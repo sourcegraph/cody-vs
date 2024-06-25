@@ -1,0 +1,1 @@
+# Cody for Visual Studio source code.
