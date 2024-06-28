@@ -1,0 +1,18 @@
+{
+    "$schema": "http://json.schemastore.org/vsix-publish",
+    "categories": [
+        "Coding"
+    ],
+    "identity": {
+        "internalName": "Cody",
+        "tags": [
+            "ai"
+        ]
+    },
+    "overview": "marketplace-overview.md",
+    "priceCategory": "free",
+    "publisher": "SourcegraphTests",
+    "private": true,
+    "qna": true,
+    "repo": "https://github.com/sourcegraph/cody-vs.git"
+}

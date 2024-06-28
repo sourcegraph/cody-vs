@@ -1,5 +1,9 @@
 #addin nuget:?package=Cake.Git&version=4.0.0
 #addin nuget:?package=Cake.Pnpm&version=1.0.0
+#tool nuget:?package=vswhere&version=3.1.7
+
+var target = Argument("target", "Build");
+var configuration = Argument("configuration", "Release");
 
 
 var agentDir = Directory("./Sourcegraph.Cody/Agent");
@@ -10,6 +14,12 @@ var nodeBinariesDir = Directory("../node-binaries");
 var nodeExeFile = nodeBinariesDir + File("node-win-x64.exe");
 var nodeArmExeFile = nodeBinariesDir + File("node-win-arm64.exe");
 var solutionDir = MakeAbsolute(Context.Environment.WorkingDirectory);
+var buildDir = solutionDir + Directory($"Sourcegraph.Cody/bin/{configuration}");
+var buildExtensionFile = buildDir + File("Sourcegraph.Cody.vsix");
+var publishManifestFile = buildDir + File("marketplace-manifest.json");
+
+var vsixPublisherFile = VSWhereLatest() + File("/VSSDK/VisualStudioIntegration/Tools/Bin/VsixPublisher.exe");
+
 
 var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
@@ -17,8 +27,7 @@ var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v2
 
 var codyCommit = "1a155d5432370b31a1b1cf7a1b78412f237f66b0";
 
-var target = Argument("target", "Build");
-var configuration = Argument("configuration", "Release");
+var marketplaceToken = "<HIDDEN>";
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
@@ -76,6 +85,22 @@ Task("Build")
 		Configuration = configuration,
 		PlatformTarget = PlatformTarget.MSIL
 	});
+});
+
+Task("Publish")
+    .IsDependentOn("Build")
+    .Does(() =>
+{
+	var args = new ProcessSettings().WithArguments(x => x
+					.Append("publish")
+					.AppendSwitchQuoted("-payload", buildExtensionFile)
+					.AppendSwitchQuoted("-publishManifest", publishManifestFile)
+					.AppendSwitchQuoted("-personalAccessToken", marketplaceToken)
+				);
+    
+	var returnCode = StartProcess(vsixPublisherFile, args);
+	if(returnCode != 0) throw new Exception("Publishing error");
+    
 });
 
 Task("Clean")
