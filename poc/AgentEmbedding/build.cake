@@ -8,10 +8,12 @@ var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
 var codyAgentDistDir = codyAgentDir + Directory("dist");
 var nodeBinariesDir = Directory("../node-binaries");
 var nodeExeFile = nodeBinariesDir + File("node-win-x64.exe");
+var nodeArmExeFile = nodeBinariesDir + File("node-win-arm64.exe");
 var solutionDir = MakeAbsolute(Context.Environment.WorkingDirectory);
 
 var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
+var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
 var codyCommit = "1a155d5432370b31a1b1cf7a1b78412f237f66b0";
 
@@ -55,7 +57,14 @@ Task("DownloadNode")
 		DownloadFile(nodeBinaryUrl, nodeExeFile);
 	}
 	
+	if(!FileExists(nodeArmExeFile))
+	{
+		CreateDirectory(nodeBinariesDir);
+		DownloadFile(nodeArmBinaryUrl, nodeArmExeFile);
+	}
+	
 	CopyFileToDirectory(nodeExeFile, agentDir);
+	CopyFileToDirectory(nodeArmExeFile, agentDir);
 });
 
 Task("Build")
