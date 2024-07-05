@@ -59,6 +59,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>VSCommandTable.vsct</DependentUpon>
     </Compile>
+    <Compile Include="VsVersionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="marketplace-manifest.json">
