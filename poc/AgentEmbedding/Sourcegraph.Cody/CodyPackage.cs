@@ -51,7 +51,7 @@ namespace Sourcegraph.Cody
                     AnonymousUserID = "cdb239b6-6444-42fa-816e-0e32fdcf6d6b",
                     ServerEndpoint = "https://sourcegraph.com/",
                     Proxy = null,
-                    AccessToken = "sgp_a0d7ccb4f752ea73_8a50e828f41ec18c673ebca5af2564f99a6dd751",
+                    AccessToken = "<HIDDEN>",
                     AutocompleteAdvancedProvider = null,
                     Debug = false,
                     VerboseDebug = false,
@@ -69,7 +69,7 @@ namespace Sourcegraph.Cody
 
             var process = new Process();
             process.StartInfo.FileName = Path.Combine(agentDir, "node-win-x64.exe");
-            process.StartInfo.Arguments = "--inspect --enable-source-maps index.js";
+            process.StartInfo.Arguments = "--inspect --enable-source-maps index.js api jsonrpc-stdio";
             process.StartInfo.WorkingDirectory = agentDir;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
