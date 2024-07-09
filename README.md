@@ -1,5 +1,6 @@
-# cody-vs
-Visual Studio extension for Cody, AI coding assistant
+# Cody for Visual Studio
+
+Visual Studio extension for Cody, an AI coding assistant that uses search and codebase context to help you understand, write, and fix code faster.
 
 ## Setup Instructions for Sourcegraph Teammates
 
@@ -8,3 +9,5 @@ Visual Studio extension for Cody, AI coding assistant
 - Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the node.js and Visual Studio Extension components
 - Install [git for Windows](https://gitforwindows.org/) and set up git to not change line endings (`git config core.autocrlf false`).
 - Clone `git@github.com:sourcegraph/cody-vs.git`
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
