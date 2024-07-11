@@ -62,7 +62,7 @@ namespace Cody.VisualStudio
 
                 VersionService = loggerFactory.GetVersionService();
                 VsVersionService = new VsVersionService(Logger);
-
+                
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
                 await CodyToolWindowCommand.InitializeAsync(this);

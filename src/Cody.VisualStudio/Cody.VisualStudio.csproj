@@ -47,18 +47,29 @@
   <ItemGroup>
     <Compile Include="CodyToolWindow.cs" />
     <Compile Include="CodyToolWindowCommand.cs" />
-    <Compile Include="Inf\LoggerFactory.cs" />
-    <Compile Include="Inf\WindowPaneLogger.cs" />
-    <Compile Include="Inf\VsConstants.cs" />
+    <Compile Include="Infrastructure\LoggerFactory.cs" />
+    <Compile Include="Infrastructure\WindowPaneLogger.cs" />
+    <Compile Include="Infrastructure\VsConstants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="Services\SettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Marketplace\manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Marketplace\overview.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
+	<Content Include="Agent\*.*">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationFramework" />
