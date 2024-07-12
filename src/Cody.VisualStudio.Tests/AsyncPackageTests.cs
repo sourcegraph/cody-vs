@@ -28,12 +28,17 @@ namespace Cody.VisualStudio.Tests
 
         [VsTheory(Version = "2022")]
         [InlineData(CodyPackage.PackageGuidString)]
-        public async Task InvokePackageAsync()
+        public async Task InvokePackageAsync(string guidString)
         {
+            var shell = (IVsShell7)ServiceProvider.GlobalProvider.GetService(typeof(SVsShell));
+            var guid = Guid.Parse(guidString);
+            await shell.LoadPackageAsync(ref guid);
+
             var package = GetPackage();
             Assert.NotNull(package);
 
             package.Logger.Debug("Hello World from VS Integration Tests :)");
+            await package.ShowToolWindow();
 
             await Task.Delay(TimeSpan.FromSeconds(5));
             try

@@ -168,6 +168,20 @@ namespace Cody.VisualStudio
             }
         }
 
-
+        public async Task ShowToolWindow()
+        {
+            try
+            {
+                var toolWindow = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
+                if ((null == toolWindow) || (null == toolWindow.Frame))
+                {
+                    throw new NotSupportedException("Cannot create tool window");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Cannot open Tool Window.", ex);
+            }
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Cody.VisualStudio
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly AsyncPackage package;
+        private readonly CodyPackage package;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CodyToolWindowCommand"/> class.
@@ -31,7 +31,7 @@ namespace Cody.VisualStudio
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private CodyToolWindowCommand(AsyncPackage package, OleMenuCommandService commandService)
+        private CodyToolWindowCommand(CodyPackage package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -51,21 +51,10 @@ namespace Cody.VisualStudio
         }
 
         /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private IAsyncServiceProvider ServiceProvider
-        {
-            get
-            {
-                return this.package;
-            }
-        }
-
-        /// <summary>
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static async Task InitializeAsync(AsyncPackage package)
+        public static async Task InitializeAsync(CodyPackage package)
         {
             // Switch to the main thread - the call to AddCommand in CodyToolWindowCommand's constructor requires
             // the UI thread.
@@ -78,18 +67,9 @@ namespace Cody.VisualStudio
         /// <summary>
         /// Shows the tool window when the menu item is clicked.
         /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            package.JoinableTaskFactory.RunAsync(async delegate
-            {
-                ToolWindowPane window = await package.ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, package.DisposalToken);
-                if ((null == window) || (null == window.Frame))
-                {
-                    throw new NotSupportedException("Cannot create tool window");
-                }
-            });
+            package.ShowToolWindow();
         }
     }
 }
