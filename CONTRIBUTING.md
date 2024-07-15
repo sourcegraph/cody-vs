@@ -10,7 +10,6 @@
    1. Configure it with `git config core.autocrlf false` to not change line endings
 4. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
 5. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
-6. Clone the Cody repository to run Agent: `git clone git@github.com:sourcegraph/cody-vs.git`
 
 For Sourcegraph teammates:
 
