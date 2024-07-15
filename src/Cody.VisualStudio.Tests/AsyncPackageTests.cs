@@ -32,15 +32,15 @@ namespace Cody.VisualStudio.Tests
         {
             var shell = (IVsShell7)ServiceProvider.GlobalProvider.GetService(typeof(SVsShell));
             var guid = Guid.Parse(guidString);
-            await shell.LoadPackageAsync(ref guid);
+            await shell.LoadPackageAsync(ref guid); // forces to load CodyPackage, even when the Tool Window is not selected
 
             var package = GetPackage();
             Assert.NotNull(package);
 
             package.Logger.Debug("Hello World from VS Integration Tests :)");
-            await package.ShowToolWindow();
+            package.ShowToolWindow(this, EventArgs.Empty);
 
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            //await Task.Delay(TimeSpan.FromSeconds(5));
             try
             {
 
