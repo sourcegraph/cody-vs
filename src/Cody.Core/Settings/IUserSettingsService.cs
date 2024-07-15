@@ -1,7 +1,9 @@
 ﻿namespace Cody.Core.Settings
 {
-    internal interface ISettingsService
+    public interface IUserSettingsService
     {
+        string AnonymousUserID { get; set; }
+
         string AccessToken { get; set; }
         string ServerEndpoint { get; set; }
     }

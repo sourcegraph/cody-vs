@@ -60,7 +60,8 @@ namespace Sourcegraph.Cody
                 }
             };
 
-            var result = await jsonRpc.InvokeAsync<ServerInfo>("initialize", clientInfo);
+            //var result = await jsonRpc.InvokeAsync<ServerInfo>("initialize", clientInfo);
+            var result = await jsonRpc.InvokeAsync("graphql/getCurrentUserCodySubscription")
         }
 
         private JsonRpc StartAgentProcess()
@@ -233,5 +234,13 @@ namespace Sourcegraph.Cody
         int CompletionModelMaxTokens,
         string Provider,
         bool SmartContextWindow
+    );
+
+    public record CurrentUserCodySubscription(
+        string Status,
+        string Plan,
+        bool ApplyProRateLimits,
+        DateTime CurrentPeriodStartAt,
+        DateTime CurrentPeriodEndAt
     );
 }

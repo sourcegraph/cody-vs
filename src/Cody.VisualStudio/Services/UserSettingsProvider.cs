@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Services
 {
-    internal class SettingsProvider : ISettingsProvider
+    internal class UserSettingsProvider : IUserSettingsProvider
     {
         private SettingsManager settingsManager;
         private WritableSettingsStore userSettingsStore;
 
         private const string CollectionName = "Cody";
 
-        public SettingsProvider(IServiceProvider serviceProvider)
+        public UserSettingsProvider(IServiceProvider serviceProvider)
         {
             settingsManager = new ShellSettingsManager(serviceProvider);
             userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);

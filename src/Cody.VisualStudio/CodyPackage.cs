@@ -13,6 +13,12 @@ using Cody.Core.Logging;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
 using Task = System.Threading.Tasks.Task;
+using Cody.VisualStudio.CodyServer;
+using System.Reflection;
+using System.IO;
+using Cody.Core.Settings;
+using Cody.Core.Infrastructure;
+using Cody.VisualStudio.Connector;
 
 namespace Cody.VisualStudio
 {
@@ -45,13 +51,17 @@ namespace Cody.VisualStudio
         public ILog Logger;
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
+        public AgentConnector AgentConnector;
+        public IUserSettingsService UserSettingsService;
+        public InitializeCallback InitializeService;
+        public IStatusbarService StatusbarService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
 
             try
             {
-                Init();
+                Init();                
 
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
@@ -62,8 +72,14 @@ namespace Cody.VisualStudio
 
                 VersionService = loggerFactory.GetVersionService();
                 VsVersionService = new VsVersionService(Logger);
+                UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
+                StatusbarService = new StatusbarService();
+                InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
+
                 
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
+
+                InitAgent();
 
                 await CodyToolWindowCommand.InitializeAsync(this);
             }
@@ -78,6 +94,21 @@ namespace Cody.VisualStudio
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             Application.Current.DispatcherUnhandledException += CurrentOnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+        }
+
+        private void InitAgent()
+        {
+            var options = new AgentConnectorOptions
+            {
+                NotificationsTarget = new NotificationHandlers(),
+                AgentDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent"),
+                RestartAgentOnFailure = true,
+                AfterConnection = (client) => InitializeService.Initialize(client),
+            };
+
+            AgentConnector = new AgentConnector(options, Logger); 
+
+            AgentConnector.Connect();
         }
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)

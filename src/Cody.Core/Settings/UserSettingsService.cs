@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Settings
 {
-    internal class SettingsService : ISettingsService
+    public class UserSettingsService : IUserSettingsService
     {
-        private readonly ISettingsProvider settingsProvider;
+        private readonly IUserSettingsProvider settingsProvider;
         private readonly ILog log;
 
-        public SettingsService(ISettingsProvider settingsProvider, ILog log)
+        public UserSettingsService(IUserSettingsProvider settingsProvider, ILog log)
         {
             this.settingsProvider = settingsProvider;
             this.log = log;
@@ -30,6 +30,12 @@ namespace Cody.Core.Settings
         {
             settingsProvider.SetSetting(settingName, value);
             log.Info($"Value for the {settingName} setting has been changed.");
+        }
+
+        public string AnonymousUserID
+        {
+            get => GetOrDefault(nameof(AnonymousUserID), Guid.NewGuid().ToString());
+            set => Set(nameof(AnonymousUserID), value);
         }
 
         public string ServerEndpoint

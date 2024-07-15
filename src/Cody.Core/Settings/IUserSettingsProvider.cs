@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Settings
 {
-    public interface ISettingsProvider
+    public interface IUserSettingsProvider
     {
         bool SettingExists(string name);
 

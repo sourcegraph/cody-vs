@@ -45,6 +45,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Connector\AgentConnector.cs" />
+    <Compile Include="Connector\AgentProcess.cs" />
+    <Compile Include="Connector\AgentConnectorOptions.cs" />
+    <Compile Include="Connector\IAgentClient.cs" />
+    <Compile Include="Connector\InitializeCallback.cs" />
+    <Compile Include="Connector\NotificationHandlers.cs" />
     <Compile Include="CodyToolWindow.cs" />
     <Compile Include="CodyToolWindowCommand.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
@@ -53,7 +59,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
-    <Compile Include="Services\SettingsProvider.cs" />
+    <Compile Include="Services\StatusbarService.cs" />
+    <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -66,7 +73,7 @@
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
-	<Content Include="Agent\*.*">
+    <Content Include="Agent\*.*">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

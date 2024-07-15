@@ -9,9 +9,9 @@ namespace Cody.Core.AgentProtocol
     public class CurrentUserCodySubscription
     {
         public string Status { get; set; }
-        string Plan { get; set; }
-        bool ApplyProRateLimits { get; set; }
-        DateTime CurrentPeriodStartAt { get; set; }
-        DateTime CurrentPeriodEndAt { get; set; }
+        public string Plan { get; set; }
+        public bool ApplyProRateLimits { get; set; }
+        public DateTime CurrentPeriodStartAt { get; set; }
+        public DateTime CurrentPeriodEndAt { get; set; }
     }
 }
