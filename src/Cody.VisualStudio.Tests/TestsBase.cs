@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class TestsBase
+    public abstract class TestsBase
     {
         protected async Task<CodyPackage> GetPackageAsync(string guid)
         {
