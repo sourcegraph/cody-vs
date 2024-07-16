@@ -50,12 +50,19 @@
       <Link>Properties\AssemblyVersion.cs</Link>
     </Compile>
     <Compile Include="AsyncPackageTests.cs" />
+    <Compile Include="CodyPackageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestsBase.cs" />
+    <Compile Include="VsVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
       <Project>{9ff2cc40-78e9-46c8-b2ef-30a1f1be82f2}</Project>
       <Name>Cody.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cody.UI\Cody.UI.csproj">
+      <Project>{7BE6018E-01DA-4404-A56E-6478A0D513FC}</Project>
+      <Name>Cody.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\Cody.VisualStudio\Cody.VisualStudio.csproj">
       <Project>{3bb34f98-f069-4a38-bc4d-cf407d59b863}</Project>

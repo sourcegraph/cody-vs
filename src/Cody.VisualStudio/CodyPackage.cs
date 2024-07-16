@@ -11,6 +11,8 @@ using System.Windows.Threading;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
+using Cody.UI.ViewModels;
+using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -55,6 +57,7 @@ namespace Cody.VisualStudio
         public ILog Logger;
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
+        public MainView MainView;
         public AgentConnector AgentConnector;
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;

@@ -44,6 +44,7 @@ namespace Cody.VisualStudio
             };
 
             base.Content = view;
+            package.MainView = view;
         }
 
         private CodyPackage GetPackage()
