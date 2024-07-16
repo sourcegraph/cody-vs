@@ -52,7 +52,6 @@
     <Compile Include="Connector\InitializeCallback.cs" />
     <Compile Include="Connector\NotificationHandlers.cs" />
     <Compile Include="CodyToolWindow.cs" />
-    <Compile Include="CodyToolWindowCommand.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
     <Compile Include="Infrastructure\WindowPaneLogger.cs" />
     <Compile Include="Infrastructure\VsConstants.cs" />
