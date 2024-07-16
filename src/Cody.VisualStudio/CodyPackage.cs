@@ -98,12 +98,8 @@ namespace Cody.VisualStudio
             var oleMenuService = await GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
             if (oleMenuService != null)
             {
-                // Cody Tool Window command
-                Guid CommandSet = new Guid("0ac9104c-5f89-4834-9360-849c7aa6a198");
-                int CommandId = 0x0100;
-
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(ShowToolWindow, menuCommandID);
+                var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
+                var menuItem = new MenuCommand(ShowToolWindow, commandId);
                 oleMenuService.AddCommand(menuItem);
             }
             else
@@ -116,6 +112,8 @@ namespace Cody.VisualStudio
         {
             try
             {
+                Logger.Debug("Showing Tool Window ...");
+
                 var toolWindow = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
                 if ((null == toolWindow) || (null == toolWindow.Frame))
                 {
