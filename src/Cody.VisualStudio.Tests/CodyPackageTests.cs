@@ -7,24 +7,22 @@ namespace Cody.VisualStudio.Tests
     public class CodyPackageTests : TestsBase
     {
 
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task CodyPackage_Loaded_OnDemand(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task CodyPackage_Loaded_OnDemand()
         {
             // given
             // when
-            var codyPackage = await GetPackageAsync(guidString);
+            var codyPackage = await GetPackageAsync();
 
             // then
             Assert.NotNull(codyPackage);
         }
 
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task Logger_Initialized_And_Info_MethodCalled(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Logger_Initialized_And_Info_MethodCalled()
         {
             // given
-            var codyPackage = await GetPackageAsync(guidString);
+            var codyPackage = await GetPackageAsync();
 
             // when
             var logger = codyPackage.Logger;
@@ -35,13 +33,11 @@ namespace Cody.VisualStudio.Tests
             // then
         }
 
-
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task CodyToolWindow_Activated(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task CodyToolWindow_Activated()
         {
             // given
-            var codyPackage = await GetPackageAsync(guidString);
+            var codyPackage = await GetPackageAsync();
 
             // when
             codyPackage.ShowToolWindow(this, EventArgs.Empty);

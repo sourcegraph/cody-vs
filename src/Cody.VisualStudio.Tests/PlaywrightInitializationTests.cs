@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -8,9 +7,8 @@ namespace Cody.VisualStudio.Tests
     public class PlaywrightInitializationTests : PlaywrightTestsBase
     {
 
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task Playwright_Conntects_OvercCDP(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Playwright_Conntects_OvercCDP()
         {
             // given
             await WaitForPlaywrightAsync();
@@ -23,9 +21,8 @@ namespace Cody.VisualStudio.Tests
             Assert.NotNull(Page);
         }
 
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task Url_Redirection_Works(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Url_Redirection_Works()
         {
             // given
             await WaitForPlaywrightAsync();
@@ -39,9 +36,8 @@ namespace Cody.VisualStudio.Tests
             Assert.True(url == redirectedUrl);
         }
 
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task Searching_ForText_Works(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Searching_ForText_Works()
         {
             // given
             await WaitForPlaywrightAsync();
@@ -57,9 +53,8 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(text, textContents.First());
         }
 
-        [VsTheory(Version = VsVersion.VS2022)]
-        [InlineData(CodyPackage.PackageGuidString)]
-        public async Task InvokeJS_Get_Status(string guidString)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task InvokeJS_Get_Status()
         {
             // given
             await WaitForPlaywrightAsync();

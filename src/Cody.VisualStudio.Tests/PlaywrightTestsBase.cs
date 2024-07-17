@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Cody.VisualStudio.Tests
 {
-    public abstract class PlaywrightTestsBase
+    public abstract class PlaywrightTestsBase: TestsBase
     {
         protected string CdpAddress = $"http://127.0.0.1:{9222}";
         
@@ -21,7 +19,7 @@ namespace Cody.VisualStudio.Tests
 
         private async Task InitializeAsync()
         {
-            CodyPackage = await GetPackageAsync(CodyPackage.PackageGuidString);
+            CodyPackage = await GetPackageAsync();
             CodyPackage.Logger.Debug("CodyPackage loaded.");
 
             CodyPackage.ShowToolWindow(this, EventArgs.Empty);
@@ -34,14 +32,6 @@ namespace Cody.VisualStudio.Tests
 
             Context = Browser.Contexts[0];
             Page = Context.Pages[0];
-        }
-
-        private async Task<CodyPackage> GetPackageAsync(string guid)
-        {
-            var shell = (IVsShell7)ServiceProvider.GlobalProvider.GetService(typeof(SVsShell));
-            var codyPackage = (CodyPackage)await shell.LoadPackageAsync(new Guid(guid)); // forces to load CodyPackage, even when the Tool Window is not selected
-
-            return codyPackage;
         }
 
         protected async Task WaitForPlaywrightAsync()
