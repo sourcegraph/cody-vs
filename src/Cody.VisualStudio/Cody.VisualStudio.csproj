@@ -52,10 +52,11 @@
     <Compile Include="Connector\InitializeCallback.cs" />
     <Compile Include="Connector\NotificationHandlers.cs" />
     <Compile Include="CodyToolWindow.cs" />
-    <Compile Include="CodyToolWindowCommand.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
     <Compile Include="Infrastructure\WindowPaneLogger.cs" />
     <Compile Include="Infrastructure\VsConstants.cs" />
+    <Compile Include="CommandIDs.cs" />
+    <Compile Include="Guids.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />

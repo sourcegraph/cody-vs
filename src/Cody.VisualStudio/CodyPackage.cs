@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using System;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,8 +11,11 @@ using System.Windows.Threading;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
+using Cody.UI.ViewModels;
+using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
+using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 using Cody.VisualStudio.CodyServer;
 using System.Reflection;
@@ -19,6 +23,8 @@ using System.IO;
 using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.VisualStudio.Connector;
+
+#pragma warning disable VSTHRD010
 
 namespace Cody.VisualStudio
 {
@@ -51,6 +57,7 @@ namespace Cody.VisualStudio
         public ILog Logger;
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
+        public MainView MainView;
         public AgentConnector AgentConnector;
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;
@@ -61,7 +68,7 @@ namespace Cody.VisualStudio
 
             try
             {
-                Init();                
+                Init();
 
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
@@ -79,13 +86,46 @@ namespace Cody.VisualStudio
                 
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
+                await InitOleMenu();
                 InitAgent();
 
-                await CodyToolWindowCommand.InitializeAsync(this);
             }
             catch (Exception ex)
             {
                 Logger?.Error("Cody Package initialization failed.", ex);
+            }
+        }
+
+        private async Task InitOleMenu()
+        {
+            var oleMenuService = await GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+            if (oleMenuService != null)
+            {
+                var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
+                var menuItem = new MenuCommand(ShowToolWindow, commandId);
+                oleMenuService.AddCommand(menuItem);
+            }
+            else
+            {
+                Logger.Error($"Cannot get {typeof(OleMenuCommandService)}");
+            }
+        }
+
+        public async void ShowToolWindow(object sender, EventArgs eventArgs)
+        {
+            try
+            {
+                Logger.Debug("Showing Tool Window ...");
+
+                var toolWindow = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
+                if ((null == toolWindow) || (null == toolWindow.Frame))
+                {
+                    throw new NotSupportedException("Cannot create tool window");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Cannot open Tool Window.", ex);
             }
         }
 
@@ -167,7 +207,5 @@ namespace Cody.VisualStudio
                 // catching everything because if not VS will freeze/crash on the exception
             }
         }
-
-
     }
 }

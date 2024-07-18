@@ -34,6 +34,12 @@ NOTE: You must build the agent before debugging for the first time.
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
 
+### Running VS Integration Tests + Playwright
+
+1. Open Cody.sln in the Visual Studio
+2. Select Visual Studio menu Test->Test Explorer
+3. Right-click on the `Cody.VisualStudio.Tests`, select Run
+
 ## Runtime Requirements
 
 This project uses different runtimes for various components:
