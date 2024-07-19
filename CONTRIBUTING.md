@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-1. Install [node.js](https://nodejs.org/en/download/prebuilt-installer)
-   1. Required for building and running Cody Agent
+1. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
+   1. `choco install pnpm --version=8.6.7`
 2. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
    1. Visual Studio Extension
 3. Install [git for Windows](https://gitforwindows.org)
@@ -29,7 +29,7 @@ To get started quickly, follow these steps:
 
 NOTE: You must build the agent before debugging for the first time.
 
-1. Run `dotnet cake` inside the solution directory to build the agent.
+1. Run `dotnet cake` inside the `src` directory to build the agent.
 2. In your Cody project, click `Debug` > `Start Debugging` (or press `F5`) to start the debugger
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
@@ -111,7 +111,7 @@ The token from the environment variable always overrides the value from the user
 
 To debug the agent:
 
-1. Start the agent with the debugger enabled: `node --inspect --enable-source-maps index.js`
+1. Start the agent with the debugger enabled: `node --inspect --enable-source-maps ../cody-dist/agent/dist/index.js api jsonrpc-stdio`
 2. Open Chrome and navigate to `chrome://inspect/`
 3. Click "Open dedicated DevTools for Node"
 4. Wait for DevTools to detect the new debugging session
