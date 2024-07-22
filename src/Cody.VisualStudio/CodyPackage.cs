@@ -145,7 +145,10 @@ namespace Cody.VisualStudio
 
             AgentConnector = new AgentConnector(options, Logger);
 
-            _ = Task.Run(() => AgentConnector.Connect());
+            Task.Run(() => AgentConnector.Connect()).ContinueWith(t => 
+            {
+                foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
+            }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
