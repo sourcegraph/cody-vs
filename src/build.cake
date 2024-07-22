@@ -25,7 +25,7 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "aa6e4fe6f24bede84f304705eeaf68ba2ef3546f";
+var codyCommit = "e8712db1d145fb7797297601b46b84297367ff8b";
 
 var marketplaceToken = "<HIDDEN>";
 
@@ -38,10 +38,11 @@ Task("BuildCodyAgent")
 {
     if(!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
 	{
-		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = "main" });
+		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = "dpc/web-content" });
 	}
 	
-	GitCheckout(codyDir, "main");
+	GitCheckout(codyDir, "dpc/web-content");
+	//GitCheckout(codyDir, "main");
 	GitPull(codyDir, "cake", "cake@cake.com");
 	
 	GitCheckout(codyDir, codyCommit);
@@ -50,7 +51,11 @@ Task("BuildCodyAgent")
 	
 	Context.Environment.WorkingDirectory = codyAgentDir;
 	PnpmInstall();
-	PnpmRun("build:agent");
+	//PnpmRun("build:agent");
+
+	// get the dpc/webviews branch for cody and try to build it manually
+	PnpmRun("build:webviews");
+
 	Context.Environment.WorkingDirectory = solutionDir;
 	
 	CreateDirectory(agentDir);
