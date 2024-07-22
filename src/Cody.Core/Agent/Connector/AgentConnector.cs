@@ -1,5 +1,4 @@
 ﻿using Cody.Core.Logging;
-using Cody.VisualStudio.Connector;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cody.VisualStudio.CodyServer
+namespace Cody.Core.Agent.Connector
 {
     public class AgentConnector
     {
@@ -21,9 +20,9 @@ namespace Cody.VisualStudio.CodyServer
 
         public AgentConnector(AgentConnectorOptions connectorOptions, ILog log)
         {
-            if(connectorOptions == null) throw new ArgumentNullException(nameof(connectorOptions));
+            if (connectorOptions == null) throw new ArgumentNullException(nameof(connectorOptions));
 
-            this.options = connectorOptions;
+            options = connectorOptions;
             this.log = log;
         }
 
@@ -46,14 +45,14 @@ namespace Cody.VisualStudio.CodyServer
             var handler = new HeaderDelimitedMessageHandler(agentProcess.SendingStream, agentProcess.ReceivingStream, jsonMessageFormatter);
             jsonRpc = new JsonRpc(handler);
 
-            if(options.NotificationsTarget != null) jsonRpc.AddLocalRpcTarget(options.NotificationsTarget);
+            if (options.NotificationsTarget != null) jsonRpc.AddLocalRpcTarget(options.NotificationsTarget);
             agentClient = jsonRpc.Attach<IAgentClient>();
 
             jsonRpc.StartListening();
             IsConnected = true;
             log.Info("A connection with the agent has been established.");
 
-            if(options.AfterConnection != null) options.AfterConnection(agentClient);
+            if (options.AfterConnection != null) options.AfterConnection(agentClient);
         }
 
         private void OnAgentExit(int exitCode)
@@ -62,7 +61,7 @@ namespace Cody.VisualStudio.CodyServer
             if (exitCode == 0) log.Info("The agent's process has ended.");
             else log.Error($"The agent process unexpectedly ended with code {exitCode}.");
 
-            if(options.RestartAgentOnFailure && exitCode != 0)
+            if (options.RestartAgentOnFailure && exitCode != 0)
             {
                 log.Info("Restarting the agent.");
                 Connect();
@@ -72,13 +71,13 @@ namespace Cody.VisualStudio.CodyServer
         public void Disconnect()
         {
             if (!IsConnected) return;
-            
+
             DisconnectInternal();
         }
 
         private void DisconnectInternal()
         {
-            if(options.BeforeDisconnection != null) options.BeforeDisconnection(agentClient);
+            if (options.BeforeDisconnection != null) options.BeforeDisconnection(agentClient);
 
             jsonRpc.Dispose();
             agentProcess.Dispose();
@@ -92,7 +91,7 @@ namespace Cody.VisualStudio.CodyServer
 
         public IAgentClient CreateClient()
         {
-            if(!IsConnected) Connect();
+            if (!IsConnected) Connect();
 
             return agentClient;
         }

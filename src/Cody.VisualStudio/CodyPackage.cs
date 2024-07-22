@@ -17,12 +17,11 @@ using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
-using Cody.VisualStudio.CodyServer;
 using System.Reflection;
 using System.IO;
 using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
-using Cody.VisualStudio.Connector;
+using Cody.Core.Agent.Connector;
 
 #pragma warning disable VSTHRD010
 

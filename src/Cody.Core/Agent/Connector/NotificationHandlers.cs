@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cody.VisualStudio.Connector
+namespace Cody.Core.Agent.Connector
 {
     public class NotificationHandlers
     {
