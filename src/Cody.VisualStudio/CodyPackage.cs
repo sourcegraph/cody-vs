@@ -23,8 +23,6 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 
-#pragma warning disable VSTHRD010
-
 namespace Cody.VisualStudio
 {
     /// <summary>
@@ -86,7 +84,7 @@ namespace Cody.VisualStudio
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
                 await InitOleMenu();
-                InitAgent();
+                InitializeAgent();
 
             }
             catch (Exception ex)
@@ -135,7 +133,7 @@ namespace Cody.VisualStudio
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
         }
 
-        private void InitAgent()
+        private void InitializeAgent()
         {
             var options = new AgentConnectorOptions
             {
@@ -145,9 +143,9 @@ namespace Cody.VisualStudio
                 AfterConnection = (client) => InitializeService.Initialize(client),
             };
 
-            AgentConnector = new AgentConnector(options, Logger); 
+            AgentConnector = new AgentConnector(options, Logger);
 
-            AgentConnector.Connect();
+            _ = Task.Run(() => AgentConnector.Connect());
         }
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
