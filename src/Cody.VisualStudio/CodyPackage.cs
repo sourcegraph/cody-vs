@@ -11,17 +11,16 @@ using System.Windows.Threading;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
-using Cody.UI.ViewModels;
 using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
-using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 using System.Reflection;
 using System.IO;
 using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
+using Cody.Core.Agent;
 
 namespace Cody.VisualStudio
 {
@@ -97,7 +96,7 @@ namespace Cody.VisualStudio
         {
             try
             {
-                var oleMenuService = await GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+                var oleMenuService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
                 if (oleMenuService != null)
                 {
                     var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cody.Core.Agent.Connector
+namespace Cody.Core.Agent
 {
     public interface IAgentClient
     {
@@ -18,5 +18,13 @@ namespace Cody.Core.Agent.Connector
 
         [JsonRpcMethod("initialized")]
         void Initialized();
+
+
+
+        [JsonRpcMethod("webview/resolveWebviewView")]
+        Task ResolveWebviewView(string viewId, string webviewHandle);
+
+        [JsonRpcMethod("webview/receiveMessageStringEncoded")]
+        Task ReceiveMessageStringEncoded(string id, string messageStringEncoded);
     }
 }
