@@ -95,16 +95,23 @@ namespace Cody.VisualStudio
 
         private async Task InitOleMenu()
         {
-            var oleMenuService = await GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
-            if (oleMenuService != null)
+            try
             {
-                var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
-                var menuItem = new MenuCommand(ShowToolWindow, commandId);
-                oleMenuService.AddCommand(menuItem);
+                var oleMenuService = await GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+                if (oleMenuService != null)
+                {
+                    var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
+                    var menuItem = new MenuCommand(ShowToolWindow, commandId);
+                    oleMenuService.AddCommand(menuItem);
+                }
+                else
+                {
+                    Logger.Error($"Cannot get {typeof(OleMenuCommandService)}");
+                }
             }
-            else
+            catch(Exception ex)
             {
-                Logger.Error($"Cannot get {typeof(OleMenuCommandService)}");
+                Logger?.Error("Cannot initialize menu items", ex);
             }
         }
 
@@ -135,20 +142,27 @@ namespace Cody.VisualStudio
 
         private void InitializeAgent()
         {
-            var options = new AgentConnectorOptions
+            try
             {
-                NotificationsTarget = new NotificationHandlers(),
-                AgentDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent"),
-                RestartAgentOnFailure = true,
-                AfterConnection = (client) => InitializeService.Initialize(client),
-            };
+                var options = new AgentConnectorOptions
+                {
+                    NotificationsTarget = new NotificationHandlers(),
+                    AgentDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent"),
+                    RestartAgentOnFailure = true,
+                    AfterConnection = (client) => InitializeService.Initialize(client),
+                };
 
-            AgentConnector = new AgentConnector(options, Logger);
+                AgentConnector = new AgentConnector(options, Logger);
 
-            Task.Run(() => AgentConnector.Connect()).ContinueWith(t => 
+                Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
+                {
+                    foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
+                }, TaskContinuationOptions.OnlyOnFaulted);
+            }
+            catch (Exception ex)
             {
-                foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
-            }, TaskContinuationOptions.OnlyOnFaulted);
+                Logger?.Error("Cannot initialize agent.", ex);
+            }
         }
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
