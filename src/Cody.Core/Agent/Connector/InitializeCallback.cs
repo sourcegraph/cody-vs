@@ -1,10 +1,9 @@
-﻿using Cody.Core.AgentProtocol;
+﻿using Cody.Core.Agent.Protocol;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
-using Cody.VisualStudio.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cody.VisualStudio.Connector
+namespace Cody.Core.Agent.Connector
 {
     public class InitializeCallback
     {
@@ -24,10 +23,10 @@ namespace Cody.VisualStudio.Connector
 
         public InitializeCallback(
             IUserSettingsService userSettingsService,
-            IVersionService versionService, 
-            IVsVersionService vsVersionService, 
+            IVersionService versionService,
+            IVsVersionService vsVersionService,
             IStatusbarService statusbarService,
-            ILog log) 
+            ILog log)
         {
             this.userSettingsService = userSettingsService;
             this.versionService = versionService;

@@ -1,4 +1,4 @@
-﻿using Cody.Core.AgentProtocol;
+﻿using Cody.Core.Agent.Protocol;
 using StreamJsonRpc;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cody.VisualStudio.Connector
+namespace Cody.Core.Agent.Connector
 {
     public interface IAgentClient
     {

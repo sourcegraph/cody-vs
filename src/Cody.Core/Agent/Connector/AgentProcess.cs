@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cody.VisualStudio.Connector
+namespace Cody.Core.Agent.Connector
 {
     public class AgentProcess : IDisposable
     {
