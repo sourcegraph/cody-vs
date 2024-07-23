@@ -12,7 +12,7 @@ namespace Cody.Core.Agent.Protocol
 
         public bool EnableForms { get; set; }
 
-        public bool EnableCommandUris { get; set; } // In the protocol, this proprty can be of type bool or string[]. It may need to be changed.
+        public object EnableCommandUris { get; set; }
 
         public string[] LocalResourceRoots { get; set; }
 

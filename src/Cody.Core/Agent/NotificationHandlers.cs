@@ -1,4 +1,5 @@
 ﻿using Cody.Core.Agent.Protocol;
+using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,14 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setOptions")]
         public void SetOptions(string handle, DefiniteWebviewOptions options)
         {
+            if(options.EnableCommandUris is bool enableCmd)
+            {
 
+            }
+            else if(options.EnableCommandUris is JArray jArray)
+            {
+                var uris = jArray.ToObject<string[]>();
+            }
         }
 
         [JsonRpcMethod("webview/setHtml")]
