@@ -89,6 +89,8 @@ Execute these commands from the directory containing the `build.cake` file:
 
 ## Access Token
 
+Create an account and go to https://sourcegraph.com/user/settings/tokens to create a token.
+
 During development, you can use your own Cody access token by setting an environment variable. This eliminates the need to register and create a new token for each session.
 
 To set your access token:
