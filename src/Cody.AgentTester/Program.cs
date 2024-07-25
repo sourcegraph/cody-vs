@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Cody.Core.Agent;
 
 namespace Cody.AgentTester
 {
@@ -73,6 +74,8 @@ namespace Cody.AgentTester
             var result = await agentClient.Initialize(clientInfo);
 
             agentClient.Initialized();
+
+            ;
         }
 
 
