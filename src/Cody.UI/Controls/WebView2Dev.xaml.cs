@@ -19,7 +19,7 @@ namespace Cody.UI.Controls
 
         private string _vsCodeAPIScript = @"
 
-console.log('test1.1'); 
+console.log('CodeAPIScript.1'); 
 
                     globalThis.acquireVsCodeApi = (function() {{
           let acquired = false;
@@ -29,14 +29,27 @@ console.log('test1.1');
                   throw new Error('An instance of the VS Code API has already been acquired');
               }}
               acquired = true;
-              
+              return Object.freeze({
+								postMessage: function(message, transfer) {
+                                    console.log(message);
+									//console.log(message + '|' + transfer);
+								},
+								setState: function(newState) {
+									state = newState;
+									doPostMessage('do-update-state', JSON.stringify(newState));
+									return newState;
+								},
+								getState: function() {
+									return state;
+								}
+							});
           }};
       }})();
       delete window.parent;
       delete window.top;
       delete window.frameElement;
 
-console.log('test1.2'); 
+console.log('CodeAPIScript.2'); 
                 ";
 
         static string _csp =
@@ -90,7 +103,7 @@ console.log('csp.1.2');
                     );
                 await webView.EnsureCoreWebView2Async(env);
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
-                //webView.CoreWebView2.NavigationCompleted += CoreWebView2OnDOMContentLoaded; //CoreWebView2OnNavigationCompleted;
+                webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
 
                 //var result = await webView.CoreWebView2.ExecuteScriptWithResultAsync(_vsCodeAPIScript);
 
