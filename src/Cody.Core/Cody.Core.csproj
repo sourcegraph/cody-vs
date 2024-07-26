@@ -175,6 +175,10 @@
     <Compile Include="Agent\Protocol\CurrentUserCodySubscription.cs" />
     <Compile Include="Agent\Protocol\DefiniteWebviewOptions.cs" />
     <Compile Include="Agent\Protocol\ExtensionConfiguration.cs" />
+    <Compile Include="Agent\Protocol\Position.cs" />
+    <Compile Include="Agent\Protocol\ProtocolTextDocument.cs" />
+    <Compile Include="Agent\Protocol\ProtocolTextDocumentContentChangeEvent.cs" />
+    <Compile Include="Agent\Protocol\Range.cs" />
     <Compile Include="Agent\Protocol\ServerInfo.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />
