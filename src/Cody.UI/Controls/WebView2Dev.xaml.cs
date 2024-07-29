@@ -31,7 +31,9 @@ console.log('CodeAPIScript.1');
               acquired = true;
               return Object.freeze({
 								postMessage: function(message, transfer) {
-                                    console.log(message);
+                                     
+                                    console.assert(!transfer);
+                                     console.log(message);
 									//console.log(message + '|' + transfer);
 								},
 								setState: function(newState) {
