@@ -75,6 +75,13 @@ namespace Cody.AgentTester
 
             agentClient.Initialized();
 
+            await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-cody.chat");
+            //await agentClient.RegisterWebViewProvider(new RegisterWebviewViewProviderParams(){ViewId = "cody.chat", RetainContextWhenHidden = true});
+
+            //await agentClient.RegisterWebViewProvider("cody.chat", true);
+
+            //await agentClient.DidDispose("view1");
+
             ;
         }
 

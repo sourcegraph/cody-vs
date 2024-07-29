@@ -25,7 +25,7 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "3813f422279c46d0916b085e41718cda672c5c7b";
+var codyCommit = "c41fec5aa3d4270e1a994b7bb17bfaffa4696997";
 
 var marketplaceToken = "<HIDDEN>";
 
@@ -51,7 +51,7 @@ Task("BuildCodyAgent")
 	
 	Context.Environment.WorkingDirectory = codyAgentDir;
 	PnpmInstall();
-	//PnpmRun("build:agent");
+	PnpmRun("build:agent");
 
 	// get the dpc/webviews branch for cody and try to build it manually
 	PnpmRun("build:webviews");
