@@ -21,7 +21,7 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
         public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-
+            ;
         }
 
         [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]
@@ -46,7 +46,7 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
-
+            ;
         }
 
         [JsonRpcMethod("webview/postMessageStringEncoded")]

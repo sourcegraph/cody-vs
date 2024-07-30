@@ -42,15 +42,22 @@ namespace Cody.Core.Agent.Connector
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                //WorkspaceRootUri = new Uri(Path.GetDirectoryName(VS.Solutions.GetCurrentSolution().FullPath)).AbsoluteUri,
+                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs",
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
-                    EditWorkspace = Capability.None,
+                    EditWorkspace = Capability.Enabled,
                     CodeLenses = Capability.None,
-                    ShowDocument = Capability.None,
+                    ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
+                    Webview = new WebviewCapabilities
+                    {
+                        Type = "native",
+                        CspSource = "'self' https://*.sourcegraphstatic.com",
+                        WebviewBundleServingPrefix = "https://file+.sourcegraphstatic.com",
+                    },
+                    WebviewMessages = "string-encoded",
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {
@@ -59,9 +66,9 @@ namespace Cody.Core.Agent.Connector
                     Proxy = null,
                     AccessToken = userSettingsService.AccessToken,
                     AutocompleteAdvancedProvider = null,
-                    Debug = false,
-                    VerboseDebug = false,
-                    Codebase = null,
+                    Debug = true,
+                    VerboseDebug = true,
+                    Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
@@ -73,9 +80,13 @@ namespace Cody.Core.Agent.Connector
                 client.Initialized();
                 log.Info("Agent initialized");
 
+                               
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
+
+                // TODO: Move it to after we receive response for registerWebviewProvider
+                await client.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
             }
             else
             {

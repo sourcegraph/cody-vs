@@ -47,7 +47,7 @@ namespace Cody.AgentTester
                 Name = "VisualStudio",
                 Version = "1.0",
                 IdeVersion = "1.0",
-                //WorkspaceRootUri = new Uri(Path.GetDirectoryName(VS.Solutions.GetCurrentSolution().FullPath)).AbsoluteUri,
+                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs",
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -56,6 +56,12 @@ namespace Cody.AgentTester
                     ShowDocument = Capability.None,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
+                    Webview = new WebviewCapabilities {
+                        Type = "native",
+                        CspSource = "'self' https://*.sourcegraphstatic.com",
+                        WebviewBundleServingPrefix = "https://file+.sourcegraphstatic.com",
+                    },
+                    WebviewMessages = "string-encoded",
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {
@@ -64,21 +70,19 @@ namespace Cody.AgentTester
                     Proxy = null,
                     AccessToken = Environment.GetEnvironmentVariable("SourcegraphCodyToken"),
                     AutocompleteAdvancedProvider = null,
-                    Debug = false,
-                    VerboseDebug = false,
-                    Codebase = null,
+                    Debug = true,
+                    VerboseDebug = true,
+                    Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
 
-            var result = await agentClient.Initialize(clientInfo);
+            await agentClient.Initialize(clientInfo);
 
             agentClient.Initialized();
 
-            await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-cody.chat");
-            //await agentClient.RegisterWebViewProvider(new RegisterWebviewViewProviderParams(){ViewId = "cody.chat", RetainContextWhenHidden = true});
-
-            //await agentClient.RegisterWebViewProvider("cody.chat", true);
+            // TODO: Move it to after we receive response for registerWebviewProvider
+            // await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
 
             //await agentClient.DidDispose("view1");
 
