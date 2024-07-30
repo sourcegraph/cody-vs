@@ -21,6 +21,7 @@ namespace Cody.Core.Agent.Protocol
         public Capability? Ignore { get; set; }
         public Capability? CodeActions { get; set; }
         public string WebviewMessages { get; set; }
+        public WebviewCapabilities Webview { get; set; }
     }
 
     public enum Capability
