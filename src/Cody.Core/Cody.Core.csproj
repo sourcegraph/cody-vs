@@ -180,6 +180,8 @@
     <Compile Include="Agent\Protocol\ProtocolTextDocumentContentChangeEvent.cs" />
     <Compile Include="Agent\Protocol\Range.cs" />
     <Compile Include="Agent\Protocol\ServerInfo.cs" />
+    <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
+    <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />
     <Compile Include="Infrastructure\VersionService.cs" />

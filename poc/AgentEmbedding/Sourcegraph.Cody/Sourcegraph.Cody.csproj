@@ -46,6 +46,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DocActions.cs" />
+    <Compile Include="DocumentsManager.cs" />
+    <Compile Include="IDocumentActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\MyCommand.cs" />
     <Compile Include="CodyPackage.cs" />

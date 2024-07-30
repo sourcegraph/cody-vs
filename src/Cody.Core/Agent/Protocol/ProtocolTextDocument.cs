@@ -14,7 +14,7 @@ namespace Cody.Core.Agent.Protocol
 
         public Range Selection { get; set; }
 
-        public ProtocolTextDocumentContentChangeEvent ContentChanges { get; set; }
+        public ProtocolTextDocumentContentChangeEvent[] ContentChanges { get; set; }
 
         public Range VisibleRange { get; set; }
     }

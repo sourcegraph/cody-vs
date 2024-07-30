@@ -1,40 +1,35 @@
-﻿using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell;
+﻿using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Editor;
-using Cody.Core.Logging;
-using Cody.Core.Agent;
-using Cody.Core.Agent.Protocol;
-using System.Reflection;
-using Cody.Core.DocumentSync;
+using static Microsoft.VisualStudio.Threading.SingleThreadedSynchronizationContext;
 
-namespace Cody.VisualStudio.Services
+namespace Sourcegraph.Cody
 {
-    public class DocumentsSyncManager : IVsRunningDocTableEvents
+    public class DocumentsManager : IVsRunningDocTableEvents
     {
         private RunningDocumentTable rdt;
 
         private readonly IVsUIShell vsUIShell;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
-        private readonly IDocumentSyncActions documentActions;
+        private readonly IDocumentActions documentActions;
 
 
         private uint lastShowdoc = 0;
 
-        public DocumentsSyncManager(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
+        public DocumentsManager(IVsUIShell vsUIShell, IDocumentActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
         {
             this.rdt = new RunningDocumentTable();
             this.vsUIShell = vsUIShell;
             this.documentActions = documentActions;
-
+            
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
         }
 
@@ -73,6 +68,17 @@ namespace Cody.VisualStudio.Services
             return results;
         }
 
+        private IVsWindowFrame GetWindowFrame(uint docCookie)
+        {
+            foreach (var winFrame in GetOpenDocuments())
+            {
+                winFrame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
+                if (docCookie == (uint)(int)cookie) return winFrame;
+            }
+
+            return null;
+        }
+
         private ITextBuffer GetTextBuffer(IVsTextView textView)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -83,7 +89,7 @@ namespace Cody.VisualStudio.Services
         private DocumentRange GetDocumentSelection(IVsTextView textView)
         {
             int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
-            if (textView != null) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
+            if(textView != null) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
             return new DocumentRange
             {
                 Start = new DocumentPosition
@@ -139,7 +145,7 @@ namespace Cody.VisualStudio.Services
                     documentActions.OnOpened(path, content, docRange);
                 }
 
-
+                
                 documentActions.OnFocus(path);
 
                 activeTextView = VsShellUtilities.GetTextView(pFrame);
@@ -159,7 +165,7 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame)
         {
-            if (activeTextBuffer != null) activeTextBuffer.ChangedLowPriority -= OnTextBufferChanged;
+            if(activeTextBuffer != null) activeTextBuffer.ChangedLowPriority -= OnTextBufferChanged;
             activeTextView = null;
             activeTextBuffer = null;
             activeDocCookie = 0;
@@ -209,5 +215,4 @@ namespace Cody.VisualStudio.Services
             return results;
         }
     }
-
 }

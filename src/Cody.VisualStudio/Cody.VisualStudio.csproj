@@ -56,7 +56,6 @@
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="Services\DocumentsSyncManager.cs" />
-    <Compile Include="Services\RunningDocTableHandlers.cs" />
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />

@@ -21,6 +21,10 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Cody.Core.DocumentSync;
 
 namespace Cody.VisualStudio
 {
@@ -58,6 +62,7 @@ namespace Cody.VisualStudio
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
+        public DocumentsSyncManager DocumentsSyncManager;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -66,6 +71,8 @@ namespace Cody.VisualStudio
             {
                 Init();
 
+                
+                
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -79,7 +86,16 @@ namespace Cody.VisualStudio
                 StatusbarService = new StatusbarService();
                 InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
 
-                
+                var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
+                var componentModel = this.GetService<SComponentModel, IComponentModel>();
+                var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+                var uiShell = this.GetService<SVsUIShell, IVsUIShell>();
+                var doc = new DocumentSyncCallback();
+                DocumentsSyncManager = new DocumentsSyncManager(uiShell, doc, editorAdapterFactoryService);
+
+                DocumentsSyncManager.Initialize();
+
+
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
                 await InitOleMenu();
