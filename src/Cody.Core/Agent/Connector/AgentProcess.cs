@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cody.Core.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,12 +15,14 @@ namespace Cody.Core.Agent.Connector
         private Process process = new Process();
         private string agentDirectory;
         private bool debugMode;
+        private ILog logger;
         private Action<int> onExit;
 
-        private AgentProcess(string agentDirectory, bool debugMode, Action<int> onExit)
+        private AgentProcess(string agentDirectory, bool debugMode, ILog logger, Action<int> onExit)
         {
             this.agentDirectory = agentDirectory;
             this.debugMode = debugMode;
+            this.logger = logger;
             this.onExit = onExit;
         }
 
@@ -27,12 +30,12 @@ namespace Cody.Core.Agent.Connector
 
         public Stream ReceivingStream => process.StandardOutput.BaseStream;
 
-        public static AgentProcess Start(string agentDirectory, bool debugMode, Action<int> onExit)
+        public static AgentProcess Start(string agentDirectory, bool debugMode, ILog logger, Action<int> onExit)
         {
             if (!Directory.Exists(agentDirectory))
                 throw new ArgumentException("Directory does not exist");
 
-            var agentProcess = new AgentProcess(agentDirectory, debugMode, onExit);
+            var agentProcess = new AgentProcess(agentDirectory, debugMode, logger, onExit);
             agentProcess.StartInternal();
 
             return agentProcess;
@@ -56,8 +59,15 @@ namespace Cody.Core.Agent.Connector
             process.StartInfo.CreateNoWindow = true;
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
+            process.ErrorDataReceived += OnErrorDataReceived;
 
             process.Start();
+            process.BeginErrorReadLine();
+        }
+
+        private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            logger.Error(e.Data, "Agent errors");
         }
 
         private void OnProcessExited(object sender, EventArgs e)
