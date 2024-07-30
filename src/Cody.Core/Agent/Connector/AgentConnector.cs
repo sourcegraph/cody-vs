@@ -32,7 +32,7 @@ namespace Cody.Core.Agent.Connector
         {
             if (IsConnected) return;
 
-            agentProcess = AgentProcess.Start(options.AgentDirectory, options.Debug, OnAgentExit);
+            agentProcess = AgentProcess.Start(options.AgentDirectory, options.Debug, log, OnAgentExit);
             log.Info("The agent process has started.");
 
             var jsonMessageFormatter = new JsonMessageFormatter();

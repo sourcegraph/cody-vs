@@ -1,4 +1,5 @@
-﻿using Cody.Core.Agent.Connector;
+﻿using Cody.Core.Agent;
+using Cody.Core.Agent.Connector;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
@@ -82,7 +83,7 @@ namespace Cody.AgentTester
             agentClient.Initialized();
 
             // TODO: Move it to after we receive response for registerWebviewProvider
-            // await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
+            await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
 
             //await agentClient.DidDispose("view1");
 
