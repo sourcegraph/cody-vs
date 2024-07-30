@@ -18,52 +18,47 @@ namespace Cody.UI.Controls
         private bool _isWebView2Initialized;
 
         private string _vsCodeAPIScript = @"
+            globalThis.acquireVsCodeApi = (function() {{
+                let acquired = false;
+                let state = undefined;
 
-console.log('CodeAPIScript.1'); 
+                const doPostMessage = (message, transfer) => {{
+                    window.parent.postMessage(message, transfer);
+                }}
 
-                    globalThis.acquireVsCodeApi = (function() {{
-          let acquired = false;
-          let state = undefined;
-          return () => {{
-              if (acquired && !false) {{
-                  throw new Error('An instance of the VS Code API has already been acquired');
-              }}
-              acquired = true;
-              return Object.freeze({
-								postMessage: function(message, transfer) {
-                                     
-                                    console.assert(!transfer);
-                                     console.log(message);
-									//console.log(message + '|' + transfer);
-								},
-								setState: function(newState) {
-									state = newState;
-									doPostMessage('do-update-state', JSON.stringify(newState));
-									return newState;
-								},
-								getState: function() {
-									return state;
-								}
-							});
-          }};
-      }})();
-      delete window.parent;
-      delete window.top;
-      delete window.frameElement;
+                return () => {{
+                    if (acquired && !false) {{
+                        throw new Error('An instance of the VS Code API has already been acquired');
+                    }}
+                    acquired = true;
+                    return Object.freeze({
+                        postMessage: function(message, transfer) {
+                            
+                            console.assert(!transfer);
+                            console.log(JSON.stringify({ message, transfer }), 'post-message');
+                            window.parent.postMessage(message, transfer);
+                        },
+                        setState: function(newState) {
+                            state = newState;
+                            doPostMessage('do-update-state', JSON.stringify(newState));
+                            return newState;
+                        },
+                        getState: function() {
+                            return state;
+                        }
+                    });
+                }};
+            }})();
+        ";
 
-console.log('CodeAPIScript.2'); 
-                ";
-
-        static string _csp =
-            "default-src 'none'; img-src {cspSource} https: data:; script-src {cspSource}; style-src {cspSource}; font-src data: {cspSource};";
         string _cspScript = $@"
-console.log('csp.1.1'); 
-            var meta = document.createElement('meta');
-            meta.httpEquiv = 'Content-Security-Policy';
-            meta.content = '{_csp}';
-            document.getElementsByTagName('head')[0].appendChild(meta);
-            
-console.log('csp.1.2'); 
+            document.documentElement.dataset.ide = 'VisualStudio';
+
+            const rootStyle = document.documentElement.style;
+            rootStyle.setProperty('--vscode-font-family', 'monospace');
+            rootStyle.setProperty('--vscode-sideBar-foreground', '#000000');
+            rootStyle.setProperty('--vscode-sideBar-background', '#ffffff');
+            rootStyle.setProperty('--vscode-editor-font-size', '14px');
         ";
 
         public WebView2Dev()
@@ -114,7 +109,7 @@ console.log('csp.1.2');
 
                 //await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_cspScript);
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
-                webView.CoreWebView2.Navigate("file:///E:/Sigmaloc/Sourcegraph/cody-vs-clean/src/Cody.VisualStudio/Agent/webviews/index.html");
+                webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
                 webView.CoreWebView2.OpenDevToolsWindow();
 
                 //webView.Source = new Uri("https://html5test.co");
@@ -131,12 +126,13 @@ console.log('csp.1.2');
             try
             {
                 string script = @"
-                                console.log(globalThis); // Should print the global object
+                                console.log(globalThis, 'globalThis'); // Should print the global object
                                 globalThis.myGlobalVar = 'Hello from globalThis!';
                                 console.log(globalThis.myGlobalVar); // Should print 'Hello from globalThis!'
                  ";
 
                 await webView.CoreWebView2.ExecuteScriptAsync(script);
+                await webView.CoreWebView2.ExecuteScriptWithResultAsync(_cspScript);
             }
             catch (Exception ex)
             {
@@ -146,47 +142,7 @@ console.log('csp.1.2');
 
         private async void CoreWebView2OnDOMContentLoaded(object sender, CoreWebView2DOMContentLoadedEventArgs e)
         {
-            try
-            {
-
-
-
-                var vsCodeAPIScript = @"
-console.log('test2.1'); 
-
-                    globalThis.acquireVsCodeApi = (function() {{
-          let acquired = false;
-          let state = undefined;
-          return () => {{
-              if (acquired && !false) {{
-                  throw new Error('An instance of the VS Code API has already been acquired');
-              }}
-              acquired = true;
-              
-          }};
-      }})();
-      delete window.parent;
-      delete window.top;
-      delete window.frameElement;
-console.log('test2.2'); 
-                ";
-
-                //await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(vsCodeAPIScript);
-
-
-                //var result = await webView.CoreWebView2.ExecuteScriptWithResultAsync(vsCodeAPIScript);
-                ;
-                //await webView.CoreWebView2.ExecuteScriptAsync(vsCodeAPIScript);
-
-
-                var result = await webView.CoreWebView2.ExecuteScriptWithResultAsync(_cspScript);
-
-                ;
-            }
-            catch (Exception ex)
-            {
-                ;
-            }
+            ;
         }
 
         private void WebViewOnCoreWebView2InitializationCompleted(object sender,
@@ -212,13 +168,10 @@ console.log('test2.2');
 
             // Javascript call
 
-            await webView.CoreWebView2.ExecuteScriptAsync("console.log('[VSIX] ' + document.location);");
-            await webView.CoreWebView2.ExecuteScriptAsync("document.location.href = 'https://copilot.microsoft.com/';");
-
 
             // load file from disk E:\Sigmaloc\Sourcegraph\cody-vs-clean\src\Cody.VisualStudio\Agent\webviews
-            webView.CoreWebView2.Navigate("file:///E:/Sigmaloc/Sourcegraph/cody-vs-clean/src/Cody.VisualStudio/Agent/webviews/index.html");
-
+            webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
+            
             await webView.CoreWebView2.ExecuteScriptAsync("console.log('[VSIX]' + document.location);");
         }
 
