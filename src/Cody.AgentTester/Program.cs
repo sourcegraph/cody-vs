@@ -27,13 +27,14 @@ namespace Cody.AgentTester
                 NotificationsTarget = new NotificationHandlers(),
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
-                Debug = true
+                Debug = true,
+                Port = 3113,
             };
 
             connector = new AgentConnector(options, logger);
 
-            connector.Connect();
-            agentClient = connector.CreateClient();
+            await connector.Connect();
+            agentClient = await connector.CreateClient();
 
             await Initialize();
 
