@@ -57,7 +57,8 @@ namespace Cody.AgentTester
                     ShowDocument = Capability.None,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
-                    Webview = new WebviewCapabilities {
+                    Webview = new WebviewCapabilities
+                    {
                         Type = "native",
                         CspSource = "'self' https://*.sourcegraphstatic.com",
                         WebviewBundleServingPrefix = "https://file+.sourcegraphstatic.com",
