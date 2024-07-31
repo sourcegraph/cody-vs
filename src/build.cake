@@ -35,11 +35,11 @@ var marketplaceToken = "<HIDDEN>";
 Task("BuildCodyAgent")
     .Does(() =>
 {
-	// TODO: Check if this is a dev mode instead of checking for cody directory.
-	// If cody directory exists, we will build the agent from the local cody directory instead of cloning from github.
-	if (DirectoryExists(codyDevDir))
+	// Check for the env var to see if we should use the local cody directory.
+	// This is used to build the agent from the local cody directory instead of cloning from github.
+	var isDevMode = EnvironmentVariable("CODY_VS_DEV_MODE") == "true";
+	if (isDevMode && DirectoryExists(codyDevDir))
 	{
-		// TODO: Check if this is dev mode.
 		codyDir = codyDevDir;
 	}
 
@@ -49,15 +49,15 @@ Task("BuildCodyAgent")
 
     if(!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
 	{
-		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = "dpc/web-content" });
-
-		GitCheckout(codyDir, "dpc/web-content");
-
-		//GitCheckout(codyDir, "main");
+		// GitCheckout(codyDir, codyCommit);
+		
+		var branchName = "dpc/web-content"
+		
+		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = branchName });
+		
+		GitCheckout(codyDir, branchName);
 
 		GitPull(codyDir, "cake", "cake@cake.com");
-		
-		// GitCheckout(codyDir, codyCommit);
 		
 		CleanDirectory(codyAgentDistDir);
 	}
