@@ -25,6 +25,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Cody.Core.DocumentSync;
+using System.Windows.Controls;
 
 namespace Cody.VisualStudio
 {
@@ -63,6 +64,9 @@ namespace Cody.VisualStudio
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
         public DocumentsSyncManager DocumentsSyncManager;
+        public IAgentClientFactory AgentClientFactory;
+        public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
+        public IVsUIShell VsUIShell;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -88,13 +92,8 @@ namespace Cody.VisualStudio
 
                 var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
                 var componentModel = this.GetService<SComponentModel, IComponentModel>();
-                var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-                var uiShell = this.GetService<SVsUIShell, IVsUIShell>();
-                var doc = new DocumentSyncCallback();
-                DocumentsSyncManager = new DocumentsSyncManager(uiShell, doc, editorAdapterFactoryService);
-
-                DocumentsSyncManager.Initialize();
-
+                VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+                VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
 
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
@@ -168,8 +167,16 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
+                AgentClientFactory = new AgentClientFactory(AgentConnector);
 
-                Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
+                Task.Run(() => AgentConnector.Connect())
+                .ContinueWith(x =>
+                {
+                    var documentSyncCallback = new DocumentSyncCallback(AgentClientFactory, Logger);
+                    DocumentsSyncManager = new DocumentsSyncManager(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
+                    DocumentsSyncManager.Initialize();
+                })
+                .ContinueWith(t =>
                 {
                     foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
                 }, TaskContinuationOptions.OnlyOnFaulted);

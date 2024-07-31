@@ -8,11 +8,11 @@ namespace Cody.Core.DocumentSync
 {
     public interface IDocumentSyncActions
     {
-        void OnOpened(string fullPath, string content, DocumentRange selection);
+        void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection);
 
         void OnFocus(string fullPath);
 
-        void OnChanged(string fullPath, DocumentRange selection, IEnumerable<DocumentChange> changes);
+        void OnChanged(string fullPath, DocumentRange visibleRange, DocumentRange selection, IEnumerable<DocumentChange> changes);
 
         void OnSaved(string fullPath);
 

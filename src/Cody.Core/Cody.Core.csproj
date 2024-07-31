@@ -161,11 +161,13 @@
     <Compile Include="..\Cody.VisualStudio\Properties\AssemblyVersion.cs">
       <Link>Properties\AssemblyVersion.cs</Link>
     </Compile>
+    <Compile Include="Agent\AgentClientFactory.cs" />
     <Compile Include="Agent\Connector\AgentConnector.cs" />
     <Compile Include="Agent\Connector\AgentConnectorOptions.cs" />
     <Compile Include="Agent\Connector\AgentProcess.cs" />
     <Compile Include="Agent\IAgentClient.cs" />
     <Compile Include="Agent\Connector\InitializeCallback.cs" />
+    <Compile Include="Agent\IAgentClientFactory.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
     <Compile Include="Agent\Protocol\ClientCapabilities.cs" />

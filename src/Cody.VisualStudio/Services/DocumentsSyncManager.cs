@@ -10,10 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
-using Cody.Core.Logging;
-using Cody.Core.Agent;
-using Cody.Core.Agent.Protocol;
-using System.Reflection;
 using Cody.Core.DocumentSync;
 
 namespace Cody.VisualStudio.Services
@@ -26,7 +22,9 @@ namespace Cody.VisualStudio.Services
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
         private readonly IDocumentSyncActions documentActions;
 
-
+        private IVsTextView activeTextView;
+        private ITextBuffer activeTextBuffer;
+        private uint activeDocCookie = 0;
         private uint lastShowdoc = 0;
 
         public DocumentsSyncManager(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
@@ -48,8 +46,9 @@ namespace Cody.VisualStudio.Services
                 var content = rdt.GetRunningDocumentContents(docCookie);
                 var textView = VsShellUtilities.GetTextView(frame);
                 var docRange = GetDocumentSelection(textView);
+                var visibleRange = GetVisibleRange(textView);
 
-                documentActions.OnOpened(path, content, docRange);
+                documentActions.OnOpened(path, content, visibleRange, docRange);
             }
 
             rdt.Advise(this);
@@ -78,6 +77,31 @@ namespace Cody.VisualStudio.Services
             ThreadHelper.ThrowIfNotOnUIThread();
             var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
             return wpfTextView.TextBuffer;
+        }
+
+        private DocumentRange GetVisibleRange(IVsTextView textView)
+        {
+            const int SB_VERT = 1;
+            int visibleRows = 0, firstVisibleRow = 0;
+
+            if (textView != null) textView.GetScrollInfo(SB_VERT, out _, out _, out visibleRows, out firstVisibleRow);
+            else return null;
+
+            var range = new DocumentRange
+            {
+                Start = new DocumentPosition
+                {
+                    Line = firstVisibleRow,
+                    Column = 0
+                },
+                End = new DocumentPosition
+                {
+                    Line = firstVisibleRow + visibleRows,
+                    Column = 0
+                }
+            };
+
+            return range;
         }
 
         private DocumentRange GetDocumentSelection(IVsTextView textView)
@@ -120,10 +144,6 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnAfterAttributeChange(uint docCookie, uint grfAttribs) => VSConstants.S_OK;
 
-        private IVsTextView activeTextView;
-        private ITextBuffer activeTextBuffer;
-        private uint activeDocCookie = 0;
-
         int IVsRunningDocTableEvents.OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow, IVsWindowFrame pFrame)
         {
             if (lastShowdoc != docCookie)
@@ -135,8 +155,9 @@ namespace Cody.VisualStudio.Services
                     var content = rdt.GetRunningDocumentContents(docCookie);
                     var textView = VsShellUtilities.GetTextView(pFrame);
                     var docRange = GetDocumentSelection(textView);
+                    var visibleRange = GetVisibleRange(textView);
 
-                    documentActions.OnOpened(path, content, docRange);
+                    documentActions.OnOpened(path, content, visibleRange, docRange);
                 }
 
 
@@ -172,8 +193,9 @@ namespace Cody.VisualStudio.Services
             var path = rdt.GetDocumentInfo(activeDocCookie).Moniker;
             var selection = GetDocumentSelection(activeTextView);
             var changes = GetContentChanges(e.Changes, activeTextView);
+            var visibleRange = GetVisibleRange(activeTextView);
 
-            documentActions.OnChanged(path, selection, changes);
+            documentActions.OnChanged(path, visibleRange, selection, changes);
         }
 
         private IEnumerable<DocumentChange> GetContentChanges(INormalizedTextChangeCollection textChanges, IVsTextView textView)
