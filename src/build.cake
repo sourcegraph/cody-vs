@@ -35,6 +35,8 @@ var marketplaceToken = "<HIDDEN>";
 Task("BuildCodyAgent")
     .Does(() =>
 {
+	// TODO: Check if this is a dev mode instead of checking for cody directory.
+	// If cody directory exists, we will build the agent from the local cody directory instead of cloning from github.
 	if (DirectoryExists(codyDevDir))
 	{
 		// TODO: Check if this is dev mode.
@@ -69,7 +71,7 @@ Task("BuildCodyAgent")
 	Context.Environment.WorkingDirectory = solutionDir;
 	
 	CreateDirectory(agentDir);
-	CopyFiles($"{codyAgentDistDir}/*.*", agentDir);
+	CopyDirectory(codyAgentDistDir, agentDir);
 });
 
 Task("DownloadNode")

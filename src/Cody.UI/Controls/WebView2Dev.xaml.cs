@@ -61,6 +61,7 @@ namespace Cody.UI.Controls
             }})();
         ";
 
+        // TODO: Get color theme from Visual Studio then send it to the webview.
         string _cspScript = $@"
             document.documentElement.dataset.ide = 'VisualStudio';
 
@@ -109,7 +110,6 @@ namespace Cody.UI.Controls
                 
                 var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "Cody");
-
 
                 var env = await CoreWebView2Environment.CreateAsync(null, appData,
                     new CoreWebView2EnvironmentOptions(null, null, null, false, 

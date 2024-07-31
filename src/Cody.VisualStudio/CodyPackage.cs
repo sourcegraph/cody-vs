@@ -144,6 +144,7 @@ namespace Cody.VisualStudio
             try
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
+                
                 var notifier = new NotificationHandlers();
                 
                 var options = new AgentConnectorOptions
