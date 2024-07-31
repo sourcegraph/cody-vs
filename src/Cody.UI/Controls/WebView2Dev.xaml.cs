@@ -86,6 +86,20 @@ namespace Cody.UI.Controls
                 await webView.CoreWebView2.ExecuteScriptAsync(script);
             }
         }
+        public static readonly DependencyProperty HtmlProperty =
+            DependencyProperty.Register("Html", typeof(string), typeof(WebView2Dev),
+                new PropertyMetadata(null, PropertyChangedCallback));
+
+        private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ;
+        }
+
+        public string Html
+        {
+            get => (string)GetValue(HtmlProperty);
+            set => SetValue(HtmlProperty, value);
+        }
 
         public WebView2Dev()
         {

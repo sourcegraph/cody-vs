@@ -59,6 +59,8 @@ namespace Cody.VisualStudio
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
 
+        public NotificationHandlers NotificationHandlers;
+
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
 
@@ -145,11 +147,10 @@ namespace Cody.VisualStudio
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
                 
-                var notifier = new NotificationHandlers();
-                
+                NotificationHandlers = new NotificationHandlers();
                 var options = new AgentConnectorOptions
                 {
-                    NotificationsTarget = notifier,
+                    NotificationsTarget = NotificationHandlers,
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     AfterConnection = (client) => InitializeService.Initialize(client),
