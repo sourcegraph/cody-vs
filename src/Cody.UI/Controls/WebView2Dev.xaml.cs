@@ -46,7 +46,7 @@ namespace Cody.UI.Controls
                         postMessage: function(message, transfer) {
                             console.assert(!transfer);
                             console.log(`do-post: ${JSON.stringify(message)}`);
-                            window.parent.postMessage(JSON.stringify(message));
+                            window.chrome.webview.postMessage(JSON.stringify(message));
                         },
                         setState: function(newState) {
                             state = newState;
@@ -124,14 +124,22 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
-                webView.CoreWebView2.NavigateToString("");
+
+
+                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
-                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
-                webView.CoreWebView2.OpenDevToolsWindow();
 
-                webView.Source = new Uri("https://*.sourcegraphstatic.com");
+                webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView.CoreWebView2.Settings.AreHostObjectsAllowed = true;
+                webView.CoreWebView2.Settings.IsScriptEnabled = true;
+
+                webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
+
+                webView.CoreWebView2.OpenDevToolsWindow();
 
                 _isWebView2Initialized = true;
             }
