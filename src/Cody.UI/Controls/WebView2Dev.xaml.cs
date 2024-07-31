@@ -17,6 +17,8 @@ namespace Cody.UI.Controls
     {
         private bool _isWebView2Initialized;
 
+        public static CoreWebView2 _webview;
+
         private List<string> messages = new List<string>();
 
         private async void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -92,7 +94,8 @@ namespace Cody.UI.Controls
 
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ;
+            var html = e.NewValue as string;
+            _webview.NavigateToString(html); //  .NavigateToString(html);
         }
 
         public string Html
@@ -138,16 +141,18 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
-                webView.CoreWebView2.NavigateToString("");
+
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
                 webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
+
                 webView.CoreWebView2.OpenDevToolsWindow();
 
-                webView.Source = new Uri("https://*.sourcegraphstatic.com");
 
                 _isWebView2Initialized = true;
+
+                _webview = webView.CoreWebView2;
             }
             catch (Exception ex)
             {
