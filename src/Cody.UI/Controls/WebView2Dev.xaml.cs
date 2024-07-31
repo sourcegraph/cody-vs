@@ -17,30 +17,40 @@ namespace Cody.UI.Controls
     {
         private bool _isWebView2Initialized;
 
+        private List<string> messages = new List<string>();
+
+        private async void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            string message = e.WebMessageAsJson;
+            Console.WriteLine($"webview -> host: {message}");
+
+            // Handle initialization message
+            if (message.Contains("initialized"))
+            {
+               await SendMessagesToWebView();
+            }
+            await SendMessagesToWebView();
+        }
+
         private string _vsCodeAPIScript = @"
             globalThis.acquireVsCodeApi = (function() {{
                 let acquired = false;
                 let state = undefined;
 
-                const doPostMessage = (message, transfer) => {{
-                    window.parent.postMessage(message, transfer);
-                }}
-
                 return () => {{
-                    if (acquired && !false) {{
+                    if (acquired && !false) {
                         throw new Error('An instance of the VS Code API has already been acquired');
-                    }}
+                    }
                     acquired = true;
                     return Object.freeze({
                         postMessage: function(message, transfer) {
-                            
                             console.assert(!transfer);
-                            console.log(JSON.stringify({ message, transfer }), 'post-message');
-                            window.parent.postMessage(message, transfer);
+                            console.log(`do-post: ${JSON.stringify(message)}`);
+                            window.parent.postMessage(JSON.stringify(message));
                         },
                         setState: function(newState) {
                             state = newState;
-                            doPostMessage('do-update-state', JSON.stringify(newState));
+                            console.log(`do-update-state: ${JSON.stringify(newState)}`);
                             return newState;
                         },
                         getState: function() {
@@ -60,6 +70,21 @@ namespace Cody.UI.Controls
             rootStyle.setProperty('--vscode-sideBar-background', '#ffffff');
             rootStyle.setProperty('--vscode-editor-font-size', '14px');
         ";
+
+        private async Task SendMessagesToWebView()
+{
+            foreach (var message in messages)
+            {
+                string script = $@"
+                    (() => {{
+                        let e = new CustomEvent('message');
+                        e.data = {message};
+                        window.dispatchEvent(e);
+                    }})()
+                ";
+                await webView.CoreWebView2.ExecuteScriptAsync(script);
+            }
+        }
 
         public WebView2Dev()
         {
@@ -99,17 +124,12 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
+                // webView.CoreWebView2.NavigateToString("");
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
-
-                //var result = await webView.CoreWebView2.ExecuteScriptWithResultAsync(_vsCodeAPIScript);
-
-                // load file from disk E:\Sigmaloc\Sourcegraph\cody-vs-clean\src\Cody.VisualStudio\Agent\webviews
-                //var result = await webView.CoreWebView2.ExecuteScriptWithResultAsync(_vsCodeAPIScript);
-
-                //await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_cspScript);
+                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
-                webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
+                webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/cody/agent/dist/webviews/index.html");
                 webView.CoreWebView2.OpenDevToolsWindow();
 
                 //webView.Source = new Uri("https://html5test.co");
@@ -170,8 +190,11 @@ namespace Cody.UI.Controls
 
 
             // load file from disk E:\Sigmaloc\Sourcegraph\cody-vs-clean\src\Cody.VisualStudio\Agent\webviews
-            webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
-            
+           webView.CoreWebView2.NavigateToString("");
+            webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
+                webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
+
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
             await webView.CoreWebView2.ExecuteScriptAsync("console.log('[VSIX]' + document.location);");
         }
 

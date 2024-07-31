@@ -23,9 +23,10 @@ namespace Cody.AgentTester
 
         static async Task Main(string[] args)
         {
+            var notifier = new NotificationHandlers();
             var options = new AgentConnectorOptions
             {
-                NotificationsTarget = new NotificationHandlers(),
+                NotificationsTarget = notifier,
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true
@@ -34,7 +35,10 @@ namespace Cody.AgentTester
             connector = new AgentConnector(options, logger);
 
             connector.Connect();
+
             agentClient = connector.CreateClient();
+
+            notifier.SetRegisterWebview(agentClient);
 
             await Initialize();
 
@@ -43,12 +47,14 @@ namespace Cody.AgentTester
 
         private static async Task Initialize()
         {
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
+
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = "1.0",
                 IdeVersion = "1.0",
-                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs",
+                WorkspaceRootUri = "file:///C//Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent",
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -84,8 +90,6 @@ namespace Cody.AgentTester
 
             // TODO: Move it to after we receive response for registerWebviewProvider
             await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
-
-            //await agentClient.DidDispose("view1");
 
             ;
         }

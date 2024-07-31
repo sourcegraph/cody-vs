@@ -37,12 +37,14 @@ namespace Cody.Core.Agent.Connector
 
         public async Task Initialize(IAgentClient client)
         {
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
+
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs",
+                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent",
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -73,20 +75,23 @@ namespace Cody.Core.Agent.Connector
                 }
             };
 
+
+            log.Info(clientInfo.WorkspaceRootUri);
+
             var result = await client.Initialize(clientInfo);
 
             if (result.Authenticated == true)
             {
                 client.Initialized();
-                log.Info("Agent initialized");
-
+                
+                log.Info(appData);
                                
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
 
                 // TODO: Move it to after we receive response for registerWebviewProvider
-                await client.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
+                // await client.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
             }
             else
             {

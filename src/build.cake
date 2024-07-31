@@ -7,9 +7,8 @@ var configuration = Argument("configuration", "Release");
 
 
 var agentDir = Directory("./Cody.VisualStudio/Agent");
+var codyDevDir = Directory("../../cody");
 var codyDir = Directory("../cody-dist");
-var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
-var codyAgentDistDir = codyAgentDir + Directory("dist");
 var nodeBinariesDir = Directory("../node-binaries");
 var nodeExeFile = nodeBinariesDir + File("node-win-x64.exe");
 var nodeArmExeFile = nodeBinariesDir + File("node-win-arm64.exe");
@@ -36,24 +35,35 @@ var marketplaceToken = "<HIDDEN>";
 Task("BuildCodyAgent")
     .Does(() =>
 {
+	if (DirectoryExists(codyDevDir))
+	{
+		// TODO: Check if this is dev mode.
+		codyDir = codyDevDir;
+	}
+
+	
+	var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
+	var codyAgentDistDir = codyAgentDir + Directory("dist");
+
     if(!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
 	{
 		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = "dpc/web-content" });
+
+		GitCheckout(codyDir, "dpc/web-content");
+
+		//GitCheckout(codyDir, "main");
+
+		GitPull(codyDir, "cake", "cake@cake.com");
+		
+		// GitCheckout(codyDir, codyCommit);
+		
+		CleanDirectory(codyAgentDistDir);
 	}
 	
-	GitCheckout(codyDir, "dpc/web-content");
-	//GitCheckout(codyDir, "main");
-	GitPull(codyDir, "cake", "cake@cake.com");
-	
-	GitCheckout(codyDir, codyCommit);
-	
-	CleanDirectory(codyAgentDistDir);
-	
 	Context.Environment.WorkingDirectory = codyAgentDir;
+
 	PnpmInstall();
 	PnpmRun("build:agent");
-
-	// get the dpc/webviews branch for cody and try to build it manually
 	PnpmRun("build:webviews");
 
 	Context.Environment.WorkingDirectory = solutionDir;

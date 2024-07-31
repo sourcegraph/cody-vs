@@ -143,15 +143,19 @@ namespace Cody.VisualStudio
         {
             try
             {
+                var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
+                var notifier = new NotificationHandlers();
+                
                 var options = new AgentConnectorOptions
                 {
-                    NotificationsTarget = new NotificationHandlers(),
-                    AgentDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent"),
+                    NotificationsTarget = notifier,
+                    AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     AfterConnection = (client) => InitializeService.Initialize(client),
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
+                notifier.SetRegisterWebview(AgentConnector.CreateClient());
 
                 Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
                 {
