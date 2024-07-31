@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent.Connector
 {
-    public class AgentProcess : IDisposable
+    public class AgentProcess : IAgentProcess
     {
         private Process process = new Process();
         private string agentDirectory;
@@ -110,6 +110,14 @@ namespace Cody.Core.Agent.Connector
             if (!process.HasExited) process.Kill();
 
             process.Dispose();
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                return !process.HasExited;
+            }
         }
     }
 }

@@ -124,15 +124,14 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
-                // webView.CoreWebView2.NavigateToString("");
+                webView.CoreWebView2.NavigateToString("");
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
                 webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
-                webView.CoreWebView2.Navigate("file:///C://Users/BeatrixW/Dev/cody/agent/dist/webviews/index.html");
                 webView.CoreWebView2.OpenDevToolsWindow();
 
-                //webView.Source = new Uri("https://html5test.co");
+                webView.Source = new Uri("https://*.sourcegraphstatic.com");
 
                 _isWebView2Initialized = true;
             }
@@ -186,10 +185,6 @@ namespace Cody.UI.Controls
             if (!_isWebView2Initialized)
                 await InitializeAsync();
 
-            // Javascript call
-
-
-            // load file from disk E:\Sigmaloc\Sourcegraph\cody-vs-clean\src\Cody.VisualStudio\Agent\webviews
            webView.CoreWebView2.NavigateToString("");
             webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;

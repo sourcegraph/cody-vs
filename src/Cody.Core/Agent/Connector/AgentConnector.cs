@@ -12,7 +12,7 @@ namespace Cody.Core.Agent.Connector
 {
     public class AgentConnector
     {
-        private AgentProcess agentProcess;
+        private IAgentProcess agentProcess;
         private JsonRpc jsonRpc;
         private IAgentClient agentClient;
         private AgentConnectorOptions options;
@@ -28,11 +28,18 @@ namespace Cody.Core.Agent.Connector
 
         public bool IsConnected { get; private set; }
 
-        public void Connect()
+        public async Task Connect()
         {
             if (IsConnected) return;
 
-            agentProcess = AgentProcess.Start(options.AgentDirectory, options.Debug, log, OnAgentExit);
+            if (options.Port != null)
+            {
+                agentProcess = await RemoteAgent.Connect(options, OnAgentExit);
+            }
+            else
+            {
+                agentProcess = AgentProcess.Start(options.AgentDirectory, options.Debug, log, OnAgentExit);
+            }
             log.Info("The agent process has started.");
 
             var jsonMessageFormatter = new JsonMessageFormatter();
@@ -64,7 +71,8 @@ namespace Cody.Core.Agent.Connector
             if (options.RestartAgentOnFailure && exitCode != 0)
             {
                 log.Info("Restarting the agent.");
-                Connect();
+                // TODO: Make RemoteAgent wait until there's an agent to reconnect to before failing.
+                Connect().Wait();
             }
         }
 
@@ -89,9 +97,9 @@ namespace Cody.Core.Agent.Connector
             log.Info("The connection with the agent has been terminated.");
         }
 
-        public IAgentClient CreateClient()
+        public async Task<IAgentClient> CreateClient()
         {
-            if (!IsConnected) Connect();
+            if (!IsConnected) await Connect();
 
             return agentClient;
         }

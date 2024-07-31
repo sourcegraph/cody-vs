@@ -12,6 +12,8 @@ namespace Cody.Core.Agent
 {
     public class NotificationHandlers
     {
+
+        // TODO: Start NotificationHandlers with Agent Client.
         private static IAgentClient agentClient;
 
         [JsonRpcMethod("NotificationReceived")]
@@ -32,17 +34,10 @@ namespace Cody.Core.Agent
             System.Diagnostics.Debug.WriteLine(handle, "Agent registerWebview");
         }
 
-        public void SetRegisterWebview(IAgentClient client)
-        {
-            agentClient = client;
-            System.Diagnostics.Debug.WriteLine("c", "Agent agentClient");
-        }
-
-
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
         public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            agentClient.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
+            // TODO: agentClient.ResolveWebviewView("cody.chat", "visual-studio");
             System.Diagnostics.Debug.WriteLine(viewId, "Agent registerWebviewViewProvider");
         }
 
@@ -68,6 +63,7 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
+            // TODO webView.CoreWebView2.NavigateToString(html);
             System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
         }
 

@@ -155,8 +155,6 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
-                notifier.SetRegisterWebview(AgentConnector.CreateClient());
-
                 Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
                 {
                     foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);

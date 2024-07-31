@@ -8,7 +8,7 @@ namespace Cody.VisualStudio.Tests
     {
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Playwright_Conntects_OvercCDP()
+        public async Task Playwright_Connects_OvercCDP()
         {
             // given
             await WaitForPlaywrightAsync();
