@@ -164,6 +164,8 @@
     <Compile Include="Agent\Connector\AgentConnector.cs" />
     <Compile Include="Agent\Connector\AgentConnectorOptions.cs" />
     <Compile Include="Agent\Connector\AgentProcess.cs" />
+    <Compile Include="Agent\Connector\IAgentProcess.cs" />
+    <Compile Include="Agent\Connector\RemoteAgent.cs" />
     <Compile Include="Agent\IAgentClient.cs" />
     <Compile Include="Agent\Connector\InitializeCallback.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />

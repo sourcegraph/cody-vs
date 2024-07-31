@@ -20,21 +20,36 @@ namespace Cody.AgentTester
         private static AgentConnector connector;
         private static ConsoleLogger logger = new ConsoleLogger();
         private static IAgentClient agentClient;
+        private static string agentDirectoryPath;
 
         static async Task Main(string[] args)
         {
+            var notifier = new NotificationHandlers();
+
+            // Set the env var to 3113 when running with local agent.
+            var port = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+            int? portNumber = null;
+            if (port != null)
+            {
+                portNumber = Convert.ToInt32(port);
+            }
+            
             var options = new AgentConnectorOptions
             {
-                NotificationsTarget = new NotificationHandlers(),
+                NotificationsTarget = notifier,
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
-                Debug = true
+                Debug = true,
+                Port = portNumber,
             };
+
+            agentDirectoryPath = Path.GetFullPath(options.AgentDirectory);
 
             connector = new AgentConnector(options, logger);
 
-            connector.Connect();
-            agentClient = connector.CreateClient();
+            await connector.Connect();
+
+            agentClient = await connector.CreateClient();
 
             await Initialize();
 
@@ -43,12 +58,14 @@ namespace Cody.AgentTester
 
         private static async Task Initialize()
         {
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
+
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = "1.0",
                 IdeVersion = "1.0",
-                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs",
+                WorkspaceRootUri = Directory.GetCurrentDirectory().ToString(),
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -73,7 +90,7 @@ namespace Cody.AgentTester
                     AutocompleteAdvancedProvider = null,
                     Debug = true,
                     VerboseDebug = true,
-                    Codebase = "github.com/sourcegraph/cody",
+                    Codebase = null,
 
                 }
             };
@@ -83,11 +100,11 @@ namespace Cody.AgentTester
             agentClient.Initialized();
 
             // TODO: Move it to after we receive response for registerWebviewProvider
-            await agentClient.ResolveWebviewView("cody.chat", "native-webview-view-visual-studio");
-
-            //await agentClient.DidDispose("view1");
-
-            ;
+            await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio-program",
+            });
         }
 
 

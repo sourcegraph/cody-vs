@@ -74,6 +74,10 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	  <Content Include="Agent\webviews\*.*">
+		  <IncludeInVSIX>true</IncludeInVSIX>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationFramework" />

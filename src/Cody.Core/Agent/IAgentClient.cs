@@ -21,10 +21,16 @@ namespace Cody.Core.Agent
 
 
 
-        [JsonRpcMethod("webview/resolveWebviewView")]
-        Task ResolveWebviewView(string viewId, string webviewHandle);
+        [JsonRpcMethod("webview/resolveWebviewView", UseSingleObjectParameterDeserialization = true)]
+        Task ResolveWebviewView(ResolveWebviewViewParams paramValue);
 
         [JsonRpcMethod("webview/receiveMessageStringEncoded")]
         Task ReceiveMessageStringEncoded(string id, string messageStringEncoded);
     }
+}
+
+public class ResolveWebviewViewParams
+{
+    public string ViewId { get; set; }
+    public string WebviewHandle { get; set; }
 }
