@@ -7,9 +7,8 @@ var configuration = Argument("configuration", "Release");
 
 
 var agentDir = Directory("./Cody.VisualStudio/Agent");
+var codyDevDir = Directory("../../cody");
 var codyDir = Directory("../cody-dist");
-var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
-var codyAgentDistDir = codyAgentDir + Directory("dist");
 var nodeBinariesDir = Directory("../node-binaries");
 var nodeExeFile = nodeBinariesDir + File("node-win-x64.exe");
 var nodeArmExeFile = nodeBinariesDir + File("node-win-arm64.exe");
@@ -36,30 +35,43 @@ var marketplaceToken = "<HIDDEN>";
 Task("BuildCodyAgent")
     .Does(() =>
 {
+	// Check for the env var to see if we should use the local cody directory.
+	// This is used to build the agent from the local cody directory instead of cloning from github.
+	var isDevMode = EnvironmentVariable("CODY_VS_DEV_MODE") == "true";
+	if (isDevMode && DirectoryExists(codyDevDir))
+	{
+		codyDir = codyDevDir;
+	}
+
+	
+	var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
+	var codyAgentDistDir = codyAgentDir + Directory("dist");
+
     if(!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
 	{
-		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = "dpc/web-content" });
+		// GitCheckout(codyDir, codyCommit);
+		
+		var branchName = "dpc/web-content"
+		
+		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = branchName });
+		
+		GitCheckout(codyDir, branchName);
+
+		GitPull(codyDir, "cake", "cake@cake.com");
+		
+		CleanDirectory(codyAgentDistDir);
 	}
 	
-	GitCheckout(codyDir, "dpc/web-content");
-	//GitCheckout(codyDir, "main");
-	GitPull(codyDir, "cake", "cake@cake.com");
-	
-	GitCheckout(codyDir, codyCommit);
-	
-	CleanDirectory(codyAgentDistDir);
-	
 	Context.Environment.WorkingDirectory = codyAgentDir;
+
 	PnpmInstall();
 	PnpmRun("build:agent");
-
-	// get the dpc/webviews branch for cody and try to build it manually
 	PnpmRun("build:webviews");
 
 	Context.Environment.WorkingDirectory = solutionDir;
 	
 	CreateDirectory(agentDir);
-	CopyFiles($"{codyAgentDistDir}/*.*", agentDir);
+	CopyDirectory(codyAgentDistDir, agentDir);
 });
 
 Task("DownloadNode")

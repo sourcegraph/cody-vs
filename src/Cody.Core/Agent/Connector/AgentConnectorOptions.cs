@@ -9,7 +9,13 @@ namespace Cody.Core.Agent.Connector
     public class AgentConnectorOptions
     {
         public bool Debug { get; set; }
+
         public bool RestartAgentOnFailure { get; set; }
+
+        /// <summary>
+        /// If non-null, the TCP port to connect to an existing Agent instance on.
+        /// </summary>
+        public int? Port { get; set; }
 
         public string AgentDirectory { get; set; }
 
