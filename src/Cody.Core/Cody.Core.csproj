@@ -179,6 +179,7 @@
     <Compile Include="Agent\Protocol\ExtensionConfiguration.cs" />
     <Compile Include="Agent\Protocol\ServerInfo.cs" />
     <Compile Include="Agent\Protocol\WebviewCapabilities.cs" />
+    <Compile Include="Agent\SetHtmlEvent.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />

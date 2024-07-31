@@ -1,5 +1,4 @@
 ﻿using Cody.Core.Agent.Protocol;
-using Cody.Core.Logging;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
@@ -12,6 +11,7 @@ namespace Cody.Core.Agent
 {
     public class NotificationHandlers
     {
+        public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
 
         // TODO: Start NotificationHandlers with Agent Client.
         private static IAgentClient agentClient;
@@ -63,8 +63,9 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
-            // TODO webView.CoreWebView2.NavigateToString(html);
+ 			// TODO webView.CoreWebView2.NavigateToString(html);
             System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
+            OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() {Handle = handle, Html = html});
         }
 
         [JsonRpcMethod("webview/postMessage")]

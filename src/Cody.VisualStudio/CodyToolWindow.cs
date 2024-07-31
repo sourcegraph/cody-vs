@@ -37,10 +37,11 @@ namespace Cody.VisualStudio
 
             var package = GetPackage();
             var logger = package.Logger;
+            var agentClient = package.NotificationHandlers;
 
             var view = new MainView
             {
-                DataContext = new MainViewModel(logger)
+                DataContext = new MainViewModel(agentClient, logger)
             };
 
             base.Content = view;
