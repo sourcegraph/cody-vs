@@ -28,10 +28,6 @@ namespace Cody.UI.Controls
             string message = e.TryGetWebMessageAsString();
             Console.WriteLine($"webview -> host: {message}");
 
-            // Raise the event
-            // WebViewMessageReceived?.Invoke(this, message);
-
-            // TODO: Process the message
 
             // Send a response back to the WebView if needed
             await SendMessageToAgent(message);
@@ -41,23 +37,26 @@ namespace Cody.UI.Controls
         {
             SendMessage.Execute(message);
 
-            string script = $@"   
-                    console.log('Received message from host:', {message});
-                 ";
-
-            webView.CoreWebView2.ExecuteScriptAsync(script);
-
-
-            SendMessageToWebview("{\"type\":\"config\",\"config\":{\"agentIDE\":\"VisualStudio\"}}");
-
 
             return Task.CompletedTask;
         }
 
         private Task SendMessageToWebview(string message)
         {
+            WebViewMessageReceived?.Invoke(this, message);
+            webView.CoreWebView2.PostWebMessageAsString(message);
+
             // Send the message to the webview
             webView.CoreWebView2.PostWebMessageAsJson(message);
+
+            string script = $@"
+            (() => {{
+                let e = new CustomEvent('message');
+                console.log(`on-send: ${{JSON.stringify(message)}}`);
+                window.dispatchEvent(message);
+            }})()
+        ";
+             webView.CoreWebView2.ExecuteScriptAsync(script);
 
             return Task.CompletedTask;
         }
@@ -66,6 +65,10 @@ namespace Cody.UI.Controls
             globalThis.acquireVsCodeApi = (function() {{
                 let acquired = false;
                 let state = undefined;
+
+                window.chrome.webview.addEventListener('message', event => {
+                   window.dispatchEvent(event.data);
+                });
 
                 return () => {{
                     if (acquired && !false) {
@@ -85,7 +88,15 @@ namespace Cody.UI.Controls
                         },
                         getState: function() {
                             return state;
-                        }
+                        },
+                        onMessage: function(callback) {
+                            const listener = (event) => {
+                                callback(event.data);
+                            };
+                            console.log(`on-send: ${JSON.stringify(event.data)}`);
+                            window.addEventListener('message', listener);
+                            return () => window.removeEventListener('message', listener);
+                        },
                     });
                 }};
             }})();
@@ -125,10 +136,21 @@ namespace Cody.UI.Controls
             DependencyProperty.Register("PostMessage", typeof(AgentResponseEvent), typeof(WebView2Dev),
                 new PropertyMetadata(null, PostMessageCallback));
 
-        private static void PostMessageCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static async void PostMessageCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var html = e.NewValue as string;
-            ;
+            var message = e.NewValue as AgentResponseEvent;
+
+            string script = $@"
+                (() => {{
+                    let e = new CustomEvent('message');
+                    e.data = {message.StringEncodedMessage};
+                    window.dispatchEvent(e);
+                }})()
+            ";
+            await _webview.ExecuteScriptAsync(script);
+
+            _webview.PostWebMessageAsJson(message.StringEncodedMessage);
+            _webview.PostWebMessageAsJson(message.StringEncodedMessage);
         }
 
         public string PostMessage
