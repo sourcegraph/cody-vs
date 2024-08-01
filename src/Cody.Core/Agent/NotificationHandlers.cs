@@ -21,16 +21,13 @@ namespace Cody.Core.Agent
 
         public async Task SendWebviewMessage(string handle, string message)
         {
-           await agentClient.ReceiveMessageStringEncoded(handle, message);
+           await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+           {
+               Id = handle,
+               MessageStringEncoded = message
+           });
         }
 
-
-        [JsonRpcMethod("NotificationReceived")]
-        public void NotificationReceived(string message)
-        {
-            System.Diagnostics.Debug.WriteLine(message, "Agent NotificationReceived");
-        }
-        
         [JsonRpcMethod("debug/message")]
         public void Debug(string channel, string message)
         {
@@ -76,21 +73,21 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
- 			// TODO webView.CoreWebView2.NavigateToString(html);
             System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() {Handle = handle, Html = html});
         }
 
         [JsonRpcMethod("webview/PostMessage")]
-        public void PostMessage(string handle, string stringEncodedMessage)
+        public void PostMessage(string handle, string message)
         {
-            ;
+            PostMessageStringEncoded(handle, message);
         }
 
         [JsonRpcMethod("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
-            ;
+            System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
+            // TODO send message to Webview2Dev 
         }
 
         [JsonRpcMethod("webview/didDisposeNative")]

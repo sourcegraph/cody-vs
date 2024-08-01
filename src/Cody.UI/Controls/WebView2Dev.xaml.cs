@@ -24,28 +24,39 @@ namespace Cody.UI.Controls
 
         private async void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
-            string message = e.WebMessageAsJson;
+            string message = e.TryGetWebMessageAsString();
             Console.WriteLine($"webview -> host: {message}");
 
             // Raise the event
-            WebViewMessageReceived?.Invoke(this, message);
+            // WebViewMessageReceived?.Invoke(this, message);
 
             // TODO: Process the message
 
             // Send a response back to the WebView if needed
-            await SendMessageToWebView(message);
+            await SendMessageToAgent(message);
         }
 
-        private Task SendMessageToWebView(string message)
+        private Task SendMessageToAgent(string message)
         {
-
-            webView.CoreWebView2.PostWebMessageAsString(message);
+            SendMessage.Execute(message);
 
             string script = $@"   
                     console.log('Received message from host:', {message});
                  ";
 
             webView.CoreWebView2.ExecuteScriptAsync(script);
+
+
+            SendMessageToWebview("{\"type\":\"config\",\"config\":{\"agentIDE\":\"VisualStudio\"}}");
+
+
+            return Task.CompletedTask;
+        }
+
+        private Task SendMessageToWebview(string message)
+        {
+            // Send the message to the webview
+            webView.CoreWebView2.PostWebMessageAsJson(message);
 
             return Task.CompletedTask;
         }
@@ -97,7 +108,7 @@ namespace Cody.UI.Controls
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var html = e.NewValue as string;
-            _webview.NavigateToString("");
+            // _webview.NavigateToString("");
             // _webview.NavigateToString(html);
             _webview.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
             _webview.OpenDevToolsWindow();
@@ -158,6 +169,8 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
+                _webview = webView.CoreWebView2;
+
                 webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
@@ -172,8 +185,6 @@ namespace Cody.UI.Controls
 
 
                 _isWebView2Initialized = true;
-
-                _webview = webView.CoreWebView2;
             }
             catch (Exception ex)
             {
