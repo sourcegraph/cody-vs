@@ -16,9 +16,15 @@ namespace Cody.UI.ViewModels
             NotificationHandlers = notificationHandlers;
             _logger = logger;
 
-            _logger.Debug("Initialized.");
-
             NotificationHandlers.OnSetHtmlEvent += OnSetHtmlHandler;
+            NotificationHandlers.OnWebviewMessageEvent += OnWebviewRequestHandler;
+
+            _logger.Debug("Initialized.");
+        }
+
+        private async void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)
+        {
+            NotificationHandlers.SendWebviewMessage(e.Handle, e.Messsage);
         }
 
         private void OnSetHtmlHandler(object sender, SetHtmlEvent e)

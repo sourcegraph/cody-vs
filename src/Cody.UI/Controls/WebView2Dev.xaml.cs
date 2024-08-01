@@ -37,7 +37,8 @@ namespace Cody.UI.Controls
 
         private Task SendMessageToWebView(string message)
         {
-                webView.CoreWebView2.PostWebMessageAsString(message);
+
+            webView.CoreWebView2.PostWebMessageAsString(message);
 
             string script = $@"   
                     console.log('Received message from host:', {message});
@@ -95,7 +96,8 @@ namespace Cody.UI.Controls
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var html = e.NewValue as string;
-            _webview.NavigateToString(html);
+            // _webview.NavigateToString(html);
+            _webview.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
             _webview.OpenDevToolsWindow();
         }
 
@@ -142,7 +144,6 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
-                webView.CoreWebView2.NavigateToString("");
                 webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;

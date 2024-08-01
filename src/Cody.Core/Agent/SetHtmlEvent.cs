@@ -7,4 +7,10 @@ namespace Cody.Core.Agent
         public string Handle { get; set; }
         public string Html { get; set; }
     }
+
+    public class SetWebviewRequestEvent : EventArgs
+    {
+        public string Handle { get; set; }
+        public string Messsage { get; set; }
+    }
 }

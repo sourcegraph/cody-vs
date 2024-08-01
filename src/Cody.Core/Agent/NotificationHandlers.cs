@@ -3,26 +3,23 @@ using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
     public class NotificationHandlers
     {
-
-        public NotificationHandlers()
-        {
-        }
-
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
+        public event EventHandler<SetWebviewRequestEvent> OnWebviewMessageEvent;
 
-       
-        private IAgentClient agentClient;
+        public IAgentClient agentClient;
 
         public void SetAgentClient(IAgentClient agentClient) => this.agentClient = agentClient;
+
+        public async void SendWebviewMessage(string handle, string message)
+        {
+           await agentClient.ReceiveMessageStringEncoded(handle, message);
+        }
+
 
         [JsonRpcMethod("NotificationReceived")]
         public void NotificationReceived(string message)
@@ -80,7 +77,7 @@ namespace Cody.Core.Agent
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() {Handle = handle, Html = html});
         }
 
-        [JsonRpcMethod("webview/postMessage")]
+        [JsonRpcMethod("webview/PostMessage")]
         public void PostMessage(string handle, string stringEncodedMessage)
         {
             ;
