@@ -8,6 +8,10 @@ namespace Cody.Core.Agent
 {
     public class NotificationHandlers
     {
+        public NotificationHandlers()
+        {
+        }
+
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
         public event EventHandler<SetWebviewRequestEvent> OnWebviewMessageEvent;
 

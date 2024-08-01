@@ -96,6 +96,7 @@ namespace Cody.UI.Controls
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var html = e.NewValue as string;
+            _webview.NavigateToString("");
             // _webview.NavigateToString(html);
             _webview.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
             _webview.OpenDevToolsWindow();
