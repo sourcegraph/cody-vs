@@ -41,7 +41,7 @@
 
             </StackPanel>
 
-            <wpf:WebView2 Name="webView" Grid.Row="1"
+            <wpf:WebView2 Name="webView" Grid.Row="1" Visibility="Collapsed"
               
             />
             <StackPanel Grid.Row="1"
@@ -59,6 +59,7 @@
                         Click="InitWebView2"
                         Margin="10"
                         Padding="10"
+                        
                 />
 
             </StackPanel>

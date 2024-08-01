@@ -19,19 +19,33 @@ namespace Cody.UI.Controls
 
         public static CoreWebView2 _webview;
 
-        private List<string> messages = new List<string>();
+        public event EventHandler<string> WebViewMessageReceived;
 
         private async void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string message = e.WebMessageAsJson;
             Console.WriteLine($"webview -> host: {message}");
 
-            // Handle initialization message
-            if (message.Contains("initialized"))
-            {
-               await SendMessagesToWebView();
-            }
-            await SendMessagesToWebView();
+            // Raise the event
+            WebViewMessageReceived?.Invoke(this, message);
+
+            // TODO: Process the message
+
+            // Send a response back to the WebView if needed
+            await SendMessageToWebView(message);
+        }
+
+        private Task SendMessageToWebView(string message)
+        {
+                webView.CoreWebView2.PostWebMessageAsString(message);
+
+            string script = $@"   
+                    console.log('Received message from host:', {message});
+                 ";
+
+            webView.CoreWebView2.ExecuteScriptAsync(script);
+
+            return Task.CompletedTask;
         }
 
         private string _vsCodeAPIScript = @"
@@ -48,7 +62,7 @@ namespace Cody.UI.Controls
                         postMessage: function(message, transfer) {
                             console.assert(!transfer);
                             console.log(`do-post: ${JSON.stringify(message)}`);
-                            window.parent.postMessage(JSON.stringify(message));
+                            window.chrome.webview.postMessage(JSON.stringify(message));
                         },
                         setState: function(newState) {
                             state = newState;
@@ -74,20 +88,6 @@ namespace Cody.UI.Controls
             rootStyle.setProperty('--vscode-editor-font-size', '14px');
         ";
 
-        private async Task SendMessagesToWebView()
-{
-            foreach (var message in messages)
-            {
-                string script = $@"
-                    (() => {{
-                        let e = new CustomEvent('message');
-                        e.data = {message};
-                        window.dispatchEvent(e);
-                    }})()
-                ";
-                await webView.CoreWebView2.ExecuteScriptAsync(script);
-            }
-        }
         public static readonly DependencyProperty HtmlProperty =
             DependencyProperty.Register("Html", typeof(string), typeof(WebView2Dev),
                 new PropertyMetadata(null, PropertyChangedCallback));
@@ -95,7 +95,8 @@ namespace Cody.UI.Controls
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var html = e.NewValue as string;
-            _webview.NavigateToString(html); //  .NavigateToString(html);
+            _webview.NavigateToString(html);
+            _webview.OpenDevToolsWindow();
         }
 
         public string Html
@@ -141,13 +142,18 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
-
+                webView.CoreWebView2.NavigateToString("");
+                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
-                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
+
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
 
-                webView.CoreWebView2.OpenDevToolsWindow();
+                webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView.CoreWebView2.Settings.AreHostObjectsAllowed = true;
+                webView.CoreWebView2.Settings.IsScriptEnabled = true;
 
 
                 _isWebView2Initialized = true;

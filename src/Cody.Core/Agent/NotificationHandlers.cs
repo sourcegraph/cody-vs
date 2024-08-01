@@ -1,4 +1,5 @@
-﻿using Cody.Core.Agent.Protocol;
+﻿using Cody.Core.Agent.Connector;
+using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
@@ -11,10 +12,17 @@ namespace Cody.Core.Agent
 {
     public class NotificationHandlers
     {
+        private AgentConnector connector;
+
+        public NotificationHandlers(AgentConnector connector)
+        {
+            this.connector = connector;
+        }
+
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
 
         // TODO: Start NotificationHandlers with Agent Client.
-        private static IAgentClient agentClient;
+        private IAgentClient agentClient;
 
         [JsonRpcMethod("NotificationReceived")]
         public void NotificationReceived(string message)
@@ -35,10 +43,14 @@ namespace Cody.Core.Agent
         }
 
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
-        public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
+        public  void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            // TODO: agentClient.ResolveWebviewView("cody.chat", "visual-studio");
             System.Diagnostics.Debug.WriteLine(viewId, "Agent registerWebviewViewProvider");
+            connector.CreateClient().Result.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio-program",
+            }).Wait();
         }
 
         [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]

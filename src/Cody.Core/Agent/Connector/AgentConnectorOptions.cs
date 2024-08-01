@@ -19,8 +19,6 @@ namespace Cody.Core.Agent.Connector
 
         public string AgentDirectory { get; set; }
 
-        public object NotificationsTarget { get; set; }
-
         public Action<IAgentClient> AfterConnection { get; set; }
 
         public Action<IAgentClient> BeforeDisconnection { get; set; }
