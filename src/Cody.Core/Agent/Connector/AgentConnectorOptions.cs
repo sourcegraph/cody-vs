@@ -22,5 +22,7 @@ namespace Cody.Core.Agent.Connector
         public Action<IAgentClient> AfterConnection { get; set; }
 
         public Action<IAgentClient> BeforeDisconnection { get; set; }
+
+        public NotificationHandlers NotificationsTarget { get; set; }
     }
 }

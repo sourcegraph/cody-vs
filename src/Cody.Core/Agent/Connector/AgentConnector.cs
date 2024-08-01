@@ -18,15 +18,12 @@ namespace Cody.Core.Agent.Connector
         private AgentConnectorOptions options;
         private ILog log;
 
-        private NotificationHandlers notifier;
-
         public AgentConnector(AgentConnectorOptions connectorOptions, ILog log)
         {
             if (connectorOptions == null) throw new ArgumentNullException(nameof(connectorOptions));
 
             options = connectorOptions;
             this.log = log;
-            this.notifier = new NotificationHandlers(this);
         }
 
         public bool IsConnected { get; private set; }
@@ -55,8 +52,9 @@ namespace Cody.Core.Agent.Connector
             var handler = new HeaderDelimitedMessageHandler(agentProcess.SendingStream, agentProcess.ReceivingStream, jsonMessageFormatter);
             jsonRpc = new JsonRpc(handler);
 
-            if (notifier != null) jsonRpc.AddLocalRpcTarget(notifier);
+            if (options.NotificationsTarget != null) jsonRpc.AddLocalRpcTarget(options.NotificationsTarget);
             agentClient = jsonRpc.Attach<IAgentClient>();
+            options.NotificationsTarget.SetAgentClient(agentClient);
 
             jsonRpc.StartListening();
             IsConnected = true;
