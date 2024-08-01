@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Core;
 using System.IO;
+using System.Windows.Input;
 using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
@@ -108,6 +109,18 @@ namespace Cody.UI.Controls
             set => SetValue(HtmlProperty, value);
         }
 
+        public static readonly DependencyProperty SendMessageProperty =
+            DependencyProperty.Register(
+                "SendMessage",
+                typeof(ICommand),
+                typeof(WebView2Dev),
+                new UIPropertyMetadata(null));
+        public ICommand SendMessage
+        {
+            get { return (ICommand)GetValue(SendMessageProperty); }
+            set { SetValue(SendMessageProperty, value); }
+        }
+
         public WebView2Dev()
         {
             InitializeComponent();
@@ -205,6 +218,8 @@ namespace Cody.UI.Controls
                 await InitializeAsync();
 
             webView.ExecuteScriptAsync($"alert('The current date&time is {DateTime.Now:f}')");
+
+            SendMessage.Execute("Message from WebView!");
         }
 
         private async void Go2MSCopilotButtonOnClick(object sender, RoutedEventArgs e)

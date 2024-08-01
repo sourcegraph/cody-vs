@@ -14,6 +14,7 @@
             <controls:WebView2Dev 
                 Margin="5"
                 Html="{Binding Html}"
+                SendMessage="{Binding WebviewMessageSendCommand }"
                 />
 
     </Grid>

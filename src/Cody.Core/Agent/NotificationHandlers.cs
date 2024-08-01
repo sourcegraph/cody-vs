@@ -3,6 +3,7 @@ using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
+using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
@@ -13,13 +14,12 @@ namespace Cody.Core.Agent
         }
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
-        public event EventHandler<SetWebviewRequestEvent> OnWebviewMessageEvent;
 
         public IAgentClient agentClient;
 
         public void SetAgentClient(IAgentClient agentClient) => this.agentClient = agentClient;
 
-        public async void SendWebviewMessage(string handle, string message)
+        public async Task SendWebviewMessage(string handle, string message)
         {
            await agentClient.ReceiveMessageStringEncoded(handle, message);
         }

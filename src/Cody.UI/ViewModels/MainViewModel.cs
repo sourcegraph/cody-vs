@@ -2,6 +2,7 @@
 using Cody.Core.Agent.Connector;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
+using System.Windows.Input;
 
 namespace Cody.UI.ViewModels
 {
@@ -17,7 +18,6 @@ namespace Cody.UI.ViewModels
             _logger = logger;
 
             NotificationHandlers.OnSetHtmlEvent += OnSetHtmlHandler;
-            NotificationHandlers.OnWebviewMessageEvent += OnWebviewRequestHandler;
 
             _logger.Debug("Initialized.");
         }
@@ -25,6 +25,17 @@ namespace Cody.UI.ViewModels
         private async void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)
         {
             NotificationHandlers.SendWebviewMessage(e.Handle, e.Messsage);
+        }
+
+        public ICommand WebviewMessageSendCommand
+        {
+            get { return new DelegateCommand<object>(WebviewSendMessage); }
+        }
+
+
+        private void WebviewSendMessage(object message)
+        {
+            NotificationHandlers.SendWebviewMessage("visual-studio-program", (string)message);
         }
 
         private void OnSetHtmlHandler(object sender, SetHtmlEvent e)
