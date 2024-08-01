@@ -18,8 +18,18 @@ namespace Cody.UI.ViewModels
             _logger = logger;
 
             NotificationHandlers.OnSetHtmlEvent += OnSetHtmlHandler;
+            NotificationHandlers.OnPostMessageEvent += OnPostMessageHandler;
 
             _logger.Debug("Initialized.");
+        }
+
+        private void OnPostMessageHandler(object sender, AgentResponseEvent e)
+        {
+            PostMessage = new AgentResponseEvent()
+            {
+                Id = e.Id, StringEncodedMessage = e.StringEncodedMessage
+
+            };
         }
 
         private async void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)
@@ -54,6 +64,20 @@ namespace Cody.UI.ViewModels
             set
             {
                 SetProperty(ref _html, value);
+            }
+        }
+
+        private AgentResponseEvent _postMessage;
+
+        public AgentResponseEvent PostMessage
+        {
+            get
+            {
+                return _postMessage;
+            }
+            set
+            {
+                SetProperty(ref _postMessage, value);
             }
         }
     }

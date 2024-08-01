@@ -15,6 +15,7 @@
                 Margin="5"
                 Html="{Binding Html}"
                 SendMessage="{Binding WebviewMessageSendCommand }"
+                PostMessage="{Binding PostMessage}"
                 />
 
     </Grid>

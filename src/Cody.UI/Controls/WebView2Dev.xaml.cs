@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using Microsoft.Web.WebView2.Core;
 using System.IO;
 using System.Windows.Input;
+using Cody.Core.Agent;
 using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
@@ -118,6 +119,22 @@ namespace Cody.UI.Controls
         {
             get => (string)GetValue(HtmlProperty);
             set => SetValue(HtmlProperty, value);
+        }
+
+        public static readonly DependencyProperty PostMessageProperty =
+            DependencyProperty.Register("PostMessage", typeof(AgentResponseEvent), typeof(WebView2Dev),
+                new PropertyMetadata(null, PostMessageCallback));
+
+        private static void PostMessageCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var html = e.NewValue as string;
+            ;
+        }
+
+        public string PostMessage
+        {
+            get => (string)GetValue(PostMessageProperty);
+            set => SetValue(PostMessageProperty, value);
         }
 
         public static readonly DependencyProperty SendMessageProperty =

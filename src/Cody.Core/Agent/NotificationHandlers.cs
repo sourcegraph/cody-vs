@@ -14,6 +14,7 @@ namespace Cody.Core.Agent
         }
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
+        public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
         public IAgentClient agentClient;
 
@@ -88,6 +89,8 @@ namespace Cody.Core.Agent
         {
             System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
             // TODO send message to Webview2Dev 
+
+            OnPostMessageEvent.Invoke(this, new AgentResponseEvent() { Id = id, StringEncodedMessage = stringEncodedMessage});
         }
 
         [JsonRpcMethod("webview/didDisposeNative")]
