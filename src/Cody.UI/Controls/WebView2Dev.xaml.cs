@@ -52,8 +52,9 @@ namespace Cody.UI.Controls
             string script = $@"
             (() => {{
                 let e = new CustomEvent('message');
-                console.log(`on-send: ${{JSON.stringify(message)}}`);
-                window.dispatchEvent(message);
+                console.log(`on-send send msg: ${{JSON.stringify(message)}}`);
+                e.data = {message};
+                window.dispatchEvent(e);
             }})()
         ";
              webView.CoreWebView2.ExecuteScriptAsync(script);
@@ -92,6 +93,8 @@ namespace Cody.UI.Controls
                         onMessage: function(callback) {
                             const listener = (event) => {
                                 callback(event.data);
+                                console.log('on msg')
+                                window.dispatchEvent(event);
                             };
                             console.log(`on-send: ${JSON.stringify(event.data)}`);
                             window.addEventListener('message', listener);
@@ -143,6 +146,7 @@ namespace Cody.UI.Controls
             string script = $@"
                 (() => {{
                     let e = new CustomEvent('message');
+                    console.log('sending custom event')
                     e.data = {message.StringEncodedMessage};
                     window.dispatchEvent(e);
                 }})()
