@@ -70,7 +70,7 @@ namespace Cody.AgentTester
                     {
                         Type = "native",
                         CspSource = "'self' https://*.sourcegraphstatic.com",
-                        WebviewBundleServingPrefix = "https://file+.sourcegraphstatic.com",
+                        WebviewBundleServingPrefix = "https://file.sourcegraphstatic.com",
                     },
                     WebviewMessages = "string-encoded",
                 },

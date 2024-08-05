@@ -57,7 +57,7 @@ namespace Cody.Core.Agent.Connector
                     {
                         Type = "native",
                         CspSource = "'self' https://*.sourcegraphstatic.com",
-                        WebviewBundleServingPrefix = "https://file+.sourcegraphstatic.com",
+                        WebviewBundleServingPrefix = "https://file.sourcegraphstatic.com",
                     },
                     WebviewMessages = "string-encoded",
                 },
