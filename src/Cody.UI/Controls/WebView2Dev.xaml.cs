@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Core;
 using System.IO;
+using System.Windows.Input;
+using Cody.Core.Agent;
 using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
@@ -19,25 +21,55 @@ namespace Cody.UI.Controls
 
         public static CoreWebView2 _webview;
 
-        private List<string> messages = new List<string>();
+        public event EventHandler<string> WebViewMessageReceived;
 
         private async void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
-            string message = e.WebMessageAsJson;
+            string message = e.TryGetWebMessageAsString();
             Console.WriteLine($"webview -> host: {message}");
 
-            // Handle initialization message
-            if (message.Contains("initialized"))
-            {
-               await SendMessagesToWebView();
-            }
-            await SendMessagesToWebView();
+
+            // Send a response back to the WebView if needed
+            await SendMessageToAgent(message);
+        }
+
+        private Task SendMessageToAgent(string message)
+        {
+            SendMessage.Execute(message);
+
+
+            return Task.CompletedTask;
+        }
+
+        private Task SendMessageToWebview(string message)
+        {
+            WebViewMessageReceived?.Invoke(this, message);
+            webView.CoreWebView2.PostWebMessageAsString(message);
+
+            // Send the message to the webview
+            webView.CoreWebView2.PostWebMessageAsJson(message);
+
+            string script = $@"
+            (() => {{
+                let e = new CustomEvent('message');
+                console.log(`on-send send msg: ${{JSON.stringify(message)}}`);
+                e.data = {message};
+                window.dispatchEvent(e);
+            }})()
+        ";
+             webView.CoreWebView2.ExecuteScriptAsync(script);
+
+            return Task.CompletedTask;
         }
 
         private string _vsCodeAPIScript = @"
             globalThis.acquireVsCodeApi = (function() {{
                 let acquired = false;
                 let state = undefined;
+
+                window.chrome.webview.addEventListener('message', event => {
+                   window.dispatchEvent(event.data);
+                });
 
                 return () => {{
                     if (acquired && !false) {
@@ -48,7 +80,7 @@ namespace Cody.UI.Controls
                         postMessage: function(message, transfer) {
                             console.assert(!transfer);
                             console.log(`do-post: ${JSON.stringify(message)}`);
-                            window.parent.postMessage(JSON.stringify(message));
+                            window.chrome.webview.postMessage(JSON.stringify(message));
                         },
                         setState: function(newState) {
                             state = newState;
@@ -57,7 +89,17 @@ namespace Cody.UI.Controls
                         },
                         getState: function() {
                             return state;
-                        }
+                        },
+                        onMessage: function(callback) {
+                            const listener = (event) => {
+                                callback(event.data);
+                                console.log('on msg')
+                                window.dispatchEvent(event);
+                            };
+                            console.log(`on-send: ${JSON.stringify(event.data)}`);
+                            window.addEventListener('message', listener);
+                            return () => window.removeEventListener('message', listener);
+                        },
                     });
                 }};
             }})();
@@ -74,20 +116,6 @@ namespace Cody.UI.Controls
             rootStyle.setProperty('--vscode-editor-font-size', '14px');
         ";
 
-        private async Task SendMessagesToWebView()
-{
-            foreach (var message in messages)
-            {
-                string script = $@"
-                    (() => {{
-                        let e = new CustomEvent('message');
-                        e.data = {message};
-                        window.dispatchEvent(e);
-                    }})()
-                ";
-                await webView.CoreWebView2.ExecuteScriptAsync(script);
-            }
-        }
         public static readonly DependencyProperty HtmlProperty =
             DependencyProperty.Register("Html", typeof(string), typeof(WebView2Dev),
                 new PropertyMetadata(null, PropertyChangedCallback));
@@ -95,13 +123,56 @@ namespace Cody.UI.Controls
         private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var html = e.NewValue as string;
-            _webview.NavigateToString(html); //  .NavigateToString(html);
+            // _webview.NavigateToString("");
+            // _webview.NavigateToString(html);
+            _webview.Navigate("file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent/webviews/index.html");
+            _webview.OpenDevToolsWindow();
         }
 
         public string Html
         {
             get => (string)GetValue(HtmlProperty);
             set => SetValue(HtmlProperty, value);
+        }
+
+        public static readonly DependencyProperty PostMessageProperty =
+            DependencyProperty.Register("PostMessage", typeof(AgentResponseEvent), typeof(WebView2Dev),
+                new PropertyMetadata(null, PostMessageCallback));
+
+        private static async void PostMessageCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var message = e.NewValue as AgentResponseEvent;
+
+            string script = $@"
+                (() => {{
+                    let e = new CustomEvent('message');
+                    console.log('sending custom event')
+                    e.data = {message.StringEncodedMessage};
+                    window.dispatchEvent(e);
+                }})()
+            ";
+            await _webview.ExecuteScriptAsync(script);
+
+            _webview.PostWebMessageAsJson(message.StringEncodedMessage);
+            _webview.PostWebMessageAsJson(message.StringEncodedMessage);
+        }
+
+        public string PostMessage
+        {
+            get => (string)GetValue(PostMessageProperty);
+            set => SetValue(PostMessageProperty, value);
+        }
+
+        public static readonly DependencyProperty SendMessageProperty =
+            DependencyProperty.Register(
+                "SendMessage",
+                typeof(ICommand),
+                typeof(WebView2Dev),
+                new UIPropertyMetadata(null));
+        public ICommand SendMessage
+        {
+            get { return (ICommand)GetValue(SendMessageProperty); }
+            set { SetValue(SendMessageProperty, value); }
         }
 
         public WebView2Dev()
@@ -141,18 +212,22 @@ namespace Cody.UI.Controls
 
                     );
                 await webView.EnsureCoreWebView2Async(env);
+                _webview = webView.CoreWebView2;
 
+                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
-                webView.CoreWebView2.WebMessageReceived += HandleWebViewMessage;
+
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
 
-                webView.CoreWebView2.OpenDevToolsWindow();
+                webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                webView.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView.CoreWebView2.Settings.AreHostObjectsAllowed = true;
+                webView.CoreWebView2.Settings.IsScriptEnabled = true;
 
 
                 _isWebView2Initialized = true;
-
-                _webview = webView.CoreWebView2;
             }
             catch (Exception ex)
             {
@@ -197,6 +272,8 @@ namespace Cody.UI.Controls
                 await InitializeAsync();
 
             webView.ExecuteScriptAsync($"alert('The current date&time is {DateTime.Now:f}')");
+
+            SendMessage.Execute("Message from WebView!");
         }
 
         private async void Go2MSCopilotButtonOnClick(object sender, RoutedEventArgs e)

@@ -1,17 +1,9 @@
 ﻿using Cody.Core.Agent;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent.Protocol;
-using Cody.Core.Inf;
-using Cody.Core.Logging;
-using Cody.Core.Settings;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using Cody.Core.Agent;
 
 namespace Cody.AgentTester
 {
@@ -33,7 +25,7 @@ namespace Cody.AgentTester
             {
                 portNumber = Convert.ToInt32(port);
             }
-            
+
             var options = new AgentConnectorOptions
             {
                 NotificationsTarget = notifier,
@@ -74,7 +66,8 @@ namespace Cody.AgentTester
                     ShowDocument = Capability.None,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
-                    Webview = new WebviewCapabilities {
+                    Webview = new WebviewCapabilities
+                    {
                         Type = "native",
                         CspSource = "'self' https://*.sourcegraphstatic.com",
                         WebviewBundleServingPrefix = "https://file+.sourcegraphstatic.com",

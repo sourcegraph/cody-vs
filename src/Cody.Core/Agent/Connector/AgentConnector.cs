@@ -54,6 +54,7 @@ namespace Cody.Core.Agent.Connector
 
             if (options.NotificationsTarget != null) jsonRpc.AddLocalRpcTarget(options.NotificationsTarget);
             agentClient = jsonRpc.Attach<IAgentClient>();
+            options.NotificationsTarget.SetAgentClient(agentClient);
 
             jsonRpc.StartListening();
             IsConnected = true;

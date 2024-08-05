@@ -50,7 +50,7 @@ namespace Cody.VisualStudio
     [ProvideToolWindow(typeof(CodyToolWindow), Style = VsDockStyle.Tabbed, Window = VsConstants.VsWindowKindSolutionExplorer)]
     public sealed class CodyPackage : AsyncPackage
     {
-        
+
         public const string PackageGuidString = "9b8925e1-803e-43d9-8f43-c4a4f35b4325";
 
         public ILog Logger;
@@ -71,7 +71,7 @@ namespace Cody.VisualStudio
             try
             {
                 Init();
-                
+
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -114,7 +114,7 @@ namespace Cody.VisualStudio
                     Logger.Error($"Cannot get {typeof(OleMenuCommandService)}");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logger?.Error("Cannot initialize menu items", ex);
             }
@@ -150,14 +150,24 @@ namespace Cody.VisualStudio
             try
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
-                
+
                 NotificationHandlers = new NotificationHandlers();
+
+                // Set the env var to 3113 when running with local agent.
+                var port = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+                int? portNumber = null;
+                if (port != null)
+                {
+                    portNumber = Convert.ToInt32(port);
+                }
+
                 var options = new AgentConnectorOptions
                 {
                     NotificationsTarget = NotificationHandlers,
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     AfterConnection = (client) => InitializeService.Initialize(client),
+                    Port = portNumber,
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
