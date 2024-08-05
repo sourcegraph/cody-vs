@@ -27,12 +27,27 @@ To get started quickly, follow these steps:
 
 ### Debugger
 
+#### Visual Studio
+
 NOTE: You must build the agent before debugging for the first time.
 
 1. Run `dotnet cake` inside the solution directory to build the agent.
 2. In your Cody project, click `Debug` > `Start Debugging` (or press `F5`) to start the debugger
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
+
+
+#### Visual Studio with Agent running in VS Code locally
+
+1. Download and install VS Code on your machine
+Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
+   1. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
+2. `cd` into the `cody` repository and run `pnpm install`
+3. Open the `cody` repository in VS Code
+4. After you have set the breakpoints, open the debug panel from selecting `View > Run`
+5. In the drop down menu next to `RUN AND DEBUG`, select `Launch Agent port 3113` to start the debugger for Agent
+6. To enable Visual Studio listening to the Agent running on Port 3113, set CODY_VS_DEV_PORT with `setx CODY_VS_DEV_PORT 3113`
+7. After the Agent is built and launched, start the debugger on the Visual Studio side following the steps above
 
 ### Running VS Integration Tests + Playwright
 

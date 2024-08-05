@@ -1,27 +1,34 @@
-﻿using Cody.Core.Agent.Protocol;
+﻿using Cody.Core.Agent.Connector;
+using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
     public class NotificationHandlers
     {
-        public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
-
-        // TODO: Start NotificationHandlers with Agent Client.
-        private static IAgentClient agentClient;
-
-        [JsonRpcMethod("NotificationReceived")]
-        public void NotificationReceived(string message)
+        public NotificationHandlers()
         {
-            System.Diagnostics.Debug.WriteLine(message, "Agent NotificationReceived");
         }
-        
+
+        public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
+        public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
+
+        public IAgentClient agentClient;
+
+        public void SetAgentClient(IAgentClient agentClient) => this.agentClient = agentClient;
+
+        public async Task SendWebviewMessage(string handle, string message)
+        {
+           await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+           {
+               Id = handle,
+               MessageStringEncoded = message
+           });
+        }
+
         [JsonRpcMethod("debug/message")]
         public void Debug(string channel, string message)
         {
@@ -35,10 +42,14 @@ namespace Cody.Core.Agent
         }
 
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
-        public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
+        public  void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            // TODO: agentClient.ResolveWebviewView("cody.chat", "visual-studio");
             System.Diagnostics.Debug.WriteLine(viewId, "Agent registerWebviewViewProvider");
+            agentClient.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio-program",
+            }).Wait();
         }
 
         [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]
@@ -63,21 +74,23 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
- 			// TODO webView.CoreWebView2.NavigateToString(html);
             System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() {Handle = handle, Html = html});
         }
 
-        [JsonRpcMethod("webview/postMessage")]
-        public void PostMessage(string handle, string stringEncodedMessage)
+        [JsonRpcMethod("webview/PostMessage")]
+        public void PostMessage(string handle, string message)
         {
-            ;
+            PostMessageStringEncoded(handle, message);
         }
 
         [JsonRpcMethod("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
-            ;
+            System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
+            // TODO send message to Webview2Dev 
+
+            OnPostMessageEvent.Invoke(this, new AgentResponseEvent() { Id = id, StringEncodedMessage = stringEncodedMessage});
         }
 
         [JsonRpcMethod("webview/didDisposeNative")]

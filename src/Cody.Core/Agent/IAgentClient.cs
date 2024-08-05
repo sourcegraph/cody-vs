@@ -25,7 +25,7 @@ namespace Cody.Core.Agent
         Task ResolveWebviewView(ResolveWebviewViewParams paramValue);
 
         [JsonRpcMethod("webview/receiveMessageStringEncoded")]
-        Task ReceiveMessageStringEncoded(string id, string messageStringEncoded);
+        Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
     }
 }
 
@@ -33,4 +33,10 @@ public class ResolveWebviewViewParams
 {
     public string ViewId { get; set; }
     public string WebviewHandle { get; set; }
+}
+
+public class ReceiveMessageStringEncodedParams
+{ 
+    public string Id { get; set; }
+    public string MessageStringEncoded { get; set; }
 }
