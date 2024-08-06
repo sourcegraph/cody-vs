@@ -22,6 +22,9 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
+using Microsoft.Win32;
+using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell.Settings;
 
 namespace Cody.VisualStudio
 {

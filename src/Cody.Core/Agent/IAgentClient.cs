@@ -28,7 +28,6 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/receiveMessageStringEncoded")]
         Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
 
-
         [JsonRpcMethod("env/openExternal")]
         Task OpenExternal(string url);
     }
@@ -41,7 +40,7 @@ public class ResolveWebviewViewParams
 }
 
 public class ReceiveMessageStringEncodedParams
-{ 
+{
     public string Id { get; set; }
     public string MessageStringEncoded { get; set; }
 }

@@ -91,6 +91,13 @@ namespace Cody.AgentTester
             await agentClient.Initialize(clientInfo);
 
             agentClient.Initialized();
+
+            // TODO: Move it to after we receive response for registerWebviewProvider
+            await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio-program",
+            });
         }
 
 

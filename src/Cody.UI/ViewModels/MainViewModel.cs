@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace Cody.UI.ViewModels
 {
-    public class MainViewModel: NotifyPropertyChangedBase
+    public class MainViewModel : NotifyPropertyChangedBase
     {
         public readonly NotificationHandlers NotificationHandlers;
 
@@ -27,14 +27,14 @@ namespace Cody.UI.ViewModels
         {
             PostMessage = new AgentResponseEvent()
             {
-                Id = e.Id, StringEncodedMessage = e.StringEncodedMessage
-
+                Id = e.Id,
+                StringEncodedMessage = e.StringEncodedMessage
             };
         }
 
         private async void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)
         {
-            NotificationHandlers.SendWebviewMessage("visual-studio", e.Messsage);
+            NotificationHandlers.SendWebviewMessage(e.Handle, e.Messsage);
         }
 
         public ICommand WebviewMessageSendCommand
@@ -60,10 +60,13 @@ namespace Cody.UI.ViewModels
             get
             {
                 return _html;
-            } 
+            }
             set
             {
-                SetProperty(ref _html, value);
+                if (SetProperty(ref _html, value))
+                {
+                    _logger.Debug($"{_html}");
+                }
             }
         }
 
@@ -77,7 +80,10 @@ namespace Cody.UI.ViewModels
             }
             set
             {
-                SetProperty(ref _postMessage, value);
+                if (SetProperty(ref _postMessage, value))
+                {
+                    _logger.Debug($"{_postMessage.StringEncodedMessage}");
+                }
             }
         }
     }

@@ -92,6 +92,13 @@ namespace Cody.Core.Agent.Connector
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
+
+                // TODO: Move this to when we receive response for "webview/registerWebviewViewProvider"
+                await client.ResolveWebviewView(new ResolveWebviewViewParams
+                {
+                    ViewId = "cody.chat",
+                    WebviewHandle = "visual-studio-cody",
+                });
             }
             else
             {

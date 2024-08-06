@@ -1,4 +1,5 @@
-﻿using Cody.Core.Agent.Protocol;
+﻿using Cody.Core.Agent.Connector;
+using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
