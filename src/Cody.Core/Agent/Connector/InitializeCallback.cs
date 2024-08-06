@@ -39,12 +39,15 @@ namespace Cody.Core.Agent.Connector
         {
             var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
 
+            // TODO: Get the solution directory path that the user is working on.
+            var solutionDirPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent",
+                WorkspaceRootUri = solutionDirPath,
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -70,7 +73,7 @@ namespace Cody.Core.Agent.Connector
                     AutocompleteAdvancedProvider = null,
                     Debug = true,
                     VerboseDebug = true,
-                    Codebase = "github.com/sourcegraph/cody",
+                    // Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
@@ -83,9 +86,9 @@ namespace Cody.Core.Agent.Connector
             if (result.Authenticated == true)
             {
                 client.Initialized();
-                
+
                 log.Info(appData);
-                               
+
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
@@ -101,6 +104,12 @@ namespace Cody.Core.Agent.Connector
             {
                 log.Warn("Authentication failed. Please check the validity of the access token.");
             }
+            // TODO: Move this into NotificationHandlers.
+            await client.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio",
+            });
         }
     }
 }

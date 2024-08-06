@@ -45,7 +45,7 @@ namespace Cody.UI.ViewModels
 
         private void WebviewSendMessage(object message)
         {
-            NotificationHandlers.SendWebviewMessage("visual-studio-cody", (string)message);
+            NotificationHandlers.SendWebviewMessage("visual-studio", (string)message);
         }
 
         private void OnSetHtmlHandler(object sender, SetHtmlEvent e)

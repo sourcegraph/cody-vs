@@ -55,6 +55,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="Services\OptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Services\ColorThemeService.cs" />
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
@@ -74,12 +77,13 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-	  <Content Include="Agent\webviews\*.*">
-		  <IncludeInVSIX>true</IncludeInVSIX>
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+    <Content Include="Agent\webviews\*.*">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Design" />

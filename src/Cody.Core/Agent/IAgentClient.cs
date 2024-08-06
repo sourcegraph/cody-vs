@@ -19,13 +19,17 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("initialized")]
         void Initialized();
 
-
+        [JsonRpcMethod("git/codebaseName")]
+        Task<string> GetGitCodebaseName(string url);
 
         [JsonRpcMethod("webview/resolveWebviewView", UseSingleObjectParameterDeserialization = true)]
         Task ResolveWebviewView(ResolveWebviewViewParams paramValue);
 
         [JsonRpcMethod("webview/receiveMessageStringEncoded")]
         Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
+
+        [JsonRpcMethod("env/openExternal")]
+        Task OpenExternal(string url);
     }
 }
 
@@ -36,7 +40,7 @@ public class ResolveWebviewViewParams
 }
 
 public class ReceiveMessageStringEncodedParams
-{ 
+{
     public string Id { get; set; }
     public string MessageStringEncoded { get; set; }
 }

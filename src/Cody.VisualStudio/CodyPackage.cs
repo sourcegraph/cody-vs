@@ -12,6 +12,7 @@ using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
 using Cody.UI.Views;
+using Cody.UI.Controls;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
 using Task = System.Threading.Tasks.Task;
@@ -47,6 +48,7 @@ namespace Cody.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(CodyPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideOptionPage(typeof(OptionsPage), "Cody", "General", 0, 0, true)]
     [ProvideToolWindow(typeof(CodyToolWindow), Style = VsDockStyle.Tabbed, Window = VsConstants.VsWindowKindSolutionExplorer)]
     public sealed class CodyPackage : AsyncPackage
     {
@@ -62,7 +64,6 @@ namespace Cody.VisualStudio
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
         public IColorThemeService ColorThemeService;
-
         public NotificationHandlers NotificationHandlers;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -70,32 +71,35 @@ namespace Cody.VisualStudio
 
             try
             {
-                Init();
+                InitializeErrorHandling();
 
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-                var loggerFactory = new LoggerFactory();
-                Logger = loggerFactory.Create();
-
-                VersionService = loggerFactory.GetVersionService();
-                VsVersionService = new VsVersionService(Logger);
-                UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
-                StatusbarService = new StatusbarService();
-                InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
-                ColorThemeService = new ColorThemeService(this);
-
-                Logger.Info($"Visual Studio version: {VsVersionService.Version}");
-
+                InitializeServices();
                 await InitOleMenu();
-                InitializeAgent();
+                await InitializeAgent();
 
             }
             catch (Exception ex)
             {
                 Logger?.Error("Cody Package initialization failed.", ex);
             }
+        }
+
+        private void InitializeServices()
+        {
+            var loggerFactory = new LoggerFactory();
+            Logger = loggerFactory.Create();
+            VersionService = loggerFactory.GetVersionService();
+            VsVersionService = new VsVersionService(Logger);
+            UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
+            StatusbarService = new StatusbarService();
+            InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
+            ColorThemeService = new ColorThemeService(this);
+
+            Logger.Info($"Visual Studio version: {VsVersionService.Version}");
         }
 
         private async Task InitOleMenu()
@@ -125,9 +129,8 @@ namespace Cody.VisualStudio
             try
             {
                 Logger.Debug("Showing Tool Window ...");
-
                 var toolWindow = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
-                if ((null == toolWindow) || (null == toolWindow.Frame))
+                if (toolWindow?.Frame == null)
                 {
                     throw new NotSupportedException("Cannot create tool window");
                 }
@@ -138,28 +141,22 @@ namespace Cody.VisualStudio
             }
         }
 
-        private void Init()
+        private void InitializeErrorHandling()
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             Application.Current.DispatcherUnhandledException += CurrentOnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
         }
 
-        private void InitializeAgent()
+        private async Task InitializeAgent()
         {
             try
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
                 NotificationHandlers = new NotificationHandlers();
-
                 // Set the env var to 3113 when running with local agent.
-                var port = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
-                int? portNumber = null;
-                if (port != null)
-                {
-                    portNumber = Convert.ToInt32(port);
-                }
+                var portNumber = int.TryParse(Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT"), out int port) ? port : (int?)null;
 
                 var options = new AgentConnectorOptions
                 {
@@ -171,10 +168,15 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
-                Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
-                {
-                    foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
-                }, TaskContinuationOptions.OnlyOnFaulted);
+
+                await WebView2Dev.InitializeAsync();
+                NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
+
+                _ = Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
+                               {
+                                   foreach (var ex in t.Exception.Flatten().InnerExceptions)
+                                       Logger.Error("Agent connecting error", ex);
+                               }, TaskContinuationOptions.OnlyOnFaulted);
             }
             catch (Exception ex)
             {
