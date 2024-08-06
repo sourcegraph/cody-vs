@@ -46,7 +46,7 @@ namespace Cody.UI.Controls
                 string script = $@"
                     (() => {{
                         const event = new CustomEvent('message');
-                        console.log('PostMessageCallback', {message});
+                        console.log('PostWebMessageAsJson', {message});
                         event.data = {message};
                         window.dispatchEvent(event);
                     }})()

@@ -22,7 +22,6 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
-using Microsoft.Web.WebView2.Core;
 
 namespace Cody.VisualStudio
 {
@@ -62,7 +61,6 @@ namespace Cody.VisualStudio
         public IStatusbarService StatusbarService;
 
         public NotificationHandlers NotificationHandlers;
-        public CoreWebView2 Webview;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -169,7 +167,7 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
-                Webview = await WebView2Dev.InitializeAsync();
+                await WebView2Dev.InitializeAsync();
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
                 Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
                 {
