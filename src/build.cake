@@ -1,4 +1,4 @@
-#addin nuget:?package=Cake.Git&version=4.0.0
+﻿#addin nuget:?package=Cake.Git&version=4.0.0
 #addin nuget:?package=Cake.Pnpm&version=1.0.0
 #tool nuget:?package=vswhere&version=3.1.7
 
@@ -41,6 +41,7 @@ Task("BuildCodyAgent")
 	var isDevMode = EnvironmentVariable("CODY_VS_DEV_MODE") == "true";
 	if (isDevMode && DirectoryExists(codyDevDir))
 	{
+		Information($"--> Running in DevMode using:'{codyDir}'");
 		codyDir = codyDevDir;
 	}
 
@@ -50,29 +51,65 @@ Task("BuildCodyAgent")
 
     if(!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
 	{
+		Information($"--> Cloning repository:'{codyRepo}'");
 		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = branchName });
 	}
 	
 	if (!isDevMode)
 	{	
+		Information($"--> Checkout '{branchName}' ...");
 		GitCheckout(codyDir, branchName);
+		
+
 		//GitCheckout(codyDir, codyCommit);
 		
+		Information($"--> git pull ...");
 		GitPull(codyDir, "cake", "cake@cake.com");
-		
-		CleanDirectory(codyAgentDistDir);
 	}
 	
+	Information($"--> Cleaning '{codyAgentDistDir}' ...");
+	CleanDirectory(codyAgentDistDir);
+
 	Context.Environment.WorkingDirectory = codyAgentDir;
 
+	Information($"--> pnpm install ...");
 	PnpmInstall();
-	PnpmRun("build:agent");
-	PnpmRun("build:webviews");
+	
+	Information($"--> pnpm build ...");
+	PnpmRun("build");
+	
+	//PnpmRun("build:agent");
+	//PnpmRun("build:webviews");
 
 	Context.Environment.WorkingDirectory = solutionDir;
 	
+	var deleteSettings = new DeleteDirectorySettings
+            {
+                Recursive = true,
+                Force = true
+            };
+	Information($"--> Cleaning '{agentDir}' ...");
+	CleanDirectory(agentDir);
+
+	Information($"--> Copying the agent to '{agentDir}'");
 	CreateDirectory(agentDir);
 	CopyDirectory(codyAgentDistDir, agentDir);
+
+	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("vscode/webviews/$PWD/dist/webviews"));
+	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentDir}' ...");
+	CopyDirectory(codyWebviewsFolder, $"{agentDir}/webviews");
+		
+	
+	// removing pnpm build:root artefacts (/src and /scripts folders)
+
+	var srcFolder = @$"{agentDir}/src";
+	var scriptsFolder = @$"{agentDir}/scripts";
+	if(DirectoryExists(srcFolder))
+		DeleteDirectory(srcFolder, deleteSettings);
+
+	if(DirectoryExists(scriptsFolder))
+		DeleteDirectory(scriptsFolder, deleteSettings);
+
 });
 
 Task("DownloadNode")
