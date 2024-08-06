@@ -16,31 +16,6 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal">
-
-                <Button Name="msCopilotButton"
-                        Content="Copilot Chat"
-                        Click="Go2MSCopilotButtonOnClick"
-                        Margin="5"
-                        Padding="10"
-                />
-
-                <Button Name="devToolsButton"
-                        Content="Dev Tools"
-                        Click="DevToolsOnClick"
-                        Margin="5"
-                        Padding="10"
-                />
-
-                <Button Name="callJsButton"
-                        Content="Call Javascript"
-                        Click="CallJsButtonOnClick"
-                        Margin="5"
-                        Padding="10"
-                />
-
-            </StackPanel>
-
             <wpf:WebView2 Name="webView" Grid.Row="1"
               
             />

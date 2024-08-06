@@ -21,32 +21,41 @@ namespace Cody.UI.Controls
         private bool _isWebView2Initialized;
 
         public static CoreWebView2 _webview;
+        public static string _html;
+
+        public static CoreWebView2 GetWebview => _webview;
 
         public event EventHandler<string> WebViewMessageReceived;
 
+        // Receive message from webview and send it to the agent.
         private void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string message = e.TryGetWebMessageAsString();
+            System.Diagnostics.Debug.WriteLine(message, "Agent HandleWebViewMessage");
 
             SendMessage.Execute(message);
         }
 
-        private Task SendMessageToWebview(string message)
+        // Send message to webview
+        public static async Task PostWebMessageAsJson(string message)
         {
-            string script = $@"
-                (() => {{
+            await Application.Current.Dispatcher.InvokeAsync(async () =>
+            {
+                System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson");
+
+                string script = $@"
+                    (() => {{
                         const event = new CustomEvent('message');
-                        console.log('SendMessageToWebview', {message});
+                        console.log('PostMessageCallback', {message});
                         event.data = {message};
                         window.dispatchEvent(event);
-                }})()
-            ";
-             webView.CoreWebView2.ExecuteScriptAsync(script);
+                    }})()
+                ";
 
-            // Send the message to the webview
-            webView.CoreWebView2.PostWebMessageAsJson(message);
+                _webview.PostWebMessageAsJson(message);
 
-            return Task.CompletedTask;
+                await _webview.ExecuteScriptAsync(script);
+            });
         }
 
         string _vsCodeAPIScript = @"
@@ -81,7 +90,7 @@ namespace Cody.UI.Controls
         ";
 
         // TODO: Get color theme from Visual Studio then send it to the webview.
-        private static readonly string _cspScript = $@"
+        string _cspScript = $@"
             document.documentElement.dataset.ide = 'VisualStudio';
 
             const rootStyle = document.documentElement.style;
@@ -95,13 +104,14 @@ namespace Cody.UI.Controls
             DependencyProperty.Register("Html", typeof(string), typeof(WebView2Dev),
                 new PropertyMetadata(null, PropertyChangedCallback));
 
-        private static async void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void PropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var html = e.NewValue as string;
+            _html = html;
+            _webview?.NavigateToString(html);
 
-            await _webview.ExecuteScriptWithResultAsync(_cspScript);
-
-            _webview.NavigateToString(html);
+            var agentIndexFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent", "webviews", "index.html");
+            _webview.Navigate(agentIndexFile);
         }
 
         public string Html
@@ -117,6 +127,8 @@ namespace Cody.UI.Controls
         private static async void PostMessageCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var message = e.NewValue as AgentResponseEvent;
+
+            System.Diagnostics.Debug.WriteLine(message.StringEncodedMessage, "Agent PostMessageCallback");
 
             string script = $@"
                 (() => {{
@@ -153,29 +165,35 @@ namespace Cody.UI.Controls
         public WebView2Dev()
         {
             InitializeComponent();
-
-            InitializeAsync();
+            InitializeWebView();
         }
 
         private void InitWebView2(object sender, RoutedEventArgs e)
         {
-            InitializeAsync();
+            InitializeWebView();
         }
 
-        private async Task InitializeAsync()
+        public static async Task<CoreWebView2> InitializeAsync()
+        {
+            var webView2Dev = new WebView2Dev();
+            await webView2Dev.InitializeWebView();
+            return _webview;
+        }
+
+        private async Task<CoreWebView2> InitializeWebView()
         {
             try
             {
-                if (_isWebView2Initialized)
-                    return;
+                if (_webview != null)
+                    return _webview;
 
                 webView.CoreWebView2InitializationCompleted += WebViewOnCoreWebView2InitializationCompleted;
-                
+
                 var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "Cody");
 
                 var env = await CoreWebView2Environment.CreateAsync(null, appData,
-                    new CoreWebView2EnvironmentOptions(null, null, null, false, 
+                    new CoreWebView2EnvironmentOptions(null, null, null, false,
                         new List<CoreWebView2CustomSchemeRegistration> { new CoreWebView2CustomSchemeRegistration("") }) // https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/winrt/microsoft_web_webview2_core/corewebview2customschemeregistration?view=webview2-winrt-1.0.1369-prerelease
                     {
 #if DEBUG
@@ -188,13 +206,8 @@ namespace Cody.UI.Controls
                     );
                 await webView.EnsureCoreWebView2Async(env);
 
-                webView.CoreWebView2.NavigateToString("");
-
-                _webview = webView.CoreWebView2;
-
-                webView.CoreWebView2.OpenDevToolsWindow();
-
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
+                webView.CoreWebView2.NavigateToString("");
 
                 webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
                 webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted;
@@ -207,12 +220,16 @@ namespace Cody.UI.Controls
                 webView.CoreWebView2.Settings.AreHostObjectsAllowed = true;
                 webView.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = true;
+                webView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+                webView.CoreWebView2.Settings.IsGeneralAutofillEnabled = true;
+                _webview = webView.CoreWebView2;
 
                 webView.CoreWebView2.OpenDevToolsWindow();
 
 
 
                 var AppOrigin = "https://file.sourcegraphstatic.com";
+
                 webView.CoreWebView2.AddWebResourceRequestedFilter($"{AppOrigin}*", CoreWebView2WebResourceContext.All);
 
                 webView.CoreWebView2.WebResourceRequested += (s, eventArgs) =>
@@ -244,72 +261,29 @@ namespace Cody.UI.Controls
 
 
                 _isWebView2Initialized = true;
+                webView.CoreWebView2.NavigateToString(_html);
+                return webView.CoreWebView2;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                return webView.CoreWebView2;
             }
         }
 
         private async void CoreWebView2OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
-            try
-            {
-                string script = @"
-                                console.log(globalThis, 'globalThis'); // Should print the global object
-                                globalThis.myGlobalVar = 'Hello from globalThis!';
-                 ";
-
-                await webView.CoreWebView2.ExecuteScriptAsync(script);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
+            await webView.CoreWebView2.ExecuteScriptWithResultAsync(_cspScript);
         }
 
         private async void CoreWebView2OnDOMContentLoaded(object sender, CoreWebView2DOMContentLoadedEventArgs e)
         {
-            ;
+            await webView.CoreWebView2.ExecuteScriptWithResultAsync(_cspScript);
         }
 
         private void WebViewOnCoreWebView2InitializationCompleted(object sender,
             CoreWebView2InitializationCompletedEventArgs e)
         {
             Debug.WriteLine(e.IsSuccess ? "WebView2 initialized." : "WebView2 initialized failed!");
-        }
-
-
-
-        private async void CallJsButtonOnClick(object sender, RoutedEventArgs e)
-        {
-            if (!_isWebView2Initialized)
-                await InitializeAsync();
-
-            webView.ExecuteScriptAsync($"alert('The current date&time is {DateTime.Now:f}')");
-
-            SendMessage.Execute("Message from WebView!");
-        }
-
-        private async void Go2MSCopilotButtonOnClick(object sender, RoutedEventArgs e)
-        {
-            if (!_isWebView2Initialized)
-                await InitializeAsync();
-
-           webView.CoreWebView2.NavigateToString("");
-            webView.CoreWebView2.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
-                webView.CoreWebView2.NavigationCompleted += CoreWebView2OnNavigationCompleted; //CoreWebView2OnNavigationCompleted;
-
-                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_vsCodeAPIScript);
-            await webView.CoreWebView2.ExecuteScriptAsync("console.log('[VSIX]' + document.location);");
-        }
-
-        private async void DevToolsOnClick(object sender, RoutedEventArgs e)
-        {
-            if (!_isWebView2Initialized)
-                await InitializeAsync();
-
-            webView.CoreWebView2.OpenDevToolsWindow();
         }
     }
 }

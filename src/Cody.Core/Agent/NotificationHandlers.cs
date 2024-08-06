@@ -1,5 +1,4 @@
-﻿using Cody.Core.Agent.Connector;
-using Cody.Core.Agent.Protocol;
+﻿using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
@@ -12,6 +11,8 @@ namespace Cody.Core.Agent
         public NotificationHandlers()
         {
         }
+        public delegate Task PostWebMessageAsJsonDelegate(string message);
+        public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
@@ -24,7 +25,7 @@ namespace Cody.Core.Agent
         {
            await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
            {
-               Id = handle,
+               Id = "visual-studio",
                MessageStringEncoded = message
            });
         }
@@ -42,14 +43,9 @@ namespace Cody.Core.Agent
         }
 
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
-        public  void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
+        public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
             System.Diagnostics.Debug.WriteLine(viewId, "Agent registerWebviewViewProvider");
-            agentClient.ResolveWebviewView(new ResolveWebviewViewParams
-            {
-                ViewId = "cody.chat",
-                WebviewHandle = "visual-studio-program",
-            }).Wait();
         }
 
         [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]
@@ -87,10 +83,8 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
+            PostWebMessageAsJson?.Invoke(stringEncodedMessage);
             System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
-            // TODO send message to Webview2Dev 
-
-            OnPostMessageEvent.Invoke(this, new AgentResponseEvent() { Id = id, StringEncodedMessage = stringEncodedMessage});
         }
 
         [JsonRpcMethod("webview/didDisposeNative")]

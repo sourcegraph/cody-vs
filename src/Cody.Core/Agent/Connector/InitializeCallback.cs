@@ -38,13 +38,15 @@ namespace Cody.Core.Agent.Connector
         public async Task Initialize(IAgentClient client)
         {
             var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
+            // Get the solution directory path that the user is working on
+            var solutionDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = "file:///C://Users/BeatrixW/Dev/vs/src/Cody.VisualStudio/Agent",
+                WorkspaceRootUri = solutionDirectoryPath,
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -70,7 +72,7 @@ namespace Cody.Core.Agent.Connector
                     AutocompleteAdvancedProvider = null,
                     Debug = true,
                     VerboseDebug = true,
-                    Codebase = "github.com/sourcegraph/cody",
+                    // Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
@@ -89,18 +91,17 @@ namespace Cody.Core.Agent.Connector
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
-
-                // TODO: Move this to when we receive response for "webview/registerWebviewViewProvider"
-                await client.ResolveWebviewView(new ResolveWebviewViewParams
-                {
-                    ViewId = "cody.chat",
-                    WebviewHandle = "visual-studio-cody",
-                });
             }
             else
             {
                 log.Warn("Authentication failed. Please check the validity of the access token.");
             }
+
+            await client.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio",
+            });
         }
     }
 }

@@ -12,6 +12,7 @@ using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
 using Cody.UI.Views;
+using Cody.UI.Controls;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
 using Task = System.Threading.Tasks.Task;
@@ -21,6 +22,7 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
+using Microsoft.Web.WebView2.Core;
 
 namespace Cody.VisualStudio
 {
@@ -60,6 +62,7 @@ namespace Cody.VisualStudio
         public IStatusbarService StatusbarService;
 
         public NotificationHandlers NotificationHandlers;
+        public CoreWebView2 Webview;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -85,7 +88,7 @@ namespace Cody.VisualStudio
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
                 await InitOleMenu();
-                InitializeAgent();
+                await InitializeAgent();
 
             }
             catch (Exception ex)
@@ -141,14 +144,13 @@ namespace Cody.VisualStudio
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
         }
 
-        private void InitializeAgent()
+        private async Task InitializeAgent()
         {
             try
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
                 NotificationHandlers = new NotificationHandlers();
-
                 // Set the env var to 3113 when running with local agent.
                 var port = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
                 int? portNumber = null;
@@ -167,6 +169,8 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
+                Webview = await WebView2Dev.InitializeAsync();
+                NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
                 Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
                 {
                     foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
