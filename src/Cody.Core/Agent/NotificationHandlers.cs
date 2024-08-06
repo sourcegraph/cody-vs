@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Linq;
 using StreamJsonRpc;
 using System;
+using EnvDTE;
+using EnvDTE80;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -21,13 +23,40 @@ namespace Cody.Core.Agent
 
         public void SetAgentClient(IAgentClient agentClient) => this.agentClient = agentClient;
 
+        // Send a message to the host from webview.
         public async Task SendWebviewMessage(string handle, string message)
         {
-           await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
-           {
-               Id = "visual-studio",
-               MessageStringEncoded = message
-           });
+            // Turn message into a JSON object
+            JObject json = JObject.Parse(message);
+
+            var command = json["command"].ToString();
+            if (command.Equals("links"))
+            {
+                // if the is links, open the link in the default browser
+                string link = json["value"].ToString();
+                System.Diagnostics.Process.Start(link);
+                return;
+            }
+            else if (command.Equals("command"))
+            {
+                string id = json["id"].ToString();
+                if (id.Equals("cody.status-bar.interacted"))
+                {
+                    DTE2 dte = (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject("VisualStudio.DTE");
+                    dte.ExecuteCommand("Tools.Options", "Cody.General");
+                    return;
+                }
+                // cody.auth.signin, cody.auth.signout, cody.auth.account
+                // await agentClient.SignOut();
+            }
+
+                await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+                {
+                    Id = handle,
+                    MessageStringEncoded = message
+                });
+            
+
         }
 
         [JsonRpcMethod("debug/message")]

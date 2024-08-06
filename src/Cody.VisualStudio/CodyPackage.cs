@@ -45,6 +45,7 @@ namespace Cody.VisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(CodyPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideOptionPage(typeof(OptionsPage), "Cody", "General", 0, 0, true)]
     [ProvideToolWindow(typeof(CodyToolWindow), Style = VsDockStyle.Tabbed, Window = VsConstants.VsWindowKindSolutionExplorer)]
     public sealed class CodyPackage : AsyncPackage
     {
@@ -167,8 +168,10 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
+
                 await WebView2Dev.InitializeAsync();
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
+
                 Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
                 {
                     foreach (var ex in t.Exception.Flatten().InnerExceptions) Logger.Error("Agent connecting error", ex);
@@ -235,6 +238,17 @@ namespace Cody.VisualStudio
             {
                 // catching everything because if not VS will freeze/crash on the exception
             }
+        }
+
+        public string GetTokenKey()
+        {
+            var package = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(CodyPackage)) as CodyPackage;
+            if (package != null)
+            {
+                var optionsPage = package.GetDialogPage(typeof(OptionsPage)) as OptionsPage;
+                return optionsPage.TokenKey;
+            }
+            return string.Empty;
         }
     }
 }
