@@ -55,6 +55,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="Services\OptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Services\ColorThemeService.cs" />
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
@@ -83,6 +87,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>

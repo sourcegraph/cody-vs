@@ -59,6 +59,7 @@
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\WebviewController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\WebView2Dev.xaml">
