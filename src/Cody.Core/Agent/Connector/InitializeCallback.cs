@@ -37,20 +37,32 @@ namespace Cody.Core.Agent.Connector
 
         public async Task Initialize(IAgentClient client)
         {
+            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
+
+            // TODO: Get the solution directory path that the user is working on.
+            var solutionDirPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                //WorkspaceRootUri = new Uri(Path.GetDirectoryName(VS.Solutions.GetCurrentSolution().FullPath)).AbsoluteUri,
+                WorkspaceRootUri = solutionDirPath,
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
-                    EditWorkspace = Capability.None,
+                    EditWorkspace = Capability.Enabled,
                     CodeLenses = Capability.None,
-                    ShowDocument = Capability.None,
+                    ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
+                    Webview = new WebviewCapabilities
+                    {
+                        Type = "native",
+                        CspSource = "'self' https://*.sourcegraphstatic.com",
+                        WebviewBundleServingPrefix = "https://file.sourcegraphstatic.com",
+                    },
+                    WebviewMessages = "string-encoded",
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {
@@ -59,28 +71,45 @@ namespace Cody.Core.Agent.Connector
                     Proxy = null,
                     AccessToken = userSettingsService.AccessToken,
                     AutocompleteAdvancedProvider = null,
-                    Debug = false,
-                    VerboseDebug = false,
-                    Codebase = null,
+                    Debug = true,
+                    VerboseDebug = true,
+                    // Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
+
+
+            log.Info(clientInfo.WorkspaceRootUri);
 
             var result = await client.Initialize(clientInfo);
 
             if (result.Authenticated == true)
             {
                 client.Initialized();
-                log.Info("Agent initialized");
+
+                log.Info(appData);
 
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
+
+                // TODO: Move this to when we receive response for "webview/registerWebviewViewProvider"
+                await client.ResolveWebviewView(new ResolveWebviewViewParams
+                {
+                    ViewId = "cody.chat",
+                    WebviewHandle = "visual-studio-cody",
+                });
             }
             else
             {
                 log.Warn("Authentication failed. Please check the validity of the access token.");
             }
+            // TODO: Move this into NotificationHandlers.
+            await client.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio",
+            });
         }
     }
 }

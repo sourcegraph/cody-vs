@@ -1,15 +1,14 @@
-#addin nuget:?package=Cake.Git&version=4.0.0
-#addin nuget:?package=Cake.Pnpm&version=1.0.0
-#tool nuget:?package=vswhere&version=3.1.7
+﻿# addin nuget:?package=Cake.Git&version=4.0.0
+# addin nuget:?package=Cake.Pnpm&version=1.0.0
+# tool nuget:?package=vswhere&version=3.1.7
 
 var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");
 
 
 var agentDir = Directory("./Cody.VisualStudio/Agent");
+var codyDevDir = Directory("../../cody");
 var codyDir = Directory("../cody-dist");
-var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
-var codyAgentDistDir = codyAgentDir + Directory("dist");
 var nodeBinariesDir = Directory("../node-binaries");
 var nodeExeFile = nodeBinariesDir + File("node-win-x64.exe");
 var nodeArmExeFile = nodeBinariesDir + File("node-win-arm64.exe");
@@ -25,7 +24,7 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "aa6e4fe6f24bede84f304705eeaf68ba2ef3546f";
+var codyCommit = "c41fec5aa3d4270e1a994b7bb17bfaffa4696997";
 
 var marketplaceToken = "<HIDDEN>";
 
@@ -34,62 +33,119 @@ var marketplaceToken = "<HIDDEN>";
 //////////////////////////////////////////////////////////////////////
 
 Task("BuildCodyAgent")
-    .Does(() =>
+	.Does(() =>
 {
-    if(!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
+
+	// Check for the env var to see if we should use the local cody directory.
+	// This is used to build the agent from the local cody directory instead of cloning from github.
+	var isDevMode = EnvironmentVariable("CODY_VS_DEV_PORT") == "3113";
+	if (isDevMode && DirectoryExists(codyDevDir))
 	{
-		GitClone(codyRepo, codyDir, new GitCloneSettings{ BranchName = "main" });
+		Information($"--> Running in DevMode using:'{codyDir}'");
+		codyDir = codyDevDir;
 	}
-	
-	GitCheckout(codyDir, "main");
-	GitPull(codyDir, "cake", "cake@cake.com");
-	
-	GitCheckout(codyDir, codyCommit);
-	
+
+	var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
+	var codyAgentDistDir = codyAgentDir + Directory("dist");
+	var branchName = "dpc/web-content";
+
+	if (!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
+	{
+		Information($"--> Cloning repository:'{codyRepo}'");
+		GitClone(codyRepo, codyDir, new GitCloneSettings { BranchName = branchName });
+	}
+
+	if (!isDevMode)
+	{
+		Information($"--> Checkout '{branchName}' ...");
+		GitCheckout(codyDir, branchName);
+
+
+		//GitCheckout(codyDir, codyCommit);
+
+		Information($"--> git pull ...");
+		GitPull(codyDir, "cake", "cake@cake.com");
+	}
+
+	Information($"--> Cleaning '{codyAgentDistDir}' ...");
 	CleanDirectory(codyAgentDistDir);
-	
+
 	Context.Environment.WorkingDirectory = codyAgentDir;
+
+	Information($"--> pnpm install ...");
 	PnpmInstall();
-	PnpmRun("build:agent");
+
+	Information($"--> pnpm build ...");
+	PnpmRun("build");
+
+	//PnpmRun("build:agent");
+	//PnpmRun("build:webviews");
+
 	Context.Environment.WorkingDirectory = solutionDir;
-	
+
+	var deleteSettings = new DeleteDirectorySettings
+	{
+		Recursive = true,
+		Force = true
+	};
+	Information($"--> Cleaning '{agentDir}' ...");
+	CleanDirectory(agentDir);
+
+	Information($"--> Copying the agent to '{agentDir}'");
 	CreateDirectory(agentDir);
-	CopyFiles($"{codyAgentDistDir}/*.*", agentDir);
+	CopyDirectory(codyAgentDistDir, agentDir);
+
+	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("vscode/webviews/$PWD/dist/webviews"));
+	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentDir}' ...");
+	CopyDirectory(codyWebviewsFolder, $"{agentDir}/webviews");
+
+
+	// removing pnpm build:root artefacts (/src and /scripts folders)
+
+	var srcFolder = @$"{agentDir}/src";
+	var scriptsFolder = @$"{agentDir}/scripts";
+	if (DirectoryExists(srcFolder))
+		DeleteDirectory(srcFolder, deleteSettings);
+
+	if (DirectoryExists(scriptsFolder))
+		DeleteDirectory(scriptsFolder, deleteSettings);
+
 });
 
 Task("DownloadNode")
-    .Does(() =>
+	.Does(() =>
 {
-	if(!FileExists(nodeExeFile))
+	if (!FileExists(nodeExeFile))
 	{
 		CreateDirectory(nodeBinariesDir);
 		DownloadFile(nodeBinaryUrl, nodeExeFile);
 	}
-	
-	if(!FileExists(nodeArmExeFile))
+
+	if (!FileExists(nodeArmExeFile))
 	{
 		CreateDirectory(nodeBinariesDir);
 		DownloadFile(nodeArmBinaryUrl, nodeArmExeFile);
 	}
-	
+
 	CopyFileToDirectory(nodeExeFile, agentDir);
 	CopyFileToDirectory(nodeArmExeFile, agentDir);
 });
 
 Task("Build")
-    .IsDependentOn("BuildCodyAgent")
+	.IsDependentOn("BuildCodyAgent")
 	.IsDependentOn("DownloadNode")
-    .Does(() =>
+	.Does(() =>
 {
-    MSBuild("./Cody.sln", new MSBuildSettings { 
+	MSBuild("./Cody.sln", new MSBuildSettings
+	{
 		Configuration = configuration,
 		PlatformTarget = PlatformTarget.MSIL
 	});
 });
 
 Task("Publish")
-    //.IsDependentOn("Build")
-    .Does(() =>
+	//.IsDependentOn("Build")
+	.Does(() =>
 {
 	var args = new ProcessSettings().WithArguments(x => x
 					.Append("publish")
@@ -97,27 +153,27 @@ Task("Publish")
 					.AppendSwitchQuoted("-publishManifest", publishManifestFile)
 					.AppendSwitchQuoted("-personalAccessToken", marketplaceToken)
 				);
-    
+
 	var returnCode = StartProcess(vsixPublisherFile, args);
-	if(returnCode != 0) throw new Exception("Publishing error");
-	
-	
+	if (returnCode != 0) throw new Exception("Publishing error");
+
+
 	//StartProcess(vsixPublisherFile, $"publish -payload \"{buildExtensionFile}\" -publishManifest \"{publishManifestFile}\" -personalAccessToken \"{marketplaceToken}\"");
-    
+
 });
 
 Task("Clean")
-    //.WithCriteria(c => HasArgument("rebuild"))
-    .Does(() =>
+	//.WithCriteria(c => HasArgument("rebuild"))
+	.Does(() =>
 {
-    //todo
+	//todo
 });
 
 Task("Test")
-    .IsDependentOn("Build")
-    .Does(() =>
+	.IsDependentOn("Build")
+	.Does(() =>
 {
-    //todo
+	//todo
 });
 
 //////////////////////////////////////////////////////////////////////

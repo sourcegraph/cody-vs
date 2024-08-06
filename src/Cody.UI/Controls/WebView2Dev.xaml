@@ -16,52 +16,9 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal">
-
-                <Button Name="msCopilotButton"
-                        Content="Copilot Chat"
-                        Click="Go2MSCopilotButtonOnClick"
-                        Margin="5"
-                        Padding="10"
-                />
-
-                <Button Name="devToolsButton"
-                        Content="Dev Tools"
-                        Click="DevToolsOnClick"
-                        Margin="5"
-                        Padding="10"
-                />
-
-                <Button Name="callJsButton"
-                        Content="Call Javascript"
-                        Click="CallJsButtonOnClick"
-                        Margin="5"
-                        Padding="10"
-                />
-
-            </StackPanel>
-
             <wpf:WebView2 Name="webView" Grid.Row="1"
               
             />
-            <StackPanel Grid.Row="1"
-                        VerticalAlignment="Center" HorizontalAlignment="Center" 
-                        Background="Green"
-            >
-                <TextBlock 
-                    Margin="20"
-                    Text="WPF Overlay Control" 
-                    TextAlignment="Center"
-                />
-
-                <Button Name="initWebView2"
-                        Content="Init WebView2 (Click Me!)"
-                        Click="InitWebView2"
-                        Margin="10"
-                        Padding="10"
-                />
-
-            </StackPanel>
         </Grid>
 
     </Grid>
