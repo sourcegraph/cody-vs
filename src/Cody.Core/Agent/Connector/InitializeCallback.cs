@@ -5,11 +5,9 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using EnvDTE;
 
 namespace Cody.Core.Agent.Connector
 {
@@ -37,20 +35,30 @@ namespace Cody.Core.Agent.Connector
 
         public async Task Initialize(IAgentClient client)
         {
+            DTE dte = (DTE)System.Runtime.InteropServices.Marshal.GetActiveObject("VisualStudio.DTE");
+            string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
+
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                //WorkspaceRootUri = new Uri(Path.GetDirectoryName(VS.Solutions.GetCurrentSolution().FullPath)).AbsoluteUri,
+                WorkspaceRootUri = new Uri(solutionDir).AbsoluteUri,
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
-                    EditWorkspace = Capability.None,
+                    EditWorkspace = Capability.Enabled,
                     CodeLenses = Capability.None,
-                    ShowDocument = Capability.None,
+                    ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
+                    Webview = new WebviewCapabilities
+                    {
+                        Type = "native",
+                        CspSource = "'self' https://*.sourcegraphstatic.com",
+                        WebviewBundleServingPrefix = "https://file.sourcegraphstatic.com",
+                    },
+                    WebviewMessages = "string-encoded",
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {
@@ -59,9 +67,9 @@ namespace Cody.Core.Agent.Connector
                     Proxy = null,
                     AccessToken = userSettingsService.AccessToken,
                     AutocompleteAdvancedProvider = null,
-                    Debug = false,
-                    VerboseDebug = false,
-                    Codebase = null,
+                    Debug = true,
+                    VerboseDebug = true,
+                    // Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
@@ -71,7 +79,6 @@ namespace Cody.Core.Agent.Connector
             if (result.Authenticated == true)
             {
                 client.Initialized();
-                log.Info("Agent initialized");
 
                 var subscription = await client.GetCurrentUserCodySubscription();
 
@@ -81,6 +88,13 @@ namespace Cody.Core.Agent.Connector
             {
                 log.Warn("Authentication failed. Please check the validity of the access token.");
             }
+
+            // TODO: Move this into NotificationHandlers.
+            await client.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                ViewId = "cody.chat",
+                WebviewHandle = "visual-studio",
+            });
         }
     }
 }

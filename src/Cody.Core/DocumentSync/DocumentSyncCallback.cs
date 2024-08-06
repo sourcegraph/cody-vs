@@ -32,7 +32,7 @@ namespace Cody.Core.DocumentSync
             logger.Debug($"Sending didChange() for '{fullPath}' changes: {string.Join("|", changes.Select(x => x.Text))}");
 
             Range vRange = null;
-            if(visibleRange != null)
+            if (visibleRange != null)
             {
                 vRange = new Range
                 {
@@ -48,7 +48,7 @@ namespace Cody.Core.DocumentSync
                     }
                 };
             }
-            
+
             var docState = new ProtocolTextDocument
             {
                 Uri = ToUri(fullPath),
@@ -105,7 +105,7 @@ namespace Cody.Core.DocumentSync
         {
             logger.Debug($"Sending DidFocus() for '{fullPath}'");
             agentClientFactory.CreateAgentClient().DidFocus(ToUri(fullPath));
-            
+
         }
 
         public void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection)
@@ -113,7 +113,7 @@ namespace Cody.Core.DocumentSync
             logger.Debug($"Sending DidOpen() for '{fullPath}'");
 
             Range vRange = null;
-            if(visibleRange != null)
+            if (visibleRange != null)
             {
                 vRange = new Range
                 {

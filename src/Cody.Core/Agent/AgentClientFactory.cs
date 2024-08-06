@@ -1,9 +1,4 @@
 ﻿using Cody.Core.Agent.Connector;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
@@ -18,7 +13,7 @@ namespace Cody.Core.Agent
 
         public IAgentClient CreateAgentClient()
         {
-            return connector.CreateClient();
+            return connector.CreateClient().Result;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cody.Core.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,17 +10,20 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent.Connector
 {
-    public class AgentProcess : IDisposable
+    public class AgentProcess : IAgentProcess
     {
-        private Process process = new Process();
+        private readonly Process process = new Process();
         private string agentDirectory;
+        private static readonly string workingDirectory = "../../../../../cody/agent/dist";
         private bool debugMode;
+        private ILog logger;
         private Action<int> onExit;
 
-        private AgentProcess(string agentDirectory, bool debugMode, Action<int> onExit)
+        private AgentProcess(string agentDirectory, bool debugMode, ILog logger, Action<int> onExit)
         {
             this.agentDirectory = agentDirectory;
             this.debugMode = debugMode;
+            this.logger = logger;
             this.onExit = onExit;
         }
 
@@ -27,12 +31,13 @@ namespace Cody.Core.Agent.Connector
 
         public Stream ReceivingStream => process.StandardOutput.BaseStream;
 
-        public static AgentProcess Start(string agentDirectory, bool debugMode, Action<int> onExit)
+        public static AgentProcess Start(string agentDirectory, bool debugMode, ILog logger, Action<int> onExit)
         {
-            if (!Directory.Exists(agentDirectory))
-                throw new ArgumentException("Directory does not exist");
 
-            var agentProcess = new AgentProcess(agentDirectory, debugMode, onExit);
+            if (!Directory.Exists(agentDirectory))
+                throw new ArgumentException("Directory does not exist", nameof(agentDirectory));
+
+            var agentProcess = new AgentProcess(agentDirectory, debugMode, logger, onExit);
             agentProcess.StartInternal();
 
             return agentProcess;
@@ -46,6 +51,11 @@ namespace Cody.Core.Agent.Connector
             if (!File.Exists(path))
                 throw new FileNotFoundException("Agent file not found", path);
 
+            var port = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+
+            if (port != null && Directory.Exists(workingDirectory))
+                agentDirectory = workingDirectory;
+
             process.StartInfo.FileName = path;
             process.StartInfo.Arguments = GetAgentArguments(debugMode);
             process.StartInfo.WorkingDirectory = agentDirectory;
@@ -56,8 +66,15 @@ namespace Cody.Core.Agent.Connector
             process.StartInfo.CreateNoWindow = true;
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
+            process.ErrorDataReceived += OnErrorDataReceived;
 
             process.Start();
+            process.BeginErrorReadLine();
+        }
+
+        private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            logger.Error(e.Data, "Agent errors");
         }
 
         private void OnProcessExited(object sender, EventArgs e)
@@ -94,6 +111,14 @@ namespace Cody.Core.Agent.Connector
             if (!process.HasExited) process.Kill();
 
             process.Dispose();
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                return !process.HasExited;
+            }
         }
     }
 }
