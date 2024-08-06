@@ -21,6 +21,9 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
+using Microsoft.Win32;
+using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell.Settings;
 
 namespace Cody.VisualStudio
 {
@@ -58,6 +61,7 @@ namespace Cody.VisualStudio
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
+        public IColorThemeService ColorThemeService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -65,7 +69,7 @@ namespace Cody.VisualStudio
             try
             {
                 Init();
-
+                
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -78,8 +82,8 @@ namespace Cody.VisualStudio
                 UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
                 StatusbarService = new StatusbarService();
                 InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
+                ColorThemeService = new ColorThemeService(this);
 
-                
                 Logger.Info($"Visual Studio version: {VsVersionService.Version}");
 
                 await InitOleMenu();
