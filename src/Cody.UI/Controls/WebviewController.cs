@@ -189,6 +189,10 @@ namespace Cody.UI.Controls
             rootStyle.setProperty('--vscode-sideBar-foreground', '#000000');
             rootStyle.setProperty('--vscode-sideBar-background', '#ffffff');
             rootStyle.setProperty('--vscode-editor-font-size', '14px');
+            rootStyle.setProperty('--vscode-dropdown-background', '#ffffff');
+            rootStyle.setProperty('--vscode-dropdown-foreground', '#000000');
+            rootStyle.setProperty('--vscode-input-background', '#ffffff');
+            rootStyle.setProperty('--vscode-input-foreground', '#000000');
         ";
 
         private static string GetPostMessageScript(string message) => $@"

@@ -38,15 +38,16 @@ namespace Cody.Core.Agent.Connector
         public async Task Initialize(IAgentClient client)
         {
             var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
-            // Get the solution directory path that the user is working on
-            var solutionDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            // TODO: Get the solution directory path that the user is working on.
+            var solutionDirPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = solutionDirectoryPath,
+                WorkspaceRootUri = solutionDirPath,
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,
@@ -85,9 +86,9 @@ namespace Cody.Core.Agent.Connector
             if (result.Authenticated == true)
             {
                 client.Initialized();
-                
+
                 log.Info(appData);
-                               
+
                 var subscription = await client.GetCurrentUserCodySubscription();
 
                 statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
@@ -96,7 +97,7 @@ namespace Cody.Core.Agent.Connector
             {
                 log.Warn("Authentication failed. Please check the validity of the access token.");
             }
-
+            // TODO: Move this into NotificationHandlers.
             await client.ResolveWebviewView(new ResolveWebviewViewParams
             {
                 ViewId = "cody.chat",

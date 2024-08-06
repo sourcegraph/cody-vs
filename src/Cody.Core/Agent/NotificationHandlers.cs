@@ -27,36 +27,46 @@ namespace Cody.Core.Agent
         public async Task SendWebviewMessage(string handle, string message)
         {
             // Turn message into a JSON object
-            JObject json = JObject.Parse(message);
+            var json = JObject.Parse(message);
+            var command = json["command"]?.ToString();
 
-            var command = json["command"].ToString();
-            if (command.Equals("links"))
+            switch (command)
             {
-                // if the is links, open the link in the default browser
-                string link = json["value"].ToString();
-                System.Diagnostics.Process.Start(link);
-                return;
-            }
-            else if (command.Equals("command"))
-            {
-                string id = json["id"].ToString();
-                if (id.Equals("cody.status-bar.interacted"))
-                {
-                    DTE2 dte = (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject("VisualStudio.DTE");
-                    dte.ExecuteCommand("Tools.Options", "Cody.General");
+                case "links":
+                    var link = json["value"]?.ToString();
+                    if (!string.IsNullOrEmpty(link))
+                    {
+                        // if the is links, open the link in the default browser
+                        // string link = json["value"].ToString();
+                        // System.Diagnostics.Process.Start(link);
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(link) { UseShellExecute = true });
+                    }
                     return;
-                }
-                // cody.auth.signin, cody.auth.signout, cody.auth.account
-                // await agentClient.SignOut();
+
+                case "command":
+                    var id = json["id"]?.ToString();
+                    // Open the extension options page for authentication related commands.
+                    if (id == "cody.status-bar.interacted" || id.StartsWith("cody.auth.signin") || id.StartsWith("cody.auth.signout"))
+                    {
+                        try
+                        {
+                            var dte = (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject("VisualStudio.DTE");
+                            dte.ExecuteCommand("Tools.Options", "Cody.General");
+                        }
+                        catch (System.Runtime.InteropServices.COMException)
+                        {
+                            // Handle the case where Visual Studio is not running or COM object is not accessible
+                        }
+                        return;
+                    }
+                    break;
             }
 
-                await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
-                {
-                    Id = handle,
-                    MessageStringEncoded = message
-                });
-            
-
+            await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+            {
+                Id = handle,
+                MessageStringEncoded = message
+            });
         }
 
         [JsonRpcMethod("debug/message")]
@@ -64,7 +74,7 @@ namespace Cody.Core.Agent
         {
             System.Diagnostics.Debug.WriteLine(message, "Agent Debug");
         }
-        
+
         [JsonRpcMethod("webview/registerWebview")]
         public void RegisterWebview(string handle)
         {
@@ -74,7 +84,15 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
         public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            System.Diagnostics.Debug.WriteLine(viewId, "Agent registerWebviewViewProvider");
+            System.Diagnostics.Debug.WriteLine(viewId, retainContextWhenHidden, "Agent registerWebviewViewProvider");
+            // TODO: Check if webview is ready before sending message.
+            // agentClient.ResolveWebviewView(new ResolveWebviewViewParams
+            // {
+            //     // cody.chat for sidebar view, or cody.editorPanel for editor panel
+            //     ViewId = "cody.chat",
+            //     // Create dynmically
+            //     WebviewHandle = "visual-studio",
+            // }).Wait();
         }
 
         [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]
@@ -86,11 +104,11 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/setOptions")]
         public void SetOptions(string handle, DefiniteWebviewOptions options)
         {
-            if(options.EnableCommandUris is bool enableCmd)
+            if (options.EnableCommandUris is bool enableCmd)
             {
 
             }
-            else if(options.EnableCommandUris is JArray jArray)
+            else if (options.EnableCommandUris is JArray jArray)
             {
                 var uris = jArray.ToObject<string[]>();
             }
@@ -100,7 +118,7 @@ namespace Cody.Core.Agent
         public void SetHtml(string handle, string html)
         {
             System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
-            OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() {Handle = handle, Html = html});
+            OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() { Handle = handle, Html = html });
         }
 
         [JsonRpcMethod("webview/PostMessage")]
@@ -112,8 +130,8 @@ namespace Cody.Core.Agent
         [JsonRpcMethod("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
-            PostWebMessageAsJson?.Invoke(stringEncodedMessage);
             System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
+            PostWebMessageAsJson?.Invoke(stringEncodedMessage);
         }
 
         [JsonRpcMethod("webview/didDisposeNative")]
