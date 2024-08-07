@@ -1,6 +1,6 @@
-﻿# addin nuget:?package=Cake.Git&version=4.0.0
-# addin nuget:?package=Cake.Pnpm&version=1.0.0
-# tool nuget:?package=vswhere&version=3.1.7
+﻿#addin nuget:?package=Cake.Git&version=4.0.0
+#addin nuget:?package=Cake.Pnpm&version=1.0.0
+#tool nuget:?package=vswhere&version=3.1.7
 
 var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");

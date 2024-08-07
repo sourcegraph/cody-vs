@@ -98,9 +98,9 @@ namespace Cody.Core.Agent.Connector
             log.Info("The connection with the agent has been terminated.");
         }
 
-        public async Task<IAgentClient> CreateClient()
+        public IAgentClient CreateClient()
         {
-            if (!IsConnected) await Connect();
+            if (!IsConnected) Connect();
 
             return agentClient;
         }
