@@ -22,9 +22,10 @@ using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
-using Microsoft.Win32;
-using Microsoft.VisualStudio.Settings;
-using Microsoft.VisualStudio.Shell.Settings;
+using Cody.Core.DocumentSync;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Cody.VisualStudio
 {
@@ -65,6 +66,10 @@ namespace Cody.VisualStudio
         public IStatusbarService StatusbarService;
         public IColorThemeService ColorThemeService;
         public NotificationHandlers NotificationHandlers;
+        public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
+        public IVsUIShell VsUIShell;
+        public IAgentClientFactory AgentClientFactory;
+        public DocumentsSyncManager DocumentsSyncManager;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -98,6 +103,11 @@ namespace Cody.VisualStudio
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
             ColorThemeService = new ColorThemeService(this);
+
+            var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
+            var componentModel = this.GetService<SComponentModel, IComponentModel>();
+            VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+            VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
 
             Logger.Info($"Visual Studio version: {VsVersionService.Version}");
         }
@@ -168,15 +178,25 @@ namespace Cody.VisualStudio
                 };
 
                 AgentConnector = new AgentConnector(options, Logger);
+                AgentClientFactory = new AgentClientFactory(AgentConnector);
 
                 await WebView2Dev.InitializeAsync();
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
-                _ = Task.Run(() => AgentConnector.Connect()).ContinueWith(t =>
-                               {
-                                   foreach (var ex in t.Exception.Flatten().InnerExceptions)
-                                       Logger.Error("Agent connecting error", ex);
-                               }, TaskContinuationOptions.OnlyOnFaulted);
+
+
+                _ = Task.Run(() => AgentConnector.Connect())
+                .ContinueWith(x =>
+                {
+                    var documentSyncCallback = new DocumentSyncCallback(AgentClientFactory, Logger);
+                    DocumentsSyncManager = new DocumentsSyncManager(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
+                    DocumentsSyncManager.Initialize();
+                })
+                .ContinueWith(t =>
+                {
+                    foreach (var ex in t.Exception.Flatten().InnerExceptions)
+                        Logger.Error("Agent connecting error", ex);
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
             catch (Exception ex)
             {

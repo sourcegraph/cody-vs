@@ -167,6 +167,7 @@
     <Compile Include="..\Cody.VisualStudio\Properties\AssemblyVersion.cs">
       <Link>Properties\AssemblyVersion.cs</Link>
     </Compile>
+    <Compile Include="Agent\AgentClientFactory.cs" />
     <Compile Include="Agent\Connector\AgentConnector.cs" />
     <Compile Include="Agent\Connector\AgentConnectorOptions.cs" />
     <Compile Include="Agent\Connector\AgentProcess.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="Agent\Connector\RemoteAgent.cs" />
     <Compile Include="Agent\IAgentClient.cs" />
     <Compile Include="Agent\Connector\InitializeCallback.cs" />
+    <Compile Include="Agent\IAgentClientFactory.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
     <Compile Include="Agent\Protocol\ClientCapabilities.cs" />
@@ -183,9 +185,15 @@
     <Compile Include="Agent\Protocol\CurrentUserCodySubscription.cs" />
     <Compile Include="Agent\Protocol\DefiniteWebviewOptions.cs" />
     <Compile Include="Agent\Protocol\ExtensionConfiguration.cs" />
+    <Compile Include="Agent\Protocol\Position.cs" />
+    <Compile Include="Agent\Protocol\ProtocolTextDocument.cs" />
+    <Compile Include="Agent\Protocol\ProtocolTextDocumentContentChangeEvent.cs" />
+    <Compile Include="Agent\Protocol\Range.cs" />
     <Compile Include="Agent\Protocol\ServerInfo.cs" />
     <Compile Include="Agent\Protocol\WebviewCapabilities.cs" />
     <Compile Include="Agent\SetHtmlEvent.cs" />
+    <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
+    <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />

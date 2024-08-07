@@ -41,7 +41,7 @@ namespace Cody.AgentTester
 
             await connector.Connect();
 
-            agentClient = await connector.CreateClient();
+            agentClient = connector.CreateClient();
 
             await Initialize();
 
