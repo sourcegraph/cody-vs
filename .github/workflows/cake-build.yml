@@ -23,5 +23,6 @@ jobs:
     - name: Run Cake script
       run: |
         cd src
+        dotnet tool restore
         dotnet cake
         
