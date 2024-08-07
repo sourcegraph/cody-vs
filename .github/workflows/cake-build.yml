@@ -21,9 +21,7 @@ jobs:
       run: dotnet tool install --global Cake.Tool
 
     - name: Restore NuGet packages
-      run: |
-        nuget restore src\Cody.AgentTester\Cody.AgentTester.csproj -PackagesDirectory src\packages
-        nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
+      run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
     - name: Run Cake script
       run: |
