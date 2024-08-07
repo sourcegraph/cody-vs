@@ -1,0 +1,27 @@
+name: Cake Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Install Cake.Tool
+      run: dotnet tool install --global Cake.Tool
+
+    - name: Run Cake script
+      run: |
+        cd src
+        dotnet cake
+        
