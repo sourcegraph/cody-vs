@@ -20,8 +20,14 @@ jobs:
     - name: Install Cake.Tool
       run: dotnet tool install --global Cake.Tool
 
+    - name: Restore NuGet packages
+      run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
+
     - name: Run Cake script
       run: |
         cd src
+        dotnet tool restore
+        corepack enable
+        corepack install --global pnpm@8.6.7
         dotnet cake
         

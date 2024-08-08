@@ -134,6 +134,7 @@ Task("DownloadNode")
 Task("Build")
 	.IsDependentOn("BuildCodyAgent")
 	.IsDependentOn("DownloadNode")
+	.IsDependentOn("Restore")
 	.Does(() =>
 {
 	MSBuild("./Cody.sln", new MSBuildSettings
@@ -141,6 +142,17 @@ Task("Build")
 		Configuration = configuration,
 		PlatformTarget = PlatformTarget.MSIL
 	});
+});
+
+Task("Restore")
+    .Does(() =>
+{
+	Information($"Restore ...");
+
+    MSBuild("./Cody.sln", new MSBuildSettings {
+        Targets = { "Restore" },
+        Verbosity = Verbosity.Minimal
+    });
 });
 
 Task("Publish")
