@@ -59,7 +59,7 @@
     <Compile Include="Services\OptionsPage.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Services\ColorThemeService.cs" />
+    <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
