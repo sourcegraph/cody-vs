@@ -64,7 +64,7 @@ namespace Cody.VisualStudio
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
-        public IColorThemeService ColorThemeService;
+        public IThemeService ThemeService;
         public NotificationHandlers NotificationHandlers;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
         public IVsUIShell VsUIShell;
@@ -102,7 +102,7 @@ namespace Cody.VisualStudio
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
-            ColorThemeService = new ColorThemeService(this);
+            ThemeService = new ThemeService(this);
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
