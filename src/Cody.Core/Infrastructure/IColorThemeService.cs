@@ -12,7 +12,9 @@ namespace Cody.Core.Infrastructure
 
         IReadOnlyDictionary<string, string> GetColors();
 
-        FontInformation GetFont();
+        FontInformation GetEditorFont();
+
+        FontInformation GetUIFont();
     }
 
     public class FontInformation

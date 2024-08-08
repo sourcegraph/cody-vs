@@ -43,28 +43,32 @@ namespace Cody.VisualStudio.Services
             return result;
         }
 
-        public FontInformation GetFont()
+        public FontInformation GetEditorFont()
+        {
+            const string textEditorCategory = "{A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0}";
+            return GetFontInfo(new Guid(textEditorCategory));
+        }
+
+        public FontInformation GetUIFont()
         {
             const string environmentCategory = "{1F987C00-E7C4-4869-8A17-23FD602268B0}";
+            return GetFontInfo(new Guid(environmentCategory));
+        }
 
+        private FontInformation GetFontInfo(Guid categoryGuid)
+        {
             var storage = (IVsFontAndColorStorage)serviceProvider.GetService(typeof(SVsFontAndColorStorage));
-            storage.OpenCategory(new Guid(environmentCategory), (uint)(__FCSTORAGEFLAGS.FCSF_READONLY));
+            storage.OpenCategory(categoryGuid, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_READONLY));
 
-            FontInformation uIFont;
             var logFont = new LOGFONTW[1];
             var pInfo = new FontInfo[1];
-            storage.GetFont(logFont , pInfo);
-            if (pInfo[0].bFaceNameValid == 1 && pInfo[0].bPointSizeValid == 1)
-                uIFont = new FontInformation(pInfo[0].bstrFaceName, pInfo[0].wPointSize);
-            else
-            {
-                var systemFont = SystemFonts.CaptionFont;
-                uIFont = new FontInformation(systemFont.Name, systemFont.SizeInPoints);
-            }
-                
+            storage.GetFont(logFont, pInfo);
+
+            var result = new FontInformation(pInfo[0].bstrFaceName, pInfo[0].wPointSize);
+
             storage.CloseCategory();
 
-            return uIFont;
+            return result;
         }
 
         public bool IsDarkTheme()
