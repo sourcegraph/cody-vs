@@ -6,10 +6,27 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Infrastructure
 {
-    public interface IColorThemeService
+    public interface IThemeService
     {
         bool IsDarkTheme();
 
-        IReadOnlyDictionary<string, string> GetThemedColors();
+        IReadOnlyDictionary<string, string> GetColors();
+
+        FontInformation GetEditorFont();
+
+        FontInformation GetUIFont();
+    }
+
+    public class FontInformation
+    {
+        public FontInformation(string fontName, float size)
+        {
+            FontName = fontName;
+            Size = size;
+        }
+
+        public string FontName { get; protected set; }
+
+        public float Size { get; protected set; }
     }
 }
