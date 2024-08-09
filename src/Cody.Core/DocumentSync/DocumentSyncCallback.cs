@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Nerdbank.Streams.MultiplexingStream;
 
 namespace Cody.Core.DocumentSync
 {
@@ -29,7 +30,7 @@ namespace Cody.Core.DocumentSync
 
         public void OnChanged(string fullPath, DocumentRange visibleRange, DocumentRange selection, IEnumerable<DocumentChange> changes)
         {
-            logger.Debug($"Sending didChange() for '{fullPath}' changes: {string.Join("|", changes.Select(x => x.Text))}");
+            logger.Debug($"Sending didChange() for '{fullPath}', s:{selection}, v:{visibleRange}, c:{string.Join("", changes)}");
 
             Range vRange = null;
             if (visibleRange != null)
@@ -110,7 +111,7 @@ namespace Cody.Core.DocumentSync
 
         public void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection)
         {
-            logger.Debug($"Sending DidOpen() for '{fullPath}'");
+            logger.Debug($"Sending DidOpen() for '{fullPath}', s:{selection}, v:{visibleRange}");
 
             Range vRange = null;
             if (visibleRange != null)

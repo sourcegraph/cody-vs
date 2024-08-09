@@ -25,6 +25,8 @@ namespace Cody.Core.DocumentSync
         public int Line { get; set; }
 
         public int Column { get; set; }
+
+        public override string ToString() => $"({Line},{Column})";
     }
 
     public class DocumentRange
@@ -32,11 +34,15 @@ namespace Cody.Core.DocumentSync
         public DocumentPosition Start { get; set; }
 
         public DocumentPosition End { get; set; }
+
+        public override string ToString() => $"{Start}-{End}";
     }
 
     public class DocumentChange
     {
         public string Text { get; set; }
         public DocumentRange Range { get; set; }
+
+        public override string ToString() => $"['{Text}':{Range}]";
     }
 }
