@@ -69,7 +69,7 @@ namespace Cody.VisualStudio
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
         public IVsUIShell VsUIShell;
         public IAgentClientFactory AgentClientFactory;
-        public DocumentsSyncManager DocumentsSyncManager;
+        public DocumentsSyncService DocumentsSyncService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -189,8 +189,8 @@ namespace Cody.VisualStudio
                 .ContinueWith(x =>
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentClientFactory, Logger);
-                    DocumentsSyncManager = new DocumentsSyncManager(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
-                    DocumentsSyncManager.Initialize();
+                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
+                    DocumentsSyncService.Initialize();
                 })
                 .ContinueWith(t =>
                 {
