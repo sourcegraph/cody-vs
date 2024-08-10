@@ -1,4 +1,4 @@
-﻿using Cody.Core.Agent;
+using Cody.Core.Agent;
 using Cody.Core.Agent.Connector;
 using Cody.Core.Agent.Protocol;
 using System;
@@ -20,7 +20,7 @@ namespace Cody.AgentTester
 
             var options = new AgentConnectorOptions
             {
-                NotificationsTarget = new NotificationHandlers();,
+                NotificationsTarget = new NotificationHandlers(),
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,
