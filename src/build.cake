@@ -145,14 +145,13 @@ Task("Build")
 });
 
 Task("Restore")
-	.Does(() =>
+    .Does(() =>
 {
 	Information($"Restore ...");
-
     MSBuild("./Cody.sln", new MSBuildSettings {
-		Targets = { "Restore" },
-		Verbosity = Verbosity.Minimal
-	});
+        Targets = { "Restore" },
+        Verbosity = Verbosity.Minimal
+    });
 });
 
 Task("Publish")
