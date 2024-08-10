@@ -12,30 +12,20 @@ namespace Cody.AgentTester
         private static AgentConnector connector;
         private static ConsoleLogger logger = new ConsoleLogger();
         private static IAgentClient agentClient;
-        private static string agentDirectoryPath;
 
         static async Task Main(string[] args)
         {
-            var notifier = new NotificationHandlers();
-
             // Set the env var to 3113 when running with local agent.
-            var port = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
-            int? portNumber = null;
-            if (port != null)
-            {
-                portNumber = Convert.ToInt32(port);
-            }
+            var portNumber = int.TryParse(Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT"), out int port) ? port : (int?)null;
 
             var options = new AgentConnectorOptions
             {
-                NotificationsTarget = notifier,
+                NotificationsTarget = new NotificationHandlers();,
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,
                 Port = portNumber,
             };
-
-            agentDirectoryPath = Path.GetFullPath(options.AgentDirectory);
 
             connector = new AgentConnector(options, logger);
 
@@ -50,8 +40,6 @@ namespace Cody.AgentTester
 
         private static async Task Initialize()
         {
-            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
-
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
@@ -66,11 +54,11 @@ namespace Cody.AgentTester
                     ShowDocument = Capability.None,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
-                    Webview = new WebviewCapabilities
+                    Webview = "native",
+                    WebviewNativeConfig = new WebviewCapabilities
                     {
-                        Type = "native",
-                        CspSource = "'self' https://*.sourcegraphstatic.com",
-                        WebviewBundleServingPrefix = "https://file.sourcegraphstatic.com",
+                        CspSource = "'self' https://cody.vs",
+                        WebviewBundleServingPrefix = "https://cody.vs",
                     },
                     WebviewMessages = "string-encoded",
                 },
@@ -83,7 +71,7 @@ namespace Cody.AgentTester
                     AutocompleteAdvancedProvider = null,
                     Debug = true,
                     VerboseDebug = true,
-                    Codebase = null,
+                    Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
@@ -91,13 +79,6 @@ namespace Cody.AgentTester
             await agentClient.Initialize(clientInfo);
 
             agentClient.Initialized();
-
-            // TODO: Move it to after we receive response for registerWebviewProvider
-            await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
-            {
-                ViewId = "cody.chat",
-                WebviewHandle = "visual-studio-program",
-            });
         }
 
 

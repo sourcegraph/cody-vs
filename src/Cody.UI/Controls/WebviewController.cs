@@ -13,9 +13,7 @@ namespace Cody.UI.Controls
 
         public CoreWebView2 GetWebview => _webview;
 
-        private string _html;
-
-        private const string AppOrigin = "https://file.sourcegraphstatic.com";
+        public string colorThemeScript;
 
         public event EventHandler<string> WebViewMessageReceived;
 
@@ -25,20 +23,15 @@ namespace Cody.UI.Controls
 
         public async Task<CoreWebView2> InitializeWebView(CoreWebView2 webView)
         {
-            webView.NavigateToString("");
-
             _webview = webView;
 
+            SetupVirtualHostMapping();
             await ApplyVsCodeApiScript();
-
             SetupEventHandlers();
             ConfigureWebView();
             SetupResourceHandling();
 
-            webView.NavigateToString(_html);
             webView.OpenDevToolsWindow();
-
-            _webview = webView;
 
             return webView;
         }
@@ -77,6 +70,7 @@ namespace Cody.UI.Controls
 
         private void SetupResourceHandling()
         {
+            string AppOrigin = "https://cody.vs";
             _webview.AddWebResourceRequestedFilter($"{AppOrigin}*", CoreWebView2WebResourceContext.All);
             _webview.WebResourceRequested += HandleWebResourceRequest;
         }
@@ -96,6 +90,12 @@ namespace Cody.UI.Controls
             }
         }
 
+        private void SetupVirtualHostMapping()
+        {
+            string agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent", "webviews");
+            _webview.SetVirtualHostNameToFolderMapping("cody.vs", agentDir, CoreWebView2HostResourceAccessKind.Allow);
+        }
+
         private string GetContentType(string filePath)
         {
             if (filePath.EndsWith(".js")) return "Content-Type: text/javascript";
@@ -106,12 +106,12 @@ namespace Cody.UI.Controls
 
         private async void CoreWebView2OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
-            await ApplyInjectionScript();
+            await ApplyThemingScript();
         }
 
         private async void CoreWebView2OnDOMContentLoaded(object sender, CoreWebView2DOMContentLoadedEventArgs e)
         {
-            await ApplyInjectionScript();
+            await ApplyThemingScript();
         }
 
         private void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -136,18 +136,17 @@ namespace Cody.UI.Controls
             await _webview.AddScriptToExecuteOnDocumentCreatedAsync(GetVsCodeApiScript());
         }
 
-        private async Task ApplyInjectionScript()
+        private async Task ApplyThemingScript()
         {
-            await _webview.ExecuteScriptWithResultAsync(GetDocInjectionScript());
+            await _webview.ExecuteScriptWithResultAsync(GetThemeScript(colorThemeScript));
         }
 
         public void SetHtml(string html)
         {
-            _html = html;
-            _webview?.NavigateToString(_html);
+            // NOTE: Serving the returned html doesn't work in Visual Studio,
+            // as it doesn't allow access to the local storage _webview?.NavigateToString(html);
 
-            var agentIndexFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent", "webviews", "index.html");
-            _webview?.Navigate(agentIndexFile);
+            _webview.Navigate("https://cody.vs/index.html");
         }
 
         private static string GetVsCodeApiScript() => @"
@@ -180,19 +179,10 @@ namespace Cody.UI.Controls
             })();
         ";
 
-        // TODO: Get this from user theme settings.
-        private static string GetDocInjectionScript() => @"
+        private static string GetThemeScript(string colorTheme) => $@"
             document.documentElement.dataset.ide = 'VisualStudio';
-
-            const rootStyle = document.documentElement.style;
-            rootStyle.setProperty('--vscode-font-family', 'monospace');
-            rootStyle.setProperty('--vscode-sideBar-foreground', '#000000');
-            rootStyle.setProperty('--vscode-sideBar-background', '#ffffff');
-            rootStyle.setProperty('--vscode-editor-font-size', '14px');
-            rootStyle.setProperty('--vscode-dropdown-background', '#ffffff');
-            rootStyle.setProperty('--vscode-dropdown-foreground', '#000000');
-            rootStyle.setProperty('--vscode-input-background', '#ffffff');
-            rootStyle.setProperty('--vscode-input-foreground', '#000000');
+            
+            {colorTheme}
         ";
 
         private static string GetPostMessageScript(string message) => $@"
