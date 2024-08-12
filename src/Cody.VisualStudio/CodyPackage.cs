@@ -180,10 +180,8 @@ namespace Cody.VisualStudio
                 AgentConnector = new AgentConnector(options, Logger);
                 AgentClientFactory = new AgentClientFactory(AgentConnector);
 
-                await WebView2Dev.InitializeAsync();
+                WebView2Dev.InitializeController(ThemeService.GetThemingScript());
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
-
-
 
                 _ = Task.Run(() => AgentConnector.Connect())
                 .ContinueWith(x =>

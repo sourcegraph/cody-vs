@@ -12,6 +12,8 @@ namespace Cody.Core.Infrastructure
 
         IReadOnlyDictionary<string, string> GetColors();
 
+        string GetThemingScript();
+
         FontInformation GetEditorFont();
 
         FontInformation GetUIFont();

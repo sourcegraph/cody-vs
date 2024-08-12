@@ -9,10 +9,8 @@
              d:DesignHeight="750" 
              d:DesignWidth="400"
              >
-    <Grid Background="Aqua"
-          >
+    <Grid >
             <controls:WebView2Dev 
-                Margin="5"
                 Html="{Binding Html}"
                 SendMessage="{Binding WebviewMessageSendCommand }"
                 PostMessage="{Binding PostMessage}"

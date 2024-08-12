@@ -17,18 +17,14 @@ namespace Cody.VisualStudio.Services
 {
     public class ThemeService : IThemeService
     {
-        private ThemeResourceKey[] colorsList = new ThemeResourceKey[]
-        {
-            EnvironmentColors.ToolWindowBackgroundColorKey,
-            EnvironmentColors.ToolWindowTextColorKey,
-            EnvironmentColors.ToolWindowBorderColorKey,
-        };
-
         private IServiceProvider serviceProvider;
 
         public ThemeService(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
+
+            // TODO: Update the webviews when the theme changes.
+            // VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
         }
 
         public IReadOnlyDictionary<string, string> GetColors()
@@ -98,6 +94,34 @@ namespace Cody.VisualStudio.Services
 
         private string ToCssVariableName(string name) => $"--visualstudio-{name.ToLower()}";
 
+        /// <summary>
+        /// Generates a CSS stylesheet script that sets the themed colors for the Visual Studio environment.
+        /// </summary>
+        /// <returns>A string containing the CSS stylesheet script.</returns>
+        public string GetThemingScript()
+        {
+            var colors = GetColors();
+            var sb = new StringBuilder();
+            sb.AppendLine("const rootStyle = document.documentElement.style;");
+
+            // Generate the CSS variables for each color.
+            foreach (var color in colors)
+            {
+                sb.AppendLine($"rootStyle.setProperty('{color.Key}', '{color.Value}');");
+            }
+
+            // Generate the CSS variables for the fonts.
+            var editorFont = GetEditorFont();
+            sb.AppendLine($"rootStyle.setProperty('--visualstudio-editor-font-family', '{editorFont.FontName}');");
+            sb.AppendLine($"rootStyle.setProperty('--visualstudio-editor-font-size', '{editorFont.Size}pt');");
+
+            var uiFont = GetUIFont();
+            sb.AppendLine($"rootStyle.setProperty('--visualstudio-ui-font-family', '{uiFont.FontName}');");
+            sb.AppendLine($"rootStyle.setProperty('--visualstudio-ui-font-size', '{uiFont.Size}pt');");
+
+            return sb.ToString();
+        }
+
         [Conditional("DEBUG")]
         public static void GetAllColors()
         {
@@ -117,5 +141,82 @@ namespace Cody.VisualStudio.Services
 
             File.WriteAllLines("colors.txt", list);
         }
+
+        private ThemeResourceKey[] colorsList = new ThemeResourceKey[]
+        {
+            EnvironmentColors.ToolWindowBackgroundColorKey,
+            EnvironmentColors.ToolWindowTextColorKey,
+            EnvironmentColors.ToolWindowBorderColorKey,
+            EnvironmentColors.DropDownBackgroundColorKey,
+            EnvironmentColors.DropDownTextColorKey,
+            EnvironmentColors.DropDownBorderColorKey,
+            EnvironmentColors.ToolWindowButtonHoverActiveColorKey,
+            EnvironmentColors.ToolWindowButtonHoverActiveBorderColorKey,
+            EnvironmentColors.ScrollBarBackgroundColorKey,
+            EnvironmentColors.ScrollBarThumbGlyphColorKey,
+            EnvironmentColors.PanelSeparatorColorKey,
+            EnvironmentColors.EnvironmentBackgroundColorKey,
+            EnvironmentColors.DropDownMouseDownTextColorKey,
+            EnvironmentColors.DropDownMouseOverBackgroundEndColorKey,
+            EnvironmentColors.MainWindowButtonHoverActiveColorKey,
+            EnvironmentColors.MainWindowButtonHoverInactiveBorderColorKey,
+            EnvironmentColors.MainWindowButtonHoverActiveBorderColorKey,
+            EnvironmentColors.EditorExpansionFillColorKey,
+            EnvironmentColors.EditorExpansionLinkColorKey,
+            EnvironmentColors.EditorExpansionTextColorKey,
+            EnvironmentColors.ComboBoxBackgroundColorKey,
+            EnvironmentColors.ComboBoxTextColorKey,
+            EnvironmentColors.ComboBoxBorderColorKey,
+            EnvironmentColors.ComboBoxFocusedButtonBackgroundColorKey,
+            EnvironmentColors.ComboBoxItemTextInactiveColorKey,
+            EnvironmentColors.SystemButtonTextColorKey,
+            EnvironmentColors.DiagReportLinkTextColorKey,
+            EnvironmentColors.PanelTitleBarTextColorKey,
+            EnvironmentColors.PanelTextColorKey,
+            EnvironmentColors.PanelHyperlinkColorKey,
+            EnvironmentColors.PanelHyperlinkDisabledColorKey,
+            EnvironmentColors.ToolTipColorKey,
+            EnvironmentColors.ToolWindowValidationErrorBorderColorKey,
+            EnvironmentColors.ToolWindowValidationErrorTextColorKey,
+            EnvironmentColors.SystemInfoBackgroundColorKey,
+            EnvironmentColors.SystemInfoTextColorKey,
+            EnvironmentColors.MainWindowSolutionNameActiveBackgroundColorKey,
+            EnvironmentColors.MainWindowSolutionNameActiveTextColorKey,
+            EnvironmentColors.WizardOrientationPanelBackgroundColorKey,
+            EnvironmentColors.WizardOrientationPanelTextColorKey,
+            EnvironmentColors.SystemWindowFrameColorKey,
+            EnvironmentColors.HelpHowDoIPaneBackgroundColorKey,
+            EnvironmentColors.HelpHowDoIPaneTextColorKey,
+            EnvironmentColors.HelpHowDoITaskBackgroundColorKey,
+            EnvironmentColors.DropDownButtonMouseOverBackgroundColorKey,
+            EnvironmentColors.ToolWindowTabSelectedActiveTextColorKey,
+            EnvironmentColors.TitleBarActiveBorderColorKey,
+            EnvironmentColors.TitleBarInactiveColorKey,
+            EnvironmentColors.VizSurfaceBrownDarkColorKey,
+            EnvironmentColors.VizSurfaceDarkGoldDarkColorKey,
+            EnvironmentColors.VizSurfaceGoldDarkColorKey,
+            EnvironmentColors.VizSurfaceGreenDarkColorKey,
+            EnvironmentColors.VizSurfacePlumDarkColorKey,
+            EnvironmentColors.VizSurfaceRedDarkColorKey,
+            EnvironmentColors.VizSurfaceSoftBlueDarkColorKey,
+            EnvironmentColors.VizSurfaceSteelBlueDarkColorKey,
+            EnvironmentColors.VizSurfaceStrongBlueDarkColorKey,
+            EnvironmentColors.VSBrandingTextColorKey,
+            EnvironmentColors.SnaplinesColorKey,
+            EnvironmentColors.FileTabButtonHoverSelectedActiveBorderColorKey,
+            EnvironmentColors.FileTabSelectedBackgroundColorKey,
+            EnvironmentColors.FileTabParentTextColorKey,
+            EnvironmentColors.FileTabPrimarySeparatorColorKey,
+            EnvironmentColors.FileTabBackgroundColorKey,
+            EnvironmentColors.ScrollBarThumbBackgroundColorKey,
+            EnvironmentColors.FileTabActiveGroupTitleBackgroundColorKey,
+            EnvironmentColors.FileTabHotTextColorKey,
+            EnvironmentColors.FileTabInactiveTextColorKey,
+            EnvironmentColors.FileTabButtonHoverInactiveBorderColorKey,
+            EnvironmentColors.FileTabProvisionalHoverColorKey,
+            EnvironmentColors.FileTabProvisionalHoverBorderColorKey,
+            EnvironmentColors.FileTabProvisionalHoverForegroundColorKey,
+            EnvironmentColors.FileTabProvisionalInactiveForegroundColorKey,
+        };
     }
 }

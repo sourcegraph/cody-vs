@@ -47,7 +47,7 @@ Task("BuildCodyAgent")
 
 	var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
 	var codyAgentDistDir = codyAgentDir + Directory("dist");
-	var branchName = "dpc/web-content";
+	var branchName = "main";
 
 	if (!DirectoryExists(codyDir) || !GitIsValidRepository(codyDir))
 	{
@@ -95,7 +95,7 @@ Task("BuildCodyAgent")
 	CreateDirectory(agentDir);
 	CopyDirectory(codyAgentDistDir, agentDir);
 
-	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("vscode/webviews/$PWD/dist/webviews"));
+	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("agent/dist/webviews"));
 	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentDir}' ...");
 	CopyDirectory(codyWebviewsFolder, $"{agentDir}/webviews");
 
@@ -148,7 +148,6 @@ Task("Restore")
     .Does(() =>
 {
 	Information($"Restore ...");
-
     MSBuild("./Cody.sln", new MSBuildSettings {
         Targets = { "Restore" },
         Verbosity = Verbosity.Minimal

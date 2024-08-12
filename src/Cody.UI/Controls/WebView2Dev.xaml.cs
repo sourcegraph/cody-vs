@@ -28,8 +28,9 @@ namespace Cody.UI.Controls
             InitializeWebView();
         }
 
-        public static async Task<WebviewController> InitializeAsync()
+        public static WebviewController InitializeController(string themeScript)
         {
+            _controller.colorThemeScript = themeScript;
             return _controller;
         }
 

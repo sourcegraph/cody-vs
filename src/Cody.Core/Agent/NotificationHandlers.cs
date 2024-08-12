@@ -83,17 +83,16 @@ namespace Cody.Core.Agent
         }
 
         [JsonRpcMethod("webview/registerWebviewViewProvider")]
-        public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
+        public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
             System.Diagnostics.Debug.WriteLine(viewId, retainContextWhenHidden, "Agent registerWebviewViewProvider");
-            // TODO: Check if webview is ready before sending message.
-            // agentClient.ResolveWebviewView(new ResolveWebviewViewParams
-            // {
-            //     // cody.chat for sidebar view, or cody.editorPanel for editor panel
-            //     ViewId = "cody.chat",
-            //     // Create dynmically
-            //     WebviewHandle = "visual-studio",
-            // }).Wait();
+            await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                // cody.chat for sidebar view, or cody.editorPanel for editor panel
+                ViewId = "cody.chat",
+                // TODO: Create dynmically when we support editor panel
+                WebviewHandle = "visual-studio-sidebar",
+            });
         }
 
         [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]
