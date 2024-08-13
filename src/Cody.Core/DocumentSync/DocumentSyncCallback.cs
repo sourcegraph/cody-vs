@@ -7,18 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static Nerdbank.Streams.MultiplexingStream;
 
 namespace Cody.Core.DocumentSync
 {
     public class DocumentSyncCallback : IDocumentSyncActions
     {
         private ILog logger;
-        private IAgentClientFactory agentClientFactory;
+        private IAgentService agentService;
 
-        public DocumentSyncCallback(IAgentClientFactory agentClientFactory, ILog logger)
+        public DocumentSyncCallback(IAgentService agentService, ILog logger)
         {
-            this.agentClientFactory = agentClientFactory;
+            this.agentService = agentService;
             this.logger = logger;
         }
 
@@ -86,7 +85,7 @@ namespace Cody.Core.DocumentSync
                 }).ToArray()
             };
 
-            agentClientFactory.CreateAgentClient().DidChange(docState);
+            agentService.DidChange(docState);
         }
 
         public void OnClosed(string fullPath)
@@ -99,13 +98,13 @@ namespace Cody.Core.DocumentSync
             };
 
             // Only the 'uri' property is required, other properties are ignored.
-            agentClientFactory.CreateAgentClient().DidClose(docState);
+            agentService.DidClose(docState);
         }
 
         public void OnFocus(string fullPath)
         {
             logger.Debug($"Sending DidFocus() for '{fullPath}'");
-            agentClientFactory.CreateAgentClient().DidFocus(ToUri(fullPath));
+            agentService.DidFocus(ToUri(fullPath));
 
         }
 
@@ -151,14 +150,14 @@ namespace Cody.Core.DocumentSync
                 }
             };
 
-            agentClientFactory.CreateAgentClient().DidOpen(docState);
+            agentService.DidOpen(docState);
         }
 
         public void OnSaved(string fullPath)
         {
             logger.Debug($"Sending DidSave() for '{fullPath}'");
 
-            agentClientFactory.CreateAgentClient().DidSave(ToUri(fullPath));
+            agentService.DidSave(ToUri(fullPath));
         }
     }
 }

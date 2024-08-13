@@ -1,15 +1,12 @@
-﻿using Cody.Core.Agent.Connector;
-using Cody.Core.Agent.Protocol;
+﻿using Cody.Core.Agent.Protocol;
 using Newtonsoft.Json.Linq;
-using StreamJsonRpc;
 using System;
-using EnvDTE;
 using EnvDTE80;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
-    public class NotificationHandlers
+    public class NotificationHandlers : INotificationHandler
     {
         public NotificationHandlers()
         {
@@ -20,9 +17,9 @@ namespace Cody.Core.Agent
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
-        public IAgentClient agentClient;
+        public IAgentService agentClient;
 
-        public void SetAgentClient(IAgentClient agentClient) => this.agentClient = agentClient;
+        public void SetAgentClient(IAgentService agentClient) => this.agentClient = agentClient;
 
         // Send a message to the host from webview.
         public async Task SendWebviewMessage(string handle, string message)
@@ -70,19 +67,19 @@ namespace Cody.Core.Agent
             });
         }
 
-        [JsonRpcMethod("debug/message")]
+        [AgentNotification("debug/message")]
         public void Debug(string channel, string message)
         {
             System.Diagnostics.Debug.WriteLine(message, "Agent Debug");
         }
 
-        [JsonRpcMethod("webview/registerWebview")]
+        [AgentNotification("webview/registerWebview")]
         public void RegisterWebview(string handle)
         {
             System.Diagnostics.Debug.WriteLine(handle, "Agent registerWebview");
         }
 
-        [JsonRpcMethod("webview/registerWebviewViewProvider")]
+        [AgentNotification("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
             System.Diagnostics.Debug.WriteLine(viewId, retainContextWhenHidden, "Agent registerWebviewViewProvider");
@@ -95,13 +92,13 @@ namespace Cody.Core.Agent
             });
         }
 
-        [JsonRpcMethod("webview/createWebviewPanel", UseSingleObjectParameterDeserialization = true)]
+        [AgentNotification("webview/createWebviewPanel", deserializeToSingleObject: true)]
         public void CreateWebviewPanel(CreateWebviewPanelParams panelParams)
         {
             System.Diagnostics.Debug.WriteLine(panelParams, "Agent createWebviewPanel");
         }
 
-        [JsonRpcMethod("webview/setOptions")]
+        [AgentNotification("webview/setOptions")]
         public void SetOptions(string handle, DefiniteWebviewOptions options)
         {
             if (options.EnableCommandUris is bool enableCmd)
@@ -114,66 +111,60 @@ namespace Cody.Core.Agent
             }
         }
 
-        [JsonRpcMethod("webview/setHtml")]
+        [AgentNotification("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
             System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() { Handle = handle, Html = html });
         }
 
-        [JsonRpcMethod("webview/PostMessage")]
+        [AgentNotification("webview/PostMessage")]
         public void PostMessage(string handle, string message)
         {
             PostMessageStringEncoded(handle, message);
         }
 
-        [JsonRpcMethod("webview/postMessageStringEncoded")]
+        [AgentNotification("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
             System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
             PostWebMessageAsJson?.Invoke(stringEncodedMessage);
         }
 
-        [JsonRpcMethod("webview/didDisposeNative")]
+        [AgentNotification("webview/didDisposeNative")]
         public void DidDisposeNative(string handle)
         {
-            ;
+            
         }
 
-        [JsonRpcMethod("extensionConfiguration/didChange")]
+        [AgentNotification("extensionConfiguration/didChange", deserializeToSingleObject: true)]
         public void ExtensionConfigDidChange(ExtensionConfiguration config)
         {
             System.Diagnostics.Debug.WriteLine(config, "Agent didChange");
         }
 
-        [JsonRpcMethod("webview/dispose")]
+        [AgentNotification("webview/dispose")]
         public void Dispose(string handle)
         {
             System.Diagnostics.Debug.WriteLine(handle, "Agent dispose");
         }
 
-        [JsonRpcMethod("webview/reveal")]
+        [AgentNotification("webview/reveal")]
         public void Reveal(string handle, int viewColumn, bool preserveFocus)
         {
             System.Diagnostics.Debug.WriteLine(handle, "Agent reveal");
         }
 
-        [JsonRpcMethod("webview/setTitle")]
+        [AgentNotification("webview/setTitle")]
         public void SetTitle(string handle, string title)
         {
             System.Diagnostics.Debug.WriteLine(title, "Agent setTitle");
         }
 
-        [JsonRpcMethod("webview/setIconPath")]
+        [AgentNotification("webview/setIconPath")]
         public void SetIconPath(string handle, string iconPathUri)
         {
             System.Diagnostics.Debug.WriteLine(iconPathUri, "Agent setIconPath");
-        }
-
-        [JsonRpcMethod("webview/createWebviewPanel")]
-        public void CreateWebviewPanel(string handle, string viewType, string title, ShowOptions showOptions, bool enableScripts, bool enableForms, bool enableCommandUris, bool enableFindWidget, bool retainContextWhenHidden)
-        {
-            System.Diagnostics.Debug.WriteLine(title, "Agent createWebviewPanel");
         }
 
     }
