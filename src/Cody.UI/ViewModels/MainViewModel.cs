@@ -1,5 +1,4 @@
 ﻿using Cody.Core.Agent;
-using Cody.Core.Agent.Connector;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
 using System.Windows.Input;

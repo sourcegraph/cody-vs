@@ -8,7 +8,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Cody.Core.Agent.Connector
+namespace Cody.Core.Agent
 {
     public class InitializeCallback
     {
@@ -32,7 +32,7 @@ namespace Cody.Core.Agent.Connector
             this.log = log;
         }
 
-        public async Task Initialize(IAgentClient client)
+        public async Task Initialize(IAgentService client)
         {
             // TODO: Get the solution directory path that the user is working on.
             var solutionDirPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

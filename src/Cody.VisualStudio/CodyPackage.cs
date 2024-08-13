@@ -1,5 +1,4 @@
 ﻿using Cody.Core.Agent;
-using Cody.Core.Agent.Connector;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -8,6 +7,7 @@ using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.UI.Controls;
 using Cody.UI.Views;
+using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
@@ -60,7 +61,8 @@ namespace Cody.VisualStudio
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
         public MainView MainView;
-        public AgentConnector AgentConnector;
+        public AgentClient AgentClient;
+        public IAgentService AgentService;
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
@@ -68,7 +70,6 @@ namespace Cody.VisualStudio
         public NotificationHandlers NotificationHandlers;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
         public IVsUIShell VsUIShell;
-        public IAgentClientFactory AgentClientFactory;
         public DocumentsSyncService DocumentsSyncService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -165,28 +166,33 @@ namespace Cody.VisualStudio
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
-                // Set the env var to 3113 when running with local agent.
-                var portNumber = int.TryParse(Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT"), out int port) ? port : (int?)null;
+                var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+                var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
-                var options = new AgentConnectorOptions
+                var options = new AgentClientOptions
                 {
-                    NotificationsTarget = NotificationHandlers,
+                    NotificationHandlers = new List<INotificationHandler> { NotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
-                    AfterConnection = async (client) => await InitializeService.Initialize(client),
-                    Port = portNumber,
+                    ConnectToRemoteAgent = devPort != null,
+                    RemoteAgentPort = portNumber,
                 };
+
+                AgentClient = new AgentClient(options, Logger);
 
                 WebView2Dev.InitializeController(ThemeService.GetThemingScript());
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
-                AgentConnector = new AgentConnector(options, Logger);
-                AgentClientFactory = new AgentClientFactory(AgentConnector);
-
-                _ = Task.Run(async () => await AgentConnector.Connect())
+                _ = Task.Run(() => AgentClient.Start())
+                .ContinueWith(async x =>
+                {
+                    AgentService = AgentClient.CreateAgentService<IAgentService>();
+                    await InitializeService.Initialize(AgentService);
+                    NotificationHandlers.SetAgentClient(AgentService);
+                })
                 .ContinueWith(x =>
                 {
-                    var documentSyncCallback = new DocumentSyncCallback(AgentClientFactory, Logger);
+                    var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
                     DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
                     DocumentsSyncService.Initialize();
                 })
