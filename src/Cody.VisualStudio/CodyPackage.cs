@@ -20,12 +20,13 @@ using System.Reflection;
 using System.IO;
 using Cody.Core.Settings;
 using Cody.Core.Infrastructure;
-using Cody.Core.Agent.Connector;
 using Cody.Core.Agent;
 using Cody.Core.DocumentSync;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell.Interop;
+using Cody.VisualStudio.Client;
+using System.Collections.Generic;
 
 namespace Cody.VisualStudio
 {
@@ -60,7 +61,8 @@ namespace Cody.VisualStudio
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
         public MainView MainView;
-        public AgentConnector AgentConnector;
+        public AgentClient AgentClient;
+        public IAgentService AgentService;
         public IUserSettingsService UserSettingsService;
         public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
@@ -68,7 +70,6 @@ namespace Cody.VisualStudio
         public NotificationHandlers NotificationHandlers;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
         public IVsUIShell VsUIShell;
-        public IAgentClientFactory AgentClientFactory;
         public DocumentsSyncService DocumentsSyncService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -165,28 +166,34 @@ namespace Cody.VisualStudio
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
                 NotificationHandlers = new NotificationHandlers();
-                // Set the env var to 3113 when running with local agent.
-                var portNumber = int.TryParse(Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT"), out int port) ? port : (int?)null;
 
-                var options = new AgentConnectorOptions
+                var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+                var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
+
+                var options = new AgentClientOptions
                 {
-                    NotificationsTarget = NotificationHandlers,
+                    NotificationHandlers = new List<INotificationHandler> { NotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
-                    AfterConnection = (client) => InitializeService.Initialize(client),
-                    Port = portNumber,
+                    ConnectToRemoteAgent = devPort != null,
+                    RemoteAgentPort = portNumber,
                 };
 
-                AgentConnector = new AgentConnector(options, Logger);
-                AgentClientFactory = new AgentClientFactory(AgentConnector);
+                AgentClient = new AgentClient(options, Logger);
 
                 WebView2Dev.InitializeController(ThemeService.GetThemingScript());
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
-                _ = Task.Run(() => AgentConnector.Connect())
+                _ = Task.Run(() => AgentClient.Start())
+                .ContinueWith(async x => 
+                {
+                    AgentService = AgentClient.CreateAgentService<IAgentService>();
+                    NotificationHandlers.SetAgentClient(AgentService);
+                    await InitializeService.Initialize(AgentService);
+                })
                 .ContinueWith(x =>
                 {
-                    var documentSyncCallback = new DocumentSyncCallback(AgentClientFactory, Logger);
+                    var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
                     DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
                     DocumentsSyncService.Initialize();
                 })

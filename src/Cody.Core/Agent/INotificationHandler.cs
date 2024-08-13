@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
-    public interface IAgentClientFactory
+    public interface INotificationHandler
     {
-        IAgentClient CreateAgentClient();
     }
 }

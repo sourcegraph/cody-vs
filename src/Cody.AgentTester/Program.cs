@@ -1,7 +1,8 @@
 using Cody.Core.Agent;
-using Cody.Core.Agent.Connector;
 using Cody.Core.Agent.Protocol;
+using Cody.VisualStudio.Client;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,29 +10,31 @@ namespace Cody.AgentTester
 {
     internal class Program
     {
-        private static AgentConnector connector;
+        private static AgentClient client;
         private static ConsoleLogger logger = new ConsoleLogger();
-        private static IAgentClient agentClient;
+        private static IAgentService agentService;
 
         static async Task Main(string[] args)
         {
             // Set the env var to 3113 when running with local agent.
-            var portNumber = int.TryParse(Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT"), out int port) ? port : (int?)null;
+            var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+            var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
-            var options = new AgentConnectorOptions
+            var options = new AgentClientOptions
             {
-                NotificationsTarget = new NotificationHandlers(),
+                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers() },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,
-                Port = portNumber,
+                ConnectToRemoteAgent = devPort != null,
+                RemoteAgentPort = portNumber,
             };
 
-            connector = new AgentConnector(options, logger);
+            client = new AgentClient(options, logger);
 
-            await connector.Connect();
+            client.Start();
 
-            agentClient = connector.CreateClient();
+            agentService = client.CreateAgentService<IAgentService>();
 
             await Initialize();
 
@@ -76,9 +79,9 @@ namespace Cody.AgentTester
                 }
             };
 
-            await agentClient.Initialize(clientInfo);
+            await agentService.Initialize(clientInfo);
 
-            agentClient.Initialized();
+            agentService.Initialized();
         }
 
 
