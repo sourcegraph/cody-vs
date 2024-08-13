@@ -1,26 +1,42 @@
 # Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
 
+# Matches Cody Main Repository
+[*]
+insert_final_newline = true
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[{*.json,*.yml,*.yaml,*.md}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[{*.sh, *.bash}]
+indent_style = space
+indent_size = 2
+switch_case_indent = true
+
+[**/{node_modules,dist}/**]
+ignore = true
+
 # C# files
 [*.cs]
 
 #### Core EditorConfig Options ####
 
 # Indentation and spacing
-indent_size = 4
-indent_style = space
 tab_width = 4
-
-# New line preferences
-end_of_line = crlf
-insert_final_newline = false
 
 #### .NET Coding Conventions ####
 
 # Organize usings
 dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
-file_header_template = unset
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false
@@ -232,9 +248,6 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
 [*.{cs,vb}]
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
-tab_width = 4
-indent_size = 4
-end_of_line = crlf
 dotnet_style_coalesce_expression = true:suggestion
 dotnet_style_null_propagation = true:suggestion
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
