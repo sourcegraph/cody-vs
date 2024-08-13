@@ -22,7 +22,7 @@ namespace Cody.VisualStudio.Tests
             CodyPackage = await GetPackageAsync();
             CodyPackage.Logger.Debug("CodyPackage loaded.");
 
-            CodyPackage.ShowToolWindow(this, EventArgs.Empty);
+            await CodyPackage.ShowToolWindowAsync();
             CodyPackage.Logger.Debug("Tool Window activated.");
 
             Playwright = await Microsoft.Playwright.Playwright.CreateAsync();

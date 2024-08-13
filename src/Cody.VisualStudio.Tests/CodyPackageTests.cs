@@ -40,7 +40,8 @@ namespace Cody.VisualStudio.Tests
             var codyPackage = await GetPackageAsync();
 
             // when
-            codyPackage.ShowToolWindow(this, EventArgs.Empty);
+            await codyPackage.ShowToolWindowAsync();
+            await Task.Delay(TimeSpan.FromSeconds(10)); // TODO: waiting for the agent to fully initialize WebView
 
             // then
             Assert.NotNull(codyPackage.MainView);
