@@ -95,19 +95,23 @@ namespace Cody.VisualStudio.Services
 
         private DocumentRange GetDocumentSelection(IVsTextView textView)
         {
+            bool swap = false;
             int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
             if (textView != null) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
+            
+            if(startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
+
             return new DocumentRange
             {
                 Start = new DocumentPosition
                 {
-                    Line = startLine,
-                    Column = startCol,
+                    Line = swap ? endLine : startLine,
+                    Column = swap ? endCol : startCol,
                 },
                 End = new DocumentPosition
                 {
-                    Line = endLine,
-                    Column = endCol,
+                    Line = swap ? startLine : endLine,
+                    Column = swap ? startCol : endCol,
                 }
             };
         }
