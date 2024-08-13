@@ -10,16 +10,15 @@
              d:DesignWidth="800"
              >
     <Grid>
-        <Grid Background="MediumPurple">
+        <Grid Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <wpf:WebView2 Name="webView" Grid.Row="1"
+            <wpf:WebView2 Name="webView" Grid.Row="1" Loaded="InitWebView2"
               
             />
         </Grid>
-
     </Grid>
 </UserControl>

@@ -1,7 +1,7 @@
 ﻿using Cody.Core.Agent.Protocol;
+using EnvDTE80;
 using Newtonsoft.Json.Linq;
 using System;
-using EnvDTE80;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -19,7 +19,14 @@ namespace Cody.Core.Agent
 
         public IAgentService agentClient;
 
-        public void SetAgentClient(IAgentService agentClient) => this.agentClient = agentClient;
+        private TaskCompletionSource<bool> agentClientReady = new TaskCompletionSource<bool>();
+
+
+        public void SetAgentClient(IAgentService client)
+        {
+            this.agentClient = client;
+            agentClientReady.SetResult(true);
+        }
 
         // Send a message to the host from webview.
         public async Task SendWebviewMessage(string handle, string message)
@@ -82,14 +89,15 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            System.Diagnostics.Debug.WriteLine(viewId, retainContextWhenHidden, "Agent registerWebviewViewProvider");
+            agentClientReady.Task.Wait();
             await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
             {
                 // cody.chat for sidebar view, or cody.editorPanel for editor panel
-                ViewId = "cody.chat",
+                ViewId = viewId,
                 // TODO: Create dynmically when we support editor panel
                 WebviewHandle = "visual-studio-sidebar",
             });
+            System.Diagnostics.Debug.WriteLine(viewId, retainContextWhenHidden, "Agent registerWebviewViewProvider");
         }
 
         [AgentNotification("webview/createWebviewPanel", deserializeToSingleObject: true)]
@@ -134,7 +142,7 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/didDisposeNative")]
         public void DidDisposeNative(string handle)
         {
-            
+
         }
 
         [AgentNotification("extensionConfiguration/didChange", deserializeToSingleObject: true)]

@@ -1,32 +1,32 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Cody.Core.Agent;
+using Cody.Core.DocumentSync;
+using Cody.Core.Ide;
+using Cody.Core.Inf;
+using Cody.Core.Infrastructure;
+using Cody.Core.Logging;
+using Cody.Core.Settings;
+using Cody.UI.Controls;
+using Cody.UI.Views;
+using Cody.VisualStudio.Client;
+using Cody.VisualStudio.Inf;
+using Cody.VisualStudio.Services;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Cody.Core.Ide;
-using Cody.Core.Inf;
-using Cody.Core.Logging;
-using Cody.UI.Views;
-using Cody.UI.Controls;
-using Cody.VisualStudio.Inf;
-using Cody.VisualStudio.Services;
 using Task = System.Threading.Tasks.Task;
-using System.Reflection;
-using System.IO;
-using Cody.Core.Settings;
-using Cody.Core.Infrastructure;
-using Cody.Core.Agent;
-using Cody.Core.DocumentSync;
-using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Shell.Interop;
-using Cody.VisualStudio.Client;
-using System.Collections.Generic;
 
 namespace Cody.VisualStudio
 {
@@ -104,6 +104,7 @@ namespace Cody.VisualStudio
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
             ThemeService = new ThemeService(this);
+            NotificationHandlers = new NotificationHandlers();
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
@@ -117,16 +118,14 @@ namespace Cody.VisualStudio
         {
             try
             {
-                var oleMenuService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-                if (oleMenuService != null)
+                if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService oleMenuService)
                 {
                     var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
-                    var menuItem = new MenuCommand(ShowToolWindow, commandId);
-                    oleMenuService.AddCommand(menuItem);
+                    oleMenuService.AddCommand(new MenuCommand(ShowToolWindow, commandId));
                 }
                 else
                 {
-                    Logger.Error($"Cannot get {typeof(OleMenuCommandService)}");
+                    throw new NotSupportedException($"Cannot get {nameof(OleMenuCommandService)}");
                 }
             }
             catch (Exception ex)
@@ -165,8 +164,6 @@ namespace Cody.VisualStudio
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
-                NotificationHandlers = new NotificationHandlers();
-
                 var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
                 var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
@@ -185,11 +182,11 @@ namespace Cody.VisualStudio
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
                 _ = Task.Run(() => AgentClient.Start())
-                .ContinueWith(async x => 
+                .ContinueWith(async x =>
                 {
                     AgentService = AgentClient.CreateAgentService<IAgentService>();
-                    NotificationHandlers.SetAgentClient(AgentService);
                     await InitializeService.Initialize(AgentService);
+                    NotificationHandlers.SetAgentClient(AgentService);
                 })
                 .ContinueWith(x =>
                 {
