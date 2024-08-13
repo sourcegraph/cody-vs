@@ -30,5 +30,9 @@ jobs:
         corepack enable
         corepack install --global pnpm@8.6.7
         dotnet cake
-        dotnet test .\Cody.VisualStudio.Tests\bin\Release\Cody.VisualStudio.Tests.dll
+
+    - name: UI Integration Tests
+      run: |
+        cd src
+        dotnet cake --target Test
         
