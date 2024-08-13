@@ -91,6 +91,13 @@ namespace Cody.Core.Agent.Connector
             }
 
             client.Initialized();
+            await client.ResolveWebviewView(new ResolveWebviewViewParams
+            {
+                // cody.chat for sidebar view, or cody.editorPanel for editor panel
+                ViewId = "cody.chat",
+                // TODO: Create dynmically when we support editor panel
+                WebviewHandle = "visual-studio-sidebar",
+            });
         }
     }
 }
