@@ -118,16 +118,14 @@ namespace Cody.VisualStudio
         {
             try
             {
-                var oleMenuService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-                if (oleMenuService != null)
+                if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService oleMenuService)
                 {
                     var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
-                    var menuItem = new MenuCommand(ShowToolWindow, commandId);
-                    oleMenuService.AddCommand(menuItem);
+                    oleMenuService.AddCommand(new MenuCommand(ShowToolWindow, commandId));
                 }
                 else
                 {
-                    Logger.Error($"Cannot get {typeof(OleMenuCommandService)}");
+                    throw new NotSupportedException($"Cannot get {nameof(OleMenuCommandService)}");
                 }
             }
             catch (Exception ex)
