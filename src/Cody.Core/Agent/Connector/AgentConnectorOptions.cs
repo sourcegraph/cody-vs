@@ -18,8 +18,7 @@ namespace Cody.Core.Agent.Connector
         public int? Port { get; set; }
 
         public string AgentDirectory { get; set; }
-
-        public Action<IAgentClient> AfterConnection { get; set; }
+        public Func<IAgentClient, Task> AfterConnection { get; set; }
 
         public Action<IAgentClient> BeforeDisconnection { get; set; }
 

@@ -20,7 +20,7 @@ namespace Cody.UI.ViewModels
             NotificationHandlers.OnSetHtmlEvent += OnSetHtmlHandler;
             NotificationHandlers.OnPostMessageEvent += OnPostMessageHandler;
 
-            _logger.Debug("Initialized.");
+            _logger.Debug("MainViewModel Initialized.");
         }
 
         private void OnPostMessageHandler(object sender, AgentResponseEvent e)

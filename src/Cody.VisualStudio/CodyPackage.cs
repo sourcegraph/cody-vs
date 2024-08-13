@@ -1,31 +1,31 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Cody.Core.Agent;
+using Cody.Core.Agent.Connector;
+using Cody.Core.DocumentSync;
+using Cody.Core.Ide;
+using Cody.Core.Inf;
+using Cody.Core.Infrastructure;
+using Cody.Core.Logging;
+using Cody.Core.Settings;
+using Cody.UI.Controls;
+using Cody.UI.Views;
+using Cody.VisualStudio.Inf;
+using Cody.VisualStudio.Services;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Cody.Core.Ide;
-using Cody.Core.Inf;
-using Cody.Core.Logging;
-using Cody.UI.Views;
-using Cody.UI.Controls;
-using Cody.VisualStudio.Inf;
-using Cody.VisualStudio.Services;
 using Task = System.Threading.Tasks.Task;
-using System.Reflection;
-using System.IO;
-using Cody.Core.Settings;
-using Cody.Core.Infrastructure;
-using Cody.Core.Agent.Connector;
-using Cody.Core.Agent;
-using Cody.Core.DocumentSync;
-using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Cody.VisualStudio
 {
@@ -103,6 +103,7 @@ namespace Cody.VisualStudio
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
             ThemeService = new ThemeService(this);
+            NotificationHandlers = new NotificationHandlers();
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
@@ -164,7 +165,6 @@ namespace Cody.VisualStudio
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
-                NotificationHandlers = new NotificationHandlers();
                 // Set the env var to 3113 when running with local agent.
                 var portNumber = int.TryParse(Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT"), out int port) ? port : (int?)null;
 
@@ -173,17 +173,17 @@ namespace Cody.VisualStudio
                     NotificationsTarget = NotificationHandlers,
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
-                    AfterConnection = (client) => InitializeService.Initialize(client),
+                    AfterConnection = async (client) => await InitializeService.Initialize(client),
                     Port = portNumber,
                 };
-
-                AgentConnector = new AgentConnector(options, Logger);
-                AgentClientFactory = new AgentClientFactory(AgentConnector);
 
                 WebView2Dev.InitializeController(ThemeService.GetThemingScript());
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
-                _ = Task.Run(() => AgentConnector.Connect())
+                AgentConnector = new AgentConnector(options, Logger);
+                AgentClientFactory = new AgentClientFactory(AgentConnector);
+
+                _ = Task.Run(async () => await AgentConnector.Connect())
                 .ContinueWith(x =>
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentClientFactory, Logger);

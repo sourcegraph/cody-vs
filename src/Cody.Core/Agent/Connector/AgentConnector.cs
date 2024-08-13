@@ -3,9 +3,6 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent.Connector
@@ -54,13 +51,16 @@ namespace Cody.Core.Agent.Connector
 
             if (options.NotificationsTarget != null) jsonRpc.AddLocalRpcTarget(options.NotificationsTarget);
             agentClient = jsonRpc.Attach<IAgentClient>();
-            options.NotificationsTarget.SetAgentClient(agentClient);
 
             jsonRpc.StartListening();
             IsConnected = true;
-            log.Info("A connection with the agent has been established.");
 
-            if (options.AfterConnection != null) options.AfterConnection(agentClient);
+            if (options.AfterConnection != null) await options.AfterConnection(agentClient);
+
+            // Makes sure the notifications target is set after the connection is established.
+            options.NotificationsTarget.SetAgentClient(agentClient);
+
+            log.Info("A connection with the agent has been established.");
         }
 
         private void OnAgentExit(int exitCode)

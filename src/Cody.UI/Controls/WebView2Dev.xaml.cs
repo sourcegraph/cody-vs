@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Cody.Core.Agent;
+using Microsoft.Web.WebView2.Core;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Web.WebView2.Core;
-using System.IO;
 using System.Windows.Input;
-using Cody.Core.Agent;
 
 namespace Cody.UI.Controls
 {
@@ -17,15 +17,16 @@ namespace Cody.UI.Controls
 
         private static WebviewController _controller = new WebviewController();
 
+
         public WebView2Dev()
         {
             InitializeComponent();
-            InitializeWebView();
+            System.Diagnostics.Debug.WriteLine("InitializeComponent", "WebView2Dev");
         }
 
-        private void InitWebView2(object sender, RoutedEventArgs e)
+        private async void InitWebView2(object sender, RoutedEventArgs e)
         {
-            InitializeWebView();
+            await InitializeWebView();
         }
 
         public static WebviewController InitializeController(string themeScript)
@@ -34,14 +35,15 @@ namespace Cody.UI.Controls
             return _controller;
         }
 
-        private async Task<CoreWebView2> InitializeWebView()
+        private async Task InitializeWebView()
         {
             var env = await CreateWebView2Environment();
             await webView.EnsureCoreWebView2Async(env);
 
             _controller.WebViewMessageReceived += (sender, message) => SendMessage?.Execute(message);
 
-            return await _controller.InitializeWebView(webView.CoreWebView2);
+            await _controller.InitializeWebView(webView.CoreWebView2);
+            System.Diagnostics.Debug.WriteLine("InitializeWebView", "WebView2Dev");
         }
 
         private async Task<CoreWebView2Environment> CreateWebView2Environment()

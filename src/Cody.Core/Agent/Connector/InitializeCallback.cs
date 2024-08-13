@@ -5,10 +5,7 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent.Connector
@@ -91,13 +88,6 @@ namespace Cody.Core.Agent.Connector
             }
 
             client.Initialized();
-            await client.ResolveWebviewView(new ResolveWebviewViewParams
-            {
-                // cody.chat for sidebar view, or cody.editorPanel for editor panel
-                ViewId = "cody.chat",
-                // TODO: Create dynmically when we support editor panel
-                WebviewHandle = "visual-studio-sidebar",
-            });
         }
     }
 }
