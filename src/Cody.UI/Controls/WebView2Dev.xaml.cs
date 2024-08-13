@@ -17,6 +17,7 @@ namespace Cody.UI.Controls
 
         private static WebviewController _controller = new WebviewController();
 
+        private bool isInitialized = false;
 
         public WebView2Dev()
         {
@@ -37,8 +38,12 @@ namespace Cody.UI.Controls
 
         private async Task InitializeWebView()
         {
-            var env = await CreateWebView2Environment();
-            await webView.EnsureCoreWebView2Async(env);
+            if (isInitialized != true)
+            {
+                var env = await CreateWebView2Environment();
+                await webView.EnsureCoreWebView2Async(env);
+                isInitialized = true;
+            }
 
             _controller.WebViewMessageReceived += (sender, message) => SendMessage?.Execute(message);
 
