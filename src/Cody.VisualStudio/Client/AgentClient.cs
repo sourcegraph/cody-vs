@@ -115,5 +115,4 @@ namespace Cody.VisualStudio.Client
             log.Info("The connection with the agent has been terminated.");
         }
     }
-
 }

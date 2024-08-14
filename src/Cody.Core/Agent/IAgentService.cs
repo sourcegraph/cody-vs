@@ -15,16 +15,13 @@ namespace Cody.Core.Agent
         void Initialized();
 
         [AgentMethod("git/codebaseName")]
-        Task<string> GetGitCodebaseName(string url);
+        Task<string> GetGitCodebaseName(CodyFilePath path);
 
         [AgentMethod("webview/resolveWebviewView")]
         Task ResolveWebviewView(ResolveWebviewViewParams paramValue);
 
         [AgentMethod("webview/receiveMessageStringEncoded")]
         Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
-
-        [AgentMethod("env/openExternal")]
-        Task OpenExternal(string url);
 
         [AgentMethod("textDocument/didOpen")]
         void DidOpen(ProtocolTextDocument docState);
@@ -33,10 +30,10 @@ namespace Cody.Core.Agent
         void DidChange(ProtocolTextDocument docState);
 
         [AgentMethod("textDocument/didFocus")]
-        void DidFocus(string uri);
+        void DidFocus(CodyFilePath path);
 
         [AgentMethod("textDocument/didSave")]
-        void DidSave(string uri);
+        void DidSave(CodyFilePath path);
 
         [AgentMethod("textDocument/didClose")]
         void DidClose(ProtocolTextDocument docState);
@@ -51,7 +48,6 @@ namespace Cody.Core.Agent
         Task<ChatPanelInfo> NewEditorChat();
 
         [AgentMethod("workspaceFolder/didChange")]
-        void WorkspaceFolderDidChange(string uri);
+        Task WorkspaceFolderDidChange(CodyFilePath path);
     }
 }
-

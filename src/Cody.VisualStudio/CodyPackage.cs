@@ -1,4 +1,5 @@
 ﻿using Cody.Core.Agent;
+using Cody.Core.Agent.Protocol;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -200,7 +201,7 @@ namespace Cody.VisualStudio
                 {
                     if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
                     SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
-                    SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution; 
+                    SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
                 })
                 .ContinueWith(t =>
                 {
@@ -219,8 +220,7 @@ namespace Cody.VisualStudio
             try
             {
                 var solutionUri = new Uri(SolutionService.GetSolutionDirectory()).AbsoluteUri;
-                AgentService.WorkspaceFolderDidChange(solutionUri);
-
+                AgentService.WorkspaceFolderDidChange(new CodyFilePath { Uri = solutionUri });
 
                 if (DocumentsSyncService == null)
                 {
@@ -239,10 +239,11 @@ namespace Cody.VisualStudio
         {
             try
             {
-                DocumentsSyncService.Deinitialize();
-                AgentService.WorkspaceFolderDidChange(null);
+                DocumentsSyncService?.Deinitialize();
+                // TODO: Implement workspace folder on close.
+                // AgentService.WorkspaceFolderDidChange(new CodyFilePath { Uri = "" });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logger?.Error("After close solution error.", ex);
             }

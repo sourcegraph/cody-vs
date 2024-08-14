@@ -4,8 +4,6 @@ using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
-using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -37,23 +35,20 @@ namespace Cody.Core.Agent
 
         public async Task Initialize(IAgentService client)
         {
-            var solutionDir = solutionService.GetSolutionDirectory();
-            var workspaceUri = solutionDir != null ? new Uri(solutionDir).AbsoluteUri : null;
-
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = workspaceUri,
+                WorkspaceRootUri = solutionService.GetSolutionDirectory(),
                 Capabilities = new ClientCapabilities
                 {
-                    Edit = Capability.Enabled,
-                    EditWorkspace = Capability.Enabled,
+                    Edit = Capability.None,
+                    EditWorkspace = Capability.None,
                     CodeLenses = Capability.None,
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
-                    UntitledDocuments = Capability.Enabled,
+                    UntitledDocuments = Capability.None,
                     Webview = "native",
                     WebviewNativeConfig = new WebviewCapabilities
                     {
@@ -71,7 +66,6 @@ namespace Cody.Core.Agent
                     AutocompleteAdvancedProvider = null,
                     Debug = true,
                     VerboseDebug = true,
-                    // Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
