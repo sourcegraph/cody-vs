@@ -2,14 +2,16 @@
 
 ## Prerequisites
 
-1. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
+1. Install [chocolatey](https://chocolatey.org/install) - Package Manager for Windows
+   1. `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+2. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
    1. `choco install pnpm --version=8.6.7`
-2. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
+3. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
    1. Visual Studio Extension
-3. Install [git for Windows](https://gitforwindows.org)
+4. Install [git for Windows](https://gitforwindows.org)
    1. Configure it with `git config core.autocrlf false` to not change line endings
-4. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
-5. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
+5. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
+6. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
 
 For Sourcegraph teammates:
 
