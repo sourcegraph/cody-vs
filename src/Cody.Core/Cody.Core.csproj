@@ -62,6 +62,7 @@
     <Compile Include="Agent\INotificationHandler.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
+    <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
     <Compile Include="Agent\Protocol\ClientCapabilities.cs" />
     <Compile Include="Agent\Protocol\ClientInfo.cs" />
     <Compile Include="Agent\Protocol\ConfigOverwrites.cs" />

@@ -1,8 +1,4 @@
 ﻿using Cody.Core.Agent.Protocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -44,6 +40,15 @@ namespace Cody.Core.Agent
 
         [AgentMethod("textDocument/didClose")]
         void DidClose(ProtocolTextDocument docState);
+
+        [AgentMethod("chat/new")]
+        Task<string> NewChat();
+
+        [AgentMethod("chat/sidebar/new")]
+        Task<ChatPanelInfo> NewSidebarChat();
+
+        [AgentMethod("chat/web/new")]
+        Task<ChatPanelInfo> NewEditorChat();
     }
 }
 

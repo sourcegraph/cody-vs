@@ -2,6 +2,7 @@
 using EnvDTE80;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -11,6 +12,7 @@ namespace Cody.Core.Agent
         public NotificationHandlers()
         {
         }
+
         public delegate Task PostWebMessageAsJsonDelegate(string message);
         public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
 
@@ -24,49 +26,32 @@ namespace Cody.Core.Agent
 
         public void SetAgentClient(IAgentService client)
         {
-            this.agentClient = client;
+            agentClient = client;
             agentClientReady.SetResult(true);
         }
 
         // Send a message to the host from webview.
         public async Task SendWebviewMessage(string handle, string message)
         {
-            // Turn message into a JSON object
-            var json = JObject.Parse(message);
-            var command = json["command"]?.ToString();
-
-            switch (command)
+            try
             {
-                case "links":
-                    var link = json["value"]?.ToString();
-                    if (!string.IsNullOrEmpty(link))
-                    {
-                        // if the is links, open the link in the default browser
-                        // string link = json["value"].ToString();
-                        // System.Diagnostics.Process.Start(link);
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(link) { UseShellExecute = true });
-                    }
-                    return;
-
-                case "command":
+                var json = JObject.Parse(message);
+                var command = json["command"]?.ToString();
+                if (command == "command")
+                {
                     var id = json["id"]?.ToString();
-                    // Open the extension options page for authentication related commands.
-                    if (id == "cody.status-bar.interacted" || id.StartsWith("cody.auth.signin") || id.StartsWith("cody.auth.signout"))
+                    if (id == "cody.status-bar.interacted" || id?.StartsWith("cody.auth.signin") == true)
                     {
-                        try
-                        {
-                            var dte = (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject("VisualStudio.DTE");
-                            dte.ExecuteCommand("Tools.Options", "Cody.General");
-                        }
-                        catch (System.Runtime.InteropServices.COMException)
-                        {
-                            // Handle the case where Visual Studio is not running or COM object is not accessible
-                        }
+                        var dte = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE");
+                        dte.ExecuteCommand("Tools.Options", "Cody.General");
                         return;
                     }
-                    break;
+                }
             }
-
+            catch
+            {
+                // Ignore
+            }
             await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
             {
                 Id = handle,
@@ -77,18 +62,19 @@ namespace Cody.Core.Agent
         [AgentNotification("debug/message")]
         public void Debug(string channel, string message)
         {
-            System.Diagnostics.Debug.WriteLine(message, "Agent Debug");
+            DebugLog(message, "Debug");
         }
 
         [AgentNotification("webview/registerWebview")]
         public void RegisterWebview(string handle)
         {
-            System.Diagnostics.Debug.WriteLine(handle, "Agent registerWebview");
+            DebugLog(handle, "RegisterWebview");
         }
 
         [AgentNotification("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
+            DebugLog(viewId, "RegisterWebviewViewProvider");
             agentClientReady.Task.Wait();
             await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
             {
@@ -97,13 +83,12 @@ namespace Cody.Core.Agent
                 // TODO: Create dynmically when we support editor panel
                 WebviewHandle = "visual-studio-sidebar",
             });
-            System.Diagnostics.Debug.WriteLine(viewId, retainContextWhenHidden, "Agent registerWebviewViewProvider");
         }
 
         [AgentNotification("webview/createWebviewPanel", deserializeToSingleObject: true)]
         public void CreateWebviewPanel(CreateWebviewPanelParams panelParams)
         {
-            System.Diagnostics.Debug.WriteLine(panelParams, "Agent createWebviewPanel");
+            DebugLog(panelParams.ToString(), "CreateWebviewPanel");
         }
 
         [AgentNotification("webview/setOptions")]
@@ -111,7 +96,7 @@ namespace Cody.Core.Agent
         {
             if (options.EnableCommandUris is bool enableCmd)
             {
-
+                DebugLog(handle, "SetOptions");
             }
             else if (options.EnableCommandUris is JArray jArray)
             {
@@ -122,7 +107,7 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
-            System.Diagnostics.Debug.WriteLine(html, "Agent setHtml");
+            DebugLog(html, "SetHtml");
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() { Handle = handle, Html = html });
         }
 
@@ -135,45 +120,68 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
-            System.Diagnostics.Debug.WriteLine(stringEncodedMessage, "Agent postMessageStringEncoded");
+            DebugLog(stringEncodedMessage, "PostMessageStringEncoded");
             PostWebMessageAsJson?.Invoke(stringEncodedMessage);
         }
 
         [AgentNotification("webview/didDisposeNative")]
         public void DidDisposeNative(string handle)
         {
-
-        }
-
-        [AgentNotification("extensionConfiguration/didChange", deserializeToSingleObject: true)]
-        public void ExtensionConfigDidChange(ExtensionConfiguration config)
-        {
-            System.Diagnostics.Debug.WriteLine(config, "Agent didChange");
+            DebugLog(handle, "DidDisposeNative");
         }
 
         [AgentNotification("webview/dispose")]
         public void Dispose(string handle)
         {
-            System.Diagnostics.Debug.WriteLine(handle, "Agent dispose");
+            DebugLog(handle, "Dispose");
         }
 
         [AgentNotification("webview/reveal")]
         public void Reveal(string handle, int viewColumn, bool preserveFocus)
         {
-            System.Diagnostics.Debug.WriteLine(handle, "Agent reveal");
+            DebugLog(handle, "Reveal");
         }
 
         [AgentNotification("webview/setTitle")]
         public void SetTitle(string handle, string title)
         {
-            System.Diagnostics.Debug.WriteLine(title, "Agent setTitle");
+            DebugLog(title, "SetTitle");
         }
 
         [AgentNotification("webview/setIconPath")]
         public void SetIconPath(string handle, string iconPathUri)
         {
-            System.Diagnostics.Debug.WriteLine(iconPathUri, "Agent setIconPath");
+            DebugLog(iconPathUri, "SetIconPath");
         }
 
+        [AgentNotification("window/didChangeContext")]
+        public void WindowDidChangeContext(string key, string value)
+        {
+            DebugLog(value, $@"WindowDidChangeContext Key - {key}");
+
+            // Check the value to see if Cody is activated or deactivated
+            // Deactivated: value = "false", meaning user is no longer authenticated.
+            // In this case, we can send Agent a request to get the latest user AuthStatus to
+            // confirm if the user is logged out or not.
+            if (key == "cody.activated")
+            {
+                var isAuthenticated = value == "true";
+                DebugLog(isAuthenticated.ToString(), "User is authenticated");
+            }
+        }
+
+        [AgentNotification("extensionConfiguration/didChange", deserializeToSingleObject: true)]
+        public void ExtensionConfigDidChange(ExtensionConfiguration config)
+        {
+            DebugLog(config.ToString(), "didChange");
+        }
+
+        public void DebugLog(string message, string origin)
+        {
+            // Log the message to the debug console when in debug mode.
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine(message, $@"Agent Notified {origin}");
+#endif
+        }
     }
 }

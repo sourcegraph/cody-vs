@@ -11,8 +11,6 @@ namespace Cody.UI.Controls
     {
         private CoreWebView2 _webview;
 
-        public CoreWebView2 GetWebview => _webview;
-
         public string colorThemeScript;
 
         public event EventHandler<string> WebViewMessageReceived;
@@ -31,22 +29,7 @@ namespace Cody.UI.Controls
             ConfigureWebView();
             SetupResourceHandling();
 
-            webView.OpenDevToolsWindow();
-
             return webView;
-        }
-
-        private async Task<CoreWebView2Environment> CreateWebView2Environment()
-        {
-            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
-            var options = new CoreWebView2EnvironmentOptions
-            {
-#if DEBUG
-                AdditionalBrowserArguments = "--remote-debugging-port=9222 --disable-web-security --allow-file-access-from-files",
-                AllowSingleSignOnUsingOSPrimaryAccount = true,
-#endif
-            };
-            return await CoreWebView2Environment.CreateAsync(null, appData, options);
         }
 
         private void ConfigureWebView()
@@ -57,14 +40,19 @@ namespace Cody.UI.Controls
             _webview.Settings.AreHostObjectsAllowed = true;
             _webview.Settings.IsScriptEnabled = true;
             _webview.Settings.AreBrowserAcceleratorKeysEnabled = true;
-            _webview.Settings.AreDevToolsEnabled = true;
             _webview.Settings.IsGeneralAutofillEnabled = true;
+            // Enable below settings only in DEBUG mode.
+            _webview.Settings.AreDefaultContextMenusEnabled = false;
+            _webview.Settings.AreDevToolsEnabled = false;
+#if DEBUG
+            _webview.Settings.AreDefaultContextMenusEnabled = true;
+            _webview.Settings.AreDevToolsEnabled = true;
+#endif
         }
 
         private void SetupEventHandlers()
         {
             _webview.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
-            _webview.NavigationCompleted += CoreWebView2OnNavigationCompleted;
             _webview.WebMessageReceived += HandleWebViewMessage;
         }
 
@@ -103,12 +91,6 @@ namespace Cody.UI.Controls
             return "Content-Type: text/html";
         }
 
-
-        private async void CoreWebView2OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
-        {
-            await ApplyThemingScript();
-        }
-
         private async void CoreWebView2OnDOMContentLoaded(object sender, CoreWebView2DOMContentLoadedEventArgs e)
         {
             await ApplyThemingScript();
@@ -116,18 +98,21 @@ namespace Cody.UI.Controls
 
         private void HandleWebViewMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
+            // Handle message sent from webview to agent.
             var message = e.TryGetWebMessageAsString();
-            System.Diagnostics.Debug.WriteLine(message, "Agent HandleWebViewMessage");
             WebViewMessageReceived.Invoke(this, message);
+            // TODO: Get token from message if message has a token.
+            // IMPORTANT: Do not log the token to the console in production.
+            System.Diagnostics.Debug.WriteLine(message, "Agent HandleWebViewMessage");
         }
 
         public async Task PostWebMessageAsJson(string message)
         {
-            await Application.Current.Dispatcher.InvokeAsync(async () =>
+            // From agent to webview.
+            await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson");
                 _webview.PostWebMessageAsJson(message);
-                await _webview.ExecuteScriptWithResultAsync(GetPostMessageScript(message));
+                System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson");
             });
         }
 
@@ -153,6 +138,14 @@ namespace Cody.UI.Controls
             globalThis.acquireVsCodeApi = (function() {
                 let acquired = false;
                 let state = undefined;
+
+                window.chrome.webview.addEventListener('message', e => {
+                    console.log('Send to webview', e.data)
+                    const event = new CustomEvent('message');
+                    event.data = e.data;
+                    window.dispatchEvent(event)
+                });
+
                 return () => {
                     if (acquired && !false) {
                         throw new Error('An instance of the VS Code API has already been acquired');
@@ -160,12 +153,12 @@ namespace Cody.UI.Controls
                     acquired = true;
                     return Object.freeze({
                         postMessage: function(message) {
-                            console.log(`do-postMessage: ${JSON.stringify(message)}`);
+                            console.log(`Send from webview: ${JSON.stringify(message)}`);
                             window.chrome.webview.postMessage(JSON.stringify(message));
                         },
                         setState: function(newState) {
                             state = newState;
-                            console.log(`do-setState: ${JSON.stringify(newState)}`);
+                            console.log(`Set State: ${JSON.stringify(newState)}`);
                             return newState;
                         },
                         getState: function() {
@@ -183,15 +176,6 @@ namespace Cody.UI.Controls
             document.documentElement.dataset.ide = 'VisualStudio';
             
             {colorTheme}
-        ";
-
-        private static string GetPostMessageScript(string message) => $@"
-            (() => {{
-                const event = new CustomEvent('message');
-                console.log('PostWebMessageAsJson', {message});
-                event.data = {message};
-                window.dispatchEvent(event);
-            }})()
         ";
     }
 }
