@@ -1,0 +1,33 @@
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+# Matches Cody Main Repository
+[*]
+insert_final_newline = true
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[{*.json,*.yml,*.yaml,*.md}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[{*.sh, *.bash}]
+indent_style = space
+indent_size = 2
+switch_case_indent = true
+
+[**/{node_modules,dist}/**]
+ignore = true
+
+# C# files
+[*.cs]
+
+#### Core EditorConfig Options ####
+
+# Indentation and spacing
+tab_width = 4
