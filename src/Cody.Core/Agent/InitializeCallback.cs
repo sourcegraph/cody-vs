@@ -16,6 +16,7 @@ namespace Cody.Core.Agent
         private readonly IVersionService versionService;
         private readonly IVsVersionService vsVersionService;
         private readonly IStatusbarService statusbarService;
+        private readonly ISolutionService solutionService;
         private readonly ILog log;
 
         public InitializeCallback(
@@ -23,27 +24,28 @@ namespace Cody.Core.Agent
             IVersionService versionService,
             IVsVersionService vsVersionService,
             IStatusbarService statusbarService,
+            ISolutionService solutionService,
             ILog log)
         {
             this.userSettingsService = userSettingsService;
             this.versionService = versionService;
             this.vsVersionService = vsVersionService;
             this.statusbarService = statusbarService;
+            this.solutionService = solutionService;
             this.log = log;
         }
 
         public async Task Initialize(IAgentService client)
         {
-            // TODO: Get the solution directory path that the user is working on.
-            var solutionDirPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var wf = Path.Combine(solutionDirPath, "source", "repos");
+            var solutionDir = solutionService.GetSolutionDirectory();
+            var workspaceUri = solutionDir != null ? new Uri(solutionDir).AbsoluteUri : null;
 
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = new Uri(wf).ToString(),
+                WorkspaceRootUri = workspaceUri,
                 Capabilities = new ClientCapabilities
                 {
                     Edit = Capability.Enabled,

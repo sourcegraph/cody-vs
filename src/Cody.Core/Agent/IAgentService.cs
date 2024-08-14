@@ -49,6 +49,9 @@ namespace Cody.Core.Agent
 
         [AgentMethod("chat/web/new")]
         Task<ChatPanelInfo> NewEditorChat();
+
+        [AgentMethod("workspaceFolder/didChange")]
+        void WorkspaceFolderDidChange(string uri);
     }
 }
 
