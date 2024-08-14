@@ -15,6 +15,7 @@ namespace Cody.VisualStudio.Services
     public class DocumentsSyncService : IVsRunningDocTableEvents
     {
         private RunningDocumentTable rdt;
+        private uint rdtCookie = 0;
 
         private readonly IVsUIShell vsUIShell;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
@@ -47,7 +48,16 @@ namespace Cody.VisualStudio.Services
                 documentActions.OnOpened(path, content, visibleRange, docRange);
             }
 
-            rdt.Advise(this);
+            rdtCookie = rdt.Advise(this);
+        }
+
+        public void Deinitialize()
+        {
+            if (rdtCookie != 0)
+            {
+                rdt.Unadvise(rdtCookie);
+                rdtCookie = 0;
+            }
         }
 
         private IEnumerable<IVsWindowFrame> GetOpenDocuments()

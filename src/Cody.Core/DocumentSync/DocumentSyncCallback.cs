@@ -4,9 +4,7 @@ using Cody.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Cody.Core.DocumentSync
 {
@@ -104,7 +102,7 @@ namespace Cody.Core.DocumentSync
         public void OnFocus(string fullPath)
         {
             logger.Debug($"Sending DidFocus() for '{fullPath}'");
-            agentService.DidFocus(ToUri(fullPath));
+            agentService.DidFocus(new CodyFilePath { Uri = ToUri(fullPath) });
 
         }
 
@@ -157,7 +155,7 @@ namespace Cody.Core.DocumentSync
         {
             logger.Debug($"Sending DidSave() for '{fullPath}'");
 
-            agentService.DidSave(ToUri(fullPath));
+            agentService.DidSave(new CodyFilePath { Uri = ToUri(fullPath) });
         }
     }
 }

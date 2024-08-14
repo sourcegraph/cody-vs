@@ -1,4 +1,5 @@
 ﻿using Cody.Core.Agent;
+using Cody.Core.Agent.Protocol;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -10,9 +11,11 @@ using Cody.UI.Views;
 using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Services;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
@@ -52,6 +55,7 @@ namespace Cody.VisualStudio
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideOptionPage(typeof(OptionsPage), "Cody", "General", 0, 0, true)]
     [ProvideToolWindow(typeof(CodyToolWindow), Style = VsDockStyle.Tabbed, Window = VsConstants.VsWindowKindSolutionExplorer)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
     public sealed class CodyPackage : AsyncPackage
     {
 
@@ -71,6 +75,7 @@ namespace Cody.VisualStudio
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
         public IVsUIShell VsUIShell;
         public DocumentsSyncService DocumentsSyncService;
+        public ISolutionService SolutionService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -82,6 +87,8 @@ namespace Cody.VisualStudio
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+
 
                 InitializeServices();
                 await InitOleMenu();
@@ -98,11 +105,13 @@ namespace Cody.VisualStudio
         {
             var loggerFactory = new LoggerFactory();
             Logger = loggerFactory.Create();
+            var vsSolution = this.GetService<SVsSolution, IVsSolution>();
+            SolutionService = new SolutionService(vsSolution);
             VersionService = loggerFactory.GetVersionService();
             VsVersionService = new VsVersionService(Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
             StatusbarService = new StatusbarService();
-            InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, Logger);
+            InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
             NotificationHandlers = new NotificationHandlers();
 
@@ -190,9 +199,9 @@ namespace Cody.VisualStudio
                 })
                 .ContinueWith(x =>
                 {
-                    var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
-                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
-                    DocumentsSyncService.Initialize();
+                    if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
+                    SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
+                    SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
                 })
                 .ContinueWith(t =>
                 {
@@ -205,6 +214,41 @@ namespace Cody.VisualStudio
                 Logger?.Error("Cannot initialize agent.", ex);
             }
         }
+
+        private void OnAfterBackgroundSolutionLoadComplete(object sender = null, EventArgs e = null)
+        {
+            try
+            {
+                var solutionUri = new Uri(SolutionService.GetSolutionDirectory()).AbsoluteUri;
+                AgentService.WorkspaceFolderDidChange(new CodyFilePath { Uri = solutionUri });
+
+                if (DocumentsSyncService == null)
+                {
+                    var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
+                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
+                }
+                DocumentsSyncService.Initialize();
+            }
+            catch (Exception ex)
+            {
+                Logger?.Error("After open solution error.", ex);
+            }
+        }
+
+        private void OnAfterCloseSolution(object sender, EventArgs e)
+        {
+            try
+            {
+                DocumentsSyncService?.Deinitialize();
+                // TODO: Implement workspace folder on close.
+                // AgentService.WorkspaceFolderDidChange(new CodyFilePath { Uri = "" });
+            }
+            catch (Exception ex)
+            {
+                Logger?.Error("After close solution error.", ex);
+            }
+        }
+
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

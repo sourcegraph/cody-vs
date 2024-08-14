@@ -2,6 +2,7 @@
 using EnvDTE80;
 using Newtonsoft.Json.Linq;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -174,6 +175,43 @@ namespace Cody.Core.Agent
         public void ExtensionConfigDidChange(ExtensionConfiguration config)
         {
             DebugLog(config.ToString(), "didChange");
+        }
+
+        [AgentNotification("ignore/didChange")]
+        public void IgnoreDidChange()
+        {
+            DebugLog("Changed", "IgnoreDidChange");
+        }
+
+        // REQUEST FROM AGENT
+        [AgentNotification("textDocument/show")]
+        public Task<bool> ShowTextDocument(TextDocumentShowParams param)
+        {
+            DebugLog(param.Uri, "ShowTextDocument");
+            OpenAgentTextDocument(new Uri(param.Uri).ToString());
+            return Task.FromResult(true);
+        }
+
+        [AgentNotification("env/openExternal")]
+        public Task<bool> OpenExternalLink(CodyFilePath path)
+        {
+            DebugLog(path.Uri, "OpenExternalLink");
+            if (Uri.TryCreate(path.Uri, UriKind.RelativeOrAbsolute, out var uri))
+            {
+                if (uri.IsFile)
+                {
+                    OpenAgentTextDocument(uri.LocalPath); // Use LocalPath for files
+                }
+            }
+            // Open the URL in the default browser
+            System.Diagnostics.Process.Start(path.Uri);
+            return Task.FromResult(true);
+        }
+
+        private void OpenAgentTextDocument(string uri)
+        {
+            var dte = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE");
+            dte.ItemOperations.OpenFile(uri);
         }
 
         public void DebugLog(string message, string origin)

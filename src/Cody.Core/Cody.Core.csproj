@@ -63,6 +63,9 @@
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\TextDocumentShowParamsOptions.cs" />
+    <Compile Include="Agent\Protocol\TextDocumentShowParams.cs" />
+    <Compile Include="Agent\Protocol\CodyFilePath.cs" />
     <Compile Include="Agent\Protocol\ClientCapabilities.cs" />
     <Compile Include="Agent\Protocol\ClientInfo.cs" />
     <Compile Include="Agent\Protocol\ConfigOverwrites.cs" />
@@ -83,6 +86,7 @@
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />
+    <Compile Include="Infrastructure\ISolutionService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />
     <Compile Include="Infrastructure\VersionService.cs" />
     <Compile Include="Infrastructure\IVersionService.cs" />

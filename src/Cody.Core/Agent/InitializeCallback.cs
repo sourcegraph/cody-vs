@@ -4,8 +4,6 @@ using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
-using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -16,6 +14,7 @@ namespace Cody.Core.Agent
         private readonly IVersionService versionService;
         private readonly IVsVersionService vsVersionService;
         private readonly IStatusbarService statusbarService;
+        private readonly ISolutionService solutionService;
         private readonly ILog log;
 
         public InitializeCallback(
@@ -23,35 +22,33 @@ namespace Cody.Core.Agent
             IVersionService versionService,
             IVsVersionService vsVersionService,
             IStatusbarService statusbarService,
+            ISolutionService solutionService,
             ILog log)
         {
             this.userSettingsService = userSettingsService;
             this.versionService = versionService;
             this.vsVersionService = vsVersionService;
             this.statusbarService = statusbarService;
+            this.solutionService = solutionService;
             this.log = log;
         }
 
         public async Task Initialize(IAgentService client)
         {
-            // TODO: Get the solution directory path that the user is working on.
-            var solutionDirPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var wf = Path.Combine(solutionDirPath, "source", "repos");
-
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = versionService.Full,
                 IdeVersion = vsVersionService.Version.ToString(),
-                WorkspaceRootUri = new Uri(wf).ToString(),
+                WorkspaceRootUri = solutionService.GetSolutionDirectory(),
                 Capabilities = new ClientCapabilities
                 {
-                    Edit = Capability.Enabled,
-                    EditWorkspace = Capability.Enabled,
+                    Edit = Capability.None,
+                    EditWorkspace = Capability.None,
                     CodeLenses = Capability.None,
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
-                    UntitledDocuments = Capability.Enabled,
+                    UntitledDocuments = Capability.None,
                     Webview = "native",
                     WebviewNativeConfig = new WebviewCapabilities
                     {
@@ -69,7 +66,6 @@ namespace Cody.Core.Agent
                     AutocompleteAdvancedProvider = null,
                     Debug = true,
                     VerboseDebug = true,
-                    // Codebase = "github.com/sourcegraph/cody",
 
                 }
             };
