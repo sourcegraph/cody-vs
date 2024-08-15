@@ -136,6 +136,11 @@ namespace Cody.VisualStudio
 
         public async void ShowToolWindow(object sender, EventArgs eventArgs)
         {
+            await ShowToolWindowAsync();
+        }
+
+        public async Task ShowToolWindowAsync()
+        {
             try
             {
                 Logger.Debug("Showing Tool Window ...");
