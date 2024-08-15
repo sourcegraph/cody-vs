@@ -1,4 +1,4 @@
-﻿using Cody.Core.Logging;
+using Cody.Core.Logging;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
@@ -31,7 +31,8 @@ namespace Cody.VisualStudio.Client
 
             connector.Connect(options);
 
-            var jsonMessageFormatter = new JsonMessageFormatter();
+            var jsonMessageFormatter = new AgentJsonMessageFormatter(log);
+            jsonMessageFormatter.TraceSentMessages = options.Debug;
             jsonMessageFormatter.JsonSerializer.ContractResolver = new DefaultContractResolver()
             {
                 NamingStrategy = new CamelCaseNamingStrategy()
