@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Cody.Core.Logging;
+using Cody.Core.Settings;
+using Cody.VisualStudio.Services;
 
 namespace Cody.AgentTester
 {
@@ -21,9 +24,10 @@ namespace Cody.AgentTester
             var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
             var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
+            var settingsService = new UserSettingsService(new UserSettingsProvider(new FakeSettingsProvider()), new Logger());
             var options = new AgentClientOptions
             {
-                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers() },
+                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,

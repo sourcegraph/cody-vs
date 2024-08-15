@@ -116,7 +116,8 @@ namespace Cody.VisualStudio
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
-            NotificationHandlers = new NotificationHandlers();
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, Logger);
+            NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
@@ -124,6 +125,18 @@ namespace Cody.VisualStudio
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
 
             Logger.Info($"Visual Studio version: {VsVersionService.Version}");
+        }
+
+        private void HandleOnOptionsPageShowRequest(object sender, EventArgs e)
+        {
+            try
+            {
+                ShowOptionPage(typeof(GeneralOptionsPage));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Navigation to '{nameof(GeneralOptionsPage)}' failed.", ex);
+            }
         }
 
         private async void AuthorizationDetailsChanged(object sender, EventArgs eventArgs)

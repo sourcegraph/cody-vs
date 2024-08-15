@@ -6,28 +6,44 @@ namespace Cody.Core.Settings
     public class UserSettingsService : IUserSettingsService
     {
         private readonly IUserSettingsProvider _settingsProvider;
-        private readonly ILog _log;
+        private readonly ILog _logger;
 
         public event EventHandler AuthorizationDetailsChanged;
 
         public UserSettingsService(IUserSettingsProvider settingsProvider, ILog log)
         {
             _settingsProvider = settingsProvider;
-            _log = log;
+            _logger = log;
         }
 
         private string GetOrDefault(string settingName, string defaultValue = null)
         {
-            if (_settingsProvider.SettingExists(settingName))
-                return _settingsProvider.GetSetting(settingName);
+            try
+            {
+                if (_settingsProvider.SettingExists(settingName))
+                    return _settingsProvider.GetSetting(settingName);
 
-            return defaultValue;
+                return defaultValue;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed getting '{settingName}'", ex);
+            }
+
+            return null;
         }
 
         private void Set(string settingName, string value)
         {
-            _settingsProvider.SetSetting(settingName, value);
-            _log.Info($"Value for the {settingName} setting has been changed.");
+            try
+            {
+                _settingsProvider.SetSetting(settingName, value);
+                _logger.Info($"Value for the {settingName} setting has been changed to `{value}`");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed setting '{settingName}' with `{value}`", ex);
+            }
         }
 
         public string AnonymousUserID
@@ -59,7 +75,7 @@ namespace Cody.Core.Settings
                 ;
                 if (envToken != null && userToken == null) // use env token only when a user token is not set
                 {
-                    _log.Warn("You are using a access token from environment variables!");
+                    _logger.Warn("You are using a access token from environment variables!");
                     return envToken;
                 }
 

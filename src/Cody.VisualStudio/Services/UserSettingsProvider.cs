@@ -1,16 +1,11 @@
-﻿using Cody.Core.Settings;
+using Cody.Core.Settings;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Settings;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Services
 {
-    internal class UserSettingsProvider : IUserSettingsProvider
+    public class UserSettingsProvider : IUserSettingsProvider
     {
         private readonly SettingsManager _settingsManager;
         private readonly WritableSettingsStore _userSettingsStore;
