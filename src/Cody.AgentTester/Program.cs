@@ -12,6 +12,7 @@ namespace Cody.AgentTester
     {
         private static AgentClient client;
         private static ConsoleLogger logger = new ConsoleLogger();
+        private static ConsoleLogger agentLogger = new ConsoleLogger();
         private static IAgentService agentService;
 
         static async Task Main(string[] args)
@@ -30,7 +31,7 @@ namespace Cody.AgentTester
                 RemoteAgentPort = portNumber,
             };
 
-            client = new AgentClient(options, logger);
+            client = new AgentClient(options, logger, agentLogger);
 
             client.Start();
 

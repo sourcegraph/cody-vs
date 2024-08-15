@@ -1,4 +1,4 @@
-﻿using Cody.Core.Agent;
+using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
@@ -62,6 +62,7 @@ namespace Cody.VisualStudio
         public const string PackageGuidString = "9b8925e1-803e-43d9-8f43-c4a4f35b4325";
 
         public ILog Logger;
+        public ILog AgentLogger;
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
         public MainView MainView;
@@ -104,7 +105,8 @@ namespace Cody.VisualStudio
         private void InitializeServices()
         {
             var loggerFactory = new LoggerFactory();
-            Logger = loggerFactory.Create();
+            Logger = loggerFactory.Create("Cody");
+            AgentLogger = loggerFactory.Create("Cody agent");
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution);
             VersionService = loggerFactory.GetVersionService();
@@ -183,9 +185,10 @@ namespace Cody.VisualStudio
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = devPort != null,
                     RemoteAgentPort = portNumber,
+                    Debug = true
                 };
 
-                AgentClient = new AgentClient(options, Logger);
+                AgentClient = new AgentClient(options, Logger, AgentLogger);
 
                 WebView2Dev.InitializeController(ThemeService.GetThemingScript());
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
