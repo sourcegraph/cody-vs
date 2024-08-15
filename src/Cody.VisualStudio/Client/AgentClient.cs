@@ -9,14 +9,15 @@ namespace Cody.VisualStudio.Client
     {
         private AgentClientOptions options;
         private ILog log;
-
+        private ILog agentLog;
         private IAgentConnector connector;
         private JsonRpc jsonRpc;
 
-        public AgentClient(AgentClientOptions options, ILog log)
+        public AgentClient(AgentClientOptions options, ILog log, ILog agentLog)
         {
             this.options = options;
             this.log = log;
+            this.agentLog = agentLog;
         }
 
         public bool IsConnected { get; private set; }
@@ -31,7 +32,7 @@ namespace Cody.VisualStudio.Client
 
             connector.Connect(options);
 
-            var jsonMessageFormatter = new AgentJsonMessageFormatter(log);
+            var jsonMessageFormatter = new AgentJsonMessageFormatter(agentLog);
             jsonMessageFormatter.TraceSentMessages = options.Debug;
             jsonMessageFormatter.JsonSerializer.ContractResolver = new DefaultContractResolver()
             {
@@ -61,7 +62,7 @@ namespace Cody.VisualStudio.Client
 
         private void OnErrorReceived(object sender, string error)
         {
-            log.Error(error, "Agent errors");
+            agentLog.Error(error);
         }
 
         private IAgentConnector CreateConnector()

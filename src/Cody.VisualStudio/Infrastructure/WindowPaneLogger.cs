@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using Cody.Core.Logging;
@@ -14,7 +14,7 @@ namespace Cody.VisualStudio.Inf
         private readonly IVsOutputWindow _outputWindow;
         private readonly IVsOutputWindowPane _pane;
 
-        private static Guid _guid = Guid.NewGuid();
+        private Guid _guid = Guid.NewGuid();
 
         public WindowPaneLogger(IVsOutputWindow outputWindow, string name)
         {

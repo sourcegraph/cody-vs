@@ -1,4 +1,4 @@
-﻿using Cody.Core.Inf;
+using Cody.Core.Inf;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -9,10 +9,9 @@ namespace Cody.VisualStudio.Inf
 {
     public class LoggerFactory
     {
-        private readonly string _logPaneName = "Cody";
         private IVersionService _versionService;
 
-        public ILog Create()
+        public ILog Create(string outputName = "Cody")
         {
             var outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
 
@@ -21,7 +20,7 @@ namespace Cody.VisualStudio.Inf
 
             try
             {
-                paneLogger = new WindowPaneLogger(outputWindow, _logPaneName);
+                paneLogger = new WindowPaneLogger(outputWindow, outputName);
             }
             catch
             {
