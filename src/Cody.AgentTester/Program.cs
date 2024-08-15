@@ -24,10 +24,11 @@ namespace Cody.AgentTester
             var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
             var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
-            var settingsService = new UserSettingsService(new UserSettingsProvider(new FakeSettingsProvider()), new Logger());
+            var logger = new Logger();
+            var settingsService = new UserSettingsService(new UserSettingsProvider(new FakeSettingsProvider()), logger);
             var options = new AgentClientOptions
             {
-                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService) },
+                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService, logger) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,
