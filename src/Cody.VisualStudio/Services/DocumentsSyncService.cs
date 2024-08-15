@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -41,7 +41,7 @@ namespace Cody.VisualStudio.Services
                 var docCookie = (uint)(int)cookie;
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
                 var content = rdt.GetRunningDocumentContents(docCookie);
-                var textView = VsShellUtilities.GetTextView(frame);
+                var textView = GetTextView(frame);
                 var docRange = GetDocumentSelection(textView);
                 var visibleRange = GetVisibleRange(textView);
 
@@ -49,6 +49,19 @@ namespace Cody.VisualStudio.Services
             }
 
             rdtCookie = rdt.Advise(this);
+        }
+
+        private IVsTextView GetTextView(IVsWindowFrame windowFrame)
+        {
+            windowFrame.GetProperty((int)__VSFPROPID.VSFPROPID_DocView, out var pvar);
+            IVsTextView ppView = pvar as IVsTextView;
+            if (ppView == null && pvar is IVsCodeWindow vsCodeWindow)
+            {
+                if(vsCodeWindow.GetPrimaryView(out ppView) != 0)
+                    vsCodeWindow.GetSecondaryView(out ppView);
+            }
+
+            return ppView;
         }
 
         public void Deinitialize()
@@ -152,7 +165,7 @@ namespace Cody.VisualStudio.Services
             if (lastShowDocCookie != docCookie)
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                var textView = VsShellUtilities.GetTextView(pFrame);
+                var textView = GetTextView(pFrame);
 
                 if (fFirstShow == 1)
                 {
