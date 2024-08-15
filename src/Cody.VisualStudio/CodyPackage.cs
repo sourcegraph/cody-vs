@@ -90,8 +90,6 @@ namespace Cody.VisualStudio
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-
-
                 InitializeServices();
                 await InitOleMenu();
                 await InitializeAgent();
@@ -113,6 +111,8 @@ namespace Cody.VisualStudio
             VersionService = loggerFactory.GetVersionService();
             VsVersionService = new VsVersionService(Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
+            UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
+
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
@@ -124,6 +124,25 @@ namespace Cody.VisualStudio
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
 
             Logger.Info($"Visual Studio version: {VsVersionService.Version}");
+        }
+
+        private async void AuthorizationDetailsChanged(object sender, EventArgs eventArgs)
+        {
+            try
+            {
+                Logger.Debug($"Changing authorization details ...");
+
+                var config = InitializeService.GetConfiguration();
+                var status = await AgentService.ConfigurationChange(config);
+
+                UpdateCurrentWorkspaceFolder();
+
+                Logger.Debug($"Auth status: Authenticated: {status.Authenticated}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed.", ex);
+            }
         }
 
         private async Task InitOleMenu()
@@ -220,6 +239,11 @@ namespace Cody.VisualStudio
         }
 
         private void OnAfterBackgroundSolutionLoadComplete(object sender = null, EventArgs e = null)
+        {
+            UpdateCurrentWorkspaceFolder();
+        }
+
+        private void UpdateCurrentWorkspaceFolder()
         {
             try
             {
