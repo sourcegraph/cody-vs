@@ -70,25 +70,7 @@
                     Text="{Binding SourcegraphUrl, Mode=TwoWay}"
                     ToolTip="Enter the URL of the Sourcegraph instance. For example, https://sourcegraph.example.com"
                 />
-
-                <!--<TextBlock 
-                    Margin="0 5 0 0"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Width="200"
-                    Height="20"
-                >
-                    <controls:ExternalBrowserHyperlink 
-                        NavigateUri="https://sourcegraph.com/user/settings/tokens" 
-                        ToolTip="https://sourcegraph.com/user/settings/tokens" 
-                    >
-                        <TextBlock Text="Get a token" 
-                        />
-                    </controls:ExternalBrowserHyperlink>
-                </TextBlock>-->
-
             </Grid>
-
         </GroupBox>
     </Grid>
 </UserControl>

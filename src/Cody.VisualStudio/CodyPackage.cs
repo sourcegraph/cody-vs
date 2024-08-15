@@ -29,6 +29,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Cody.VisualStudio.Options;
 using Task = System.Threading.Tasks.Task;
 
 namespace Cody.VisualStudio

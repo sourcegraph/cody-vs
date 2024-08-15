@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.Windows;
 using Cody.Core.Logging;
+using Cody.Core.Settings;
 using Cody.UI.Controls.Options;
 using Cody.UI.ViewModels;
 using Cody.VisualStudio.Inf;
-using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -15,7 +15,7 @@ namespace Cody.VisualStudio.Options
     {
 
         private GeneralOptionsControl _control;
-        private WritableSettingsStore _settingsStore;
+        private IUserSettingsService _settingsService;
 
         private CodyPackage _codyPackage;
         private GeneralOptionsViewModel _generalOptionsViewModel;
@@ -27,7 +27,9 @@ namespace Cody.VisualStudio.Options
             if (_codyPackage != null)
             {
                 _logger = _codyPackage.Logger;
-                _logger.Debug("Initialization ...");
+                _settingsService = _codyPackage.UserSettingsService;
+
+                _logger.Debug("Initialized.");
             }
         }
 
@@ -56,6 +58,12 @@ namespace Cody.VisualStudio.Options
             _logger.Debug($"Settings page activated.");
 
 
+            var accessToken = _settingsService.AccessToken;
+            var sourcegraphUrl = _settingsService.ServerEndpoint;
+
+            _generalOptionsViewModel.AccessToken = accessToken;
+            _generalOptionsViewModel.SourcegraphUrl = sourcegraphUrl;
+
             _logger.Debug($"Is canceled:{e.Cancel}");
 
             base.OnActivate(e);
@@ -66,7 +74,9 @@ namespace Cody.VisualStudio.Options
 
             var accessToken = _generalOptionsViewModel.AccessToken;
             var sourcegraphUrl = _generalOptionsViewModel.SourcegraphUrl;
-            ;
+
+            _settingsService.AccessToken = accessToken;
+            _settingsService.ServerEndpoint = sourcegraphUrl;
         }
 
         protected override void OnDeactivate(CancelEventArgs e)
@@ -75,21 +85,6 @@ namespace Cody.VisualStudio.Options
 
             base.OnDeactivate(e);
         }
-
-        //protected override void LoadSettingFromStorage(PropertyDescriptor prop)
-        //{
-        //    base.LoadSettingFromStorage(prop);
-        //}
-
-        //protected override void SaveSetting(PropertyDescriptor property)
-        //{
-        //    base.SaveSetting(property);
-        //}
-
-        //protected override object GetDefaultPropertyValue(PropertyDescriptor property)
-        //{
-        //    return base.GetDefaultPropertyValue(property);
-        //}
 
         protected override void OnClosed(EventArgs e)
         {
@@ -100,25 +95,10 @@ namespace Cody.VisualStudio.Options
 
         public override void ResetSettings()
         {
+            _settingsService.AccessToken = string.Empty;
+            _settingsService.ServerEndpoint = string.Empty;
+
             base.ResetSettings();
-        }
-
-        private void InitializeSettingsStore()
-        {
-            try
-            {
-                //var cModel = (IComponentModel)(Site.GetService(typeof(SComponentModel))); // for VS 2019 https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.componentmodelhost.scomponentmodel?view=visualstudiosdk-2022
-                //var sp = cModel.GetService<SVsServiceProvider>();
-                //var manager = new ShellSettingsManager(sp);
-
-                //_settingsStore = manager.GetWritableSettingsStore(SettingsScope.UserSettings);
-
-                _logger.Debug("VS settings store initialized.");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed VS settings store initialization.", ex);
-            }
         }
 
         protected override UIElement Child
@@ -135,21 +115,6 @@ namespace Cody.VisualStudio.Options
                 }
 
                 return _control;
-            }
-        }
-
-        public override void LoadSettingsFromStorage()
-        {
-            try
-            {
-                _logger.Debug("Loading settings ...");
-
-                _logger.Debug("Settings loaded.");
-                base.LoadSettingsFromStorage(); // without it, LoadSettingsFromStorage() is called second time
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed loading settings.", ex);
             }
         }
     }

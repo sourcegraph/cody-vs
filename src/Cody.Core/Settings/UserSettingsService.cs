@@ -48,11 +48,13 @@ namespace Cody.Core.Settings
         {
             get
             {
-                var token = Environment.GetEnvironmentVariable("SourcegraphCodyToken");
-                if (token != null)
+                var envToken = Environment.GetEnvironmentVariable("SourcegraphCodyToken");
+                var userToken = GetOrDefault(nameof(AccessToken), null);
+                ;
+                if (envToken != null && userToken == null) // use env token only when an user token is not set
                 {
                     log.Warn("You are using a access token from environment variables!");
-                    return token;
+                    return envToken;
                 }
 
                 return GetOrDefault(nameof(AccessToken), null);
