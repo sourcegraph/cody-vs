@@ -1,23 +1,31 @@
-﻿using Cody.Core.Agent.Protocol;
+using Cody.Core.Agent.Protocol;
 using EnvDTE80;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Cody.Core.Logging;
+using Cody.Core.Settings;
 
 namespace Cody.Core.Agent
 {
     public class NotificationHandlers : INotificationHandler
     {
-        public NotificationHandlers()
+        private IUserSettingsService _settingsService;
+        private readonly ILog _logger;
+
+        public NotificationHandlers(IUserSettingsService settingsService, ILog logger)
         {
+            _settingsService = settingsService;
+            _logger = logger;
         }
 
         public delegate Task PostWebMessageAsJsonDelegate(string message);
         public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
+        public event EventHandler OnOptionsPageShowRequest;
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
         public IAgentService agentClient;
@@ -36,22 +44,33 @@ namespace Cody.Core.Agent
         {
             try
             {
-                var json = JObject.Parse(message);
-                var command = json["command"]?.ToString();
-                if (command == "command")
+                dynamic json = JObject.Parse(message);
+                if (json.command == "auth")
                 {
-                    var id = json["id"]?.ToString();
-                    if (id == "cody.status-bar.interacted" || id?.StartsWith("cody.auth.signin") == true)
+                    if (json.authKind == "signout")
                     {
-                        var dte = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE");
-                        dte.ExecuteCommand("Tools.Options", "Cody.General");
-                        return;
+                        _settingsService.AccessToken = string.Empty;
+                    }
+                    else if (json.authKind == "signin")
+                    {
+                        var token = json.value;
+                        var endpoint = json.endpoint;
+
+                        _settingsService.ServerEndpoint = endpoint;
+                        _settingsService.AccessToken = token;
+                    }
+                }
+                else if (json.command == "command")
+                {
+                    if (json.id == "cody.status-bar.interacted")
+                    {
+                        OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty);
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                // Ignore
+                _logger.Error("Failed.", ex);
             }
             await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
             {

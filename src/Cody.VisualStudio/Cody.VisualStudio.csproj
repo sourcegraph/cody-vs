@@ -59,6 +59,9 @@
     <Compile Include="Infrastructure\VsConstants.cs" />
     <Compile Include="CommandIDs.cs" />
     <Compile Include="Guids.cs" />
+    <Compile Include="Options\GeneralOptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />

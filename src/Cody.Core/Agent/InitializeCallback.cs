@@ -1,4 +1,5 @@
-﻿using Cody.Core.Agent.Protocol;
+using System;
+using Cody.Core.Agent.Protocol;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
@@ -57,17 +58,7 @@ namespace Cody.Core.Agent
                     },
                     WebviewMessages = "string-encoded",
                 },
-                ExtensionConfiguration = new ExtensionConfiguration
-                {
-                    AnonymousUserID = userSettingsService.AnonymousUserID,
-                    ServerEndpoint = userSettingsService.ServerEndpoint,
-                    Proxy = null,
-                    AccessToken = userSettingsService.AccessToken,
-                    AutocompleteAdvancedProvider = null,
-                    Debug = true,
-                    VerboseDebug = true,
-
-                }
+                ExtensionConfiguration = GetConfiguration()
             };
 
             var result = await client.Initialize(clientInfo);
@@ -84,6 +75,22 @@ namespace Cody.Core.Agent
             }
 
             client.Initialized();
+        }
+
+        public ExtensionConfiguration GetConfiguration()
+        {
+            var config = new ExtensionConfiguration
+            {
+                AnonymousUserID = userSettingsService.AnonymousUserID,
+                ServerEndpoint = userSettingsService.ServerEndpoint,
+                Proxy = null,
+                AccessToken = userSettingsService.AccessToken,
+                AutocompleteAdvancedProvider = null,
+                Debug = true,
+                VerboseDebug = true,
+            };
+
+            return config;
         }
     }
 }

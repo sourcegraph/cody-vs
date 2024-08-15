@@ -23,6 +23,10 @@ namespace Cody.Core.Agent
         [AgentMethod("webview/receiveMessageStringEncoded")]
         Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
 
+        [AgentMethod("extensionConfiguration/change")]
+        Task<AuthStatus> ConfigurationChange(ExtensionConfiguration configuration);
+
+
         [AgentMethod("textDocument/didOpen")]
         void DidOpen(ProtocolTextDocument docState);
 

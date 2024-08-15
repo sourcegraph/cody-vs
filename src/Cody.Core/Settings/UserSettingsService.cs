@@ -1,35 +1,49 @@
-﻿using Cody.Core.Logging;
+using Cody.Core.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Settings
 {
     public class UserSettingsService : IUserSettingsService
     {
-        private readonly IUserSettingsProvider settingsProvider;
-        private readonly ILog log;
+        private readonly IUserSettingsProvider _settingsProvider;
+        private readonly ILog _logger;
+
+        public event EventHandler AuthorizationDetailsChanged;
 
         public UserSettingsService(IUserSettingsProvider settingsProvider, ILog log)
         {
-            this.settingsProvider = settingsProvider;
-            this.log = log;
+            _settingsProvider = settingsProvider;
+            _logger = log;
         }
 
-        private string GetOrDefault(string settingName, string defaultValue)
+        private string GetOrDefault(string settingName, string defaultValue = null)
         {
-            if (settingsProvider.SettingExists(settingName))
-                return settingsProvider.GetSetting(settingName);
+            try
+            {
+                if (_settingsProvider.SettingExists(settingName))
+                    return _settingsProvider.GetSetting(settingName);
 
-            return defaultValue;
+                return defaultValue;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed getting '{settingName}'", ex);
+            }
+
+            return null;
         }
 
         private void Set(string settingName, string value)
         {
-            settingsProvider.SetSetting(settingName, value);
-            log.Info($"Value for the {settingName} setting has been changed.");
+            try
+            {
+                _settingsProvider.SetSetting(settingName, value);
+                _logger.Info($"Value for the {settingName} setting has been changed to `{value}`");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Failed setting '{settingName}' with `{value}`", ex);
+            }
         }
 
         public string AnonymousUserID
@@ -41,25 +55,40 @@ namespace Cody.Core.Settings
         public string ServerEndpoint
         {
             get => GetOrDefault(nameof(ServerEndpoint), "https://sourcegraph.com/");
-            set => Set(nameof(ServerEndpoint), value);
+            set
+            {
+                var endpoint = GetOrDefault(nameof(ServerEndpoint));
+                if (!string.Equals(value, endpoint, StringComparison.InvariantCulture))
+                {
+                    Set(nameof(ServerEndpoint), value);
+                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
         }
 
         public string AccessToken
         {
             get
             {
-                var token = Environment.GetEnvironmentVariable("SourcegraphCodyToken");
-                if (token != null)
+                var envToken = Environment.GetEnvironmentVariable("SourcegraphCodyToken");
+                var userToken = GetOrDefault(nameof(AccessToken));
+                ;
+                if (envToken != null && userToken == null) // use env token only when a user token is not set
                 {
-                    log.Warn("You are using a access token from environment variables!");
-                    return token;
+                    _logger.Warn("You are using a access token from environment variables!");
+                    return envToken;
                 }
 
-                return GetOrDefault(nameof(AccessToken), null);
+                return GetOrDefault(nameof(AccessToken));
             }
             set
             {
-                Set(nameof(AccessToken), value);
+                var token = GetOrDefault(nameof(AccessToken));
+                if (!string.Equals(value, token, StringComparison.InvariantCulture))
+                {
+                    Set(nameof(AccessToken), value);
+                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
         }
     }
