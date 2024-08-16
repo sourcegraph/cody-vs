@@ -1,4 +1,4 @@
-﻿#addin nuget:?package=Cake.Git&version=4.0.0
+#addin nuget:?package=Cake.Git&version=4.0.0
 #addin nuget:?package=Cake.Pnpm&version=1.0.0
 #tool nuget:?package=vswhere&version=3.1.7
 
@@ -24,9 +24,9 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "0e03022321f543c27cbb4a8777b36a6698440102";
+var codyCommit = "5bb199df24ceb3668a02e80c08fead2f65720d15";
 
-var marketplaceToken = "<HIDDEN>";
+var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
 //////////////////////////////////////////////////////////////////////
 // TASKS
