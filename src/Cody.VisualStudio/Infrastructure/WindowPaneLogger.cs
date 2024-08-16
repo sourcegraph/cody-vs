@@ -11,14 +11,18 @@ namespace Cody.VisualStudio.Inf
 {
     public class WindowPaneLogger : IOutputWindowPane
     {
+        public static string CodyAgent = "Cody Agent";
+
         private readonly IVsOutputWindow _outputWindow;
         private readonly IVsOutputWindowPane _pane;
 
         private Guid _guid = Guid.NewGuid();
+        private string _name;
 
         public WindowPaneLogger(IVsOutputWindow outputWindow, string name)
         {
             _outputWindow = outputWindow;
+            _name = name;
 
             if (_outputWindow.GetPane(_guid, out _pane) != VSConstants.S_OK)
             {
@@ -60,7 +64,7 @@ namespace Cody.VisualStudio.Inf
             Log(message, "Error", callerName);
 
 #if DEBUG
-            if (_pane != null)
+            if (_pane != null && _name != CodyAgent)
                 _pane.Activate();
 #endif
         }
