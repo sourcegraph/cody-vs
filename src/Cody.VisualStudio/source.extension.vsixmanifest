@@ -3,8 +3,9 @@
     <Metadata>
         <Identity Id="Cody.VisualStudio" Version="0.0.0" Language="en-US" Publisher="Sourcegraph" />
         <DisplayName>Cody for Visual Studio - AI Coding Assistant</DisplayName>
-        <Description xml:space="preserve">AI coding assistant that uses search and codebase context to help you write code faster. Cody brings autocomplete, chat, and commands to VS Code, so you can generate code, write unit tests, create docs, and explain complex code using AI. Choose from the latest LLMs, including GPT-4o and Claude 3.</Description>
-        <MoreInfo>https://sourcegraph.com/</MoreInfo>
+        <Description xml:space="preserve">AI coding assistant that uses search and codebase context to help you write code faster. Cody brings chat, and commands to Visual Studio, so you can generate code, write unit tests, create docs, and explain complex code using AI. Choose from the latest LLMs, including GPT-4o, Claude 3.5 Sonnet, Claude 3 Opus, Google Gemini 1.5 Pro and more!</Description>
+        <MoreInfo>https://sourcegraph.com/cody</MoreInfo>
+        <GettingStartedGuide>https://sourcegraph.com/docs</GettingStartedGuide>
         <Icon>Resources\Marketplace.png</Icon>
         <PreviewImage>Resources\Preview.png</PreviewImage>
         <Tags>ai, openai, anthropic, assistant, chatbot, chat, refactor, documentation, test, sourcegraph, codey, llm, codegen, bot, model, typescript, javascript, python, golang, go, html, css, java, php, swift, kotlin, ollama, c#, c++, gemini</Tags>
