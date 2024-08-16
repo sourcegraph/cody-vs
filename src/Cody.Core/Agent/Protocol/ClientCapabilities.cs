@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Cody.Core.Agent.Protocol
 {
     public class ClientCapabilities
@@ -20,9 +14,10 @@ namespace Cody.Core.Agent.Protocol
         public ShowWindowMessageCapability? ShowWindowMessage { get; set; }
         public Capability? Ignore { get; set; }
         public Capability? CodeActions { get; set; }
-        public string WebviewMessages { get; set; }
-        public string Webview { get; set; }
+        public string WebviewMessages { get; set; } // 'object-encoded' | 'string-encoded'
+        public string Webview { get; set; } // 'agentic' | 'native'
         public WebviewCapabilities WebviewNativeConfig { get; set; }
+        public string GlobalState { get; set; } // 'stateless' | 'server-managed' | 'client-managed'
     }
 
     public enum Capability

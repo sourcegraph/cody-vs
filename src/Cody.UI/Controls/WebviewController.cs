@@ -140,7 +140,6 @@ namespace Cody.UI.Controls
                 let state = undefined;
 
                 window.chrome.webview.addEventListener('message', e => {
-                    console.log('Send to webview', e.data)
                     const event = new CustomEvent('message');
                     event.data = e.data;
                     window.dispatchEvent(event)
@@ -153,10 +152,12 @@ namespace Cody.UI.Controls
                     acquired = true;
                     return Object.freeze({
                         postMessage: function(message) {
-                            console.log(`Send from webview: ${JSON.stringify(message)}`);
                             window.chrome.webview.postMessage(JSON.stringify(message));
                         },
                         setState: function(newState) {
+                            if (state === newState) {
+                                return;
+                            }
                             state = newState;
                             console.log(`Set State: ${JSON.stringify(newState)}`);
                             return newState;
@@ -174,7 +175,7 @@ namespace Cody.UI.Controls
 
         private static string GetThemeScript(string colorTheme) => $@"
             document.documentElement.dataset.ide = 'VisualStudio';
-            
+
             {colorTheme}
         ";
     }

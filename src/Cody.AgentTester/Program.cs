@@ -71,6 +71,7 @@ namespace Cody.AgentTester
                         WebviewBundleServingPrefix = "https://cody.vs",
                     },
                     WebviewMessages = "string-encoded",
+                    GlobalState = "stateless",
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {

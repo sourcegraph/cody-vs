@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Cody.Core.Agent.Protocol
 {
     public class ClientInfo
@@ -14,6 +8,7 @@ namespace Cody.Core.Agent.Protocol
         public string WorkspaceRootUri { get; set; }
         public ExtensionConfiguration ExtensionConfiguration { get; set; }
         public ClientCapabilities Capabilities { get; set; }
+        public string GlobalStateDir { get; set; }
 
     }
 }
