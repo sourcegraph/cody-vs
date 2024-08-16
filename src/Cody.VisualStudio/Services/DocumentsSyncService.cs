@@ -9,6 +9,7 @@ using System.Linq;
 using Cody.Core.DocumentSync;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
+using System.Threading;
 
 namespace Cody.VisualStudio.Services
 {
@@ -35,11 +36,19 @@ namespace Cody.VisualStudio.Services
 
         public void Initialize()
         {
+            uint activeCookie = 0;
+            IVsWindowFrame activeFrame = null;
             foreach (var frame in GetOpenDocuments())
             {
                 frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
                 var docCookie = (uint)(int)cookie;
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                frame.IsOnScreen(out int onScreen);
+                if (onScreen == 1)
+                {
+                    activeCookie = docCookie;
+                    activeFrame = frame;
+                }
                 var content = rdt.GetRunningDocumentContents(docCookie);
                 var textView = GetTextView(frame);
                 var docRange = GetDocumentSelection(textView);
@@ -47,6 +56,9 @@ namespace Cody.VisualStudio.Services
 
                 documentActions.OnOpened(path, content, visibleRange, docRange);
             }
+
+            if (activeCookie != 0)
+                ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame);
 
             rdtCookie = rdt.Advise(this);
         }

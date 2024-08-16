@@ -42,6 +42,7 @@ namespace Cody.VisualStudio.Client
             var handler = new HeaderDelimitedMessageHandler(connector.SendingStream, connector.ReceivingStream, jsonMessageFormatter);
 
             jsonRpc = new JsonRpc(handler);
+            jsonRpc.Disconnected += OnDisconnected;
 
             foreach (var target in options.NotificationHandlers)
             {
@@ -52,6 +53,11 @@ namespace Cody.VisualStudio.Client
             jsonRpc.StartListening();
             IsConnected = true;
             log.Info("A connection with the agent has been established.");
+        }
+
+        private void OnDisconnected(object sender, JsonRpcDisconnectedEventArgs e)
+        {
+            log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
         }
 
         public T CreateAgentService<T>() where T : class
