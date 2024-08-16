@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
+    //---------------------------------------------------------
+    // For notifications return type MUST be void!
+    //---------------------------------------------------------
     public interface IAgentService
     {
         [AgentMethod("initialize")]
@@ -27,7 +30,6 @@ namespace Cody.Core.Agent
 
         [AgentMethod("extensionConfiguration/change")]
         Task<AuthStatus> ConfigurationChange(ExtensionConfiguration configuration);
-
 
         [AgentMethod("textDocument/didOpen")]
         void DidOpen(ProtocolTextDocument docState);
@@ -54,6 +56,10 @@ namespace Cody.Core.Agent
         Task<ChatPanelInfo> NewEditorChat();
 
         [AgentMethod("workspaceFolder/didChange")]
-        Task WorkspaceFolderDidChange(WorkspaceFolderDidChangeEvent uris);
+        void WorkspaceFolderDidChange(WorkspaceFolderDidChangeEvent uris);
+
+        //---------------------------------------------------------
+        // For notifications return type MUST be void!
+        //---------------------------------------------------------
     }
 }
