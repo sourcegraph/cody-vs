@@ -1,4 +1,3 @@
-using System;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -58,6 +57,7 @@ namespace Cody.Core.Agent
                         WebviewBundleServingPrefix = "https://cody.vs",
                     },
                     WebviewMessages = "string-encoded",
+                    GlobalState = "server-managed",
                 },
                 ExtensionConfiguration = GetConfiguration()
             };
