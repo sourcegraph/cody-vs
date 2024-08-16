@@ -63,6 +63,7 @@
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\WorkspaceFolderDidChangeEvent.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParamsOptions.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParams.cs" />
     <Compile Include="Agent\Protocol\CodyFilePath.cs" />

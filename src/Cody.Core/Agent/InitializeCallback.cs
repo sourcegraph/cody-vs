@@ -53,6 +53,7 @@ namespace Cody.Core.Agent
                     Webview = "native",
                     WebviewNativeConfig = new WebviewCapabilities
                     {
+                        View = WebviewView.Single,
                         CspSource = "'self' https://cody.vs",
                         WebviewBundleServingPrefix = "https://cody.vs",
                     },

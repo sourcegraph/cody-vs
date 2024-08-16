@@ -1,4 +1,6 @@
-﻿using Cody.Core.Agent.Protocol;
+using Cody.Core.Agent.Protocol;
+using System.Collections.Generic;
+using System;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -52,6 +54,6 @@ namespace Cody.Core.Agent
         Task<ChatPanelInfo> NewEditorChat();
 
         [AgentMethod("workspaceFolder/didChange")]
-        Task WorkspaceFolderDidChange(CodyFilePath path);
+        Task WorkspaceFolderDidChange(WorkspaceFolderDidChangeEvent uris);
     }
 }
