@@ -104,8 +104,9 @@ namespace Cody.VisualStudio
         private void InitializeServices()
         {
             var loggerFactory = new LoggerFactory();
+            AgentLogger = loggerFactory.Create(WindowPaneLogger.CodyAgent);
             Logger = loggerFactory.Create("Cody");
-            AgentLogger = loggerFactory.Create("Cody agent");
+
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution);
             VersionService = loggerFactory.GetVersionService();
