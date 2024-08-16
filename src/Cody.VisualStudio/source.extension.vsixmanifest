@@ -2,10 +2,12 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
         <Identity Id="Cody.VisualStudio" Version="0.1" Language="en-US" Publisher="Sourcegraph" />
-        <DisplayName>Cody.VisualStudio</DisplayName>
-        <Description>Empty VSIX Project.</Description>
+        <DisplayName>Cody -AI Coding Assistant with Autocomplete &amp; Chat</DisplayName>
+        <Description xml:space="preserve">AI coding assistant that uses search and codebase context to help you write code faster. Cody brings autocomplete, chat, and commands to VS Code, so you can generate code, write unit tests, create docs, and explain complex code using AI. Choose from the latest LLMs, including GPT-4o and Claude 3.</Description>
+        <MoreInfo>https://sourcegraph.com/</MoreInfo>
         <Icon>Resources\Marketplace.png</Icon>
         <PreviewImage>Resources\Preview.png</PreviewImage>
+        <Preview>true</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
@@ -26,14 +28,14 @@
 		<InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0, 18.0)">
 			<ProductArchitecture>arm64</ProductArchitecture>
 		</InstallationTarget>
-	</Installation>
-	<Dependencies>
-		<Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
-	</Dependencies>
-	<Prerequisites>
-		<Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
-	</Prerequisites>
-	<Assets>
-		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-	</Assets>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    </Assets>
 </PackageManifest>
