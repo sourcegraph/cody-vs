@@ -261,7 +261,11 @@ namespace Cody.VisualStudio
             try
             {
                 var solutionUri = new Uri(SolutionService.GetSolutionDirectory()).AbsoluteUri;
-                AgentService.WorkspaceFolderDidChange(new CodyFilePath { Uri = solutionUri });
+                var workspaceFolderEvent = new WorkspaceFolderDidChangeEvent
+                {
+                    Uris = new List<string> { solutionUri }
+                };
+                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
 
                 if (DocumentsSyncService == null)
                 {
@@ -281,8 +285,12 @@ namespace Cody.VisualStudio
             try
             {
                 DocumentsSyncService?.Deinitialize();
-                // TODO: Implement workspace folder on close.
-                // AgentService.WorkspaceFolderDidChange(new CodyFilePath { Uri = "" });
+                var workspaceFolderEvent = new WorkspaceFolderDidChangeEvent
+                {
+                    Uris = new List<string>()
+                };
+                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+
             }
             catch (Exception ex)
             {
