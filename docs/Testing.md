@@ -1,5 +1,9 @@
 # Testing Cody for Visual Studio
 
+This test plan outlines the comprehensive testing procedures for Cody in Visual Studio.
+
+It covers various features including Chat functionality, Context handling, LLM selection, and Command execution. The plan details specific steps to verify the Chat View's opening, closing, and basic interactions, as well as testing context-awareness and LLM selection for different user tiers. It also includes instructions for testing built-in commands like Explain Code and Find Code Smells, along with instructions for creating and verifying custom commands, and prompts from the prompt library.
+
 ## Checklist
 
 - Autocomplete
