@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Cody.UI.Controls
 {
@@ -11,17 +12,19 @@ namespace Cody.UI.Controls
     {
         private CoreWebView2 _webview;
 
-        public string colorThemeScript;
+        private string _colorThemeScript;
 
-        public event EventHandler<string> WebViewMessageReceived;
+        private ICommand _sendMessageCommand;
 
         public WebviewController()
         {
         }
 
-        public async Task<CoreWebView2> InitializeWebView(CoreWebView2 webView)
+        public async Task<CoreWebView2> InitializeWebView(CoreWebView2 webView, ICommand sendMessageCommand)
         {
+            webView.NavigateToString(LoadingScreenHtml);
             _webview = webView;
+            _sendMessageCommand = sendMessageCommand;
 
             SetupVirtualHostMapping();
             await ApplyVsCodeApiScript();
@@ -100,10 +103,13 @@ namespace Cody.UI.Controls
         {
             // Handle message sent from webview to agent.
             var message = e.TryGetWebMessageAsString();
-            WebViewMessageReceived.Invoke(this, message);
+
             // TODO: Get token from message if message has a token.
             // IMPORTANT: Do not log the token to the console in production.
             System.Diagnostics.Debug.WriteLine(message, "Agent HandleWebViewMessage");
+
+            // Dispatch the message to the ViewModel using the Command
+            Application.Current.Dispatcher.Invoke(() => _sendMessageCommand?.Execute(message));
         }
 
         public async Task PostWebMessageAsJson(string message)
@@ -123,7 +129,16 @@ namespace Cody.UI.Controls
 
         private async Task ApplyThemingScript()
         {
-            await _webview.ExecuteScriptWithResultAsync(GetThemeScript(colorThemeScript));
+            await _webview.ExecuteScriptWithResultAsync(GetThemeScript(_colorThemeScript));
+        }
+
+        public void SetThemeScript(string colorThemeScript)
+        {
+            _colorThemeScript = colorThemeScript;
+            // We might want to apply the theme immediately if the webview is already loaded.
+            // if (_webview.CoreWebView2.IsDocumentOpen) {
+            //     _ = ApplyThemingScript(); 
+            // }
         }
 
         public void SetHtml(string html)
@@ -177,6 +192,49 @@ namespace Cody.UI.Controls
             document.documentElement.dataset.ide = 'VisualStudio';
 
             {colorTheme}
+        ";
+
+        private static readonly string LoadingScreenHtml = @"
+            <html>
+                <head>
+                    <title>Waiting for Cody...</title>
+                    <style>
+                        body {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100%;
+                            margin: 0;
+                            background-color: transparent;
+                            gap: 12px;
+                        }
+                        .dot {
+                            width: 12px;
+                            height: 12px;
+                            border-radius: 50%;
+                            background-color: #b200f8;
+                            animation: flash 1s infinite linear;
+                            opacity: 0.8;
+                        }
+                        .dot:nth-child(2) {
+                            animation-delay: .2s;
+                            background-color: #ff5543;
+                        }
+                        .dot:nth-child(3) {
+                            animation-delay: .4s;
+                            background-color: #00cbec;
+                        }
+                        @keyframes flash {
+                            50% { opacity: .25; }
+                        }
+                    </style>
+                </head>
+                <body>
+                        <div class=""dot""></div>
+                        <div class=""dot""></div>
+                        <div class=""dot""></div>
+                </body>
+             </html>
         ";
     }
 }

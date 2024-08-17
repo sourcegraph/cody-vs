@@ -32,7 +32,7 @@ namespace Cody.UI.Controls
 
         public static WebviewController InitializeController(string themeScript)
         {
-            _controller.colorThemeScript = themeScript;
+            _controller.SetThemeScript(themeScript);
             return _controller;
         }
 
@@ -42,8 +42,7 @@ namespace Cody.UI.Controls
 
             var env = await CreateWebView2Environment();
             await webView.EnsureCoreWebView2Async(env);
-            _controller.WebViewMessageReceived += (sender, message) => SendMessage?.Execute(message);
-            await _controller.InitializeWebView(webView.CoreWebView2);
+            await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
             _webViewReady.SetResult(true);
             System.Diagnostics.Debug.WriteLine("InitializeWebView", "WebView2Dev");
         }
