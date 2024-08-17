@@ -22,7 +22,6 @@ namespace Cody.UI.Controls
 
         public async Task<CoreWebView2> InitializeWebView(CoreWebView2 webView, ICommand sendMessageCommand)
         {
-            webView.NavigateToString(LoadingScreenHtml);
             _webview = webView;
             _sendMessageCommand = sendMessageCommand;
 
@@ -124,7 +123,7 @@ namespace Cody.UI.Controls
 
         private async Task ApplyVsCodeApiScript()
         {
-            await _webview.AddScriptToExecuteOnDocumentCreatedAsync(GetVsCodeApiScript());
+            await _webview.AddScriptToExecuteOnDocumentCreatedAsync(VsCodeApi);
         }
 
         private async Task ApplyThemingScript()
@@ -149,7 +148,7 @@ namespace Cody.UI.Controls
             _webview.Navigate("https://cody.vs/index.html");
         }
 
-        private static string GetVsCodeApiScript() => @"
+        private static readonly string VsCodeApi = @"
             globalThis.acquireVsCodeApi = (function() {
                 let acquired = false;
                 let state = undefined;
@@ -192,49 +191,6 @@ namespace Cody.UI.Controls
             document.documentElement.dataset.ide = 'VisualStudio';
 
             {colorTheme}
-        ";
-
-        private static readonly string LoadingScreenHtml = @"
-            <html>
-                <head>
-                    <title>Waiting for Cody...</title>
-                    <style>
-                        body {
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100%;
-                            margin: 0;
-                            background-color: transparent;
-                            gap: 12px;
-                        }
-                        .dot {
-                            width: 12px;
-                            height: 12px;
-                            border-radius: 50%;
-                            background-color: #b200f8;
-                            animation: flash 1s infinite linear;
-                            opacity: 0.8;
-                        }
-                        .dot:nth-child(2) {
-                            animation-delay: .2s;
-                            background-color: #ff5543;
-                        }
-                        .dot:nth-child(3) {
-                            animation-delay: .4s;
-                            background-color: #00cbec;
-                        }
-                        @keyframes flash {
-                            50% { opacity: .25; }
-                        }
-                    </style>
-                </head>
-                <body>
-                        <div class=""dot""></div>
-                        <div class=""dot""></div>
-                        <div class=""dot""></div>
-                </body>
-             </html>
         ";
     }
 }
