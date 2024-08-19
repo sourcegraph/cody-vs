@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace Cody.UI.Controls
 {
@@ -11,17 +12,18 @@ namespace Cody.UI.Controls
     {
         private CoreWebView2 _webview;
 
-        public string colorThemeScript;
+        private string _colorThemeScript;
 
-        public event EventHandler<string> WebViewMessageReceived;
+        private ICommand _sendMessageCommand;
 
         public WebviewController()
         {
         }
 
-        public async Task<CoreWebView2> InitializeWebView(CoreWebView2 webView)
+        public async Task<CoreWebView2> InitializeWebView(CoreWebView2 webView, ICommand sendMessageCommand)
         {
             _webview = webView;
+            _sendMessageCommand = sendMessageCommand;
 
             SetupVirtualHostMapping();
             await ApplyVsCodeApiScript();
@@ -100,10 +102,13 @@ namespace Cody.UI.Controls
         {
             // Handle message sent from webview to agent.
             var message = e.TryGetWebMessageAsString();
-            WebViewMessageReceived.Invoke(this, message);
+
             // TODO: Get token from message if message has a token.
             // IMPORTANT: Do not log the token to the console in production.
             System.Diagnostics.Debug.WriteLine(message, "Agent HandleWebViewMessage");
+
+            // Dispatch the message to the ViewModel using the Command
+            Application.Current.Dispatcher.Invoke(() => _sendMessageCommand?.Execute(message));
         }
 
         public async Task PostWebMessageAsJson(string message)
@@ -118,12 +123,21 @@ namespace Cody.UI.Controls
 
         private async Task ApplyVsCodeApiScript()
         {
-            await _webview.AddScriptToExecuteOnDocumentCreatedAsync(GetVsCodeApiScript());
+            await _webview.AddScriptToExecuteOnDocumentCreatedAsync(VsCodeApi);
         }
 
         private async Task ApplyThemingScript()
         {
-            await _webview.ExecuteScriptWithResultAsync(GetThemeScript(colorThemeScript));
+            await _webview.ExecuteScriptWithResultAsync(GetThemeScript(_colorThemeScript));
+        }
+
+        public void SetThemeScript(string colorThemeScript)
+        {
+            _colorThemeScript = colorThemeScript;
+            // We might want to apply the theme immediately if the webview is already loaded.
+            // if (_webview.CoreWebView2.IsDocumentOpen) {
+            //     _ = ApplyThemingScript(); 
+            // }
         }
 
         public void SetHtml(string html)
@@ -134,7 +148,7 @@ namespace Cody.UI.Controls
             _webview.Navigate("https://cody.vs/index.html");
         }
 
-        private static string GetVsCodeApiScript() => @"
+        private static readonly string VsCodeApi = @"
             globalThis.acquireVsCodeApi = (function() {
                 let acquired = false;
                 let state = undefined;
