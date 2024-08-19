@@ -271,7 +271,7 @@ namespace Cody.VisualStudio
                 if (DocumentsSyncService == null)
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
-                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService);
+                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, Logger);
                 }
                 DocumentsSyncService.Initialize();
             }
