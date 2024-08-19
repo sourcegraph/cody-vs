@@ -44,21 +44,28 @@ namespace Cody.VisualStudio.Services
                 IVsWindowFrame activeFrame = null;
                 foreach (var frame in GetOpenDocuments())
                 {
-                    frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
-                    var docCookie = (uint)(int)cookie;
-                    var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                    frame.IsOnScreen(out int onScreen);
-                    if (onScreen == 1)
+                    try
                     {
-                        activeCookie = docCookie;
-                        activeFrame = frame;
-                    }
-                    var content = rdt.GetRunningDocumentContents(docCookie);
-                    var textView = GetTextView(frame);
-                    var visibleRange = GetVisibleRange(textView);
-                    var docRange = GetDocumentSelection(textView);    
+                        frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
+                        var docCookie = (uint)(int)cookie;
+                        var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                        frame.IsOnScreen(out int onScreen);
+                        if (onScreen == 1)
+                        {
+                            activeCookie = docCookie;
+                            activeFrame = frame;
+                        }
+                        var content = rdt.GetRunningDocumentContents(docCookie);
+                        var textView = GetTextView(frame);
+                        var visibleRange = GetVisibleRange(textView);
+                        var docRange = GetDocumentSelection(textView);
 
-                    documentActions.OnOpened(path, content, visibleRange, docRange);
+                        documentActions.OnOpened(path, content, visibleRange, docRange);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error("Can't initialize document sync", ex);
+                    }
                 }
 
                 if (activeCookie != 0)
