@@ -10,6 +10,7 @@ using Cody.Core.DocumentSync;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
 using Cody.Core.Logging;
+using Microsoft.VisualStudio.Threading;
 
 namespace Cody.VisualStudio.Services
 {
@@ -54,20 +55,22 @@ namespace Cody.VisualStudio.Services
                     }
                     var content = rdt.GetRunningDocumentContents(docCookie);
                     var textView = GetTextView(frame);
-                    var docRange = GetDocumentSelection(textView);
                     var visibleRange = GetVisibleRange(textView);
+                    var docRange = GetDocumentSelection(textView);    
 
                     documentActions.OnOpened(path, content, visibleRange, docRange);
                 }
 
                 if (activeCookie != 0)
-                    ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame);
-
-                rdtCookie = rdt.Advise(this);
+                    ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame); 
             }
             catch (Exception ex)
             {
                 log.Error("Document sync initialization error", ex);
+            }
+            finally
+            {
+                rdtCookie = rdt.Advise(this);
             }
         }
 
@@ -140,7 +143,7 @@ namespace Cody.VisualStudio.Services
         {
             bool swap = false;
             int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
-            if (textView != null) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
+            if (textView != null && ThreadHelper.CheckAccess()) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
             
             if(startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
 
