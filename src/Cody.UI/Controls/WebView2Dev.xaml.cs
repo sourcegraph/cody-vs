@@ -17,7 +17,6 @@ namespace Cody.UI.Controls
 
         private static readonly WebviewController _controller = new WebviewController();
 
-        private static readonly TaskCompletionSource<bool> _webViewReady = new TaskCompletionSource<bool>();
 
         public WebView2Dev()
         {
@@ -38,12 +37,10 @@ namespace Cody.UI.Controls
 
         private async Task InitializeWebView()
         {
-            if (_webViewReady.Task.IsCompleted) return;
-
             var env = await CreateWebView2Environment();
             await webView.EnsureCoreWebView2Async(env);
             await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
-            _webViewReady.SetResult(true);
+
             System.Diagnostics.Debug.WriteLine("InitializeWebView", "WebView2Dev");
         }
 
@@ -69,7 +66,6 @@ namespace Cody.UI.Controls
                  "Html", typeof(string), typeof(WebView2Dev),
                  new PropertyMetadata(null, async (d, e) =>
                  {
-                     if (!_webViewReady.Task.IsCompleted) await _webViewReady.Task;
                      _controller.SetHtml(e.NewValue as string);
                  }));
 
@@ -83,7 +79,6 @@ namespace Cody.UI.Controls
             "PostMessage", typeof(AgentResponseEvent), typeof(WebView2Dev),
             new PropertyMetadata(null, async (d, e) =>
             {
-                if (!_webViewReady.Task.IsCompleted) await _webViewReady.Task;
                 var message = (e.NewValue as AgentResponseEvent)?.StringEncodedMessage;
                 if (!string.IsNullOrEmpty(message)) await _controller.PostWebMessageAsJson(message);
             }));
