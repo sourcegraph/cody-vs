@@ -4,7 +4,20 @@ This test plan outlines the comprehensive testing procedures for Cody in Visual 
 
 It covers various features including Chat functionality, Context handling, LLM selection, and Command execution. The plan details specific steps to verify the Chat View's opening, closing, and basic interactions, as well as testing context-awareness and LLM selection for different user tiers. It also includes instructions for testing built-in commands like Explain Code and Find Code Smells, along with instructions for creating and verifying custom commands, and prompts from the prompt library.
 
-## Checklist
+## Test Plan
+
+Use the checklist below to track your progress through the test plan.
+
+### Prerequisites
+
+- [ ] Visual Studio 2022 installed
+- [ ] Solution project in C# - a project with a solution file (.sln)
+- [ ] Preview version of [Cody for Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) installed
+  - You must first receive READ access to the Cody extension in the Visual Studio Marketplace, or ask a team member to share the extension package with you.
+
+### Checklist
+
+Below is a list of the features to be tested in Cody for Visual Studio.
 
 - Autocomplete
   - [ ] Not available
@@ -13,8 +26,8 @@ It covers various features including Chat functionality, Context handling, LLM s
   - [ ] [Context](#context)
   - [ ] [LLM Selection](#llm-selection)
 - Commands
-  - [ ] [Explain](#explain)
-  - [ ] [Smell](#smell)
+  - [ ] [Explain Code](#explain-code)
+  - [ ] [Find Code Smells](#find-code-smells)
   - [ ] [Prompt Library](#prompt-library)
   - [ ] [Custom Commands](#custom-commands)
 - Edit
@@ -22,7 +35,11 @@ It covers various features including Chat functionality, Context handling, LLM s
 
 ## Chat
 
+The Chat feature in Cody allows users to interact with the AI to get codebase-related responses.
+
 ### Chat View
+
+The Chat View is the primary interface for this interaction.
 
 #### Opening and Closing
 
@@ -69,12 +86,33 @@ It covers various features including Chat functionality, Context handling, LLM s
 
 ### LLM Selection
 
+A Language Model (LLM) is a model that Cody uses to generate responses. Cody offers a variety of LLMs, some of which are only available to certain user tiers.
+
 #### Free User Experience
 
 - [ ] Sign in as a Free user and open a new chat.
-- [ ] Verify that the default LLM is Claude 3.5 Sonnet.
+- [ ] Verify that the default LLM is `Claude 3.5 Sonnet`.
 - [ ] Check that you can switch between LLM options not marked as Pro.
 - [ ] Confirm that clicking on a Pro-marked LLM option redirects to the Pro subscription page.
+
+#### Pro User Experience
+
+- [ ] Sign in as a Pro user using manual credential entry.
+- [ ] Verify all LLM options in the dropdown list are available and switchable.
+
+#### Local LLM Selection
+
+Prerequisites:
+
+- [ ] Install [Ollama for Windows](https://ollama.com/download/windows) on your machine.
+- [ ] Download a LLM model and have it running in Ollama.
+
+  - Example: run `ollama pull tinyllama` to download [tinyllama](https://ollama.com/library/tinyllama).
+
+- [ ] Make sure Ollama is running and the LLM model is loaded.
+- [ ] Open Visual Studio and sign in as a Free user.
+- [ ] Open a new chat and verify that the default LLM is `Claude 3.5 Sonnet`, or the last selected LLM.
+- [ ] Open the LLM dropdown and verify the local LLM model is showing up as an option.
 
 #### Account Management
 
@@ -83,17 +121,14 @@ It covers various features including Chat functionality, Context handling, LLM s
 - [ ] Test the "Sign Out" button in the "Account" tab.
 - [ ] Verify that signing out redirects to the sign-in page.
 
-#### Pro User Experience
-
-- [ ] Sign in as a Pro user using manual credential entry.
-- [ ] Verify all LLM options in the dropdown list are available and switchable.
-
 #### Enterprise User Experience
 
 - [ ] Sign in as an enterprise user.
 - [ ] Confirm that LLM selection is not available (cannot be changed).
 
 ## Commands
+
+Currently, only chat commands are available in the Visual Studio extension. The chat commands include Explain Code, Find Code Smells, and the ability to create custom commands.
 
 ### Explain Code
 
@@ -123,7 +158,20 @@ It covers various features including Chat functionality, Context handling, LLM s
 - [ ] Verify that command results are displayed consistently in new chat windows
 - [ ] Check that all command-generated chats are properly logged in the relevant history or chat sections
 
+## Prompt Library
+
+- [ ] Verify the availability of the `Prompt Library` command in:
+  - [ ] The sidebar Chat home page under the `Prompts & Commands` section.
+  - [ ] The `Prompts & Commands` tab above the `Commands` section.
+- [ ] Confirm that selecting `+ New` redirects to the Sourcegraph instance for prompt creation.
+- [ ] Verify that your created prompts are visible in the `Prompt Library` tab.
+- [ ] Ensure that clicking `Manage` redirects to the Sourcegraph instance for prompt management.
+- [ ] Verify that selecting a prompt inserts it into the chat input box.
+- [ ] Confirm that you can run the prompt by pressing Enter or clicking the `Send` button.
+
 ## Custom Commands
+
+Cody allows users to create custom commands that can be executed in the chat window. Even though the custom commands are not officially supported outside VS Code, users can still create them using the `.cody` directory in their home folder or at the root of their solution project.
 
 ### Creating User Custom Commands
 
@@ -172,17 +220,6 @@ To create a workspace-specific custom command:
 - [ ] Verify that summarize and checker are listed in the Commands section above the default commands.
 - [ ] Test the newly created commands by selecting and running them.
 - [ ] Confirm that responses appear in a new chat window and align with the command prompts.
-
-## Prompt Library
-
-- [ ] Verify the availability of the `Prompt Library` command in:
-  - [ ] The sidebar Chat home page under the `Prompts & Commands` section.
-  - [ ] The `Prompts & Commands` tab above the `Commands` section.
-- [ ] Confirm that selecting `+ New` redirects to the Sourcegraph instance for prompt creation.
-- [ ] Verify that your created prompts are visible in the `Prompt Library` tab.
-- [ ] Ensure that clicking `Manage` redirects to the Sourcegraph instance for prompt management.
-- [ ] Verify that selecting a prompt inserts it into the chat input box.
-- [ ] Confirm that you can run the prompt by pressing Enter or clicking the `Send` button.
 
 ### Known Limitations
 
