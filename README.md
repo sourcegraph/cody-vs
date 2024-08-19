@@ -23,12 +23,13 @@ For example, you can ask Cody:
 - "Add helpful debug log statements"
 - "Make this work" _(seriously, it often works—try it!)_
 
-
 ## Choose Your LLM
 
-Cody Pro users can now select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from Claude 3 Opus, Claude 3.5 Sonnet, Claude 3 Sonnet, Claude 3 Haiku, ChatGPT 4o, ChatGPT 4 Turbo, ChatGPT 3.5 Turbo, Google Gemini 1.5 Pro, Gemini 1.5 Flash, and Mixtral.
+Cody offers a variety of large language models (LLMs) to power your chat experience.
+Cody Pro users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from Claude 3.5 Sonnet,Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo, Google Gemini 1.5 Pro, Gemini 1.5 Flash, and Mixtral, while Cody Free users have access to the latest base models from Anthropic, OpenAI, Google, and Mixtral.
+Local models are also available through Ollama to both Cody Free and Cody Pro users. Simply download the model and run it in Ollama to use it in Cody chat.
 
-Administrators for Sourcegraph Enterprise instances can choose betweeen Claude and ChatGPT models to set for their teams as well.
+Administrators for Sourcegraph Enterprise instances can choose between Claude and GPT models to set for their teams as well.
 
 ## Usage
 
@@ -36,6 +37,16 @@ This extension works for all Cody plans, including Cody Free, Cody Pro, and Cody
 
 You can find detailed information about Cody's available plans [on our website](https://sourcegraph.com/pricing?utm_source=marketplace.visualstudio.com&utm_medium=referral).
 
+### Feedback
+
+Cody is often magical and sometimes frustratingly wrong. Cody's goal is to be powerful _and_ accurate. You can help:
+
+- Use the <kbd>👍</kbd>/<kbd>👎</kbd> buttons in the chat view to give feedback.
+- [File an issue](https://community.sourcegraph.com/c/cody) when you see problems.
+- [Sourcegraph Forum](https://community.sourcegraph.com/c/cody) is a great place to share ideas and feedback.
+- [Discord](https://discord.gg/s2qDtYGnAE) is a great place to chat with the team and other users.
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information on how to contribute to this project and how to set up your development environment.
+https://community.sourcegraph.com/
