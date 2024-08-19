@@ -9,7 +9,8 @@ using System.Linq;
 using Cody.Core.DocumentSync;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
-using System.Threading;
+using Cody.Core.Logging;
+using Microsoft.VisualStudio.Threading;
 
 namespace Cody.VisualStudio.Services
 {
@@ -21,46 +22,63 @@ namespace Cody.VisualStudio.Services
         private readonly IVsUIShell vsUIShell;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
         private readonly IDocumentSyncActions documentActions;
+        private readonly ILog log;
 
         private ActiveDocument activeDocument;
         private uint lastShowDocCookie = 0;
 
-        public DocumentsSyncService(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
+        public DocumentsSyncService(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService, ILog log)
         {
             this.rdt = new RunningDocumentTable();
             this.vsUIShell = vsUIShell;
             this.documentActions = documentActions;
-
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
+            this.log = log;
         }
 
         public void Initialize()
         {
-            uint activeCookie = 0;
-            IVsWindowFrame activeFrame = null;
-            foreach (var frame in GetOpenDocuments())
+            try
             {
-                frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
-                var docCookie = (uint)(int)cookie;
-                var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                frame.IsOnScreen(out int onScreen);
-                if (onScreen == 1)
+                uint activeCookie = 0;
+                IVsWindowFrame activeFrame = null;
+                foreach (var frame in GetOpenDocuments())
                 {
-                    activeCookie = docCookie;
-                    activeFrame = frame;
+                    try
+                    {
+                        frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
+                        var docCookie = (uint)(int)cookie;
+                        var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                        frame.IsOnScreen(out int onScreen);
+                        if (onScreen == 1)
+                        {
+                            activeCookie = docCookie;
+                            activeFrame = frame;
+                        }
+                        var content = rdt.GetRunningDocumentContents(docCookie);
+                        var textView = GetTextView(frame);
+                        var visibleRange = GetVisibleRange(textView);
+                        var docRange = GetDocumentSelection(textView);
+
+                        documentActions.OnOpened(path, content, visibleRange, docRange);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error("Can't initialize document sync", ex);
+                    }
                 }
-                var content = rdt.GetRunningDocumentContents(docCookie);
-                var textView = GetTextView(frame);
-                var docRange = GetDocumentSelection(textView);
-                var visibleRange = GetVisibleRange(textView);
 
-                documentActions.OnOpened(path, content, visibleRange, docRange);
+                if (activeCookie != 0)
+                    ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame); 
             }
-
-            if (activeCookie != 0)
-                ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame);
-
-            rdtCookie = rdt.Advise(this);
+            catch (Exception ex)
+            {
+                log.Error("Document sync initialization error", ex);
+            }
+            finally
+            {
+                rdtCookie = rdt.Advise(this);
+            }
         }
 
         private IVsTextView GetTextView(IVsWindowFrame windowFrame)
@@ -132,7 +150,7 @@ namespace Cody.VisualStudio.Services
         {
             bool swap = false;
             int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
-            if (textView != null) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
+            if (textView != null && ThreadHelper.CheckAccess()) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
             
             if(startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
 
@@ -193,6 +211,12 @@ namespace Cody.VisualStudio.Services
 
                 if (textView != null)
                 {
+                    if(activeDocument != null)
+                    {
+                        activeDocument.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
+                        activeDocument.Selection.SelectionChanged -= OnSelectionChanged;
+                    }
+
                     activeDocument = new ActiveDocument
                     {
                         DocCookie = docCookie,
@@ -234,7 +258,7 @@ namespace Cody.VisualStudio.Services
         }
 
         private void OnSelectionChanged(object sender, EventArgs e)
-        {
+        {           
             var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
             var selection = GetDocumentSelection(activeDocument.TextView);
             var visibleRange = GetVisibleRange(activeDocument.TextView);
