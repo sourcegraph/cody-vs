@@ -234,7 +234,7 @@ namespace Cody.VisualStudio
 
                 AgentClient = new AgentClient(options, Logger, AgentLogger);
 
-                WebView2Dev.InitializeController(ThemeService.GetThemingScript());
+                WebView2Dev.InitializeController(ThemeService.GetThemingScript(), NotificationHandlers);
                 NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
                 _ = Task.Run(() => AgentClient.Start())

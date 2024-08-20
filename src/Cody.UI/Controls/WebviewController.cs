@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Cody.Core.Agent;
 
 namespace Cody.UI.Controls
 {
@@ -15,6 +16,8 @@ namespace Cody.UI.Controls
         private string _colorThemeScript;
 
         private ICommand _sendMessageCommand;
+
+        public NotificationHandlers NotificationHandlers;
 
         public WebviewController()
         {

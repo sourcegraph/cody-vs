@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
@@ -28,11 +29,14 @@ namespace Cody.UI.Controls
 
         private async void InitWebView2(object sender, RoutedEventArgs e)
         {
-            await InitializeWebView();
+            //await InitializeWebView();
+
+            //ButtonBase_OnClick(this, null);
         }
 
-        public static WebviewController InitializeController(string themeScript)
+        public static WebviewController InitializeController(string themeScript, NotificationHandlers notificationHandlers)
         {
+            _controller.NotificationHandlers = notificationHandlers;
             _controller.SetThemeScript(themeScript);
             return _controller;
         }
@@ -152,5 +156,23 @@ namespace Cody.UI.Controls
             set => SetValue(LoggerProperty, value);
         }
 
+        private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            await InitializeWebView();
+
+            try
+            {
+                await _controller.NotificationHandlers.agentClient.ResolveWebviewView(new ResolveWebviewViewParams
+                {
+                    // cody.chat for sidebar view, or cody.editorPanel for editor panel
+                    ViewId = "cody.chat",
+                    WebviewHandle = "visual-studio-sidebar",
+                });
+            }
+            catch (Exception exception)
+            {
+                ;
+            }
+        }
     }
 }

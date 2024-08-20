@@ -16,6 +16,13 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+
+            <Button Grid.Row="0"
+                    Height="50"
+                    Content="Initialize"
+                    Click="ButtonBase_OnClick"
+            />
+
             <wpf:WebView2 Name="webView" Grid.Row="1" Loaded="InitWebView2"
               
             />
