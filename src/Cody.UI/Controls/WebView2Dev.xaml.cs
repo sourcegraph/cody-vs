@@ -41,19 +41,19 @@ namespace Cody.UI.Controls
         {
             try
             {
-                Logger.Debug("Initializing ...");
+                Logger?.Debug("Initializing ...");
 
                 var env = await CreateWebView2Environment();
                 await webView.EnsureCoreWebView2Async(env);
                 await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
 
-                Logger.Debug("Done.");
+                Logger?.Debug("Done.");
                 Debug.WriteLine("InitializeWebView", "WebView2Dev");
             }
             catch (Exception ex)
             {
 
-                Logger.Error("Failed.", ex);
+                Logger?.Error("Failed.", ex);
             }
             
         }
@@ -63,7 +63,7 @@ namespace Cody.UI.Controls
 
             try
             {
-                Logger.Debug("Initializing ...");
+                Logger?.Debug("Initializing ...");
 
                 var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "Cody");
@@ -77,13 +77,13 @@ namespace Cody.UI.Controls
                 };
 
                 var webView2 = await CoreWebView2Environment.CreateAsync(null, appData, options);
-                Logger.Debug("Done.");
+                Logger?.Debug("Done.");
 
                 return webView2;
             }
             catch (Exception ex)
             {
-                Logger.Error("Failed", ex);
+                Logger?.Error("Failed", ex);
             }
 
             return null;
