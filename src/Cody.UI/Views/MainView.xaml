@@ -17,11 +17,12 @@
             TextAlignment="Center"
             Text="loading Cody chat"
             />
-        <controls:WebView2Dev 
-            Html="{Binding Html}"
-            SendMessage="{Binding WebviewMessageSendCommand }"
-            PostMessage="{Binding PostMessage}"
-            />
+            <controls:WebView2Dev 
+                Html="{Binding Html}"
+                SendMessage="{Binding WebviewMessageSendCommand }"
+                PostMessage="{Binding PostMessage}"
+                Logger="{Binding Logger}"
+                />
 
     </Grid>
 </UserControl>

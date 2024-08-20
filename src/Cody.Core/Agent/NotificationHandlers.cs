@@ -45,12 +45,12 @@ namespace Cody.Core.Agent
             bool handled = _messageFilter.HandleMessage(message);
             if (!handled)
             {
-                await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
-                {
-                    Id = handle,
-                    MessageStringEncoded = message
-                });
-            }
+            await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+            {
+                Id = handle,
+                MessageStringEncoded = message
+            });
+        }
         }
 
         [AgentCallback("debug/message")]

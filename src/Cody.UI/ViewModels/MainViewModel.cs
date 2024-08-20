@@ -96,5 +96,7 @@ namespace Cody.UI.ViewModels
                 }
             }
         }
+
+        public ILog Logger => _logger;
     }
 }

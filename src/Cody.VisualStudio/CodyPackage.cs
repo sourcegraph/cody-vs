@@ -65,6 +65,8 @@ namespace Cody.VisualStudio
 
         public ILog Logger;
         public ILog AgentLogger;
+        public ILog AgentNotificationsLogger;
+
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
         public MainView MainView;
@@ -106,7 +108,8 @@ namespace Cody.VisualStudio
         {
             var loggerFactory = new LoggerFactory();
             AgentLogger = loggerFactory.Create(WindowPaneLogger.CodyAgent);
-            Logger = loggerFactory.Create("Cody");
+            AgentNotificationsLogger = loggerFactory.Create(WindowPaneLogger.CodyNotifications);
+            Logger = loggerFactory.Create();
 
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution);

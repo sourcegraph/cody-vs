@@ -11,8 +11,10 @@ namespace Cody.VisualStudio.Inf
     {
         private IVersionService _versionService;
 
-        public ILog Create(string outputName = "Cody")
+        public ILog Create(string outputName = null)
         {
+            if (outputName == null) outputName = WindowPaneLogger.DefaultCody;
+
             var outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
 
             Logger logger;
