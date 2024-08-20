@@ -19,7 +19,7 @@ Before you begin, you'll need to download and install two essential pieces of so
 
 Follow these steps to create your Windows VM:
 
-1. Open UTM
+1. Open `UTM`
 2. Click "Create a New Virtual Machine"
 3. Select "Virtualize"
 4. Choose "Windows"
