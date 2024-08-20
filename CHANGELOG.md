@@ -20,4 +20,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.0.0]
 
-🎉 Cody for Visual Studio is now available!
+- Initial preview release of [Cody for Visual Studio](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) 🎉
