@@ -1,23 +1,68 @@
 # Testing Cody for Visual Studio
 
+**NOTE:** Cody for Visual Studio is currently in Preview and may have limited functionality compared to the VS Code version.
+
 This test plan outlines the comprehensive testing procedures for Cody in Visual Studio.
 
 It covers various features including Chat functionality, Context handling, LLM selection, and Command execution. The plan details specific steps to verify the Chat View's opening, closing, and basic interactions, as well as testing context-awareness and LLM selection for different user tiers. It also includes instructions for testing built-in commands like Explain Code and Find Code Smells, along with instructions for creating and verifying custom commands, and prompts from the prompt library.
 
-## Test Plan
+## Prerequisites
 
-Use the checklist below to track your progress through the test plan.
+Before beginning the test plan, ensure you have:
 
-### Prerequisites
-
-- [ ] Visual Studio 2022 installed
-- [ ] Solution project in C# - a project with a solution file (.sln)
+- [ ] [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) installed
+  - Supported versions: Community, Professional, and Enterprise
+- [ ] A codebase with a Visual Studio solution file
+  - To create a new solution project, follow the instructions in the [Create a solution documentation](https://learn.microsoft.com/en-us/visualstudio/get-started/tutorial-projects-solutions?view=vs-2022#create-a-solution)
 - [ ] Preview version of [Cody for Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) installed
-  - You must first receive READ access to the Cody extension in the Visual Studio Marketplace, or ask a team member to share the extension package with you.
+
+**IMPORTANT:** Cody requires an open solution in Visual Studio to provide context-aware responses. Ensure you have a solution project opened before testing Cody features.
+
+## Installation Steps
+
+You must have `READ` access to the Cody extension in the Visual Studio Marketplace to download the Preview version.
+
+If you don't have access, obtain the link to download the latest extension installation package from a team member.
+
+### Preview Version
+
+If you have access to the Preview version of Cody in the Visual Studio Marketplace:
+
+1. Visit the [Cody for Visual Studio Marketplace page](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
+2. Download the extension package (`Cody.VisualStudio.vsix`).
+3. Install the extension by double-clicking the downloaded file.
+
+### Public Release Version
+
+Once Cody for Visual Studio is publicly available in the Marketplace:
+
+1. Open Visual Studio.
+2. Go to `Extensions` > `Manage Extensions`.
+3. In the search bar, type "Cody".
+4. Locate the Cody extension in the results.
+5. Click `Download` to install the extension.
+
+### Post-Installation
+
+After installing Cody:
+
+1. Restart Visual Studio if prompted.
+2. Open your solution or create a new project to start using Cody.
+
+## Test Plan Overview
+
+The plan includes steps to verify:
+
+1. Chat View functionality (opening, closing, and basic interactions)
+2. Context-awareness in chat
+3. LLM selection for different user tiers
+4. Execution of built-in commands (e.g., Explain Code, Find Code Smells)
+5. Creation and verification of custom commands
+6. Usage of prompts from the prompt library
 
 ### Checklist
 
-Below is a list of the features to be tested in Cody for Visual Studio.
+Use the following checklist to track your progress through the test plan:
 
 - Autocomplete
   - [ ] Not available
@@ -32,6 +77,10 @@ Below is a list of the features to be tested in Cody for Visual Studio.
   - [ ] [Custom Commands](#custom-commands)
 - Edit
   - [ ] Not available
+
+## Autocomplete
+
+Verify that Autocomplete is not available (expected behavior).
 
 ## Chat
 
@@ -171,7 +220,11 @@ Currently, only chat commands are available in the Visual Studio extension. The 
 
 ## Custom Commands
 
-Cody allows users to create custom commands that can be executed in the chat window. Even though the custom commands are not officially supported outside VS Code, users can still create them using the `.cody` directory in their home folder or at the root of their solution project.
+NOTE: Custom Command is a beta feature that is currently not officially supported outside of VS Code.
+
+**You may skip this section until it is officially supported in Visual Studio.**
+
+Cody for Visual Studio would extract user's custom commands automatically from the `.cody` directory in their home folder or at the root of their solution project.
 
 ### Creating User Custom Commands
 
@@ -224,3 +277,7 @@ To create a workspace-specific custom command:
 ### Known Limitations
 
 - The `Manage` button in the Command section is not functional.
+
+## Edit
+
+- Verify that Edit functionality is not available (expected behavior).
