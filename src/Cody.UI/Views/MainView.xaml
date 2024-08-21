@@ -15,7 +15,8 @@
             VerticalAlignment="Center"
             Foreground="{Binding TextColor}"
             TextAlignment="Center"
-            Text="loading Cody chat"
+            Text="Loading Cody Chat ..."
+            FontSize="16"
             />
             <controls:WebView2Dev 
                 Html="{Binding Html}"

@@ -42,13 +42,14 @@ namespace Cody.VisualStudio
             var logger = package.Logger;
             var notificationsHandlers = package.NotificationHandlers;
             var webViewsManager = package.WebViewsManager;
+
+            // TODO: move to ThemeService and inject it to MainViewModel
             var textColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowTextColorKey);
             var wpfTextColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(textColor.R, textColor.G, textColor.B));
             
-            var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, logger, wpfTextColor);
+            var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, wpfTextColor, logger);
             var view = new MainView
             {
-
                 DataContext = viewModel
             };
 

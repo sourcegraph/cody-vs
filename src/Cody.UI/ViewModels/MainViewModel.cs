@@ -14,7 +14,7 @@ namespace Cody.UI.ViewModels
 
         private readonly ILog _logger;
 
-        public MainViewModel(IWebViewsManager webViewsManager, NotificationHandlers notificationHandlers, ILog logger, Brush textColor)
+        public MainViewModel(IWebViewsManager webViewsManager, NotificationHandlers notificationHandlers, Brush textColor, ILog logger)
         {
             _webViewsManager = webViewsManager;
             NotificationHandlers = notificationHandlers;
