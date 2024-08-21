@@ -17,5 +17,10 @@ namespace Cody.Core.Agent.Protocol
         public bool VerboseDebug { get; set; }
 
         public string Codebase { get; set; }
+
+        public override string ToString()
+        {
+            return $"ServerEndpoint:'{ServerEndpoint}' Proxy:'{Proxy}' AccessToken:<TOKEN> AnonymousUserID:'{AnonymousUserID}' AutocompleteAdvancedProvider:'{AutocompleteAdvancedProvider}' AutocompleteAdvancedModel:'{AutocompleteAdvancedModel}' Debug:{Debug} VerboseDebug:{VerboseDebug} Codebase:{Codebase}";
+        }
     }
 }

@@ -125,7 +125,7 @@ namespace Cody.VisualStudio
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
             FileService = new FileService(this, Logger);
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, Logger, FileService);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
 
             WebView2Dev.InitializeController(ThemeService.GetThemingScript());
@@ -203,8 +203,8 @@ namespace Cody.VisualStudio
 
                     if(isVisible && isOnScreen) ErrorHandler.ThrowOnFailure(windowFrame.Hide());
                     else ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                }
-            }
+                    }
+                    }
             catch (Exception ex)
             {
                 Logger.Error("Cannot toggle Tool Window.", ex);

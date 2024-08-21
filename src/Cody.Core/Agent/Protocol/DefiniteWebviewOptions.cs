@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +21,11 @@ namespace Cody.Core.Agent.Protocol
         public bool EnableFindWidget { get; set; }
 
         public bool RetainContextWhenHidden { get; set; }
+
+        public override string ToString()
+        {
+            return "TODO";
+        }
     }
 
 
