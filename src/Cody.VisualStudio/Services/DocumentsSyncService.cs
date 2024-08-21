@@ -249,21 +249,35 @@ namespace Cody.VisualStudio.Services
 
         private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
         {
-            var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-            var selection = GetDocumentSelection(activeDocument.TextView);
-            var changes = GetContentChanges(e.Changes, activeDocument.TextView);
-            var visibleRange = GetVisibleRange(activeDocument.TextView);
+            try
+            {
+                var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
+                var selection = GetDocumentSelection(activeDocument.TextView);
+                var changes = GetContentChanges(e.Changes, activeDocument.TextView);
+                var visibleRange = GetVisibleRange(activeDocument.TextView);
 
-            documentActions.OnChanged(path, visibleRange, selection, changes);
+                documentActions.OnChanged(path, visibleRange, selection, changes);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Failed.", ex);
+            }
         }
 
         private void OnSelectionChanged(object sender, EventArgs e)
-        {           
-            var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-            var selection = GetDocumentSelection(activeDocument.TextView);
-            var visibleRange = GetVisibleRange(activeDocument.TextView);
+        {
+            try
+            {
+                var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
+                var selection = GetDocumentSelection(activeDocument.TextView);
+                var visibleRange = GetVisibleRange(activeDocument.TextView);
 
-            documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
+                documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
+            }
+            catch (Exception ex)
+            {
+                log.Error("Failed.", ex);
+            }
         }
 
         private IEnumerable<DocumentChange> GetContentChanges(INormalizedTextChangeCollection textChanges, IVsTextView textView)
