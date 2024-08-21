@@ -2,18 +2,21 @@ using Cody.Core.Agent;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
 using System.Windows.Input;
+using Cody.Core.Infrastructure;
 using System.Windows.Media;
 
 namespace Cody.UI.ViewModels
 {
-    public class MainViewModel : NotifyPropertyChangedBase
+    public class MainViewModel : NotifyPropertyChangedBase, IWebChatHost
     {
+        private readonly IWebViewsManager _webViewsManager;
         public readonly NotificationHandlers NotificationHandlers;
 
         private readonly ILog _logger;
 
-        public MainViewModel(NotificationHandlers notificationHandlers, ILog logger, Brush textColor)
+        public MainViewModel(IWebViewsManager webViewsManager, NotificationHandlers notificationHandlers, ILog logger, Brush textColor)
         {
+            _webViewsManager = webViewsManager;
             NotificationHandlers = notificationHandlers;
             _logger = logger;
             _textColor = textColor;
@@ -97,6 +100,26 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        public ILog Logger => _logger;
+        public ILog Logger
+        {
+            get { return _logger; }
+        }
+
+        private bool _isInitialized;
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+            set
+            {
+                _isInitialized = value;
+                if (_isInitialized)
+                {
+                    _logger.Debug("WebChatHost initialized.");
+
+                    _webViewsManager.Register(this);
+                }
+
+            }
+        }
     }
 }

@@ -51,6 +51,7 @@
     </Compile>
     <Compile Include="Agent\AgentCallAttribute.cs" />
     <Compile Include="Agent\AgentCallbackAttribute.cs" />
+    <Compile Include="Agent\IAgentProxy.cs" />
     <Compile Include="Agent\IAgentService.cs" />
     <Compile Include="Agent\InitializeCallback.cs" />
     <Compile Include="Agent\INotificationHandler.cs" />
@@ -83,9 +84,11 @@
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
+    <Compile Include="Infrastructure\WebViewsManager.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />
     <Compile Include="Infrastructure\ISolutionService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />
+    <Compile Include="Infrastructure\IWebChatHost.cs" />
     <Compile Include="Infrastructure\VersionService.cs" />
     <Compile Include="Infrastructure\IVersionService.cs" />
     <Compile Include="Logging\IOutputWindowPane.cs" />

@@ -22,6 +22,7 @@
                 SendMessage="{Binding WebviewMessageSendCommand }"
                 PostMessage="{Binding PostMessage}"
                 Logger="{Binding Logger}"
+                IsInitialized="{Binding IsInitialized}"
                 />
 
     </Grid>

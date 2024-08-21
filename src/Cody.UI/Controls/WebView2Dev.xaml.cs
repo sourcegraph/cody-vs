@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
@@ -19,24 +18,20 @@ namespace Cody.UI.Controls
     {
         private static readonly WebviewController _controller = new WebviewController();
 
-
         public WebView2Dev()
         {
             InitializeComponent();
 
-            System.Diagnostics.Debug.WriteLine("InitializeComponent", "WebView2Dev");
+            Debug.WriteLine("InitializeComponent", "WebView2Dev");
         }
 
         private async void InitWebView2(object sender, RoutedEventArgs e)
         {
-            //await InitializeWebView();
-
-            //ButtonBase_OnClick(this, null);
+            await InitializeWebView();
         }
 
-        public static WebviewController InitializeController(string themeScript, NotificationHandlers notificationHandlers)
+        public static WebviewController InitializeController(string themeScript)
         {
-            _controller.NotificationHandlers = notificationHandlers;
             _controller.SetThemeScript(themeScript);
             return _controller;
         }
@@ -45,11 +40,19 @@ namespace Cody.UI.Controls
         {
             try
             {
+                if (IsInitialized)
+                {
+                    Logger?.Debug("Already initialized.");
+                    return;
+                }
+
                 Logger?.Debug("Initializing ...");
 
                 var env = await CreateWebView2Environment();
                 await webView.EnsureCoreWebView2Async(env);
                 await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
+
+                IsInitialized = true;
 
                 Logger?.Debug("Done.");
                 Debug.WriteLine("InitializeWebView", "WebView2Dev");
@@ -156,23 +159,17 @@ namespace Cody.UI.Controls
             set => SetValue(LoggerProperty, value);
         }
 
-        private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-            await InitializeWebView();
+        public static readonly DependencyProperty IsInitializedProperty = DependencyProperty.Register(
+            "IsInitialized", typeof(bool), typeof(WebView2Dev),
+            new FrameworkPropertyMetadata(false,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+                )
+            );
 
-            try
-            {
-                await _controller.NotificationHandlers.agentClient.ResolveWebviewView(new ResolveWebviewViewParams
-                {
-                    // cody.chat for sidebar view, or cody.editorPanel for editor panel
-                    ViewId = "cody.chat",
-                    WebviewHandle = "visual-studio-sidebar",
-                });
-            }
-            catch (Exception exception)
-            {
-                ;
-            }
+        public bool IsInitialized
+        {
+            get => (bool)GetValue(IsInitializedProperty);
+            set => SetValue(IsInitializedProperty, value);
         }
     }
 }

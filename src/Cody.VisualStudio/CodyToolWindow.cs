@@ -40,13 +40,16 @@ namespace Cody.VisualStudio
 
             var package = GetPackage();
             var logger = package.Logger;
-            var agentClient = package.NotificationHandlers;
+            var notificationsHandlers = package.NotificationHandlers;
+            var webViewsManager = package.WebViewsManager;
             var textColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowTextColorKey);
             var wpfTextColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(textColor.R, textColor.G, textColor.B));
-
+            
+            var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, logger, wpfTextColor);
             var view = new MainView
             {
-                DataContext = new MainViewModel(agentClient, logger, wpfTextColor)
+
+                DataContext = viewModel
             };
 
             base.Content = view;

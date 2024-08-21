@@ -22,7 +22,10 @@ namespace Cody.Core.Agent
         public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
+
+        public event EventHandler<string> OnRegisterWebViewRequest;
         public event EventHandler OnOptionsPageShowRequest;
+
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
         public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService)
@@ -36,7 +39,6 @@ namespace Cody.Core.Agent
         public void SetAgentClient(IAgentService client)
         {
             agentClient = client;
-            //agentClientReady.SetResult(true);
         }
 
         // Send a message to the host from webview.
@@ -69,14 +71,7 @@ namespace Cody.Core.Agent
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
             _logger.Debug(viewId, "RegisterWebviewViewProvider");
-            ////agentClientReady.Task.Wait();
-            //await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
-            //{
-            //    // cody.chat for sidebar view, or cody.editorPanel for editor panel
-            //    ViewId = viewId,
-            //    // TODO: Create dynmically when we support editor panel
-            //    WebviewHandle = "visual-studio-sidebar",
-            //});
+            OnRegisterWebViewRequest?.Invoke(this, viewId);
         }
 
         [AgentCallback("webview/createWebviewPanel", deserializeToSingleObject: true)]

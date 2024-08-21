@@ -69,19 +69,22 @@ namespace Cody.VisualStudio
 
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
-        public MainView MainView;
-        public AgentClient AgentClient;
         public IAgentService AgentService;
         public IUserSettingsService UserSettingsService;
-        public InitializeCallback InitializeService;
         public IStatusbarService StatusbarService;
         public IThemeService ThemeService;
-        public NotificationHandlers NotificationHandlers;
-        public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
-        public IVsUIShell VsUIShell;
-        public DocumentsSyncService DocumentsSyncService;
         public ISolutionService SolutionService;
+        public IWebViewsManager WebViewsManager;
+        public IAgentProxy AgentClient;
+
+        public MainView MainView;
+        public InitializeCallback InitializeService;
+        public NotificationHandlers NotificationHandlers;
+        public DocumentsSyncService DocumentsSyncService;
         public IFileService FileService;
+        public IVsUIShell VsUIShell;
+        public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
+
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
 
@@ -124,6 +127,9 @@ namespace Cody.VisualStudio
             FileService = new FileService(this, Logger);
             NotificationHandlers = new NotificationHandlers(UserSettingsService, Logger, FileService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
+
+            WebView2Dev.InitializeController(ThemeService.GetThemingScript());
+            NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
@@ -213,7 +219,8 @@ namespace Cody.VisualStudio
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
         }
 
-        private async Task InitializeAgent()
+
+        private void PrepareAgentConfiguration()
         {
             try
             {
@@ -234,13 +241,26 @@ namespace Cody.VisualStudio
 
                 AgentClient = new AgentClient(options, Logger, AgentLogger);
 
-                WebView2Dev.InitializeController(ThemeService.GetThemingScript(), NotificationHandlers);
-                NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
+                WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed.", ex);
+            }
+        }
+
+        private async Task InitializeAgent()
+        {
+            try
+            {
+                PrepareAgentConfiguration();
 
                 _ = Task.Run(() => AgentClient.Start())
                 .ContinueWith(async x =>
                 {
                     AgentService = AgentClient.CreateAgentService<IAgentService>();
+                    WebViewsManager.SetAgentService(AgentService);
+
                     await InitializeService.Initialize(AgentService);
                     NotificationHandlers.SetAgentClient(AgentService);
                 })
