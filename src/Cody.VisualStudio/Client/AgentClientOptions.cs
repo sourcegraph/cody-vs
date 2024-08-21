@@ -1,4 +1,4 @@
-﻿using Cody.Core.Agent;
+using Cody.Core.Agent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +22,6 @@ namespace Cody.VisualStudio.Client
 
         public string AgentDirectory { get; set; }
 
-        public List<INotificationHandler> NotificationHandlers { get; set; } = new List<INotificationHandler>();
+        public List<INotificationHandler> CallbackHandlers { get; set; } = new List<INotificationHandler>();
     }
 }
