@@ -30,8 +30,11 @@
     called "command set" and is used to group different command inside a logically related
     group; your package should define its own command set in order to avoid collisions
     with command ids defined by other packages. -->
-
 		<Groups>
+            <Group guid="guidCodyPackageCmdSet" id="CodyToolsMenuGroup" priority="0x0100">
+                <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+            </Group>
+            <!-- Context Menu group -->
 			<Group guid="guidCodyPackageCmdSet" id="CodyEditorContextMenuGroup" priority="0x0100">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
 			</Group>
@@ -64,6 +67,15 @@
 					<ButtonText>Cody Chat</ButtonText>
 				</Strings>
 			</Button>
+            <!-- New button in the toolbar -->
+            <Button guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" priority="0x100" type="Button">
+                <Parent guid="guidCodyPackageCmdSet" id="CodyToolsMenuGroup"/>
+                <Icon guid="guidImages" id="bmpPic1"/>
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <Strings>
+                    <ButtonText>Cody</ButtonText>
+                </Strings>
+            </Button>
 		</Buttons>
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
 		<Bitmaps>
@@ -84,6 +96,7 @@
 		<GuidSymbol name="guidCodyPackageCmdSet" value="{0ac9104c-5f89-4834-9360-849c7aa6a198}">
 			<IDSymbol name="CodyEditorContextMenuGroup" value="0x0101" />
 			<IDSymbol name="CodyToolWindowCommandId" value="0x0100" />
+            <IDSymbol name="CodyToolsMenuGroup" value="0x1010" />
 		</GuidSymbol>
 
 		<GuidSymbol name="guidImages" value="{9cf94066-686e-4dd8-99c8-3dee4bfb3f59}" >

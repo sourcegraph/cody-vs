@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Cody.UI.Views.MainView"
+<UserControl x:Class="Cody.UI.Views.MainView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -9,7 +9,7 @@
              d:DesignHeight="750" 
              d:DesignWidth="400"
              >
-    <Grid >
+    <Grid Background="Transparent">
             <controls:WebView2Dev 
                 Html="{Binding Html}"
                 SendMessage="{Binding WebviewMessageSendCommand }"

@@ -66,6 +66,7 @@
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="Services\DocumentsSyncService.cs" />
+    <Compile Include="Services\FileService.cs" />
     <Compile Include="Services\OptionsPage.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -74,6 +75,7 @@
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
+    <Compile Include="Utilities\FilePathHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\Marketplace.png">
