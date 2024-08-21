@@ -10,11 +10,18 @@
              d:DesignWidth="400"
              >
     <Grid Background="Transparent">
-            <controls:WebView2Dev 
-                Html="{Binding Html}"
-                SendMessage="{Binding WebviewMessageSendCommand }"
-                PostMessage="{Binding PostMessage}"
-                />
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Foreground="{Binding TextColor}"
+            TextAlignment="Center"
+            Text="loading Cody chat"
+            />
+        <controls:WebView2Dev 
+            Html="{Binding Html}"
+            SendMessage="{Binding WebviewMessageSendCommand }"
+            PostMessage="{Binding PostMessage}"
+            />
 
     </Grid>
 </UserControl>

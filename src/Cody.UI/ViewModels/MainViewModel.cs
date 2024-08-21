@@ -1,7 +1,8 @@
-﻿using Cody.Core.Agent;
+using Cody.Core.Agent;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Cody.UI.ViewModels
 {
@@ -11,10 +12,11 @@ namespace Cody.UI.ViewModels
 
         private readonly ILog _logger;
 
-        public MainViewModel(NotificationHandlers notificationHandlers, ILog logger)
+        public MainViewModel(NotificationHandlers notificationHandlers, ILog logger, Brush textColor)
         {
             NotificationHandlers = notificationHandlers;
             _logger = logger;
+            _textColor = textColor;
 
             NotificationHandlers.OnSetHtmlEvent += OnSetHtmlHandler;
             NotificationHandlers.OnPostMessageEvent += OnPostMessageHandler;
@@ -50,6 +52,15 @@ namespace Cody.UI.ViewModels
         private void OnSetHtmlHandler(object sender, SetHtmlEvent e)
         {
             Html = e.Html;
+        }
+
+        private Brush _textColor;
+        public Brush TextColor
+        {
+            get
+            {
+                return _textColor;
+            }
         }
 
         private string _html;

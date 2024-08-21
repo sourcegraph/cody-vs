@@ -1,10 +1,13 @@
-﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
 using Cody.UI.ViewModels;
 using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.PlatformUI;
+using System.Windows.Media;
+using System.Drawing;
 
 #pragma warning disable VSTHRD010
 
@@ -38,10 +41,12 @@ namespace Cody.VisualStudio
             var package = GetPackage();
             var logger = package.Logger;
             var agentClient = package.NotificationHandlers;
+            var textColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowTextColorKey);
+            var wpfTextColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(textColor.R, textColor.G, textColor.B));
 
             var view = new MainView
             {
-                DataContext = new MainViewModel(agentClient, logger)
+                DataContext = new MainViewModel(agentClient, logger, wpfTextColor)
             };
 
             base.Content = view;
