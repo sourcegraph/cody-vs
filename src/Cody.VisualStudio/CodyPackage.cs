@@ -189,14 +189,11 @@ namespace Cody.VisualStudio
                 var window = FindToolWindow(typeof(CodyToolWindow), 0, true);
                 if (window?.Frame is IVsWindowFrame windowFrame)
                 {
-                    if (windowFrame == null || windowFrame.IsVisible() == 1)
-                    {
-                        ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                    }
-                    else
-                    {
-                        ErrorHandler.ThrowOnFailure(windowFrame.Hide());
-                    }
+                    bool isVisible = windowFrame.IsVisible() == 0;
+                    bool isOnScreen = windowFrame.IsOnScreen(out int screenTmp) == 0 && screenTmp == 1;
+
+                    if(isVisible && isOnScreen) ErrorHandler.ThrowOnFailure(windowFrame.Hide());
+                    else ErrorHandler.ThrowOnFailure(windowFrame.Show());
                 }
             }
             catch (Exception ex)
