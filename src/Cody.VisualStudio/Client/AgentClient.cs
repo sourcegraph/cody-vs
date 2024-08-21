@@ -44,9 +44,9 @@ namespace Cody.VisualStudio.Client
             jsonRpc = new JsonRpc(handler);
             jsonRpc.Disconnected += OnDisconnected;
 
-            foreach (var target in options.NotificationHandlers)
+            foreach (var target in options.CallbackHandlers)
             {
-                var methods = NameTransformer.GetNotificationMethods(target.GetType());
+                var methods = NameTransformer.GetCallbackMethods(target.GetType());
                 foreach (var method in methods) jsonRpc.AddLocalRpcMethod(method.Key, target, method.Value);
             }
 

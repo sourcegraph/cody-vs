@@ -224,7 +224,7 @@ namespace Cody.VisualStudio
 
                 var options = new AgentClientOptions
                 {
-                    NotificationHandlers = new List<INotificationHandler> { NotificationHandlers },
+                    CallbackHandlers = new List<INotificationHandler> { NotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = devPort != null,

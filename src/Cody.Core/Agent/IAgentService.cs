@@ -10,52 +10,52 @@ namespace Cody.Core.Agent
     //---------------------------------------------------------
     public interface IAgentService
     {
-        [AgentMethod("initialize")]
+        [AgentCall("initialize")]
         Task<ServerInfo> Initialize(ClientInfo clientInfo);
 
-        [AgentMethod("graphql/getCurrentUserCodySubscription")]
+        [AgentCall("graphql/getCurrentUserCodySubscription")]
         Task<CurrentUserCodySubscription> GetCurrentUserCodySubscription();
 
-        [AgentMethod("initialized")]
+        [AgentCall("initialized")]
         void Initialized();
 
-        [AgentMethod("git/codebaseName")]
+        [AgentCall("git/codebaseName")]
         Task<string> GetGitCodebaseName(CodyFilePath path);
 
-        [AgentMethod("webview/resolveWebviewView")]
+        [AgentCall("webview/resolveWebviewView")]
         Task ResolveWebviewView(ResolveWebviewViewParams paramValue);
 
-        [AgentMethod("webview/receiveMessageStringEncoded")]
+        [AgentCall("webview/receiveMessageStringEncoded")]
         Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
 
-        [AgentMethod("extensionConfiguration/change")]
+        [AgentCall("extensionConfiguration/change")]
         Task<AuthStatus> ConfigurationChange(ExtensionConfiguration configuration);
 
-        [AgentMethod("textDocument/didOpen")]
+        [AgentCall("textDocument/didOpen")]
         void DidOpen(ProtocolTextDocument docState);
 
-        [AgentMethod("textDocument/didChange")]
+        [AgentCall("textDocument/didChange")]
         void DidChange(ProtocolTextDocument docState);
 
-        [AgentMethod("textDocument/didFocus")]
+        [AgentCall("textDocument/didFocus")]
         void DidFocus(CodyFilePath path);
 
-        [AgentMethod("textDocument/didSave")]
+        [AgentCall("textDocument/didSave")]
         void DidSave(CodyFilePath path);
 
-        [AgentMethod("textDocument/didClose")]
+        [AgentCall("textDocument/didClose")]
         void DidClose(ProtocolTextDocument docState);
 
-        [AgentMethod("chat/new")]
+        [AgentCall("chat/new")]
         Task<string> NewChat();
 
-        [AgentMethod("chat/sidebar/new")]
+        [AgentCall("chat/sidebar/new")]
         Task<ChatPanelInfo> NewSidebarChat();
 
-        [AgentMethod("chat/web/new")]
+        [AgentCall("chat/web/new")]
         Task<ChatPanelInfo> NewEditorChat();
 
-        [AgentMethod("workspaceFolder/didChange")]
+        [AgentCall("workspaceFolder/didChange")]
         void WorkspaceFolderDidChange(WorkspaceFolderDidChangeEvent uris);
 
         //---------------------------------------------------------

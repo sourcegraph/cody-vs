@@ -55,8 +55,8 @@
     <Compile Include="..\Cody.VisualStudio\Properties\AssemblyVersion.cs">
       <Link>Properties\AssemblyVersion.cs</Link>
     </Compile>
-    <Compile Include="Agent\AgentMethodAttribute.cs" />
-    <Compile Include="Agent\AgentNotificationAttribute.cs" />
+    <Compile Include="Agent\AgentCallAttribute.cs" />
+    <Compile Include="Agent\AgentCallbackAttribute.cs" />
     <Compile Include="Agent\IAgentService.cs" />
     <Compile Include="Agent\InitializeCallback.cs" />
     <Compile Include="Agent\INotificationHandler.cs" />

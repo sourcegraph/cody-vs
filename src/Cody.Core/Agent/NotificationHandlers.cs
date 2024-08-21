@@ -53,19 +53,19 @@ namespace Cody.Core.Agent
             }
         }
 
-        [AgentNotification("debug/message")]
+        [AgentCallback("debug/message")]
         public void Debug(string channel, string message)
         {
             _logger.Debug(message, channel);
         }
 
-        [AgentNotification("webview/registerWebview")]
+        [AgentCallback("webview/registerWebview")]
         public void RegisterWebview(string handle)
         {
             _logger.Debug(handle, "RegisterWebview");
         }
 
-        [AgentNotification("webview/registerWebviewViewProvider")]
+        [AgentCallback("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
             _logger.Debug(viewId, "RegisterWebviewViewProvider");
@@ -79,13 +79,13 @@ namespace Cody.Core.Agent
             });
         }
 
-        [AgentNotification("webview/createWebviewPanel", deserializeToSingleObject: true)]
+        [AgentCallback("webview/createWebviewPanel", deserializeToSingleObject: true)]
         public void CreateWebviewPanel(CreateWebviewPanelParams panelParams)
         {
             _logger.Debug(panelParams.ToString(), "CreateWebviewPanel");
         }
 
-        [AgentNotification("webview/setOptions")]
+        [AgentCallback("webview/setOptions")]
         public void SetOptions(string handle, DefiniteWebviewOptions options)
         {
             if (options.EnableCommandUris is bool enableCmd)
@@ -98,56 +98,56 @@ namespace Cody.Core.Agent
             }
         }
 
-        [AgentNotification("webview/setHtml")]
+        [AgentCallback("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() { Handle = handle, Html = html });
         }
 
-        [AgentNotification("webview/PostMessage")]
+        [AgentCallback("webview/PostMessage")]
         public void PostMessage(string handle, string message)
         {
             PostMessageStringEncoded(handle, message);
         }
 
-        [AgentNotification("webview/postMessageStringEncoded")]
+        [AgentCallback("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
             _logger.Debug(stringEncodedMessage, "PostMessageStringEncoded");
             PostWebMessageAsJson?.Invoke(stringEncodedMessage);
         }
 
-        [AgentNotification("webview/didDisposeNative")]
+        [AgentCallback("webview/didDisposeNative")]
         public void DidDisposeNative(string handle)
         {
             _logger.Debug(handle, "DidDisposeNative");
         }
 
-        [AgentNotification("webview/dispose")]
+        [AgentCallback("webview/dispose")]
         public void Dispose(string handle)
         {
             _logger.Debug(handle, "Dispose");
         }
 
-        [AgentNotification("webview/reveal")]
+        [AgentCallback("webview/reveal")]
         public void Reveal(string handle, int viewColumn, bool preserveFocus)
         {
             _logger.Debug(handle, "Reveal");
         }
 
-        [AgentNotification("webview/setTitle")]
+        [AgentCallback("webview/setTitle")]
         public void SetTitle(string handle, string title)
         {
             _logger.Debug(title, "SetTitle");
         }
 
-        [AgentNotification("webview/setIconPath")]
+        [AgentCallback("webview/setIconPath")]
         public void SetIconPath(string handle, string iconPathUri)
         {
             _logger.Debug(iconPathUri, "SetIconPath");
         }
 
-        [AgentNotification("window/didChangeContext")]
+        [AgentCallback("window/didChangeContext")]
         public void WindowDidChangeContext(string key, string value)
         {
             _logger.Debug(value, $@"WindowDidChangeContext Key - {key}");
@@ -163,27 +163,26 @@ namespace Cody.Core.Agent
             }
         }
 
-        [AgentNotification("extensionConfiguration/didChange", deserializeToSingleObject: true)]
+        [AgentCallback("extensionConfiguration/didChange", deserializeToSingleObject: true)]
         public void ExtensionConfigDidChange(ExtensionConfiguration config)
         {
             _logger.Debug(config.ToString(), "didChange");
         }
 
-        [AgentNotification("ignore/didChange")]
+        [AgentCallback("ignore/didChange")]
         public void IgnoreDidChange()
         {
             _logger.Debug("Changed", "IgnoreDidChange");
         }
 
-        // REQUEST FROM AGENT - NOT WORKING
-        [AgentNotification("textDocument/show")]
+        [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
         public Task<bool> ShowTextDocument(TextDocumentShowParams param)
         {
             var path = new Uri(param.Uri).ToString();
             return Task.FromResult(_fileService.OpenFileInEditor(path));
         }
 
-        [AgentNotification("env/openExternal")]
+        [AgentCallback("env/openExternal")]
         public Task<bool> OpenExternalLink(CodyFilePath path)
         {
             // Open the URL in the default browser
@@ -192,7 +191,7 @@ namespace Cody.Core.Agent
 
         }
 
-        [AgentNotification("window/showSaveDialog")]
+        [AgentCallback("window/showSaveDialog")]
         public Task<string> ShowSaveDialog(SaveDialogOptionsParams paramValues)
         {
             return Task.FromResult("Not Yet Implemented");

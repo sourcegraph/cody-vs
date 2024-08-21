@@ -46,6 +46,7 @@ namespace Cody.UI.Controls
             // Enable below settings only in DEBUG mode.
             _webview.Settings.AreDefaultContextMenusEnabled = false;
             _webview.Settings.AreDevToolsEnabled = false;
+            _webview.Settings.IsStatusBarEnabled = false;
 #if DEBUG
             _webview.Settings.AreDefaultContextMenusEnabled = true;
             _webview.Settings.AreDevToolsEnabled = true;
