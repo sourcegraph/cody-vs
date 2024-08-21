@@ -185,18 +185,26 @@ namespace Cody.VisualStudio
         {
             try
             {
-                Logger.Debug("Showing Tool Window ...");
-                var toolWindow = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
-                if (toolWindow?.Frame == null)
+                Logger.Debug("Toggling Tool Window ...");
+                var window = FindToolWindow(typeof(CodyToolWindow), 0, true);
+                if (window?.Frame is IVsWindowFrame windowFrame)
                 {
-                    throw new NotSupportedException("Cannot create tool window");
+                    if (windowFrame == null || windowFrame.IsVisible() == 1)
+                    {
+                        ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                    }
+                    else
+                    {
+                        ErrorHandler.ThrowOnFailure(windowFrame.Hide());
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error("Cannot open Tool Window.", ex);
+                Logger.Error("Cannot toggle Tool Window.", ex);
             }
         }
+
 
         private void InitializeErrorHandling()
         {
