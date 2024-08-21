@@ -1,25 +1,22 @@
 using Cody.Core.Agent.Protocol;
-using EnvDTE80;
-using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using Cody.Core.Workspace;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
     public class NotificationHandlers : INotificationHandler
     {
-        private IUserSettingsService _settingsService;
+        private readonly WebviewMessageHandler _messageFilter;
+        private readonly IUserSettingsService _settingsService;
+        private readonly IFileService _fileService;
         private readonly ILog _logger;
 
-        public NotificationHandlers(IUserSettingsService settingsService, ILog logger)
-        {
-            _settingsService = settingsService;
-            _logger = logger;
-        }
+        public IAgentService agentClient;
+        private readonly TaskCompletionSource<bool> agentClientReady = new TaskCompletionSource<bool>();
 
         public delegate Task PostWebMessageAsJsonDelegate(string message);
         public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
@@ -28,10 +25,13 @@ namespace Cody.Core.Agent
         public event EventHandler OnOptionsPageShowRequest;
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
-        public IAgentService agentClient;
-
-        private TaskCompletionSource<bool> agentClientReady = new TaskCompletionSource<bool>();
-
+        public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService)
+        {
+            _settingsService = settingsService;
+            _fileService = fileService;
+            _logger = logger;
+            _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
+        }
 
         public void SetAgentClient(IAgentService client)
         {
@@ -42,59 +42,33 @@ namespace Cody.Core.Agent
         // Send a message to the host from webview.
         public async Task SendWebviewMessage(string handle, string message)
         {
-            try
+            bool handled = _messageFilter.HandleMessage(message);
+            if (!handled)
             {
-                dynamic json = JObject.Parse(message);
-                if (json.command == "auth")
+                await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
                 {
-                    if (json.authKind == "signout")
-                    {
-                        _settingsService.AccessToken = string.Empty;
-                    }
-                    else if (json.authKind == "signin")
-                    {
-                        var token = json.value;
-                        var endpoint = json.endpoint;
-
-                        _settingsService.ServerEndpoint = endpoint;
-                        _settingsService.AccessToken = token;
-                    }
-                }
-                else if (json.command == "command")
-                {
-                    if (json.id == "cody.status-bar.interacted")
-                    {
-                        OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty);
-                    }
-                }
+                    Id = handle,
+                    MessageStringEncoded = message
+                });
             }
-            catch(Exception ex)
-            {
-                _logger.Error("Failed.", ex);
-            }
-            await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
-            {
-                Id = handle,
-                MessageStringEncoded = message
-            });
         }
 
         [AgentNotification("debug/message")]
         public void Debug(string channel, string message)
         {
-            DebugLog(message, "Debug");
+            _logger.Debug(message, channel);
         }
 
         [AgentNotification("webview/registerWebview")]
         public void RegisterWebview(string handle)
         {
-            DebugLog(handle, "RegisterWebview");
+            _logger.Debug(handle, "RegisterWebview");
         }
 
         [AgentNotification("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            DebugLog(viewId, "RegisterWebviewViewProvider");
+            _logger.Debug(viewId, "RegisterWebviewViewProvider");
             agentClientReady.Task.Wait();
             await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
             {
@@ -108,7 +82,7 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/createWebviewPanel", deserializeToSingleObject: true)]
         public void CreateWebviewPanel(CreateWebviewPanelParams panelParams)
         {
-            DebugLog(panelParams.ToString(), "CreateWebviewPanel");
+            _logger.Debug(panelParams.ToString(), "CreateWebviewPanel");
         }
 
         [AgentNotification("webview/setOptions")]
@@ -116,7 +90,7 @@ namespace Cody.Core.Agent
         {
             if (options.EnableCommandUris is bool enableCmd)
             {
-                DebugLog(handle, "SetOptions");
+                _logger.Debug(handle, "SetOptions");
             }
             else if (options.EnableCommandUris is JArray jArray)
             {
@@ -127,7 +101,6 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/setHtml")]
         public void SetHtml(string handle, string html)
         {
-            DebugLog(html, "SetHtml");
             OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() { Handle = handle, Html = html });
         }
 
@@ -140,44 +113,44 @@ namespace Cody.Core.Agent
         [AgentNotification("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
-            DebugLog(stringEncodedMessage, "PostMessageStringEncoded");
+            _logger.Debug(stringEncodedMessage, "PostMessageStringEncoded");
             PostWebMessageAsJson?.Invoke(stringEncodedMessage);
         }
 
         [AgentNotification("webview/didDisposeNative")]
         public void DidDisposeNative(string handle)
         {
-            DebugLog(handle, "DidDisposeNative");
+            _logger.Debug(handle, "DidDisposeNative");
         }
 
         [AgentNotification("webview/dispose")]
         public void Dispose(string handle)
         {
-            DebugLog(handle, "Dispose");
+            _logger.Debug(handle, "Dispose");
         }
 
         [AgentNotification("webview/reveal")]
         public void Reveal(string handle, int viewColumn, bool preserveFocus)
         {
-            DebugLog(handle, "Reveal");
+            _logger.Debug(handle, "Reveal");
         }
 
         [AgentNotification("webview/setTitle")]
         public void SetTitle(string handle, string title)
         {
-            DebugLog(title, "SetTitle");
+            _logger.Debug(title, "SetTitle");
         }
 
         [AgentNotification("webview/setIconPath")]
         public void SetIconPath(string handle, string iconPathUri)
         {
-            DebugLog(iconPathUri, "SetIconPath");
+            _logger.Debug(iconPathUri, "SetIconPath");
         }
 
         [AgentNotification("window/didChangeContext")]
         public void WindowDidChangeContext(string key, string value)
         {
-            DebugLog(value, $@"WindowDidChangeContext Key - {key}");
+            _logger.Debug(value, $@"WindowDidChangeContext Key - {key}");
 
             // Check the value to see if Cody is activated or deactivated
             // Deactivated: value = "false", meaning user is no longer authenticated.
@@ -186,59 +159,43 @@ namespace Cody.Core.Agent
             if (key == "cody.activated")
             {
                 var isAuthenticated = value == "true";
-                DebugLog(isAuthenticated.ToString(), "User is authenticated");
+                _logger.Debug(isAuthenticated.ToString(), "User is authenticated");
             }
         }
 
         [AgentNotification("extensionConfiguration/didChange", deserializeToSingleObject: true)]
         public void ExtensionConfigDidChange(ExtensionConfiguration config)
         {
-            DebugLog(config.ToString(), "didChange");
+            _logger.Debug(config.ToString(), "didChange");
         }
 
         [AgentNotification("ignore/didChange")]
         public void IgnoreDidChange()
         {
-            DebugLog("Changed", "IgnoreDidChange");
+            _logger.Debug("Changed", "IgnoreDidChange");
         }
 
-        // REQUEST FROM AGENT
+        // REQUEST FROM AGENT - NOT WORKING
         [AgentNotification("textDocument/show")]
         public Task<bool> ShowTextDocument(TextDocumentShowParams param)
         {
-            DebugLog(param.Uri, "ShowTextDocument");
-            OpenAgentTextDocument(new Uri(param.Uri).ToString());
-            return Task.FromResult(true);
+            var path = new Uri(param.Uri).ToString();
+            return Task.FromResult(_fileService.OpenFileInEditor(path));
         }
 
         [AgentNotification("env/openExternal")]
         public Task<bool> OpenExternalLink(CodyFilePath path)
         {
-            DebugLog(path.Uri, "OpenExternalLink");
-            if (Uri.TryCreate(path.Uri, UriKind.RelativeOrAbsolute, out var uri))
-            {
-                if (uri.IsFile)
-                {
-                    OpenAgentTextDocument(uri.LocalPath); // Use LocalPath for files
-                }
-            }
             // Open the URL in the default browser
             System.Diagnostics.Process.Start(path.Uri);
             return Task.FromResult(true);
+
         }
 
-        private void OpenAgentTextDocument(string uri)
+        [AgentNotification("window/showSaveDialog")]
+        public Task<string> ShowSaveDialog(SaveDialogOptionsParams paramValues)
         {
-            var dte = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE");
-            dte.ItemOperations.OpenFile(uri);
-        }
-
-        public void DebugLog(string message, string origin)
-        {
-            // Log the message to the debug console when in debug mode.
-#if DEBUG
-            System.Diagnostics.Debug.WriteLine(message, $@"Agent Notified {origin}");
-#endif
+            return Task.FromResult("Not Yet Implemented");
         }
     }
 }

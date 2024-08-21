@@ -1,21 +1,21 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Logging;
+using Cody.Core.Settings;
 using Cody.VisualStudio.Client;
+using Cody.VisualStudio.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Cody.Core.Logging;
-using Cody.Core.Settings;
-using Cody.VisualStudio.Services;
 
 namespace Cody.AgentTester
 {
     internal class Program
     {
         private static AgentClient client;
-        private static ConsoleLogger logger = new ConsoleLogger();
-        private static ConsoleLogger agentLogger = new ConsoleLogger();
+        private static readonly ConsoleLogger logger = new ConsoleLogger();
+        private static readonly ConsoleLogger agentLogger = new ConsoleLogger();
         private static IAgentService agentService;
 
         static async Task Main(string[] args)
@@ -26,9 +26,10 @@ namespace Cody.AgentTester
 
             var logger = new Logger();
             var settingsService = new UserSettingsService(new UserSettingsProvider(new FakeSettingsProvider()), logger);
+            var editorService = new FileService(new FakeServiceProvider(), logger);
             var options = new AgentClientOptions
             {
-                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService, logger) },
+                NotificationHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService, logger, editorService) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,

@@ -6,10 +6,12 @@ using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
+using Cody.Core.Workspace;
 using Cody.UI.Controls;
 using Cody.UI.Views;
 using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
+using Cody.VisualStudio.Options;
 using Cody.VisualStudio.Services;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -29,7 +31,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Cody.VisualStudio.Options;
 using Task = System.Threading.Tasks.Task;
 
 namespace Cody.VisualStudio
@@ -78,7 +79,7 @@ namespace Cody.VisualStudio
         public IVsUIShell VsUIShell;
         public DocumentsSyncService DocumentsSyncService;
         public ISolutionService SolutionService;
-
+        public IFileService FileService;
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
 
@@ -117,7 +118,8 @@ namespace Cody.VisualStudio
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, Logger);
+            FileService = new FileService(this, Logger);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, Logger, FileService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
