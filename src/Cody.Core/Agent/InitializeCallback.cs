@@ -66,9 +66,7 @@ namespace Cody.Core.Agent
 
             if (result.Authenticated == true)
             {
-                var subscription = await client.GetCurrentUserCodySubscription();
-
-                statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}. You are using cody {subscription.Plan} plan.");
+                statusbarService.SetText($"Hello {result.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
             }
             else
             {
