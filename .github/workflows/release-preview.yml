@@ -1,4 +1,4 @@
-name: vs-release-preview
+name: Release Preview
 
 on:
   push:
@@ -13,22 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "8.0.32"
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.3
 
-      - name: Restore dependencies
-        run: |
-          dotnet tool install --global Cake.Tool
-          dotnet restore src\Cody.Core\Cody.Core.csproj
-          dotnet tool restore src
-          corepack enable
-          corepack install --global pnpm@8.6.7
+      - name: Install Cake.Tool
+        run: dotnet tool install --global Cake.Tool
 
-      - name: Build
+      - name: Restore NuGet packages
+        run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
+
+      - name: Run Cake script
         run: |
           cd src
+          dotnet tool restore
+          corepack enable
+          corepack install --global pnpm@8.6.7
           dotnet cake
 
       - name: Create Release
