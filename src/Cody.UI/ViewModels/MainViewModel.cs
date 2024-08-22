@@ -1,3 +1,6 @@
+using System;
+using System.Threading.Tasks;
+using System.Windows;
 using Cody.Core.Agent;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
@@ -58,22 +61,17 @@ namespace Cody.UI.ViewModels
         }
 
         private Brush _textColor;
+
         public Brush TextColor
         {
-            get
-            {
-                return _textColor;
-            }
+            get { return _textColor; }
         }
 
         private string _html;
 
         public string Html
         {
-            get
-            {
-                return _html;
-            }
+            get { return _html; }
             set
             {
                 if (SetProperty(ref _html, value))
@@ -83,14 +81,23 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        private AgentResponseEvent _postMessage;
+        private string _isChatLoaded;
+        public string IsChatLoaded
+        {
+            get => _isChatLoaded;
+            set
+            {
+                if (SetProperty(ref _isChatLoaded, value))
+                {
+                    _logger.Debug($"IsChatLoaded:{_isChatLoaded}");
+                }
+            }
+        }
 
+        private AgentResponseEvent _postMessage;
         public AgentResponseEvent PostMessage
         {
-            get
-            {
-                return _postMessage;
-            }
+            get { return _postMessage; }
             set
             {
                 if (SetProperty(ref _postMessage, value))
@@ -105,21 +112,22 @@ namespace Cody.UI.ViewModels
             get { return _logger; }
         }
 
-        private bool _isInitialized;
-        public bool IsInitialized
+        private bool _isWebViewInitialized;
+        public bool IsWebViewInitialized
         {
-            get { return _isInitialized; }
+            get { return _isWebViewInitialized; }
             set
             {
-                _isInitialized = value;
-                if (_isInitialized)
+                _isWebViewInitialized = value;
+                if (_isWebViewInitialized)
                 {
                     _logger.Debug("WebChatHost initialized.");
 
+
                     _webViewsManager.Register(this);
                 }
-
             }
+
         }
     }
 }

@@ -19,7 +19,6 @@ namespace Cody.Core.Infrastructure
     {
         RegisterWebViewRequest,
         WebChatHostInitialized
-
     }
 
     public class WebViewsManager : IWebViewsManager, IDisposable
@@ -73,7 +72,7 @@ namespace Cody.Core.Infrastructure
                         {
                             _logger.Debug("Chat Host present.");
 
-                            if (chatHost.IsInitialized)
+                            if (chatHost.IsWebViewInitialized)
                             {
                                 _logger.Debug("Chat Host initialized.");
 
@@ -134,7 +133,7 @@ namespace Cody.Core.Infrastructure
 
         public void Register(IWebChatHost chatHost)
         {
-            if (!chatHost.IsInitialized)
+            if (!chatHost.IsWebViewInitialized)
             {
                 // run-time guard
                 throw new Exception("IWebChatHost must be initialized before registering!");

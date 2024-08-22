@@ -8,6 +8,6 @@ namespace Cody.Core.Infrastructure
 {
     public interface IWebChatHost
     {
-        bool IsInitialized { get; set; }
+        bool IsWebViewInitialized { get; set; }
     }
 }

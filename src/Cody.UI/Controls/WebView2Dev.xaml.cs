@@ -3,6 +3,7 @@ using Microsoft.Web.WebView2.Core;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,7 +41,7 @@ namespace Cody.UI.Controls
         {
             try
             {
-                if (IsInitialized)
+                if (IsWebViewInitialized)
                 {
                     Logger?.Debug("Already initialized.");
                     return;
@@ -52,7 +53,9 @@ namespace Cody.UI.Controls
                 await webView.EnsureCoreWebView2Async(env);
                 await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
 
-                IsInitialized = true;
+                webView.NavigationCompleted += WebView_NavigationCompleted;
+
+                IsWebViewInitialized = true;
 
                 Logger?.Debug("Done.");
                 Debug.WriteLine("InitializeWebView", "WebView2Dev");
@@ -63,6 +66,14 @@ namespace Cody.UI.Controls
                 Logger?.Error("Failed.", ex);
             }
             
+        }
+
+        private async void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(200)); // HACK: chat initialization takes a little time, and we don't want to show white background for even a split of a second
+            IsChatLoaded = true;
+
+            Logger.Debug("Chat loaded.");
         }
 
         private async Task<CoreWebView2Environment> CreateWebView2Environment()
@@ -102,11 +113,11 @@ namespace Cody.UI.Controls
         }
 
         public static readonly DependencyProperty HtmlProperty = DependencyProperty.Register(
-                 "Html", typeof(string), typeof(WebView2Dev),
-                 new PropertyMetadata(null, async (d, e) =>
-                 {
-                     _controller.SetHtml(e.NewValue as string);
-                 }));
+            "Html", typeof(string), typeof(WebView2Dev),
+            new PropertyMetadata(null, async (d, e) =>
+            {
+                _controller.SetHtml(e.NewValue as string);
+            }));
 
         public string Html
         {
@@ -159,17 +170,30 @@ namespace Cody.UI.Controls
             set => SetValue(LoggerProperty, value);
         }
 
-        public static readonly DependencyProperty IsInitializedProperty = DependencyProperty.Register(
-            "IsInitialized", typeof(bool), typeof(WebView2Dev),
+        public static readonly DependencyProperty IsWebViewInitializedProperty = DependencyProperty.Register(
+            "IsWebViewInitialized", typeof(bool), typeof(WebView2Dev),
             new FrameworkPropertyMetadata(false,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
                 )
             );
 
-        public bool IsInitialized
+        public bool IsWebViewInitialized
         {
-            get => (bool)GetValue(IsInitializedProperty);
-            set => SetValue(IsInitializedProperty, value);
+            get => (bool)GetValue(IsWebViewInitializedProperty);
+            set => SetValue(IsWebViewInitializedProperty, value);
+        }
+
+        public static readonly DependencyProperty IsChatLoadedProperty = DependencyProperty.Register(
+            "IsChatLoaded", typeof(bool), typeof(WebView2Dev),
+            new FrameworkPropertyMetadata(false,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+            )
+        );
+
+        public bool IsChatLoaded
+        {
+            get => (bool)GetValue(IsChatLoadedProperty);
+            set => SetValue(IsChatLoadedProperty, value);
         }
     }
 }
