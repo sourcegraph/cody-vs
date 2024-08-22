@@ -1,0 +1,58 @@
+name: vs-release-preview
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    if: github.repository == 'sourcegraph/cody-vs'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0.32"
+
+      - name: Restore dependencies
+        run: |
+          dotnet tool install --global Cake.Tool
+          dotnet restore src\Cody.Core\Cody.Core.csproj
+          dotnet tool restore src
+          corepack enable
+          corepack install --global pnpm@8.6.7
+
+      - name: Build
+        run: |
+          cd src
+          dotnet cake
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release Preview v${{ github.ref }}
+          draft: false
+          prerelease: true
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: src\Cody.VisualStudio\bin\Release\Cody.VisualStudio.vsix
+          asset_name: Cody.VisualStudio.vsix
