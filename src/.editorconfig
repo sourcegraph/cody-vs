@@ -4,7 +4,7 @@ root = true
 # Matches Cody Main Repository
 [*]
 insert_final_newline = true
-end_of_line = lf
+end_of_line = crlf
 charset = utf-8
 trim_trailing_whitespace = true
 indent_style = space

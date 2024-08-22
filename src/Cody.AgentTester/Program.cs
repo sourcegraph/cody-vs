@@ -4,9 +4,12 @@ using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Services;
+using Microsoft.VisualStudio.Setup.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Cody.AgentTester
@@ -20,12 +23,14 @@ namespace Cody.AgentTester
 
         static async Task Main(string[] args)
         {
+            AssemblyLoader.Initialize();
+
             // Set the env var to 3113 when running with local agent.
             var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
             var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
             var logger = new Logger();
-            var settingsService = new UserSettingsService(new UserSettingsProvider(new FakeSettingsProvider()), logger);
+            var settingsService = new UserSettingsService(new MemorySettingsProvider(), logger);
             var editorService = new FileService(new FakeServiceProvider(), logger);
             var options = new AgentClientOptions
             {
