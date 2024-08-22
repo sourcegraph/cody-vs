@@ -37,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release Preview v${{ github.ref }}
+          release_name: Release Preview ${{ github.ref }}
           draft: false
           prerelease: true
 
