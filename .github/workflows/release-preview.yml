@@ -9,7 +9,8 @@ jobs:
   release:
     if: github.repository == 'sourcegraph/cody-vs'
     runs-on: windows-latest
-    timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -23,6 +24,8 @@ jobs:
         run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
       - name: Run Cake script
+        env:
+          CODY_VS_MARKETPLACE_RELEASE_TOKEN: ${{ secrets.CODY_VS_MARKETPLACE_RELEASE_TOKEN }}
         run: |
           cd src
           dotnet tool restore
@@ -30,7 +33,7 @@ jobs:
           corepack install --global pnpm@8.6.7
           dotnet cake
 
-      - name: Create Release
+      - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -50,3 +53,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: src\Cody.VisualStudio\bin\Release\Cody.VisualStudio.vsix
           asset_name: Cody.VisualStudio.vsix
+          asset_content_type: application/zip

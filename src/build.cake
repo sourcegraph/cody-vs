@@ -78,9 +78,6 @@ Task("BuildCodyAgent")
 	Information($"--> pnpm build ...");
 	PnpmRun("build");
 
-	//PnpmRun("build:agent");
-	//PnpmRun("build:webviews");
-
 	Context.Environment.WorkingDirectory = solutionDir;
 
 	var deleteSettings = new DeleteDirectorySettings
