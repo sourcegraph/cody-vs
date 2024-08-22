@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +17,11 @@ namespace Cody.Core.Agent.Protocol
         public ShowOptions ShowOptions { get; set; }
 
         public DefiniteWebviewOptions Options { get; set; }
+
+        public override string ToString()
+        {
+            return $"Handle:'{Handle} ViewType:'{ViewType}' 'Title:{Title}' ShowOptions:[ {ShowOptions} ] Options:[ {Options} ]";
+        }
     }
 
     public class ShowOptions
@@ -24,5 +29,10 @@ namespace Cody.Core.Agent.Protocol
         public bool PreserveFocus { get; set; }
 
         public int ViewColumn { get; set; }
+
+        public override string ToString()
+        {
+            return $"PreserveFocus:{PreserveFocus} ViewColumn:{ViewColumn}";
+        }
     }
 }

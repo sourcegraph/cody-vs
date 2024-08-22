@@ -16,6 +16,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+
             <wpf:WebView2 Name="webView" Grid.Row="1" Loaded="InitWebView2"
               
             />

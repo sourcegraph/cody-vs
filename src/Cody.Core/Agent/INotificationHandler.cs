@@ -9,5 +9,6 @@ namespace Cody.Core.Agent
     public interface INotificationHandler
     {
         event EventHandler OnOptionsPageShowRequest;
+        event EventHandler<string> OnRegisterWebViewRequest;
     }
 }

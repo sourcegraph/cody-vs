@@ -16,13 +16,15 @@ namespace Cody.Core.Agent
         private readonly ILog _logger;
 
         public IAgentService agentClient;
-        private readonly TaskCompletionSource<bool> agentClientReady = new TaskCompletionSource<bool>();
 
         public delegate Task PostWebMessageAsJsonDelegate(string message);
         public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
+
+        public event EventHandler<string> OnRegisterWebViewRequest;
         public event EventHandler OnOptionsPageShowRequest;
+
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
         public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService)
@@ -36,7 +38,6 @@ namespace Cody.Core.Agent
         public void SetAgentClient(IAgentService client)
         {
             agentClient = client;
-            agentClientReady.SetResult(true);
         }
 
         // Send a message to the host from webview.
@@ -44,45 +45,36 @@ namespace Cody.Core.Agent
         {
             bool handled = _messageFilter.HandleMessage(message);
             if (!handled)
-            {
                 await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
-                {
-                    Id = handle,
-                    MessageStringEncoded = message
-                });
-            }
+            {
+                Id = handle,
+                MessageStringEncoded = message
+            });
         }
 
         [AgentCallback("debug/message")]
         public void Debug(string channel, string message)
         {
-            _logger.Debug(message, channel);
+            _logger.Debug($"[{channel} {message}]");
         }
 
         [AgentCallback("webview/registerWebview")]
         public void RegisterWebview(string handle)
         {
-            _logger.Debug(handle, "RegisterWebview");
+            _logger.Debug(handle);
         }
 
         [AgentCallback("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
-            _logger.Debug(viewId, "RegisterWebviewViewProvider");
-            agentClientReady.Task.Wait();
-            await agentClient.ResolveWebviewView(new ResolveWebviewViewParams
-            {
-                // cody.chat for sidebar view, or cody.editorPanel for editor panel
-                ViewId = viewId,
-                // TODO: Create dynmically when we support editor panel
-                WebviewHandle = "visual-studio-sidebar",
-            });
+            _logger.Debug(viewId);
+            OnRegisterWebViewRequest?.Invoke(this, viewId);
         }
 
         [AgentCallback("webview/createWebviewPanel", deserializeToSingleObject: true)]
         public void CreateWebviewPanel(CreateWebviewPanelParams panelParams)
         {
-            _logger.Debug(panelParams.ToString(), "CreateWebviewPanel");
+            _logger.Debug(panelParams.ToString());
         }
 
         [AgentCallback("webview/setOptions")]
@@ -90,7 +82,7 @@ namespace Cody.Core.Agent
         {
             if (options.EnableCommandUris is bool enableCmd)
             {
-                _logger.Debug(handle, "SetOptions");
+                _logger.Debug(handle);
             }
             else if (options.EnableCommandUris is JArray jArray)
             {
@@ -113,38 +105,38 @@ namespace Cody.Core.Agent
         [AgentCallback("webview/postMessageStringEncoded")]
         public void PostMessageStringEncoded(string id, string stringEncodedMessage)
         {
-            _logger.Debug(stringEncodedMessage, "PostMessageStringEncoded");
+            _logger.Debug(stringEncodedMessage);
             PostWebMessageAsJson?.Invoke(stringEncodedMessage);
         }
 
         [AgentCallback("webview/didDisposeNative")]
         public void DidDisposeNative(string handle)
         {
-            _logger.Debug(handle, "DidDisposeNative");
+            _logger.Debug(handle);
         }
 
         [AgentCallback("webview/dispose")]
         public void Dispose(string handle)
         {
-            _logger.Debug(handle, "Dispose");
+            _logger.Debug(handle);
         }
 
         [AgentCallback("webview/reveal")]
         public void Reveal(string handle, int viewColumn, bool preserveFocus)
         {
-            _logger.Debug(handle, "Reveal");
+            _logger.Debug(handle);
         }
 
         [AgentCallback("webview/setTitle")]
         public void SetTitle(string handle, string title)
         {
-            _logger.Debug(title, "SetTitle");
+            _logger.Debug(title);
         }
 
         [AgentCallback("webview/setIconPath")]
         public void SetIconPath(string handle, string iconPathUri)
         {
-            _logger.Debug(iconPathUri, "SetIconPath");
+            _logger.Debug(iconPathUri);
         }
 
         [AgentCallback("window/didChangeContext")]
@@ -166,13 +158,13 @@ namespace Cody.Core.Agent
         [AgentCallback("extensionConfiguration/didChange", deserializeToSingleObject: true)]
         public void ExtensionConfigDidChange(ExtensionConfiguration config)
         {
-            _logger.Debug(config.ToString(), "didChange");
+            _logger.Debug(config.ToString());
         }
 
         [AgentCallback("ignore/didChange")]
         public void IgnoreDidChange()
         {
-            _logger.Debug("Changed", "IgnoreDidChange");
+            _logger.Debug("Changed");
         }
 
         [AgentCallback("textDocument/show", deserializeToSingleObject: true)]

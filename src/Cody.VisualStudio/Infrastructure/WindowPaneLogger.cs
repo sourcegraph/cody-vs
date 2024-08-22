@@ -11,7 +11,9 @@ namespace Cody.VisualStudio.Inf
 {
     public class WindowPaneLogger : IOutputWindowPane
     {
+        public static string DefaultCody = "Cody";
         public static string CodyAgent = "Cody Agent";
+        public static string CodyNotifications = "Cody Notifications";
 
         private readonly IVsOutputWindow _outputWindow;
         private readonly IVsOutputWindowPane _pane;
@@ -64,7 +66,7 @@ namespace Cody.VisualStudio.Inf
             Log(message, "Error", callerName);
 
 #if DEBUG
-            if (_pane != null && _name != CodyAgent)
+            if (_pane != null && _name == DefaultCody)
                 _pane.Activate();
 #endif
         }

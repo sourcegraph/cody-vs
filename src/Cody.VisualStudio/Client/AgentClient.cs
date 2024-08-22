@@ -1,3 +1,4 @@
+using Cody.Core.Agent;
 using Cody.Core.Logging;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -5,7 +6,7 @@ using StreamJsonRpc;
 
 namespace Cody.VisualStudio.Client
 {
-    public class AgentClient
+    public class AgentClient: IAgentProxy
     {
         private AgentClientOptions options;
         private ILog log;

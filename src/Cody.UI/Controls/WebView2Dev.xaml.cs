@@ -1,11 +1,14 @@
 using Cody.Core.Agent;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
 {
@@ -14,15 +17,13 @@ namespace Cody.UI.Controls
     /// </summary>
     public partial class WebView2Dev : UserControl
     {
-
         private static readonly WebviewController _controller = new WebviewController();
-
-        private static readonly TaskCompletionSource<bool> _webViewReady = new TaskCompletionSource<bool>();
 
         public WebView2Dev()
         {
             InitializeComponent();
-            System.Diagnostics.Debug.WriteLine("InitializeComponent", "WebView2Dev");
+
+            Debug.WriteLine("InitializeComponent", "WebView2Dev");
         }
 
         private async void InitWebView2(object sender, RoutedEventArgs e)
@@ -38,26 +39,72 @@ namespace Cody.UI.Controls
 
         private async Task InitializeWebView()
         {
-            if (_webViewReady.Task.IsCompleted) return;
+            try
+            {
+                if (IsWebViewInitialized)
+                {
+                    Logger?.Debug("Already initialized.");
+                    return;
+                }
 
-            var env = await CreateWebView2Environment();
-            await webView.EnsureCoreWebView2Async(env);
-            await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
-            _webViewReady.SetResult(true);
-            System.Diagnostics.Debug.WriteLine("InitializeWebView", "WebView2Dev");
+                Logger?.Debug("Initializing ...");
+
+                var env = await CreateWebView2Environment();
+                await webView.EnsureCoreWebView2Async(env);
+                await _controller.InitializeWebView(webView.CoreWebView2, SendMessage);
+
+                webView.NavigationCompleted += WebView_NavigationCompleted;
+
+                IsWebViewInitialized = true;
+
+                Logger?.Debug("Done.");
+                Debug.WriteLine("InitializeWebView", "WebView2Dev");
+            }
+            catch (Exception ex)
+            {
+
+                Logger?.Error("Failed.", ex);
+            }
+            
+        }
+
+        private async void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(200)); // HACK: chat initialization takes a little time, and we don't want to show white background for even a split of a second
+            IsChatLoaded = true;
+
+            Logger.Debug("Chat loaded.");
         }
 
         private async Task<CoreWebView2Environment> CreateWebView2Environment()
         {
-            var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cody");
-            var options = new CoreWebView2EnvironmentOptions
+
+            try
             {
+                Logger?.Debug("Initializing ...");
+
+                var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Cody");
+                var options = new CoreWebView2EnvironmentOptions
+                {
 #if DEBUG
-                AdditionalBrowserArguments = "--remote-debugging-port=9222 --disable-web-security --allow-file-access-from-files",
-                AllowSingleSignOnUsingOSPrimaryAccount = true,
+                    AdditionalBrowserArguments =
+                        "--remote-debugging-port=9222 --disable-web-security --allow-file-access-from-files",
+                    AllowSingleSignOnUsingOSPrimaryAccount = true,
 #endif
-            };
-            return await CoreWebView2Environment.CreateAsync(null, appData, options);
+                };
+
+                var webView2 = await CoreWebView2Environment.CreateAsync(null, appData, options);
+                Logger?.Debug("Done.");
+
+                return webView2;
+            }
+            catch (Exception ex)
+            {
+                Logger?.Error("Failed", ex);
+            }
+
+            return null;
         }
 
         public static async Task PostWebMessageAsJson(string message)
@@ -66,12 +113,11 @@ namespace Cody.UI.Controls
         }
 
         public static readonly DependencyProperty HtmlProperty = DependencyProperty.Register(
-                 "Html", typeof(string), typeof(WebView2Dev),
-                 new PropertyMetadata(null, async (d, e) =>
-                 {
-                     if (!_webViewReady.Task.IsCompleted) await _webViewReady.Task;
-                     _controller.SetHtml(e.NewValue as string);
-                 }));
+            "Html", typeof(string), typeof(WebView2Dev),
+            new PropertyMetadata(null, async (d, e) =>
+            {
+                _controller.SetHtml(e.NewValue as string);
+            }));
 
         public string Html
         {
@@ -83,7 +129,6 @@ namespace Cody.UI.Controls
             "PostMessage", typeof(AgentResponseEvent), typeof(WebView2Dev),
             new PropertyMetadata(null, async (d, e) =>
             {
-                if (!_webViewReady.Task.IsCompleted) await _webViewReady.Task;
                 var message = (e.NewValue as AgentResponseEvent)?.StringEncodedMessage;
                 if (!string.IsNullOrEmpty(message)) await _controller.PostWebMessageAsJson(message);
             }));
@@ -106,6 +151,49 @@ namespace Cody.UI.Controls
         {
             get => (ICommand)GetValue(SendMessageProperty);
             set => SetValue(SendMessageProperty, value);
+        }
+
+        public static readonly DependencyProperty LoggerProperty = DependencyProperty.Register(
+            "Logger", typeof(ILog), typeof(WebView2Dev),
+            new PropertyMetadata(null, async (d, e) =>
+            {
+                var logger = e.NewValue as ILog;
+                if (logger != null)
+                {
+                    logger.Debug("Logger set.");
+                }
+            }));
+
+        public ILog Logger
+        {
+            get => (ILog)GetValue(LoggerProperty);
+            set => SetValue(LoggerProperty, value);
+        }
+
+        public static readonly DependencyProperty IsWebViewInitializedProperty = DependencyProperty.Register(
+            "IsWebViewInitialized", typeof(bool), typeof(WebView2Dev),
+            new FrameworkPropertyMetadata(false,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+                )
+            );
+
+        public bool IsWebViewInitialized
+        {
+            get => (bool)GetValue(IsWebViewInitializedProperty);
+            set => SetValue(IsWebViewInitializedProperty, value);
+        }
+
+        public static readonly DependencyProperty IsChatLoadedProperty = DependencyProperty.Register(
+            "IsChatLoaded", typeof(bool), typeof(WebView2Dev),
+            new FrameworkPropertyMetadata(false,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault
+            )
+        );
+
+        public bool IsChatLoaded
+        {
+            get => (bool)GetValue(IsChatLoadedProperty);
+            set => SetValue(IsChatLoadedProperty, value);
         }
     }
 }

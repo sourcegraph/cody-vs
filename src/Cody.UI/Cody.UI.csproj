@@ -55,6 +55,7 @@
     <Compile Include="Controls\WebView2Dev.xaml.cs">
       <DependentUpon>WebView2Dev.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="MVVM\NotifyPropertyChangedBase.cs" />
     <Compile Include="MVVM\DelegateCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -90,5 +91,6 @@
       <Version>1.0.2592.51</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
