@@ -1,18 +1,25 @@
 {
-    "$schema": "http://json.schemastore.org/vsix-publish",
-    "categories": [
-        "Coding"
-    ],
-    "identity": {
-        "internalName": "Cody",
-        "tags": [
-            "ai"
-        ]
-    },
-    "overview": "overview.md",
-    "priceCategory": "free",
-    "publisher": "SourcegraphTests",
-    "private": true,
-    "qna": true,
-    "repo": "https://github.com/sourcegraph/cody-vs.git"
+	"$schema": "http://json.schemastore.org/vsix-publish",
+	"categories": ["Coding", "visual studio extensions", "documentation"],
+	"identity": {
+		"internalName": "cody-vs",
+		"description": "AI coding assistant that uses search and codebase context to help you write code faster!",
+		"tags": [
+			"ai",
+			"chatgpt",
+			"assistant",
+			"chatbot",
+			"cody",
+			"llm",
+			"c#",
+			"c++",
+			"ollama"
+		]
+	},
+	"overview": "../../../README.md",
+	"priceCategory": "free",
+	"publisher": "sourcegraph",
+	"private": true,
+	"qna": true,
+	"repo": "https://github.com/sourcegraph/cody-vs.git"
 }

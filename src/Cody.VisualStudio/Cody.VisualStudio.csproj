@@ -89,7 +89,7 @@
     <None Include="Marketplace\manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Marketplace\overview.md">
+    <None Include="..\..\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="source.extension.vsixmanifest">
