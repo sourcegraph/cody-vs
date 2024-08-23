@@ -4,14 +4,14 @@
 
 1. Install [chocolatey](https://chocolatey.org/install) - Package Manager for Windows
    1. `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
-2. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
+1. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
    1. `choco install pnpm --version=8.6.7`
-3. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
+1. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
    1. Visual Studio Extension
-4. Install [git for Windows](https://gitforwindows.org)
+2. Install [git for Windows](https://gitforwindows.org)
    1. Configure it with `git config core.autocrlf false` to not change line endings
-5. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
-6. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
+1. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
+1. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
 
 For Sourcegraph teammates:
 
@@ -38,18 +38,17 @@ NOTE: You must build the agent before debugging for the first time.
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
 
-
 #### Visual Studio with Agent running in VS Code locally
 
-1. Download and install VS Code on your machine
-Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
-   1. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
-2. `cd` into the `cody` repository and run `pnpm install`
-3. Open the `cody` repository in VS Code
-4. After you have set the breakpoints, open the debug panel from selecting `View > Run`
-5. In the drop down menu next to `RUN AND DEBUG`, select `Launch Agent port 3113` to start the debugger for Agent
-6. To enable Visual Studio listening to the Agent running on Port 3113, set CODY_VS_DEV_PORT with `setx CODY_VS_DEV_PORT 3113`
-7. After the Agent is built and launched, start the debugger on the Visual Studio side following the steps above
+1. Download and install [VS Code](https://code.visualstudio.com/download) on your machine
+2. Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
+3. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
+4. `cd` into the `cody` repository and run `pnpm install`
+5. Open the `cody` repository in VS Code
+6. After you have set the breakpoints, open the debug panel from selecting `View > Run`
+7. In the drop down menu next to `RUN AND DEBUG`, select `Launch Agent port 3113` to start the debugger for Agent
+8. To enable `Visual Studio` listening to the `Agent` running on Port 3113, set CODY_VS_DEV_PORT with `setx CODY_VS_DEV_PORT 3113`
+9. After the `Agent` is built and launched, start the debugger on the `Visual Studio` side following the steps above
 
 ### Running VS Integration Tests + Playwright
 
@@ -65,13 +64,13 @@ This project uses different runtimes for various components:
 
 - **Runtime**: .NET Framework 4.7.2
 - **Platform**: Windows only
-- **Note**: This runtime is typically included with Windows and Visual Studio installations.
+- **Note**: This runtime is typically included with Windows and `Visual Studio` installations.
 
 ### Agent
 
 - **Runtime**: Node.js
 - **Usage**: Used for build and run processes only
-- **Note**: Not required for Visual Studio functionality
+- **Note**: Not required for `Visual Studio` functionality
 
 ### Build Scripts
 
@@ -122,7 +121,7 @@ To display your token:
 echo $env:SourcegraphCodyToken
 ```
 
-**Note:** After setting an environment variable, you may need to restart Visual Studio and any open command prompts for the changes to take effect.
+**Note:** After setting an environment variable, you may need to restart `Visual Studio` and any open command prompts for the changes to take effect.
 
 The token from the environment variable always overrides the value from the user settings and is never saved in the user settings.
 
@@ -141,3 +140,34 @@ Additional debugging options:
 
 - Use `--inspect-brk` instead of `--inspect` to break before user code starts
 - For more debugging options, refer to the [Node.js debugging documentation](https://nodejs.org/en/learn/getting-started/debugging#command-line-options)
+
+## Release Process
+
+See the [Releases](./docs/dev/Release.md) page for details on how to release a new version of the Cody extension.
+
+## Troubleshoting
+
+### Files Stuck in the Git Working Tree
+
+This repository is configured to use line endings for Windows machines. If you encounter issues with files stuck in the Git working tree, you can try one of the following solutions:
+
+1. Configure Git to handle line endings: Follow the instructions in the [Configuring Git to handle line endings](https://docs.github.com/en/get-started/getting-started-with-git/configuring-git-to-handle-line-endings) documentation to resolve the issue. This will help Git automatically handle line ending conversions based on your operating system.
+2. Remove cached files and reset the repository: You can remove all the cached files and reset the repository to the latest state of the main branch by running the following commands in your terminal:
+
+```bash
+git rm -rf --cached .
+git reset --hard origin/main
+```
+
+This will remove all cached files and reset your local repository to match the remote main branch, effectively resolving any line ending-related issues.
+
+### Debug instance keeps using the previous version of the extension
+
+The experimental instance in debug mode may keep using the previous version of the extension, which can be resolved by resetting the experimental instance following the instructions in [The Experimental Instance](https://learn.microsoft.com/en-us/visualstudio/extensibility/the-experimental-instance?view=vs-2022) docs.
+
+## Resources
+
+- [Developer Docs for Cody](https://sourcegraph.com/github.com/sourcegraph/cody@main/-/blob/vscode/CONTRIBUTING.md)
+- [Developer Docs for Agent](https://sourcegraph.com/github.com/sourcegraph/cody@main/-/blob/agent/README.md)
+- [Visual Studio Extensibility](https://learn.microsoft.com/en-us/visualstudio/extensibility/?view=vs-2022)
+- [Publish an Extension](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-publishing-a-visual-studio-extension?view=vs-2022)

@@ -1,3 +1,0 @@
-Cody is an AI coding assistant that helps you understand, write, and fix code faster. It uses advanced search to pull context from both local and remote codebases so that you can use context about APIs, symbols, and usage patterns from across your entire codebase at any scale, all from within VS Code. Plus, Cody Pro users can choose from the latest large language models—like GPT-4o and Claude 3 Opus—to customize Cody to their needs.
-
-Install Cody to get started with free AI-powered autocomplete, chat, commands, and more.
