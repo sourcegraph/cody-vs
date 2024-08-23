@@ -4,14 +4,14 @@
 
 1. Install [chocolatey](https://chocolatey.org/install) - Package Manager for Windows
    1. `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
-2. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
+1. Install [node.js](https://nodejs.org/en/download/prebuilt-installer), required for building and running Cody Agent
    1. `choco install pnpm --version=8.6.7`
-3. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
+1. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
    1. Visual Studio Extension
-4. Install [git for Windows](https://gitforwindows.org)
+2. Install [git for Windows](https://gitforwindows.org)
    1. Configure it with `git config core.autocrlf false` to not change line endings
-5. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
-6. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
+1. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
+1. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
 
 For Sourcegraph teammates:
 
@@ -160,3 +160,14 @@ git reset --hard origin/main
 ```
 
 This will remove all cached files and reset your local repository to match the remote main branch, effectively resolving any line ending-related issues.
+
+### Debug instance keeps using the previous version of the extension
+
+The experimental instance in debug mode may keep using the previous version of the extension, which can be resolved by resetting the experimental instance following the instructions in [The Experimental Instance](https://learn.microsoft.com/en-us/visualstudio/extensibility/the-experimental-instance?view=vs-2022) docs.
+
+## Resources
+
+- [Developer Docs for Cody](https://sourcegraph.com/github.com/sourcegraph/cody@main/-/blob/vscode/CONTRIBUTING.md)
+- [Developer Docs for Agent](https://sourcegraph.com/github.com/sourcegraph/cody@main/-/blob/agent/README.md)
+- [Visual Studio Extensibility](https://learn.microsoft.com/en-us/visualstudio/extensibility/?view=vs-2022)
+- [Publish an Extension](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-publishing-a-visual-studio-extension?view=vs-2022)
