@@ -38,11 +38,10 @@ NOTE: You must build the agent before debugging for the first time.
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
 
-
 #### Visual Studio with Agent running in VS Code locally
 
 1. Download and install VS Code on your machine
-Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
+   Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
    1. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
 2. `cd` into the `cody` repository and run `pnpm install`
 3. Open the `cody` repository in VS Code
@@ -141,3 +140,19 @@ Additional debugging options:
 
 - Use `--inspect-brk` instead of `--inspect` to break before user code starts
 - For more debugging options, refer to the [Node.js debugging documentation](https://nodejs.org/en/learn/getting-started/debugging#command-line-options)
+
+## Troubleshoting
+
+### Files Stuck in the Git Working Tree
+
+This repository is configured to use line endings for Windows machines. If you encounter issues with files stuck in the Git working tree, you can try one of the following solutions:
+
+1. Configure Git to handle line endings: Follow the instructions in the [Configuring Git to handle line endings](https://docs.github.com/en/get-started/getting-started-with-git/configuring-git-to-handle-line-endings) documentation to resolve the issue. This will help Git automatically handle line ending conversions based on your operating system.
+2. Remove cached files and reset the repository: You can remove all the cached files and reset the repository to the latest state of the main branch by running the following commands in your terminal:
+
+```bash
+git rm -rf --cached .
+git reset --hard origin/main
+```
+
+This will remove all cached files and reset your local repository to match the remote main branch, effectively resolving any line ending-related issues.
