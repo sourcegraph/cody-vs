@@ -30,4 +30,4 @@ jobs:
         corepack enable
         corepack install --global pnpm@8.6.7
         dotnet cake
-        
+        dotnet test .\Cody.VisualStudio.Tests\bin\Release\Cody.VisualStudio.Tests.dll

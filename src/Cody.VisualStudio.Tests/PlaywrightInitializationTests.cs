@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -58,6 +58,8 @@ namespace Cody.VisualStudio.Tests
         {
             // given
             await WaitForPlaywrightAsync();
+            var url = "https://playwright.dev/";
+            await Page.GotoAsync(url);
 
             // when
             var status = await Page.EvaluateAsync<int>(@"async () => {

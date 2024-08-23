@@ -137,8 +137,27 @@ Task("Build")
 	MSBuild("./Cody.sln", new MSBuildSettings
 	{
 		Configuration = configuration,
-		PlatformTarget = PlatformTarget.MSIL
+		PlatformTarget = PlatformTarget.MSIL,
+		Verbosity = Verbosity.Minimal
 	});
+});
+
+ask("Test")
+	.IsDependentOn("Build")
+	.Does(() =>
+{
+	MSBuild("./Cody.sln", new MSBuildSettings
+	{
+		Configuration = "Debug",
+        PlatformTarget = PlatformTarget.MSIL,
+		Verbosity = Verbosity.Minimal
+	});
+
+	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
+    {
+        NoBuild = true,
+        NoRestore = true
+    });
 });
 
 Task("Restore")
@@ -172,13 +191,6 @@ Task("Publish")
 
 Task("Clean")
 	//.WithCriteria(c => HasArgument("rebuild"))
-	.Does(() =>
-{
-	//todo
-});
-
-Task("Test")
-	.IsDependentOn("Build")
 	.Does(() =>
 {
 	//todo

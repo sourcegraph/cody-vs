@@ -1,5 +1,8 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Navigation;
+using Cody.UI.ViewModels;
 using Xunit;
 
 namespace Cody.VisualStudio.Tests
@@ -40,7 +43,7 @@ namespace Cody.VisualStudio.Tests
             var codyPackage = await GetPackageAsync();
 
             // when
-            codyPackage.ShowToolWindow(this, EventArgs.Empty);
+            await codyPackage.ShowToolWindowAsync();
 
             // then
             Assert.NotNull(codyPackage.MainView);

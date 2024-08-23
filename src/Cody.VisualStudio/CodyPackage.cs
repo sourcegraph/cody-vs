@@ -192,19 +192,27 @@ namespace Cody.VisualStudio
 
         public async void ShowToolWindow(object sender, EventArgs eventArgs)
         {
+            await ShowToolWindowAsync();
+        }
+
+        public async Task ShowToolWindowAsync()
+        {
             try
             {
                 Logger.Debug("Toggling Tool Window ...");
-                var window = FindToolWindow(typeof(CodyToolWindow), 0, true);
+                var window = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
                 if (window?.Frame is IVsWindowFrame windowFrame)
                 {
                     bool isVisible = windowFrame.IsVisible() == 0;
                     bool isOnScreen = windowFrame.IsOnScreen(out int screenTmp) == 0 && screenTmp == 1;
 
+                    Logger.Debug($"IsVisible:{isVisible} IsOnScreen:{isOnScreen}");
+
                     if (!isVisible || !isOnScreen)
                     {
                         ErrorHandler.ThrowOnFailure(windowFrame.Show());
                         Logger.Debug("Shown.");
+
                     }
                 }
             }
