@@ -142,8 +142,8 @@ Task("Build")
 	});
 });
 
-Task("Test")
-	.IsDependentOn("Build")
+Task("Tests")
+	//.IsDependentOn("Build")
 	.Does(() =>
 {
 	MSBuild("./Cody.sln", new MSBuildSettings
