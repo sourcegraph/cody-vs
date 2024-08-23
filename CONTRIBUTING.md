@@ -1,5 +1,9 @@
 # Contributing to Cody for Visual Studio
 
+This is the POC (proof of concept) branch for developing purpose, created off the v0.0.0 of Cody.
+
+Do not use this branch for production purposes.
+
 ## Prerequisites
 
 1. Install [chocolatey](https://chocolatey.org/install) - Package Manager for Windows
@@ -38,11 +42,10 @@ NOTE: You must build the agent before debugging for the first time.
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
 
-
 #### Visual Studio with Agent running in VS Code locally
 
 1. Download and install VS Code on your machine
-Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
+   Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
    1. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
 2. `cd` into the `cody` repository and run `pnpm install`
 3. Open the `cody` repository in VS Code
