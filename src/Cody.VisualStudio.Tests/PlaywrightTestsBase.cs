@@ -22,8 +22,8 @@ namespace Cody.VisualStudio.Tests
             CodyPackage = await GetPackageAsync();
             CodyPackage.Logger.Debug("CodyPackage loaded.");
 
-            await CodyPackage.ShowToolWindowAsync();
-            CodyPackage.Logger.Debug("Tool Window activated.");
+            await WaitForChat();
+            CodyPackage.Logger.Debug("Chat initialized and loaded.");
 
             Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
             Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
