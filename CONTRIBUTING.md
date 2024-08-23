@@ -40,15 +40,15 @@ NOTE: You must build the agent before debugging for the first time.
 
 #### Visual Studio with Agent running in VS Code locally
 
-1. Download and install VS Code on your machine
-   Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
-   1. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
-2. `cd` into the `cody` repository and run `pnpm install`
-3. Open the `cody` repository in VS Code
-4. After you have set the breakpoints, open the debug panel from selecting `View > Run`
-5. In the drop down menu next to `RUN AND DEBUG`, select `Launch Agent port 3113` to start the debugger for Agent
-6. To enable Visual Studio listening to the Agent running on Port 3113, set CODY_VS_DEV_PORT with `setx CODY_VS_DEV_PORT 3113`
-7. After the Agent is built and launched, start the debugger on the Visual Studio side following the steps above
+1. Download and install [VS Code](https://code.visualstudio.com/download) on your machine
+2. Clone the main Cody repository: `git clone git@github.com:sourcegraph/cody.git`
+3. Makes sure the `cody` repository is in the same directory as the `cody-vs` repository
+4. `cd` into the `cody` repository and run `pnpm install`
+5. Open the `cody` repository in VS Code
+6. After you have set the breakpoints, open the debug panel from selecting `View > Run`
+7. In the drop down menu next to `RUN AND DEBUG`, select `Launch Agent port 3113` to start the debugger for Agent
+8. To enable `Visual Studio` listening to the `Agent` running on Port 3113, set CODY_VS_DEV_PORT with `setx CODY_VS_DEV_PORT 3113`
+9. After the `Agent` is built and launched, start the debugger on the `Visual Studio` side following the steps above
 
 ### Running VS Integration Tests + Playwright
 
@@ -64,13 +64,13 @@ This project uses different runtimes for various components:
 
 - **Runtime**: .NET Framework 4.7.2
 - **Platform**: Windows only
-- **Note**: This runtime is typically included with Windows and Visual Studio installations.
+- **Note**: This runtime is typically included with Windows and `Visual Studio` installations.
 
 ### Agent
 
 - **Runtime**: Node.js
 - **Usage**: Used for build and run processes only
-- **Note**: Not required for Visual Studio functionality
+- **Note**: Not required for `Visual Studio` functionality
 
 ### Build Scripts
 
@@ -121,7 +121,7 @@ To display your token:
 echo $env:SourcegraphCodyToken
 ```
 
-**Note:** After setting an environment variable, you may need to restart Visual Studio and any open command prompts for the changes to take effect.
+**Note:** After setting an environment variable, you may need to restart `Visual Studio` and any open command prompts for the changes to take effect.
 
 The token from the environment variable always overrides the value from the user settings and is never saved in the user settings.
 
@@ -140,6 +140,10 @@ Additional debugging options:
 
 - Use `--inspect-brk` instead of `--inspect` to break before user code starts
 - For more debugging options, refer to the [Node.js debugging documentation](https://nodejs.org/en/learn/getting-started/debugging#command-line-options)
+
+## Release Process
+
+See the [Releases](./docs/dev/Release.md) page for details on how to release a new version of the Cody extension.
 
 ## Troubleshoting
 
