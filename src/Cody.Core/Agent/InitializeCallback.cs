@@ -43,6 +43,7 @@ namespace Cody.Core.Agent
                 WorkspaceRootUri = solutionService.GetSolutionDirectory(),
                 Capabilities = new ClientCapabilities
                 {
+                    Completions = "none",
                     Edit = Capability.None,
                     EditWorkspace = Capability.None,
                     CodeLenses = Capability.None,
