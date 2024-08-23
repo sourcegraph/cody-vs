@@ -142,7 +142,7 @@ Task("Build")
 	});
 });
 
-ask("Test")
+Task("Test")
 	.IsDependentOn("Build")
 	.Does(() =>
 {
