@@ -9,11 +9,15 @@ namespace Cody.VisualStudio.Tests
 {
     public abstract class TestsBase
     {
+        protected CodyPackage CodyPackage;
+
         protected async Task<CodyPackage> GetPackageAsync()
         {
             var guid = CodyPackage.PackageGuidString;
             var shell = (IVsShell7)ServiceProvider.GlobalProvider.GetService(typeof(SVsShell));
             var codyPackage = (CodyPackage)await shell.LoadPackageAsync(new Guid(guid)); // forces to load CodyPackage, even when the Tool Window is not selected
+
+            CodyPackage = codyPackage;
 
             return codyPackage;
         }
@@ -23,7 +27,11 @@ namespace Cody.VisualStudio.Tests
             while (!condition.Invoke())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
+
+                CodyPackage.Logger.Debug($"Chat not loaded ...");
             }
+
+            CodyPackage.Logger.Debug($"Chat loaded.");
         }
 
         protected async Task OnUIThread(Func<Task> task)
@@ -36,13 +44,15 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForChat()
         {
-            var codyPackage = await GetPackageAsync();
-            await codyPackage.ShowToolWindowAsync();
-            await OnUIThread((async () =>
-            {
-                var viewModel = (MainViewModel)codyPackage.MainView.DataContext;
-                await WaitForAsync(() => viewModel.IsChatLoaded);
-            }));
+            bool isChatLoaded = false;
+            await CodyPackage.ShowToolWindowAsync();
+
+            var viewModel = CodyPackage.MainViewModel;
+            await WaitForAsync(() => viewModel.IsChatLoaded);
+
+            isChatLoaded = viewModel.IsChatLoaded;
+            CodyPackage.Logger.Debug($"Chat loaded:{isChatLoaded}");
+           
         }
     }
 }

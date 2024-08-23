@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
+using Xunit;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -13,9 +14,7 @@ namespace Cody.VisualStudio.Tests
         
         protected IBrowserContext Context;
 
-        protected CodyPackage CodyPackage;
         protected IPage Page;
-
 
         private async Task InitializeAsync()
         {

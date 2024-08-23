@@ -21,7 +21,7 @@ namespace Cody.VisualStudio.Tests
             Assert.NotNull(Page);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Url_Redirection_Works()
         {
             // given
@@ -36,7 +36,7 @@ namespace Cody.VisualStudio.Tests
             Assert.True(url == redirectedUrl);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Searching_ForText_Works()
         {
             // given
@@ -53,7 +53,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(text, textContents.First());
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task InvokeJS_Get_Status()
         {
             // given

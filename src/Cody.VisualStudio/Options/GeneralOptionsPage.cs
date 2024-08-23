@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using Cody.Core.Logging;
@@ -112,6 +112,8 @@ namespace Cody.VisualStudio.Options
                     _control = new GeneralOptionsControl();
                     _generalOptionsViewModel = new GeneralOptionsViewModel(_logger);
                     _control.DataContext = _generalOptionsViewModel;
+
+                    _codyPackage.GeneralOptionsViewModel = _generalOptionsViewModel;
                 }
 
                 return _control;

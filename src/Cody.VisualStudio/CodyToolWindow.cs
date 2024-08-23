@@ -53,8 +53,10 @@ namespace Cody.VisualStudio
                 DataContext = viewModel
             };
 
-            base.Content = view;
+            package.MainViewModel = viewModel;
             package.MainView = view;
+            base.Content = view;
+            
         }
 
         private CodyPackage GetPackage()

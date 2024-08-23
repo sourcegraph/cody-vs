@@ -31,6 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Cody.UI.ViewModels;
 using Task = System.Threading.Tasks.Task;
 
 namespace Cody.VisualStudio
@@ -76,6 +77,9 @@ namespace Cody.VisualStudio
         public ISolutionService SolutionService;
         public IWebViewsManager WebViewsManager;
         public IAgentProxy AgentClient;
+
+        public GeneralOptionsViewModel GeneralOptionsViewModel;
+        public MainViewModel MainViewModel;
 
         public MainView MainView;
         public InitializeCallback InitializeService;
