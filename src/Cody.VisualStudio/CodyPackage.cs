@@ -201,10 +201,13 @@ namespace Cody.VisualStudio
                     bool isVisible = windowFrame.IsVisible() == 0;
                     bool isOnScreen = windowFrame.IsOnScreen(out int screenTmp) == 0 && screenTmp == 1;
 
-                    if(isVisible && isOnScreen) ErrorHandler.ThrowOnFailure(windowFrame.Hide());
-                    else ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                    if (!isVisible || !isOnScreen)
+                    {
+                        ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                        Logger.Debug("Shown.");
                     }
-                    }
+                }
+            }
             catch (Exception ex)
             {
                 Logger.Error("Cannot toggle Tool Window.", ex);
