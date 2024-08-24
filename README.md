@@ -1,14 +1,14 @@
 # Cody for Visual Studio
 
-Cody for Visual Studio, an AI coding assistant that uses search and codebase context to help you understand, write, and fix code faster.
+## 🚧 Preview Status
 
-Install the extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
+IMPORTANT: Please note that Cody for Visual Studio is currently in preview and is intended for testing purposes only. The extension may not be stable and could have bugs or limitations.
 
-# AI that uses your codebase as context
+Once the extension becomes general available, you can install Cody for Visual Studio from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
+
+## AI that uses your codebase as context
 
 [Cody](https://about.sourcegraph.com/cody?utm_source=marketplace.visualstudio.com&utm_medium=referral) is an AI coding assistant that helps you understand, write, and fix code faster. It uses advanced search to pull context from both local and remote codebases so that you can use context about APIs, symbols, and usage patterns from across your entire codebase at any scale, all from within VS Code. Plus, Cody Pro users can choose from the latest large language models—like GPT-4o and Claude 3.5 Sonnet and Claude 3 Opus—to customize Cody to their needs.
-
-Install Cody to get started with free AI-powered chat, commands, and more.
 
 ## Chat
 
