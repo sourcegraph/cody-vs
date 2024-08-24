@@ -3,6 +3,7 @@ namespace Cody.Core.Agent.Protocol
     public class ClientCapabilities
     {
         public string Completions { get; set; }
+        public Capability? Authentication { get; set; }
         public ChatCapability? Chat { get; set; }
         public Capability? Git { get; set; }
         public Capability? ProgressBars { get; set; }
