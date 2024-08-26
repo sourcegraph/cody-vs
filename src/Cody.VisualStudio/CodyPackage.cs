@@ -31,6 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Cody.UI.ViewModels;
 using Task = System.Threading.Tasks.Task;
 
 namespace Cody.VisualStudio
@@ -76,6 +77,9 @@ namespace Cody.VisualStudio
         public ISolutionService SolutionService;
         public IWebViewsManager WebViewsManager;
         public IAgentProxy AgentClient;
+
+        public GeneralOptionsViewModel GeneralOptionsViewModel;
+        public MainViewModel MainViewModel;
 
         public MainView MainView;
         public InitializeCallback InitializeService;
@@ -192,19 +196,27 @@ namespace Cody.VisualStudio
 
         public async void ShowToolWindow(object sender, EventArgs eventArgs)
         {
+            await ShowToolWindowAsync();
+        }
+
+        public async Task ShowToolWindowAsync()
+        {
             try
             {
                 Logger.Debug("Toggling Tool Window ...");
-                var window = FindToolWindow(typeof(CodyToolWindow), 0, true);
+                var window = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
                 if (window?.Frame is IVsWindowFrame windowFrame)
                 {
                     bool isVisible = windowFrame.IsVisible() == 0;
                     bool isOnScreen = windowFrame.IsOnScreen(out int screenTmp) == 0 && screenTmp == 1;
 
+                    Logger.Debug($"IsVisible:{isVisible} IsOnScreen:{isOnScreen}");
+
                     if (!isVisible || !isOnScreen)
                     {
                         ErrorHandler.ThrowOnFailure(windowFrame.Show());
                         Logger.Debug("Shown.");
+
                     }
                 }
             }

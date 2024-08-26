@@ -81,8 +81,8 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        private string _isChatLoaded;
-        public string IsChatLoaded
+        private bool _isChatLoaded;
+        public bool IsChatLoaded
         {
             get => _isChatLoaded;
             set

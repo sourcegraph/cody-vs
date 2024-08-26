@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
+using Xunit;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -13,17 +14,15 @@ namespace Cody.VisualStudio.Tests
         
         protected IBrowserContext Context;
 
-        protected CodyPackage CodyPackage;
         protected IPage Page;
-
 
         private async Task InitializeAsync()
         {
             CodyPackage = await GetPackageAsync();
             CodyPackage.Logger.Debug("CodyPackage loaded.");
 
-            CodyPackage.ShowToolWindow(this, EventArgs.Empty);
-            CodyPackage.Logger.Debug("Tool Window activated.");
+            await WaitForChat();
+            CodyPackage.Logger.Debug("Chat initialized and loaded.");
 
             Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
             Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);

@@ -97,11 +97,12 @@ We use [Cake](https://cakebuild.net/) as our build automation system. The build 
 
 Execute these commands from the directory containing the `build.cake` file:
 
-| Command                        | Description                                                             |
-| ------------------------------ | ----------------------------------------------------------------------- |
+| Command                        | Description                                                  |
+| ------------------------------ | ------------------------------------------------------------ |
 | `dotnet cake`                  | Download and build agent, download required node files, build extension |
-| `dotnet cake --target Build`   | Same as above                                                           |
-| `dotnet cake --target Publish` | Build extension and publish it to the marketplace                       |
+| `dotnet cake --target Build`   | Same as above                                                |
+| `dotnet cake --target Tests`   | Run tests from Cody.VisualStudio.Tests                       |
+| `dotnet cake --target Publish` | Build extension and publish it to the marketplace            |
 
 ## Access Token
 
