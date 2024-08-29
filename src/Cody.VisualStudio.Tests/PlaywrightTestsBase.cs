@@ -51,6 +51,11 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ClickSend() => await Page.GetByTitle("Send").ClickAsync();
 
+        protected async Task EnterChatText(string prompt)
+        {
+            await Page.Locator("[data-keep-toolbar-open=true]").PressSequentiallyAsync(prompt);
+        }
+
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()
         {
             var tagsList = new List<ContextTag>();

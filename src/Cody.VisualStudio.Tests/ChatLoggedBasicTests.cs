@@ -50,5 +50,19 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(startLine, tags.Last().StartLine);
             Assert.Equal(endLine, tags.Last().EndLine);
         }
+
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Can_you_close_and_reopen_chat_tool_window()
+        {
+            await WaitForPlaywrightAsync();
+
+            await CloseCodyChatToolWindow();
+            var isOpen = IsCodyChatToolWindowOpen();
+            Assert.False(isOpen);
+
+            await OpenCodyChatToolWindow();
+            isOpen = IsCodyChatToolWindowOpen();
+            Assert.True(isOpen);
+        }
     }
 }

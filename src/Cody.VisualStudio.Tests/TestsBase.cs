@@ -12,11 +12,13 @@ namespace Cody.VisualStudio.Tests
     public abstract class TestsBase
     {
         protected CodyPackage CodyPackage;
+        protected IVsUIShell UIShell;
         protected DTE2 Dte;
 
         public TestsBase()
         {
             Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
+            UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
         }
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);
@@ -43,6 +45,32 @@ namespace Cody.VisualStudio.Tests
                 textView.SetSelection(selectLineStart.Value - 1, 0, selectLineEnd.Value, 0);
                 await Task.Delay(500);
             }
+        }
+
+        protected async Task OpenCodyChatToolWindow()
+        {
+            var guid = new Guid(Guids.CodyChatToolWindowString);
+            UIShell.FindToolWindow((uint)__VSFINDTOOLWIN.FTW_fFrameOnly, ref guid, out IVsWindowFrame windowFrame);
+
+            windowFrame.Show();
+
+            await WaitForAsync(() => CodyPackage.MainViewModel.IsChatLoaded);
+        }
+
+        protected async Task CloseCodyChatToolWindow()
+        {
+            var guid = new Guid(Guids.CodyChatToolWindowString);
+            UIShell.FindToolWindow((uint)__VSFINDTOOLWIN.FTW_fFrameOnly, ref guid, out IVsWindowFrame windowFrame);
+            windowFrame.CloseFrame((uint)__FRAMECLOSE.FRAMECLOSE_NoSave);
+            await Task.Delay(500);
+        }
+
+        protected bool IsCodyChatToolWindowOpen()
+        {
+            var guid = new Guid(Guids.CodyChatToolWindowString);
+            UIShell.FindToolWindow((uint)__VSFINDTOOLWIN.FTW_fFrameOnly, ref guid, out IVsWindowFrame windowFrame);
+            
+            return windowFrame.IsVisible() == 0;
         }
 
         protected async Task<CodyPackage> GetPackageAsync()
