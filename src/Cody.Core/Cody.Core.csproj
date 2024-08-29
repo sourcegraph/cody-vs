@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>VSTHRD010;VSTHRD200</NoWarn>
+    <NoWarn>VSTHRD010;VSTHRD200;VSTHRD105</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,9 +56,14 @@
     <Compile Include="Agent\InitializeCallback.cs" />
     <Compile Include="Agent\INotificationHandler.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
+    <Compile Include="Agent\ProgressNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\ProgressOptions.cs" />
+    <Compile Include="Agent\Protocol\ProgressReportParams.cs" />
+    <Compile Include="Agent\Protocol\ProgressStartParams.cs" />
     <Compile Include="Agent\Protocol\SaveDialogOptionsParams.cs" />
+    <Compile Include="Agent\Protocol\TestProgress.cs" />
     <Compile Include="Agent\Protocol\WorkspaceFolderDidChangeEvent.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParamsOptions.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParams.cs" />
@@ -82,6 +87,7 @@
     <Compile Include="Agent\WebviewMessageHandler.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
+    <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\WebViewsManager.cs" />

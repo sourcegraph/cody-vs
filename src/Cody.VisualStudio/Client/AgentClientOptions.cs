@@ -22,6 +22,6 @@ namespace Cody.VisualStudio.Client
 
         public string AgentDirectory { get; set; }
 
-        public List<INotificationHandler> CallbackHandlers { get; set; } = new List<INotificationHandler>();
+        public List<object> CallbackHandlers { get; set; } = new List<object>();
     }
 }

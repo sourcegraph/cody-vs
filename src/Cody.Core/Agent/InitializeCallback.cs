@@ -46,6 +46,7 @@ namespace Cody.Core.Agent
                     Completions = "none",
                     Edit = Capability.None,
                     EditWorkspace = Capability.None,
+                    ProgressBars = Capability.Enabled,
                     CodeLenses = Capability.None,
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
