@@ -64,5 +64,24 @@ namespace Cody.VisualStudio.Tests
             isOpen = IsCodyChatToolWindowOpen();
             Assert.True(isOpen);
         }
+
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Does_chat_history_show_up_after_you_have_submitting_a_chat_close_and_reopen_window()
+        {
+            int num = new Random().Next();
+            string propt = $"How to create const with value {num}?";
+
+            await WaitForPlaywrightAsync();
+
+            await EnterChatTextAndSend(propt);
+            await CloseCodyChatToolWindow();
+
+            await OpenCodyChatToolWindow();
+            await ShowHistoryTab();
+            var chatHistoryEntries = await GetTodaysChatHistory();
+
+            Assert.Contains(chatHistoryEntries, x => x.Contains(propt));
+
+        }
     }
 }

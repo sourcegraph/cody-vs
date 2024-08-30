@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using Microsoft.Playwright;
 using Xunit;
@@ -49,11 +50,30 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ShowAccountTab() => await Page.GetByTestId("tab-account").ClickAsync();
 
-        protected async Task ClickSend() => await Page.GetByTitle("Send").ClickAsync();
+        protected async Task ClickNewChat() => await Page.Locator("button span :text-is('New Chat')").ClickAsync();
 
-        protected async Task EnterChatText(string prompt)
+        protected async Task EnterChatTextAndSend(string prompt)
         {
-            await Page.Locator("[data-keep-toolbar-open=true]").PressSequentiallyAsync(prompt);
+            var entryArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
+
+            await entryArea.PressSequentiallyAsync(prompt);
+            await entryArea.PressAsync("Enter");
+
+            var button = await Page.WaitForSelectorAsync("menu button[type=submit][title=Stop]");
+
+            while (await button.GetAttributeAsync("title") == "Stop") await Task.Delay(500);
+            await Task.Delay(500);
+        }
+
+        protected async Task<string[]> GetTodaysChatHistory()
+        {
+            var todaySection = await Page.QuerySelectorAsync("div[id='radix-:r11:']") ??
+                await Page.QuerySelectorAsync("div[id='radix-:r1b:']");
+
+            return (await todaySection.QuerySelectorAllAsync("button span"))
+                .Select(async x => await x.TextContentAsync())
+                .Select(x => x.Result)
+                .ToArray();
         }
 
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()
