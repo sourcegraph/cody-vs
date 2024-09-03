@@ -31,7 +31,7 @@ jobs:
         corepack install --global pnpm@8.6.7
         dotnet cake
 
-    #- name: Tests
-    #  run: |
-    #    cd src
-    #    dotnet cake --target Tests
+    - name: Tests
+      run: |
+        cd src
+        dotnet cake --target Tests
