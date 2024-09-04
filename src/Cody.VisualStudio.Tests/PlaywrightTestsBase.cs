@@ -1,11 +1,13 @@
-using System;
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EnvDTE;
+using EnvDTE80;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using Microsoft.Playwright;
-using Xunit;
+using Microsoft.VisualStudio.Shell;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -22,6 +24,8 @@ namespace Cody.VisualStudio.Tests
 
         private async Task InitializeAsync()
         {
+            await DismissStartWindow();
+
             CodyPackage = await GetPackageAsync();
             CodyPackage.Logger.Debug("CodyPackage loaded.");
 
@@ -35,6 +39,29 @@ namespace Cody.VisualStudio.Tests
 
             Context = Browser.Contexts[0];
             Page = Context.Pages[0];
+        }
+
+        protected async Task DismissStartWindow()
+        {
+            var dte2 = Package.GetGlobalService(typeof(DTE)) as DTE2;
+            await OnUIThread(() =>
+            {
+                var mainWindow = dte2.MainWindow;
+                if (!mainWindow.Visible) // Options -> General -> On Startup open: Start Window
+                    mainWindow.Visible = true; 
+
+                return Task.CompletedTask;
+            });
+
+            //ISettingsManager globalService = (ISettingsManager)Package.GetGlobalService(typeof(SVsSettingsPersistenceManager));
+            //if (globalService == null)
+            //    ActivityLog.TryLogError("General Options Page", "SVsSettingsPersistenceManager is null");
+            //else
+            //{
+            //    globalService.SetValueAsync("Microsoft.VisualStudio.IDE.OnEnvironmentStartup_Dev16", (object)10, false);
+            //}
+
+            ;
         }
 
         protected async Task WaitForPlaywrightAsync()
