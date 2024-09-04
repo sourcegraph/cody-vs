@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,14 +44,21 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task DismissStartWindow()
         {
-            var dte2 = Package.GetGlobalService(typeof(DTE)) as DTE2;
             await OnUIThread(() =>
             {
-                var mainWindow = dte2.MainWindow;
-                if (!mainWindow.Visible) // Options -> General -> On Startup open: Start Window
-                    mainWindow.Visible = true; 
+                try
+                {
 
-                return Task.CompletedTask;
+                    var mainWindow = Dte.MainWindow;
+                    if (!mainWindow.Visible) // Options -> General -> On Startup open: Start Window
+                        mainWindow.Visible = true;
+
+                    return Task.CompletedTask;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Cannot get MainWindow visible!");
+                }
             });
 
             //ISettingsManager globalService = (ISettingsManager)Package.GetGlobalService(typeof(SVsSettingsPersistenceManager));
