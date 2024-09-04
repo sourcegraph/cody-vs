@@ -58,6 +58,9 @@ namespace Cody.Core.Agent
         [AgentCall("workspaceFolder/didChange")]
         void WorkspaceFolderDidChange(WorkspaceFolderDidChangeEvent uris);
 
+        [AgentCall("progress/cancel")]
+        void CancelProgress(string id);
+
         //---------------------------------------------------------
         // For notifications return type MUST be void!
         //---------------------------------------------------------

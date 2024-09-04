@@ -33,6 +33,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Cody.UI.ViewModels;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.TaskStatusCenter;
 
 namespace Cody.VisualStudio
 {
@@ -76,6 +77,7 @@ namespace Cody.VisualStudio
         public IThemeService ThemeService;
         public ISolutionService SolutionService;
         public IWebViewsManager WebViewsManager;
+        public IProgressService ProgressService;
         public IAgentProxy AgentClient;
 
         public GeneralOptionsViewModel GeneralOptionsViewModel;
@@ -84,6 +86,7 @@ namespace Cody.VisualStudio
         public MainView MainView;
         public InitializeCallback InitializeService;
         public NotificationHandlers NotificationHandlers;
+        public ProgressNotificationHandlers ProgressNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public IFileService FileService;
         public IVsUIShell VsUIShell;
@@ -129,8 +132,11 @@ namespace Cody.VisualStudio
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
             FileService = new FileService(this, Logger);
+            var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
+            ProgressService = new ProgressService(statusCenterService);
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
+            ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 
             WebView2Dev.InitializeController(ThemeService.GetThemingScript());
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
@@ -246,7 +252,7 @@ namespace Cody.VisualStudio
 
                 var options = new AgentClientOptions
                 {
-                    CallbackHandlers = new List<INotificationHandler> { NotificationHandlers },
+                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = devPort != null,
@@ -278,6 +284,7 @@ namespace Cody.VisualStudio
 
                     await InitializeService.Initialize(AgentService);
                     NotificationHandlers.SetAgentClient(AgentService);
+                    ProgressNotificationHandlers.SetAgentService(AgentService);
                 })
                 .ContinueWith(x =>
                 {
