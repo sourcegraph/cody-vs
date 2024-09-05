@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="AssemblyLoader.cs" />
     <Compile Include="ConsoleLogger.cs" />
+    <Compile Include="FakeSecretStorageProvider.cs" />
     <Compile Include="FakeServiceProvider.cs" />
     <Compile Include="MemorySettingsProvider.cs" />
     <Compile Include="Program.cs" />

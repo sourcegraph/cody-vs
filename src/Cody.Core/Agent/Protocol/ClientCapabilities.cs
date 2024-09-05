@@ -18,6 +18,8 @@ namespace Cody.Core.Agent.Protocol
         public string Webview { get; set; } // 'agentic' | 'native'
         public WebviewCapabilities WebviewNativeConfig { get; set; }
         public string GlobalState { get; set; } // 'stateless' | 'server-managed' | 'client-managed'
+        public string Secrets { get; set; } // 'stateless' | 'server-managed' | 'client-managed'
+        public Capability? Authentication { get; set; }
     }
 
     public enum Capability

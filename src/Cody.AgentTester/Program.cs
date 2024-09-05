@@ -32,9 +32,10 @@ namespace Cody.AgentTester
             var logger = new Logger();
             var settingsService = new UserSettingsService(new MemorySettingsProvider(), logger);
             var editorService = new FileService(new FakeServiceProvider(), logger);
+            var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider());
             var options = new AgentClientOptions
             {
-                CallbackHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService, logger, editorService) },
+                CallbackHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,

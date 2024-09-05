@@ -17,6 +17,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
@@ -76,6 +77,7 @@ namespace Cody.VisualStudio
         public ISolutionService SolutionService;
         public IWebViewsManager WebViewsManager;
         public IAgentProxy AgentClient;
+        public ISecretStorageService SecretStorageService;
 
         public MainView MainView;
         public InitializeCallback InitializeService;
@@ -120,12 +122,14 @@ namespace Cody.VisualStudio
             VsVersionService = new VsVersionService(Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
             UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
+            var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
+            SecretStorageService = new SecretStorageService(vsSecretStorage);
 
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
             FileService = new FileService(this, Logger);
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
 
             WebView2Dev.InitializeController(ThemeService.GetThemingScript());
