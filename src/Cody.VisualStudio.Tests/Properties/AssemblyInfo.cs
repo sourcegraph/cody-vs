@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -32,3 +32,4 @@ using Xunit;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: TestFramework("Xunit.VsTestFramework", "VsixTesting.Xunit")]
+[assembly: CollectionBehavior(DisableTestParallelization = true)]

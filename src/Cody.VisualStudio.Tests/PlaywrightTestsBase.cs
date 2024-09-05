@@ -28,15 +28,17 @@ namespace Cody.VisualStudio.Tests
             await DismissStartWindow();
 
             CodyPackage = await GetPackageAsync();
-            CodyPackage.Logger.Debug("CodyPackage loaded.");
+            WriteLog("CodyPackage loaded.");
 
             await WaitForChat();
-            CodyPackage.Logger.Debug("Chat initialized and loaded.");
+            WriteLog("Chat initialized and loaded.");
 
             Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+            WriteLog("Playwright created.");
+
             Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
 
-            CodyPackage.Logger.Debug("Playwright initialized.");
+            WriteLog("Playwright connected to the browser.");
 
             Context = Browser.Contexts[0];
             Page = Context.Pages[0];

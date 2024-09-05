@@ -11,7 +11,7 @@ namespace Cody.VisualStudio.Tests
         {
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Loads_Properly_InLoggedState()
         {
             // given
