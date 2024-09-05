@@ -135,10 +135,6 @@ namespace Cody.UI.Controls
         public void SetThemeScript(string colorThemeScript)
         {
             _colorThemeScript = colorThemeScript;
-            // We might want to apply the theme immediately if the webview is already loaded.
-            // if (_webview.CoreWebView2.IsDocumentOpen) {
-            //     _ = ApplyThemingScript();
-            // }
         }
 
         public async void OnThemeChanged(object sender, IColorThemeChangedEvent e)
