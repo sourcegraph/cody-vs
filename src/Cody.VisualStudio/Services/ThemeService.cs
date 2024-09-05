@@ -11,28 +11,38 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Services
 {
     public class ThemeService : IThemeService
     {
-        private IServiceProvider serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILog _logger;
 
         public event EventHandler<IColorThemeChangedEvent> ThemeChanged;
 
-        public ThemeService(IServiceProvider serviceProvider)
+        public ThemeService(IServiceProvider serviceProvider, ILog logger)
         {
-            this.serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider;
+            _logger = logger;
 
             VSColorTheme.ThemeChanged += HandleThemeChanges;
         }
 
 
-        private void HandleThemeChanges(ThemeChangedEventArgs e)
+        private async void HandleThemeChanges(ThemeChangedEventArgs e)
         {
-            Task.Delay(100).Wait(); // Short delay to allow VS to update colors
-            var latest = GetThemingScript();
-            ThemeChanged?.Invoke(this, new IColorThemeChangedEvent { ThemingScript = latest });
+            try
+            {
+                await Task.Delay(100); // Short delay to allow VS to update colors
+                var latest = GetThemingScript();
+                ThemeChanged?.Invoke(this, new IColorThemeChangedEvent { ThemingScript = latest });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Processing VS Theme change failed.", ex);
+            }
         }
 
         public IReadOnlyDictionary<string, string> GetColors()
@@ -61,7 +71,7 @@ namespace Cody.VisualStudio.Services
 
         private FontInformation GetFontInfo(Guid categoryGuid)
         {
-            var storage = (IVsFontAndColorStorage)serviceProvider.GetService(typeof(SVsFontAndColorStorage));
+            var storage = (IVsFontAndColorStorage)_serviceProvider.GetService(typeof(SVsFontAndColorStorage));
             storage.OpenCategory(categoryGuid, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_READONLY));
 
             var logFont = new LOGFONTW[1];
@@ -80,7 +90,7 @@ namespace Cody.VisualStudio.Services
             const string darkTheme = "{1ded0138-47ce-435e-84ef-9ec1f439b749}";
             const string systemTheme = "{619dac1e-8220-4bd9-96fb-75ceb61a6107}";
 
-            var settingsManager = new ShellSettingsManager(serviceProvider);
+            var settingsManager = new ShellSettingsManager(_serviceProvider);
             var store = settingsManager.GetReadOnlySettingsStore(SettingsScope.UserSettings);
             var themeId = store.GetString("Theme", "BackupThemeId");
 

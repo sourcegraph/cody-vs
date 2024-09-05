@@ -130,7 +130,7 @@ namespace Cody.VisualStudio
 
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
-            ThemeService = new ThemeService(this);
+            ThemeService = new ThemeService(this, Logger);
             FileService = new FileService(this, Logger);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
@@ -138,7 +138,7 @@ namespace Cody.VisualStudio
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 
-            var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript());
+            var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
             ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 

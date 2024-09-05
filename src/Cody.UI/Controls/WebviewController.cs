@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
 {
@@ -15,6 +16,8 @@ namespace Cody.UI.Controls
         private string _colorThemeScript;
 
         private ICommand _sendMessageCommand;
+
+        private ILog _logger;
 
         public WebviewController()
         {
@@ -139,11 +142,22 @@ namespace Cody.UI.Controls
 
         public async void OnThemeChanged(object sender, IColorThemeChangedEvent e)
         {
-            string updatedScript = e.ThemingScript;
-            if (updatedScript != _colorThemeScript)
+            try
             {
-                SetThemeScript(updatedScript);
-                await ApplyThemingScript();
+                string updatedScript = e.ThemingScript;
+                if (updatedScript != _colorThemeScript)
+                {
+                    _logger.Debug("Applying VS theme change to WebView ...");
+
+                    SetThemeScript(updatedScript);
+                    await ApplyThemingScript();
+
+                    _logger.Debug("Theme change applied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Applying theme change to WebView failed.", ex);
             }
         }
 
@@ -201,5 +215,10 @@ namespace Cody.UI.Controls
                 {colorTheme}
             }})();
         ";
+
+        public void SetLogger(ILog logger)
+        {
+            _logger = logger;
+        }
     }
 }
