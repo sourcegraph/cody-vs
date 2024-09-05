@@ -15,11 +15,11 @@ namespace Cody.VisualStudio.Tests
         protected IVsUIShell UIShell;
         protected DTE2 Dte;
 
-        public TestsBase()
-        {
-            Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
-            UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
-        }
+        //public TestsBase()
+        //{
+        //    Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
+        //    UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
+        //}
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);
 
