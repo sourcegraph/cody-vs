@@ -24,7 +24,7 @@ namespace Cody.VisualStudio
     /// implementation of the IVsUIElementPane interface.
     /// </para>
     /// </remarks>
-    [Guid("f677620d-05fd-48ed-8423-72a12db4deef")]
+    [Guid(Guids.CodyChatToolWindowString)]
     public class CodyToolWindow : ToolWindowPane
     {
         /// <summary>
@@ -53,8 +53,10 @@ namespace Cody.VisualStudio
                 DataContext = viewModel
             };
 
-            base.Content = view;
+            package.MainViewModel = viewModel;
             package.MainView = view;
+            base.Content = view;
+            
         }
 
         private CodyPackage GetPackage()

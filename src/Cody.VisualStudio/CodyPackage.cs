@@ -32,7 +32,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Cody.UI.ViewModels;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.TaskStatusCenter;
 
 namespace Cody.VisualStudio
 {
@@ -76,12 +78,17 @@ namespace Cody.VisualStudio
         public IThemeService ThemeService;
         public ISolutionService SolutionService;
         public IWebViewsManager WebViewsManager;
+        public IProgressService ProgressService;
         public IAgentProxy AgentClient;
         public ISecretStorageService SecretStorageService;
+
+        public GeneralOptionsViewModel GeneralOptionsViewModel;
+        public MainViewModel MainViewModel;
 
         public MainView MainView;
         public InitializeCallback InitializeService;
         public NotificationHandlers NotificationHandlers;
+        public ProgressNotificationHandlers ProgressNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public IFileService FileService;
         public IVsUIShell VsUIShell;
@@ -130,7 +137,11 @@ namespace Cody.VisualStudio
             ThemeService = new ThemeService(this);
             FileService = new FileService(this, Logger);
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
+            var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
+            ProgressService = new ProgressService(statusCenterService);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
+            ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 
             WebView2Dev.InitializeController(ThemeService.GetThemingScript());
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
@@ -196,19 +207,27 @@ namespace Cody.VisualStudio
 
         public async void ShowToolWindow(object sender, EventArgs eventArgs)
         {
+            await ShowToolWindowAsync();
+        }
+
+        public async Task ShowToolWindowAsync()
+        {
             try
             {
                 Logger.Debug("Toggling Tool Window ...");
-                var window = FindToolWindow(typeof(CodyToolWindow), 0, true);
+                var window = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
                 if (window?.Frame is IVsWindowFrame windowFrame)
                 {
                     bool isVisible = windowFrame.IsVisible() == 0;
                     bool isOnScreen = windowFrame.IsOnScreen(out int screenTmp) == 0 && screenTmp == 1;
 
+                    Logger.Debug($"IsVisible:{isVisible} IsOnScreen:{isOnScreen}");
+
                     if (!isVisible || !isOnScreen)
                     {
                         ErrorHandler.ThrowOnFailure(windowFrame.Show());
                         Logger.Debug("Shown.");
+
                     }
                 }
             }
@@ -238,7 +257,7 @@ namespace Cody.VisualStudio
 
                 var options = new AgentClientOptions
                 {
-                    CallbackHandlers = new List<INotificationHandler> { NotificationHandlers },
+                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = devPort != null,
@@ -270,6 +289,7 @@ namespace Cody.VisualStudio
 
                     await InitializeService.Initialize(AgentService);
                     NotificationHandlers.SetAgentClient(AgentService);
+                    ProgressNotificationHandlers.SetAgentService(AgentService);
                 })
                 .ContinueWith(x =>
                 {

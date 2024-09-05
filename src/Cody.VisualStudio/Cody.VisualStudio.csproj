@@ -35,7 +35,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>VSTHRD010;VSTHRD200</NoWarn>
+    <NoWarn>VSTHRD010;VSTHRD200;VSTHRD105</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -71,6 +71,7 @@
     <Compile Include="Services\OptionsPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Services\ProgressService.cs" />
     <Compile Include="Services\SolutionService.cs" />
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\StatusbarService.cs" />

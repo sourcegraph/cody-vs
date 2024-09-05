@@ -35,7 +35,7 @@ namespace Cody.AgentTester
             var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider());
             var options = new AgentClientOptions
             {
-                CallbackHandlers = new List<INotificationHandler> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService) },
+                CallbackHandlers = new List<object> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,

@@ -50,10 +50,13 @@
     <Compile Include="..\Cody.VisualStudio\Properties\AssemblyVersion.cs">
       <Link>Properties\AssemblyVersion.cs</Link>
     </Compile>
+    <Compile Include="ChatNotLoggedStateTests.cs" />
+    <Compile Include="ChatLoggedBasicTests.cs" />
     <Compile Include="PlaywrightTestsBase.cs" />
     <Compile Include="PlaywrightInitializationTests.cs" />
     <Compile Include="CodyPackageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SolutionsPaths.cs" />
     <Compile Include="TestsBase.cs" />
     <Compile Include="VsVersion.cs" />
   </ItemGroup>
