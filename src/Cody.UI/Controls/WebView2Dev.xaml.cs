@@ -31,9 +31,11 @@ namespace Cody.UI.Controls
             await InitializeWebView();
         }
 
-        public static WebviewController InitializeController(string themeScript)
+        public static WebviewController InitializeController(string themeScript, ILog logger)
         {
+            _controller.SetLogger(logger);
             _controller.SetThemeScript(themeScript);
+
             return _controller;
         }
 
