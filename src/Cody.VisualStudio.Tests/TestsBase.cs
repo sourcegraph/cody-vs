@@ -2,9 +2,11 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Xunit.Abstractions;
+using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -23,7 +25,7 @@ namespace Cody.VisualStudio.Tests
 
         protected void WriteLog(string message, [CallerMemberName] string callerName = "")
         {
-            _logger.WriteLine($"[{callerName}] {message}");
+            _logger.WriteLine($"[{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
         }
 
         protected async Task<CodyPackage> GetPackageAsync()
