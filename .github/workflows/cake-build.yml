@@ -35,4 +35,4 @@ jobs:
       run: |
         cd src
         #dotnet cake --target Tests
-        dotnet test ./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll -v detailed
+        dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed
