@@ -16,9 +16,9 @@ namespace Cody.VisualStudio.Tests
             await GetPackageAsync();
             CodyPackage.ShowOptionPage(typeof(GeneralOptionsPage));
             await Task.Delay(TimeSpan.FromSeconds(1)); // HACK: properly wait for Options page
-
-            var accessToken = CodyPackage.GeneralOptionsViewModel.AccessToken;
-            CodyPackage.GeneralOptionsViewModel.AccessToken = $"{accessToken}INVALID"; // make it invalid
+            // TODO: Replace SourcegraphUrl with Token value
+            var accessToken = CodyPackage.GeneralOptionsViewModel.SourcegraphUrl;
+            CodyPackage.GeneralOptionsViewModel.SourcegraphUrl = $"{accessToken}INVALID"; // make it invalid
 
             await WaitForPlaywrightAsync();
             
@@ -28,7 +28,7 @@ namespace Cody.VisualStudio.Tests
             var getStarted = Page.GetByText(text);
             var textContents = await getStarted.AllTextContentsAsync();
 
-            CodyPackage.GeneralOptionsViewModel.AccessToken = $"{accessToken}"; // make it valid
+            CodyPackage.GeneralOptionsViewModel.SourcegraphUrl = $"{accessToken}"; // make it valid
 
             // then
             Assert.Equal(text, textContents.First());
