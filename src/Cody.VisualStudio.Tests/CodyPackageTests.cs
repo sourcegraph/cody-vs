@@ -4,11 +4,15 @@ using System.Windows;
 using System.Windows.Navigation;
 using Cody.UI.ViewModels;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
     public class CodyPackageTests : TestsBase
     {
+        public CodyPackageTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
         [VsFact(Version = VsVersion.VS2022)]
         public async Task CodyPackage_Loaded_OnDemand()

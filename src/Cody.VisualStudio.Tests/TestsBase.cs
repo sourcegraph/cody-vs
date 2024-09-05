@@ -1,15 +1,30 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using Cody.UI.ViewModels;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
     public abstract class TestsBase
     {
+        private readonly ITestOutputHelper _logger;
+
         protected CodyPackage CodyPackage;
+
+        protected TestsBase(ITestOutputHelper output)
+        {
+            _logger = output;
+            
+            WriteLog("[TestBase] Initialized.");
+        }
+
+        protected void WriteLog(string message, [CallerMemberName] string callerName = "")
+        {
+            _logger.WriteLine($"[{callerName}] {message}");
+        }
 
         protected async Task<CodyPackage> GetPackageAsync()
         {
