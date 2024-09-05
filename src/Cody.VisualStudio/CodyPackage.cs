@@ -127,16 +127,16 @@ namespace Cody.VisualStudio
             SolutionService = new SolutionService(vsSolution);
             VersionService = loggerFactory.GetVersionService();
             VsVersionService = new VsVersionService(Logger);
-            UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
-            UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
+
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage);
+            UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
+            UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
             StatusbarService = new StatusbarService();
             InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this);
             FileService = new FileService(this, Logger);
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);

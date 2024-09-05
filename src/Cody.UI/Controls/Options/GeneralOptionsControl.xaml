@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Cody.UI.Controls.Options.GeneralOptionsControl"
+<UserControl x:Class="Cody.UI.Controls.Options.GeneralOptionsControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -25,45 +25,45 @@
                 </Grid.ColumnDefinitions>
 
 
-                <!--Access Token-->
+                <!--Cody Configurations-->
                 <Label 
-                    Grid.Row="0"
+                    Grid.Row="1"
                     Grid.Column="0"
-                    Content="Access Token"
+                    Content="Cody Settings"
                     />
 
                 <TextBox
-                    Grid.Row="0"
+                    Grid.Row="1"
                     Grid.Column="1"
                     Width="400"
-                    Height="20"
-                    Text="{Binding AccessToken, Mode=TwoWay}"
-                    ToolTip="Paste your access token. To create an access token, go to 'Settings' and then 'Access tokens' on the Sourcegraph instance."
-                    Name="AccessTokenTextBox"
+                    Height="50"
+                    Text="{Binding Configurations, Mode=TwoWay}"
+                    ToolTip="Your Cody configuration JSON file."
+                    Name="ConfigurationsTextBox"
                     />
 
-                <!--Get a token-->
+                <!--Get Help-->
                 <Button 
                     Margin="0 5 0 0"
                     Grid.Row="2"
                     Grid.Column="1"
                     Height="25"
                     Width="100"
-                    Content="Get a token"
+                    Content="Get Help"
                     HorizontalAlignment="Left"
                     Command="{Binding ActivateBetaCommand}"
                 />
 
                 <!--Sourcegraph URL-->
                 <Label
-                    Grid.Row="1"
+                    Grid.Row="0"
                     Grid.Column="0"
                     Content="Sourcegraph URL"
                 />
 
                 <TextBox
                     Name="SourcegraphUrlTextBox"
-                    Grid.Row="1"
+                    Grid.Row="0"
                     Grid.Column="1"
                     Width="400"
                     Height="20"

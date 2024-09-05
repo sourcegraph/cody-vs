@@ -3,9 +3,10 @@ using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 
 namespace Cody.VisualStudio.Services
 {
-    public class SecretStorageService: ISecretStorageService
+    public class SecretStorageService : ISecretStorageService
     {
         private readonly IVsCredentialStorageService secretStorageService;
+        private readonly string AccessTokenKey = "cody.access-token";
         private readonly string FeatureName = "Cody.VisualStudio";
         private readonly string UserName = "CodyAgent";
         private readonly string Type = "token";
@@ -33,6 +34,18 @@ namespace Cody.VisualStudio.Services
         {
             var credentialKey = this.secretStorageService.CreateCredentialKey(FeatureName, key, UserName, Type);
             this.secretStorageService.Remove(credentialKey);
+        }
+
+        public string AccessToken
+        {
+            get
+            {
+                return this.Get(AccessTokenKey);
+            }
+            set
+            {
+                this.Set(AccessTokenKey, value);
+            }
         }
     }
 }

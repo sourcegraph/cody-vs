@@ -5,5 +5,6 @@ namespace Cody.Core.Infrastructure
         void Set(string key, string value);
         string Get(string key);
         void Delete(string key);
+        string AccessToken { get; set; }
     }
 }

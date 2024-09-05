@@ -1,3 +1,4 @@
+using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using System;
 
@@ -6,13 +7,15 @@ namespace Cody.Core.Settings
     public class UserSettingsService : IUserSettingsService
     {
         private readonly IUserSettingsProvider _settingsProvider;
+        private readonly ISecretStorageService _secretStorage;
         private readonly ILog _logger;
 
         public event EventHandler AuthorizationDetailsChanged;
 
-        public UserSettingsService(IUserSettingsProvider settingsProvider, ILog log)
+        public UserSettingsService(IUserSettingsProvider settingsProvider, ISecretStorageService secretStorage, ILog log)
         {
             _settingsProvider = settingsProvider;
+            _secretStorage = secretStorage;
             _logger = log;
         }
 
@@ -71,25 +74,32 @@ namespace Cody.Core.Settings
             get
             {
                 var envToken = Environment.GetEnvironmentVariable("SourcegraphCodyToken");
-                var userToken = GetOrDefault(nameof(AccessToken));
-                ;
+                var userToken = _secretStorage.AccessToken;
+
                 if (envToken != null && userToken == null) // use env token only when a user token is not set
                 {
                     _logger.Warn("You are using a access token from environment variables!");
                     return envToken;
                 }
 
-                return GetOrDefault(nameof(AccessToken));
+                return userToken;
             }
             set
             {
-                var token = GetOrDefault(nameof(AccessToken));
-                if (!string.Equals(value, token, StringComparison.InvariantCulture))
+                var userToken = _secretStorage.AccessToken;
+                if (!string.Equals(value, userToken, StringComparison.InvariantCulture))
                 {
-                    Set(nameof(AccessToken), value);
+                    _secretStorage.AccessToken = value;
                     AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
+        }
+
+
+        public string CodySettings
+        {
+            get => GetOrDefault(nameof(CodySettings), string.Empty);
+            set => Set(nameof(CodySettings), value);
         }
     }
 }

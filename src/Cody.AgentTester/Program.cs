@@ -30,9 +30,9 @@ namespace Cody.AgentTester
             var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
             var logger = new Logger();
-            var settingsService = new UserSettingsService(new MemorySettingsProvider(), logger);
-            var editorService = new FileService(new FakeServiceProvider(), logger);
             var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider());
+            var settingsService = new UserSettingsService(new MemorySettingsProvider(), secretStorageService, logger);
+            var editorService = new FileService(new FakeServiceProvider(), logger);
             var options = new AgentClientOptions
             {
                 CallbackHandlers = new List<object> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService) },
@@ -64,6 +64,7 @@ namespace Cody.AgentTester
                 WorkspaceRootUri = Directory.GetCurrentDirectory().ToString(),
                 Capabilities = new ClientCapabilities
                 {
+                    Authentication = Capability.Enabled,
                     Edit = Capability.Enabled,
                     EditWorkspace = Capability.None,
                     CodeLenses = Capability.None,
@@ -79,6 +80,7 @@ namespace Cody.AgentTester
                     },
                     WebviewMessages = "string-encoded",
                     GlobalState = "stateless",
+                    Secrets = "stateless",
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {

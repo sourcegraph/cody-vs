@@ -8,6 +8,7 @@ namespace Cody.Core.Settings
 
         string AccessToken { get; set; }
         string ServerEndpoint { get; set; }
+        string CodySettings { get; set; }
         event EventHandler AuthorizationDetailsChanged;
     }
 }
