@@ -2,7 +2,7 @@ name: Cake Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ piotr/ci-localhost-exp ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -31,7 +31,8 @@ jobs:
         corepack install --global pnpm@8.6.7
         dotnet cake
 
-    #- name: Tests
-    #  run: |
-    #    cd src
-    #    dotnet cake --target Tests
+    - name: Tests
+      run: |
+        cd src
+        #dotnet cake --target Tests
+        dotnet test ./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll -v detailed
