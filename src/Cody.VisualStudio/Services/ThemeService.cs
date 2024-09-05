@@ -1,4 +1,4 @@
-﻿using Cody.Core.Infrastructure;
+using Cody.Core.Infrastructure;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Services
 {
@@ -17,12 +18,21 @@ namespace Cody.VisualStudio.Services
     {
         private IServiceProvider serviceProvider;
 
+        public event EventHandler<IColorThemeChangedEvent> ThemeChanged;
+
         public ThemeService(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
 
-            // TODO: Update the webviews when the theme changes.
-            // VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
+            VSColorTheme.ThemeChanged += HandleThemeChanges;
+        }
+
+
+        private void HandleThemeChanges(ThemeChangedEventArgs e)
+        {
+            Task.Delay(100).Wait(); // Short delay to allow VS to update colors
+            var latest = GetThemingScript();
+            ThemeChanged?.Invoke(this, new IColorThemeChangedEvent { ThemingScript = latest });
         }
 
         public IReadOnlyDictionary<string, string> GetColors()

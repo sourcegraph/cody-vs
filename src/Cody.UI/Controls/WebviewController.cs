@@ -137,8 +137,18 @@ namespace Cody.UI.Controls
             _colorThemeScript = colorThemeScript;
             // We might want to apply the theme immediately if the webview is already loaded.
             // if (_webview.CoreWebView2.IsDocumentOpen) {
-            //     _ = ApplyThemingScript(); 
+            //     _ = ApplyThemingScript();
             // }
+        }
+
+        public async void OnThemeChanged(object sender, IColorThemeChangedEvent e)
+        {
+            string updatedScript = e.ThemingScript;
+            if (updatedScript != _colorThemeScript)
+            {
+                SetThemeScript(updatedScript);
+                await ApplyThemingScript();
+            }
         }
 
         public void SetHtml(string html)
@@ -189,9 +199,11 @@ namespace Cody.UI.Controls
         ";
 
         private static string GetThemeScript(string colorTheme) => $@"
-            document.documentElement.dataset.ide = 'VisualStudio';
-
-            {colorTheme}
+            (function() {{
+                document.documentElement.dataset.ide = 'VisualStudio';
+                document.documentElement.style = '';
+                {colorTheme}
+            }})();
         ";
     }
 }

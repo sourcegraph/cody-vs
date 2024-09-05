@@ -138,7 +138,8 @@ namespace Cody.VisualStudio
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 
-            WebView2Dev.InitializeController(ThemeService.GetThemingScript());
+            var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript());
+            ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
