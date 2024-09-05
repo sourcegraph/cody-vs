@@ -44,6 +44,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task DismissStartWindow()
         {
+            throw new Exception("DismissStartWindow exception!");
             await OnUIThread(() =>
             {
                 try
