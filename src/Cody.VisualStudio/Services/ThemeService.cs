@@ -35,7 +35,7 @@ namespace Cody.VisualStudio.Services
         {
             try
             {
-                await Task.Delay(100); // Short delay to allow VS to update colors
+                await Task.Delay(1000); // Short delay to allow VS to update colors
                 var latest = GetThemingScript();
                 ThemeChanged?.Invoke(this, new IColorThemeChangedEvent { ThemingScript = latest });
             }
