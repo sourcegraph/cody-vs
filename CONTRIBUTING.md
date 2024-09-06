@@ -8,7 +8,7 @@
    1. `choco install pnpm --version=8.6.7`
 1. Install [Visual Studio Pro](https://visualstudio.microsoft.com/vs/professional/) with the required component:
    1. Visual Studio Extension
-2. Install [git for Windows](https://gitforwindows.org)
+1. Install [git for Windows](https://gitforwindows.org)
    1. Configure it with `git config core.autocrlf false` to not change line endings
 1. Install [.NET SDK](https://dotnet.microsoft.com/en-us/download)
 1. Clone this repository: `git clone git@github.com:sourcegraph/cody-vs.git`
