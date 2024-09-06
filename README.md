@@ -1,10 +1,8 @@
 # Cody for Visual Studio
 
-## 🚧 Preview Status
+## Preview Status
 
-IMPORTANT: Please note that Cody for Visual Studio is currently in preview and is intended for testing purposes only. The extension may not be stable and could have bugs or limitations.
-
-Once the extension becomes general available, you can install Cody for Visual Studio from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
+🚧 [Cody for Visual Studio](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) is currently in preview. **It is intended for testing purposes only and may not be suitable for production use.**
 
 ## AI that uses your codebase as context
 
@@ -39,7 +37,13 @@ You can find detailed information about Cody's available plans [on our website](
 
 ### Feedback
 
-Cody is often magical and sometimes frustratingly wrong. Cody's goal is to be powerful _and_ accurate. You can help:
+As the extension is currently in preview, here are what to expect:
+
+- You might encounter bugs or unexpected behavior
+- Features and user interface are subject to change
+- The extension has limited functionality compared to the VS Code extension
+
+We appreciate your feedback as we work to improve Cody for Visual Studio. Please report any issues or suggestions through our official channels:
 
 - Use the <kbd>👍</kbd>/<kbd>👎</kbd> buttons in the chat view to give feedback.
 - [File an issue](https://community.sourcegraph.com/c/cody) when you see problems.

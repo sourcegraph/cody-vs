@@ -18,23 +18,20 @@ Before beginning the test plan, ensure you have:
 
 **IMPORTANT:** Cody requires an open solution in Visual Studio to provide context-aware responses. Ensure you have a solution project opened before testing Cody features.
 
-## Installation Steps
+## Installing Cody for Visual Studio (Preview)
 
-You must have `READ` access to the Cody extension in the Visual Studio Marketplace to download the Preview version.
+To install the preview version of Cody for Visual Studio:
 
-If you don't have access, obtain the link to download the latest extension installation package from a team member.
+1. Visit the [GitHub Releases Page](https://github.com/sourcegraph/cody-vs/releases)
+2. Download `Cody.VisualStudio.vsix` from the latest release's **Assets** section
+3. Close `Visual Studio`
+4. Double-click the downloaded file to install the extension
 
-### Preview Version
-
-If you have access to the Preview version of Cody in the Visual Studio Marketplace:
-
-1. Visit the [Cody for Visual Studio Marketplace page](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
-2. Download the extension package (`Cody.VisualStudio.vsix`).
-3. Install the extension by double-clicking the downloaded file.
+As this is a preview version, you may encounter bugs or limitations. Please report any issues on the [GitHub repository](https://github.com/sourcegraph/cody-vs/issues).
 
 ### Public Release Version
 
-Once Cody for Visual Studio is publicly available in the Marketplace:
+Once generally available, the extension will be on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
 
 1. Open Visual Studio.
 2. Go to `Extensions` > `Manage Extensions`.
@@ -47,7 +44,8 @@ Once Cody for Visual Studio is publicly available in the Marketplace:
 After installing Cody:
 
 1. Restart Visual Studio if prompted.
-2. Open your solution or create a new project to start using Cody.
+2. Open your solution or create a new project.
+3. Select `Cody Chat` from the `Tools` menu bar to open `Cody` in the sidebar.
 
 ## Test Plan Overview
 
@@ -64,6 +62,8 @@ The plan includes steps to verify:
 
 Use the following checklist to track your progress through the test plan:
 
+- Activation
+  - [ ] [Authentication](#authentication)
 - Autocomplete
   - [ ] Not available
 - Chat
@@ -78,6 +78,14 @@ Use the following checklist to track your progress through the test plan:
 - Edit
   - [ ] Not available
 
+## Authentication
+
+- [ ] Opening Cody: Go to `View` > `Other Windows` > `Cody Chat`
+- [ ] Verify the Cody window opens with the Sign in page if you are not logged in.
+- [ ] Verify the Cody window opens with the `Chat` tab selected if you are logged in.
+- [ ] Close the Cody window using the `X` button in the upper right corner
+- [ ] Verify that pressing `Alt + L` reopens Cody
+
 ## Autocomplete
 
 Verify that Autocomplete is not available (expected behavior).
@@ -89,13 +97,6 @@ The Chat feature in Cody allows users to interact with the AI to get codebase-re
 ### Chat View
 
 The Chat View is the primary interface for this interaction.
-
-#### Opening and Closing
-
-- [ ] Open Cody chat window: Go to `View` > `Other Windows` > `Cody Chat`
-- [ ] Verify the chat window opens with the `Chat` tab selected
-- [ ] Close the chat window using the `X` button in the upper right corner
-- [ ] Verify that pressing `Alt + L` reopens the chat window
 
 #### Basic Functionality
 
@@ -169,6 +170,10 @@ Prerequisites:
 - [ ] Confirm the "Manage Subscription" button links to the subscription page.
 - [ ] Test the "Sign Out" button in the "Account" tab.
 - [ ] Verify that signing out redirects to the sign-in page.
+
+##### Known Limitations
+
+- Switch Account button does not work.
 
 #### Enterprise User Experience
 
