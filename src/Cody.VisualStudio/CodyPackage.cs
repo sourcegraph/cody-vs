@@ -17,6 +17,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
@@ -79,6 +80,7 @@ namespace Cody.VisualStudio
         public IWebViewsManager WebViewsManager;
         public IProgressService ProgressService;
         public IAgentProxy AgentClient;
+        public ISecretStorageService SecretStorageService;
 
         public GeneralOptionsViewModel GeneralOptionsViewModel;
         public MainViewModel MainViewModel;
@@ -125,7 +127,10 @@ namespace Cody.VisualStudio
             SolutionService = new SolutionService(vsSolution);
             VersionService = loggerFactory.GetVersionService();
             VsVersionService = new VsVersionService(Logger);
-            UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), Logger);
+
+            var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
+            SecretStorageService = new SecretStorageService(vsSecretStorage);
+            UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
             UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
             StatusbarService = new StatusbarService();
@@ -134,7 +139,7 @@ namespace Cody.VisualStudio
             FileService = new FileService(this, Logger);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 

@@ -5,6 +5,7 @@ using Cody.Core.Settings;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
+using Cody.Core.Infrastructure;
 
 namespace Cody.Core.Agent
 {
@@ -13,6 +14,7 @@ namespace Cody.Core.Agent
         private readonly WebviewMessageHandler _messageFilter;
         private readonly IUserSettingsService _settingsService;
         private readonly IFileService _fileService;
+        private readonly ISecretStorageService _secretStorage;
         private readonly ILog _logger;
 
         public IAgentService agentClient;
@@ -27,10 +29,11 @@ namespace Cody.Core.Agent
 
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
-        public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService)
+        public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService, ISecretStorageService secretStorage)
         {
             _settingsService = settingsService;
             _fileService = fileService;
+            _secretStorage = secretStorage;
             _logger = logger;
             _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
         }
@@ -187,6 +190,27 @@ namespace Cody.Core.Agent
         public Task<string> ShowSaveDialog(SaveDialogOptionsParams paramValues)
         {
             return Task.FromResult("Not Yet Implemented");
+        }
+
+        [AgentCallback("secrets/get")]
+        public Task<string> SecretGet(string key)
+        {
+            _logger.Debug(key, $@"SecretGet - {key}");
+            return Task.FromResult(_secretStorage.Get(key));
+        }
+
+        [AgentCallback("secrets/store")]
+        public void SecretStore(string key, string value)
+        {
+            _logger.Debug(key, $@"SecretStore - {key}");
+            _secretStorage.Set(key, value);
+        }
+
+        [AgentCallback("secrets/delete")]
+        public void SecretDelete(string key)
+        {
+            _logger.Debug(key, $@"SecretDelete - {key}");
+            _secretStorage.Delete(key);
         }
     }
 }

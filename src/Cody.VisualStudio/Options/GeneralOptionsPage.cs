@@ -58,10 +58,10 @@ namespace Cody.VisualStudio.Options
             _logger.Debug($"Settings page activated.");
 
 
-            var accessToken = _settingsService.AccessToken;
+            var codyConfig = _settingsService.CodySettings;
             var sourcegraphUrl = _settingsService.ServerEndpoint;
 
-            _generalOptionsViewModel.AccessToken = accessToken;
+            _generalOptionsViewModel.CodyConfigurations = codyConfig;
             _generalOptionsViewModel.SourcegraphUrl = sourcegraphUrl;
 
             _logger.Debug($"Is canceled:{e.Cancel}");
@@ -72,10 +72,10 @@ namespace Cody.VisualStudio.Options
         {
             _logger.Debug($"{args.ApplyBehavior}");
 
-            var accessToken = _generalOptionsViewModel.AccessToken;
+            var codyConfig = _generalOptionsViewModel.CodyConfigurations;
             var sourcegraphUrl = _generalOptionsViewModel.SourcegraphUrl;
 
-            _settingsService.AccessToken = accessToken;
+            _settingsService.CodySettings = codyConfig;
             _settingsService.ServerEndpoint = sourcegraphUrl;
         }
 
@@ -95,7 +95,7 @@ namespace Cody.VisualStudio.Options
 
         public override void ResetSettings()
         {
-            _settingsService.AccessToken = string.Empty;
+            _settingsService.CodySettings = string.Empty;
             _settingsService.ServerEndpoint = string.Empty;
 
             base.ResetSettings();

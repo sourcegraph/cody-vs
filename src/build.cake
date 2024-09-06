@@ -24,7 +24,7 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "5bb199df24ceb3668a02e80c08fead2f65720d15";
+var codyCommit = "9a7e712ffce1b90bf2627dd528a68a803b7959ee";
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 

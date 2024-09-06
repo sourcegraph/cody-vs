@@ -43,6 +43,7 @@ namespace Cody.Core.Agent
                 WorkspaceRootUri = solutionService.GetSolutionDirectory(),
                 Capabilities = new ClientCapabilities
                 {
+                    Authentication = Capability.Enabled,
                     Completions = "none",
                     Edit = Capability.None,
                     EditWorkspace = Capability.None,
@@ -60,6 +61,7 @@ namespace Cody.Core.Agent
                     },
                     WebviewMessages = "string-encoded",
                     GlobalState = "server-managed",
+                    Secrets = "client-managed",
                 },
                 ExtensionConfiguration = GetConfiguration()
             };

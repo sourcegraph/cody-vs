@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
@@ -20,15 +20,15 @@ namespace Cody.UI.ViewModels
         private DelegateCommand _getTokenCommand;
         public DelegateCommand ActivateBetaCommand
         {
-            get { return _getTokenCommand = _getTokenCommand ?? new DelegateCommand(GetTokenCommandHandler); }
+            get { return _getTokenCommand = _getTokenCommand ?? new DelegateCommand(GetHelpCommandHandler); }
         }
 
-        private void GetTokenCommandHandler()
+        private void GetHelpCommandHandler()
         {
             var uri = string.Empty;
             try
             {
-                uri = new Uri("https://sourcegraph.com/user/settings/tokens").AbsoluteUri;
+                uri = new Uri("https://community.sourcegraph.com/").AbsoluteUri;
                 Process.Start(new ProcessStartInfo(uri));
             }
             catch(Exception ex)
@@ -37,16 +37,16 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        private string _accessToken;
+        private string _codyConfig;
 
-        public string AccessToken
+        public string CodyConfigurations
         {
-            get => _accessToken;
+            get => _codyConfig;
             set
             {
-                if (SetProperty(ref _accessToken, value))
+                if (SetProperty(ref _codyConfig, value))
                 {
-                    _logger.Debug($"Access Token set:{AccessToken}");
+                    _logger.Debug($"Cody Configurations set:{CodyConfigurations}");
                 }
 
             }
