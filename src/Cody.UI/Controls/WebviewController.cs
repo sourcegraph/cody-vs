@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Cody.Core.Logging;
 
 namespace Cody.UI.Controls
 {
@@ -15,6 +16,8 @@ namespace Cody.UI.Controls
         private string _colorThemeScript;
 
         private ICommand _sendMessageCommand;
+
+        private ILog _logger;
 
         public WebviewController()
         {
@@ -135,10 +138,27 @@ namespace Cody.UI.Controls
         public void SetThemeScript(string colorThemeScript)
         {
             _colorThemeScript = colorThemeScript;
-            // We might want to apply the theme immediately if the webview is already loaded.
-            // if (_webview.CoreWebView2.IsDocumentOpen) {
-            //     _ = ApplyThemingScript(); 
-            // }
+        }
+
+        public async void OnThemeChanged(object sender, IColorThemeChangedEvent e)
+        {
+            try
+            {
+                string updatedScript = e.ThemingScript;
+                if (updatedScript != _colorThemeScript)
+                {
+                    _logger.Debug("Applying VS theme change to WebView ...");
+
+                    SetThemeScript(updatedScript);
+                    await ApplyThemingScript();
+
+                    _logger.Debug("Theme change applied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Applying theme change to WebView failed.", ex);
+            }
         }
 
         public void SetHtml(string html)
@@ -189,9 +209,16 @@ namespace Cody.UI.Controls
         ";
 
         private static string GetThemeScript(string colorTheme) => $@"
-            document.documentElement.dataset.ide = 'VisualStudio';
-
-            {colorTheme}
+            (function() {{
+                document.documentElement.dataset.ide = 'VisualStudio';
+                document.documentElement.style = '';
+                {colorTheme}
+            }})();
         ";
+
+        public void SetLogger(ILog logger)
+        {
+            _logger = logger;
+        }
     }
 }

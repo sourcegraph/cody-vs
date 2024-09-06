@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- The chat view style now updates to match the theme of the editor on theme change. [pull/85](https://github.com/sourcegraph/cody-vs/pull/85)
+
 ### Changed
 
 ### Deprecated
