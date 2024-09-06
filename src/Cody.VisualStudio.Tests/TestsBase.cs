@@ -45,7 +45,7 @@ namespace Cody.VisualStudio.Tests
         protected async Task WaitForAsync(Func<bool> condition)
         {
             var startTime = DateTime.Now;
-            var timeout = TimeSpan.FromMinutes(10);
+            var timeout = TimeSpan.FromMinutes(1);
             while (!condition.Invoke())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
