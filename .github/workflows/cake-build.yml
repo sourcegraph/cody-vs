@@ -17,14 +17,14 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.3
 
+    - name: ⚙️ Prepare Visual Studio
+      run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings /Command File.Exit'
+
     - name: Install Cake.Tool
       run: dotnet tool install --global Cake.Tool
 
     - name: Restore NuGet packages
       run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
-
-    - name: ⚙️ Prepare Visual Studio
-      run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings /Command File.Exit'
 
     - name: Build Release
       run: |
