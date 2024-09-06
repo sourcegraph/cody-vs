@@ -82,6 +82,7 @@
     <Compile Include="Agent\WebviewMessageHandler.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
+    <Compile Include="Logging\ITestLogger.cs" />
     <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\WebViewsManager.cs" />

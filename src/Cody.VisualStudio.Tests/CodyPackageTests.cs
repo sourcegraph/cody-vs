@@ -1,8 +1,4 @@
-using System;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Navigation;
-using Cody.UI.ViewModels;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,7 +10,7 @@ namespace Cody.VisualStudio.Tests
         {
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task CodyPackage_Loaded_OnDemand()
         {
             // given
@@ -25,7 +21,7 @@ namespace Cody.VisualStudio.Tests
             Assert.NotNull(codyPackage);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Logger_Initialized_And_Info_MethodCalled()
         {
             // given
@@ -40,7 +36,7 @@ namespace Cody.VisualStudio.Tests
             // then
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task CodyToolWindow_Activated()
         {
             // given

@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using Cody.Core.Logging;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -10,7 +11,7 @@ using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
 {
-    public abstract class TestsBase
+    public abstract class TestsBase : ITestLogger
     {
         private readonly ITestOutputHelper _logger;
 
@@ -23,11 +24,9 @@ namespace Cody.VisualStudio.Tests
             WriteLog("[TestBase] Initialized.");
         }
 
-        protected void WriteLog(string message, [CallerMemberName] string callerName = "")
+        public void WriteLog(string message, string type = "", [CallerMemberName] string callerName = "")
         {
-            _logger.WriteLine($"[{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
-
-            CodyPackage?.Logger.Debug(message, callerName);
+            _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
         }
 
         protected async Task<CodyPackage> GetPackageAsync()
@@ -37,6 +36,8 @@ namespace Cody.VisualStudio.Tests
             var codyPackage = (CodyPackage)await shell.LoadPackageAsync(new Guid(guid)); // forces to load CodyPackage, even when the Tool Window is not selected
 
             CodyPackage = codyPackage;
+            var logger = (Logger)CodyPackage.Logger;
+            logger.WithTestLogger(this);
 
             return codyPackage;
         }
