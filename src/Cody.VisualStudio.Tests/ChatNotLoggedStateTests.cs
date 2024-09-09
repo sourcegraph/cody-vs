@@ -14,16 +14,15 @@ namespace Cody.VisualStudio.Tests
         }
 
         // WIP
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Loads_Properly_InNotLoggedState()
         {
             // given
-            await GetPackageAsync();
-            CodyPackage.ShowOptionPage(typeof(GeneralOptionsPage));
-            await Task.Delay(TimeSpan.FromSeconds(1)); // HACK: properly wait for Options page
+            var codyPackage = await GetPackageAsync();
+            var settingsService = codyPackage.UserSettingsService;
+            var accessToken = codyPackage.UserSettingsService.AccessToken;
 
-            var accessToken = CodyPackage.GeneralOptionsViewModel.AccessToken;
-            CodyPackage.GeneralOptionsViewModel.AccessToken = $"{accessToken}INVALID"; // make it invalid
+            codyPackage.UserSettingsService.AccessToken = "";
 
             await WaitForPlaywrightAsync();
             
@@ -33,7 +32,7 @@ namespace Cody.VisualStudio.Tests
             var getStarted = Page.GetByText(text);
             var textContents = await getStarted.AllTextContentsAsync();
 
-            CodyPackage.GeneralOptionsViewModel.AccessToken = $"{accessToken}"; // make it valid
+            settingsService.AccessToken = accessToken; // make it valid
 
             // then
             Assert.Equal(text, textContents.First());

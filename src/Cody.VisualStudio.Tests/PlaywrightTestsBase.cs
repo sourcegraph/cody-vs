@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
@@ -12,12 +13,15 @@ namespace Cody.VisualStudio.Tests
     {
         protected string CdpAddress = $"http://localhost:{9222}";
         
-        protected IPlaywright Playwright;
-        protected IBrowser Browser;
+        protected static IPlaywright Playwright;
+        protected static IBrowser Browser;
         
-        protected IBrowserContext Context;
+        protected static IBrowserContext Context;
 
-        protected IPage Page;
+        protected static IPage Page;
+
+        private static SemaphoreSlim _sync = new SemaphoreSlim(1);
+        private static bool _isInitialized;
 
         protected PlaywrightTestsBase(ITestOutputHelper output) : base(output)
         {
@@ -25,6 +29,13 @@ namespace Cody.VisualStudio.Tests
 
         private async Task InitializeAsync()
         {
+            await _sync.WaitAsync();
+            if (_isInitialized)
+            {
+                WriteLog("PlaywrightTestsBase already initialized!");
+                return;
+            }
+
             await DismissStartWindow();
 
             CodyPackage = await GetPackageAsync();
@@ -42,6 +53,10 @@ namespace Cody.VisualStudio.Tests
 
             Context = Browser.Contexts[0];
             Page = Context.Pages[0];
+
+            _isInitialized = true;
+            _sync.Release();
+
         }
 
         protected async Task WaitForPlaywrightAsync()
