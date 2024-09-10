@@ -65,7 +65,7 @@ namespace Cody.VisualStudio.Tests
             await Task.Delay(500);
         }
 
-        protected async Task<string[]> GetTodaysChatHistory()
+        protected async Task<string[]> GetTodayChatHistory()
         {
             var todaySection = await Page.QuerySelectorAsync("div[id='radix-:r11:']") ??
                 await Page.QuerySelectorAsync("div[id='radix-:r1b:']");
