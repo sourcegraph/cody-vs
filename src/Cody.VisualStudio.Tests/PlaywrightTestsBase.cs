@@ -30,33 +30,39 @@ namespace Cody.VisualStudio.Tests
         private async Task InitializeAsync()
         {
             await _sync.WaitAsync();
-            if (_isInitialized)
+
+            try
             {
-                WriteLog("PlaywrightTestsBase already initialized!");
-                return;
+                if (_isInitialized)
+                {
+                    WriteLog("PlaywrightTestsBase already initialized!");
+                    return;
+                }
+
+                await DismissStartWindow();
+
+                CodyPackage = await GetPackageAsync();
+                WriteLog("CodyPackage loaded.");
+
+                await WaitForChat();
+                WriteLog("Chat initialized and loaded.");
+
+                Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+                WriteLog("Playwright created.");
+
+                Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
+
+                WriteLog("Playwright connected to the browser.");
+
+                Context = Browser.Contexts[0];
+                Page = Context.Pages[0];
+
+                _isInitialized = true;
             }
-
-            await DismissStartWindow();
-
-            CodyPackage = await GetPackageAsync();
-            WriteLog("CodyPackage loaded.");
-
-            await WaitForChat();
-            WriteLog("Chat initialized and loaded.");
-
-            Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
-            WriteLog("Playwright created.");
-
-            Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
-
-            WriteLog("Playwright connected to the browser.");
-
-            Context = Browser.Contexts[0];
-            Page = Context.Pages[0];
-
-            _isInitialized = true;
-            _sync.Release();
-
+            finally
+            {
+                _sync.Release();
+            }
         }
 
         protected async Task WaitForPlaywrightAsync()

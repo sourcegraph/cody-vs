@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cody.VisualStudio.Options;
@@ -22,17 +23,23 @@ namespace Cody.VisualStudio.Tests
             var settingsService = codyPackage.UserSettingsService;
             var accessToken = codyPackage.UserSettingsService.AccessToken;
 
-            codyPackage.UserSettingsService.AccessToken = "";
-
-            await WaitForPlaywrightAsync();
-            
-
-            // when
             var text = "Cody Free or Cody Pro";
-            var getStarted = Page.GetByText(text);
-            var textContents = await getStarted.AllTextContentsAsync();
+            IReadOnlyList<string> textContents;
+            try
+            {
+                await WaitForPlaywrightAsync();
+                codyPackage.UserSettingsService.AccessToken += "INVALID";
+                await Task.Delay(TimeSpan.FromMilliseconds(500)); // wait for the Chat to response
 
-            settingsService.AccessToken = accessToken; // make it valid
+                // when
+
+                var getStarted = Page.GetByText(text);
+                textContents = await getStarted.AllTextContentsAsync();
+            }
+            finally
+            {
+                settingsService.AccessToken = accessToken; // make it valid
+            }
 
             // then
             Assert.Equal(text, textContents.First());
