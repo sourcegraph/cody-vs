@@ -84,9 +84,11 @@ namespace Cody.UI.Controls
             try
             {
                 Logger?.Debug("Initializing ...");
-
-                var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Cody");
+                var codyDir = "Cody";
+#if DEBUG
+                codyDir = "Cody\\Debug";
+#endif
+                var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), codyDir);
                 var options = new CoreWebView2EnvironmentOptions
                 {
 #if DEBUG
