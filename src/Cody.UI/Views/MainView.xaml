@@ -6,6 +6,10 @@
              xmlns:local="clr-namespace:Cody.UI.Views"
              xmlns:controls="clr-namespace:Cody.UI.Controls"
              xmlns:converters="clr-namespace:Cody.UI.Converters"
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+             Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
+             FontSize="{DynamicResource {x:Static vsshell:VsFonts.CaptionFontSizeKey}}"
              mc:Ignorable="d" 
              d:DesignHeight="750" 
              d:DesignWidth="400"
@@ -14,10 +18,8 @@
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Foreground="{Binding TextColor}"
             TextAlignment="Center"
-            Text="Loading Cody Chat ..."
-            FontSize="16"
+            Text="Loading Cody chat..."
             />
             <controls:WebView2Dev 
                 Html="{Binding Html}"

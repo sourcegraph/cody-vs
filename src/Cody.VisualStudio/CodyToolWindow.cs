@@ -5,9 +5,6 @@ using Cody.UI.ViewModels;
 using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.PlatformUI;
-using System.Windows.Media;
-using System.Drawing;
 
 #pragma warning disable VSTHRD010
 
@@ -42,12 +39,8 @@ namespace Cody.VisualStudio
             var logger = package.Logger;
             var notificationsHandlers = package.NotificationHandlers;
             var webViewsManager = package.WebViewsManager;
-
-            // TODO: move to ThemeService and inject it to MainViewModel
-            var textColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowTextColorKey);
-            var wpfTextColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(textColor.R, textColor.G, textColor.B));
             
-            var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, wpfTextColor, logger);
+            var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, logger);
             var view = new MainView
             {
                 DataContext = viewModel
