@@ -1,6 +1,5 @@
-using EnvDTE;
-using Microsoft.VisualStudio.Shell;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -13,12 +12,27 @@ namespace Cody.VisualStudio.Tests
         public async Task Loads_Properly_InLoggedState()
         {
             // given
-            await WaitForPlaywrightAsync();
+            var codyPackage = await GetPackageAsync();
+            var settingsService = codyPackage.UserSettingsService;
+            var accessToken = codyPackage.UserSettingsService.AccessToken;
 
-            // when
-            var text = "Prompts & Commands";
-            var getStarted = Page.GetByText(text);
-            var textContents = await getStarted.AllTextContentsAsync();
+            var text = "Cody Free or Cody Pro";
+            IReadOnlyList<string> textContents;
+            try
+            {
+                await WaitForPlaywrightAsync();
+                codyPackage.UserSettingsService.AccessToken += "INVALID";
+                await Task.Delay(TimeSpan.FromMilliseconds(500)); // wait for the Chat to response
+
+                // when
+
+                var getStarted = Page.GetByText(text);
+                textContents = await getStarted.AllTextContentsAsync();
+            }
+            finally
+            {
+                settingsService.AccessToken = accessToken; // make it valid
+            }
 
             // then
             Assert.Equal(text, textContents.First());
