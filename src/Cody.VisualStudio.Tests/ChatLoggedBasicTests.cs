@@ -39,30 +39,37 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Solution_name_is_added_to_chat_input()
+        public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
+            // given
             OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await WaitForPlaywrightAsync();
 
+            // when
             var tags = await GetChatContextTags();
 
-            Assert.Equal("ConsoleApp1", tags.First().Name);
+            // then
+            Assert.Equal("ConsoleApp1", tags.Last().Name);
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Active_file_name_and_line_selection_is_showing_in_chat_input()
+        public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
-            const int startLine = 3; const int endLine = 5;
-
+            // given
             OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await WaitForPlaywrightAsync();
 
+            // when
+            const int startLine = 3; const int endLine = 5;
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"), startLine, endLine);
             var tags = await GetChatContextTags();
 
-            Assert.Equal("Manager.cs", tags.Last().Name);
-            Assert.Equal(startLine, tags.Last().StartLine);
-            Assert.Equal(endLine, tags.Last().EndLine);
+            // then
+            var firstTagName = tags.First().Name;
+            var secondTag = tags.ElementAt(1);
+            Assert.Equal("Manager.cs", firstTagName);
+            Assert.Equal(startLine, secondTag.StartLine);
+            Assert.Equal(endLine, secondTag.EndLine);
         }
 
         [VsFact(Version = VsVersion.VS2022)]
