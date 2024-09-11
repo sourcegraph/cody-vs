@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Documents;
+using EnvDTE;
+using EnvDTE80;
 using Microsoft.Playwright;
-using Xunit;
+using Microsoft.VisualStudio.Shell;
 using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
@@ -27,6 +27,8 @@ namespace Cody.VisualStudio.Tests
 
         private async Task InitializeAsync()
         {
+            await DismissStartWindow();
+
             CodyPackage = await GetPackageAsync();
             CodyPackage.Logger.Debug("CodyPackage loaded.");
 
@@ -45,6 +47,33 @@ namespace Cody.VisualStudio.Tests
         protected async Task WaitForPlaywrightAsync()
         {
             await InitializeAsync();
+        }
+
+        protected async Task DismissStartWindow()
+        {
+            await OnUIThread(() =>
+            {
+                try
+                {
+                    var dte = (DTE2)Package.GetGlobalService(typeof(DTE));
+                    var mainWindow = dte.MainWindow;
+                    if (!mainWindow.Visible) // Options -> General -> On Startup open: Start Window
+                    {
+                        WriteLog("Main IDE Window NOT visible! Bringing it to the front ...");
+                        mainWindow.Visible = true;
+                        WriteLog("Main IDE Window is now VISIBLE.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var message = "Cannot get MainWindow visible!";
+                    WriteLog(message);
+
+                    throw new Exception($"{message}", ex);
+                }
+
+                return Task.CompletedTask;
+            });
         }
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();

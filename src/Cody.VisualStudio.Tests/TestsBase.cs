@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
+using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -31,7 +32,7 @@ namespace Cody.VisualStudio.Tests
         }
         protected void WriteLog(string message, [CallerMemberName] string callerName = "")
         {
-            _logger.WriteLine($"[{callerName}] {message}");
+            _logger.WriteLine($"[{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
         }
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);
