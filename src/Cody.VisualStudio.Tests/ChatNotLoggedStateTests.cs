@@ -3,11 +3,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Cody.VisualStudio.Options;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
     public class ChatNotLoggedStateTests : PlaywrightTestsBase
     {
+        public ChatNotLoggedStateTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         // WIP
         //[VsFact(Version = VsVersion.VS2022)]
         public async Task Loads_Properly_InNotLoggedState()

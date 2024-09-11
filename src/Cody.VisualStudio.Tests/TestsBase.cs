@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using EnvDTE;
@@ -6,19 +7,31 @@ using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
     public abstract class TestsBase
     {
+        private readonly ITestOutputHelper _logger;
+
         protected CodyPackage CodyPackage;
+
         protected IVsUIShell UIShell;
         protected DTE2 Dte;
 
-        public TestsBase()
+        public TestsBase(ITestOutputHelper output)
         {
+            _logger = output;
+
+            WriteLog("[TestBase] Initialized.");
+
             Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
             UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
+        }
+        protected void WriteLog(string message, [CallerMemberName] string callerName = "")
+        {
+            _logger.WriteLine($"[{callerName}] {message}");
         }
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);

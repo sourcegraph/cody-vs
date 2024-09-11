@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using Microsoft.Playwright;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -19,6 +20,10 @@ namespace Cody.VisualStudio.Tests
         protected IBrowserContext Context;
 
         protected IPage Page;
+
+        protected PlaywrightTestsBase(ITestOutputHelper output) : base(output)
+        {
+        }
 
         private async Task InitializeAsync()
         {

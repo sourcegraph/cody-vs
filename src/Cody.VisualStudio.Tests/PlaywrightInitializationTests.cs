@@ -1,11 +1,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
     public class PlaywrightInitializationTests : PlaywrightTestsBase
     {
+        public PlaywrightInitializationTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
         [VsFact(Version = VsVersion.VS2022)]
         public async Task Playwright_Connects_OvercCDP()
