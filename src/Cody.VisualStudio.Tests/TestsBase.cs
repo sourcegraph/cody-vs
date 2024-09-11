@@ -103,14 +103,28 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForAsync(Func<bool> condition)
         {
+            var startTime = DateTime.Now;
+            var timeout = TimeSpan.FromMinutes(2);
             while (!condition.Invoke())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
-                CodyPackage.Logger.Debug($"Chat not loaded ...");
+                WriteLog("Chat not loaded ...");
+
+                var nowTime = DateTime.Now;
+                var currentSpan = nowTime - startTime;
+                if (currentSpan >= timeout)
+                {
+                    var message = $"Chat timeout! It's loading for more than {currentSpan.TotalSeconds} s.";
+                    WriteLog(message);
+                    throw new Exception(message);
+                }
             }
 
-            CodyPackage.Logger.Debug($"Chat loaded.");
+            if (condition.Invoke())
+            {
+                WriteLog($"Condition meet.");
+            }
         }
 
         protected async Task OnUIThread(Func<Task> task)
@@ -123,15 +137,17 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForChat()
         {
+            WriteLog("Waiting for the Chat ...");
+
             bool isChatLoaded = false;
             await CodyPackage.ShowToolWindowAsync();
+            WriteLog("ShowToolWindowAsync called.");
 
             var viewModel = CodyPackage.MainViewModel;
             await WaitForAsync(() => viewModel.IsChatLoaded);
 
             isChatLoaded = viewModel.IsChatLoaded;
-            CodyPackage.Logger.Debug($"Chat loaded:{isChatLoaded}");
-           
+            WriteLog($"Chat loaded:{isChatLoaded}");
         }
     }
 }
