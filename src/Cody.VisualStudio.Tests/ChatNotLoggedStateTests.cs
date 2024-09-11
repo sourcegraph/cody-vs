@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cody.VisualStudio.Options;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,27 +13,31 @@ namespace Cody.VisualStudio.Tests
         {
         }
 
-        // WIP
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Loads_Properly_InNotLoggedState()
         {
             // given
-            await GetPackageAsync();
-            CodyPackage.ShowOptionPage(typeof(GeneralOptionsPage));
-            await Task.Delay(TimeSpan.FromSeconds(1)); // HACK: properly wait for Options page
-            // TODO: Replace SourcegraphUrl with Token value
-            var accessToken = CodyPackage.GeneralOptionsViewModel.SourcegraphUrl;
-            CodyPackage.GeneralOptionsViewModel.SourcegraphUrl = $"{accessToken}INVALID"; // make it invalid
+            var codyPackage = await GetPackageAsync();
+            var settingsService = codyPackage.UserSettingsService;
+            var accessToken = codyPackage.UserSettingsService.AccessToken;
 
-            await WaitForPlaywrightAsync();
-            
-
-            // when
             var text = "Cody Free or Cody Pro";
-            var getStarted = Page.GetByText(text);
-            var textContents = await getStarted.AllTextContentsAsync();
+            IReadOnlyList<string> textContents;
+            try
+            {
+                await WaitForPlaywrightAsync();
+                codyPackage.UserSettingsService.AccessToken += "INVALID";
+                await Task.Delay(TimeSpan.FromMilliseconds(500)); // wait for the Chat to response
 
-            CodyPackage.GeneralOptionsViewModel.SourcegraphUrl = $"{accessToken}"; // make it valid
+                // when
+
+                var getStarted = Page.GetByText(text);
+                textContents = await getStarted.AllTextContentsAsync();
+            }
+            finally
+            {
+                settingsService.AccessToken = accessToken; // make it valid
+            }
 
             // then
             Assert.Equal(text, textContents.First());
