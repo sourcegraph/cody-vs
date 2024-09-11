@@ -12,8 +12,8 @@ namespace Cody.VisualStudio.Tests
 {
     public abstract class PlaywrightTestsBase: TestsBase
     {
-        protected string CdpAddress = $"http://127.0.0.1:{9222}";
-        
+        protected string CdpAddress = $"http://localhost:{9222}";
+
         protected IPlaywright Playwright;
         protected IBrowser Browser;
         
