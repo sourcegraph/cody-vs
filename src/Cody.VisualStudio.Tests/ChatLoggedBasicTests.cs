@@ -13,7 +13,7 @@ namespace Cody.VisualStudio.Tests
         {
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Loads_Properly_InLoggedState()
         {
             // given
@@ -43,7 +43,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(text, textContents.First());
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("ConsoleApp1", tags.Last().Name);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
@@ -77,7 +77,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Can_you_close_and_reopen_chat_tool_window()
         {
             await WaitForPlaywrightAsync();

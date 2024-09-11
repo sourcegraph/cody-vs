@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
@@ -14,12 +15,15 @@ namespace Cody.VisualStudio.Tests
     {
         protected string CdpAddress = $"http://localhost:{9222}";
 
-        protected IPlaywright Playwright;
-        protected IBrowser Browser;
-        
-        protected IBrowserContext Context;
+        protected static IPlaywright Playwright;
+        protected static IBrowser Browser;
 
-        protected IPage Page;
+        protected static IBrowserContext Context;
+
+        protected static IPage Page;
+
+        private static SemaphoreSlim _sync = new SemaphoreSlim(1);
+        private static bool _isInitialized;
 
         protected PlaywrightTestsBase(ITestOutputHelper output) : base(output)
         {
@@ -27,21 +31,40 @@ namespace Cody.VisualStudio.Tests
 
         private async Task InitializeAsync()
         {
-            await DismissStartWindow();
+            await _sync.WaitAsync();
 
-            CodyPackage = await GetPackageAsync();
-            CodyPackage.Logger.Debug("CodyPackage loaded.");
+            try
+            {
+                if (_isInitialized)
+                {
+                    WriteLog("PlaywrightTestsBase already initialized!");
+                    return;
+                }
 
-            await WaitForChat();
-            CodyPackage.Logger.Debug("Chat initialized and loaded.");
+                await DismissStartWindow();
 
-            Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
-            Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
+                CodyPackage = await GetPackageAsync();
+                WriteLog("CodyPackage loaded.");
 
-            CodyPackage.Logger.Debug("Playwright initialized.");
+                await WaitForChat();
+                WriteLog("Chat initialized and loaded.");
 
-            Context = Browser.Contexts[0];
-            Page = Context.Pages[0];
+                Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+                WriteLog("Playwright created.");
+
+                Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
+
+                WriteLog("Playwright connected to the browser.");
+
+                Context = Browser.Contexts[0];
+                Page = Context.Pages[0];
+
+                _isInitialized = true;
+            }
+            finally
+            {
+                _sync.Release();
+            }
         }
 
         protected async Task WaitForPlaywrightAsync()
