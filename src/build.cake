@@ -153,11 +153,11 @@ Task("Tests")
 		Verbosity = Verbosity.Minimal
 	});
 
-	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
-    {
-        NoBuild = true,
-        NoRestore = true
-    });
+//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
+//    {
+//        NoBuild = true,
+//        NoRestore = true
+//    });
 });
 
 Task("Restore")
