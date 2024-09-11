@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using Cody.Core.Logging;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
@@ -12,7 +13,7 @@ using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
 {
-    public abstract class TestsBase
+    public abstract class TestsBase: ITestLogger
     {
         private readonly ITestOutputHelper _logger;
 
@@ -30,9 +31,9 @@ namespace Cody.VisualStudio.Tests
             Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
             UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
         }
-        protected void WriteLog(string message, [CallerMemberName] string callerName = "")
+        public void WriteLog(string message, string type = "", [CallerMemberName] string callerName = "")
         {
-            _logger.WriteLine($"[{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
+            _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
         }
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);
@@ -94,7 +95,9 @@ namespace Cody.VisualStudio.Tests
             var codyPackage = (CodyPackage)await shell.LoadPackageAsync(new Guid(guid)); // forces to load CodyPackage, even when the Tool Window is not selected
 
             CodyPackage = codyPackage;
-            
+            var logger = (Logger)CodyPackage.Logger;
+            logger.WithTestLogger(this);
+
             return codyPackage;
         }
 
