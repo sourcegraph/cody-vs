@@ -1,45 +1,102 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Documents;
+using EnvDTE;
+using EnvDTE80;
 using Microsoft.Playwright;
-using Xunit;
+using Microsoft.VisualStudio.Shell;
+using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
     public abstract class PlaywrightTestsBase: TestsBase
     {
-        protected string CdpAddress = $"http://127.0.0.1:{9222}";
-        
-        protected IPlaywright Playwright;
-        protected IBrowser Browser;
-        
-        protected IBrowserContext Context;
+        protected string CdpAddress = $"http://localhost:{9222}";
 
-        protected IPage Page;
+        protected static IPlaywright Playwright;
+        protected static IBrowser Browser;
+
+        protected static IBrowserContext Context;
+
+        protected static IPage Page;
+
+        private static SemaphoreSlim _sync = new SemaphoreSlim(1);
+        private static bool _isInitialized;
+
+        protected PlaywrightTestsBase(ITestOutputHelper output) : base(output)
+        {
+        }
 
         private async Task InitializeAsync()
         {
-            CodyPackage = await GetPackageAsync();
-            CodyPackage.Logger.Debug("CodyPackage loaded.");
+            await _sync.WaitAsync();
 
-            await WaitForChat();
-            CodyPackage.Logger.Debug("Chat initialized and loaded.");
+            try
+            {
+                if (_isInitialized)
+                {
+                    WriteLog("PlaywrightTestsBase already initialized!");
+                    return;
+                }
 
-            Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
-            Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
+                await DismissStartWindow();
 
-            CodyPackage.Logger.Debug("Playwright initialized.");
+                CodyPackage = await GetPackageAsync();
+                WriteLog("CodyPackage loaded.");
 
-            Context = Browser.Contexts[0];
-            Page = Context.Pages[0];
+                await WaitForChat();
+                WriteLog("Chat initialized and loaded.");
+
+                Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+                WriteLog("Playwright created.");
+
+                Browser = await Playwright.Chromium.ConnectOverCDPAsync(CdpAddress);
+
+                WriteLog("Playwright connected to the browser.");
+
+                Context = Browser.Contexts[0];
+                Page = Context.Pages[0];
+
+                _isInitialized = true;
+            }
+            finally
+            {
+                _sync.Release();
+            }
         }
 
         protected async Task WaitForPlaywrightAsync()
         {
             await InitializeAsync();
+        }
+
+        protected async Task DismissStartWindow()
+        {
+            await OnUIThread(() =>
+            {
+                try
+                {
+                    var dte = (DTE2)Package.GetGlobalService(typeof(DTE));
+                    var mainWindow = dte.MainWindow;
+                    if (!mainWindow.Visible) // Options -> General -> On Startup open: Start Window
+                    {
+                        WriteLog("Main IDE Window NOT visible! Bringing it to the front ...");
+                        mainWindow.Visible = true;
+                        WriteLog("Main IDE Window is now VISIBLE.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var message = "Cannot get MainWindow visible!";
+                    WriteLog(message);
+
+                    throw new Exception($"{message}", ex);
+                }
+
+                return Task.CompletedTask;
+            });
         }
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
@@ -65,7 +122,7 @@ namespace Cody.VisualStudio.Tests
             await Task.Delay(500);
         }
 
-        protected async Task<string[]> GetTodaysChatHistory()
+        protected async Task<string[]> GetTodayChatHistory()
         {
             var todaySection = await Page.QuerySelectorAsync("div[id='radix-:r11:']") ??
                 await Page.QuerySelectorAsync("div[id='radix-:r1b:']");

@@ -1,4 +1,4 @@
-name: Cake Build
+﻿name: Cake Build
 
 on:
   push:
@@ -17,6 +17,9 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.3
 
+    - name: ⚙️ Prepare Visual Studio
+      run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
+
     - name: Install Cake.Tool
       run: dotnet tool install --global Cake.Tool
 
@@ -31,7 +34,8 @@ jobs:
         corepack install --global pnpm@8.6.7
         dotnet cake
 
-    #- name: Tests
-    #  run: |
-    #    cd src
-    #    dotnet cake --target Tests
+    - name: Tests
+      run: |
+        cd src
+        dotnet cake --target Tests
+        dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed

@@ -1,13 +1,14 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Cody.Core.Logging
 {
-    public class Logger: ILog
+    public class Logger : ILog
     {
         private IOutputWindowPane _outputWindowPane;
+        private ITestLogger _testLogger;
 
         public Logger()
         {
@@ -20,6 +21,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Info(customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Info(message, callerName);
+            _testLogger?.WriteLog(message, "INFO", callerName);
         }
 
         public void Debug(string message, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = null)
@@ -32,6 +34,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Debug(customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Debug(message, callerName);
+            _testLogger?.WriteLog(message, "DEBUG", callerName);
 #endif
         }
 
@@ -48,6 +51,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Warn(customMessage);
             DebugWrite(message);
             _outputWindowPane?.Warn(message, callerName);
+            _testLogger?.WriteLog(message, "WARN", callerName);
         }
 
         public void Error(string message, [CallerMemberName] string callerName = "")
@@ -57,6 +61,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Error(customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Error(message, callerName);
+            _testLogger?.WriteLog(message, "ERROR", callerName);
         }
 
         public void Error(string message, Exception ex, [CallerMemberName] string callerName = "")
@@ -77,11 +82,18 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Error(originalException, customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Error(outputMessage, callerName);
+            _testLogger?.WriteLog(message, "ERROR", callerName);
         }
 
         public Logger WithOutputPane(IOutputWindowPane outputWindowPane)
         {
             _outputWindowPane = outputWindowPane;
+            return this;
+        }
+
+        public Logger WithTestLogger(ITestLogger testLogger)
+        {
+            _testLogger = testLogger;
             return this;
         }
 

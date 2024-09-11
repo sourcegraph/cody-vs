@@ -1,25 +1,41 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using Cody.Core.Logging;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Xunit.Abstractions;
+using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
 {
-    public abstract class TestsBase
+    public abstract class TestsBase: ITestLogger
     {
-        protected CodyPackage CodyPackage;
-        protected IVsUIShell UIShell;
-        protected DTE2 Dte;
+        private readonly ITestOutputHelper _logger;
 
-        public TestsBase()
+        protected CodyPackage CodyPackage;
+
+        protected TestsBase(ITestOutputHelper output)
         {
-            Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
-            UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
+            _logger = output;
+
+            WriteLog("[TestBase] Initialized.");
         }
+
+        public void WriteLog(string message, string type = "", [CallerMemberName] string callerName = "")
+        {
+            _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
+        }
+
+        private IVsUIShell _uiShell;
+        protected IVsUIShell UIShell => _uiShell ?? (_uiShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell)));
+
+        private DTE2 _dte;
+        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(DTE)));
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);
 
@@ -80,20 +96,36 @@ namespace Cody.VisualStudio.Tests
             var codyPackage = (CodyPackage)await shell.LoadPackageAsync(new Guid(guid)); // forces to load CodyPackage, even when the Tool Window is not selected
 
             CodyPackage = codyPackage;
-            
+            var logger = (Logger)CodyPackage.Logger;
+            logger.WithTestLogger(this);
+
             return codyPackage;
         }
 
         protected async Task WaitForAsync(Func<bool> condition)
         {
+            var startTime = DateTime.Now;
+            var timeout = TimeSpan.FromMinutes(2);
             while (!condition.Invoke())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
-                CodyPackage.Logger.Debug($"Chat not loaded ...");
+                WriteLog("Chat not loaded ...");
+
+                var nowTime = DateTime.Now;
+                var currentSpan = nowTime - startTime;
+                if (currentSpan >= timeout)
+                {
+                    var message = $"Chat timeout! It's loading for more than {currentSpan.TotalSeconds} s.";
+                    WriteLog(message);
+                    throw new Exception(message);
+                }
             }
 
-            CodyPackage.Logger.Debug($"Chat loaded.");
+            if (condition.Invoke())
+            {
+                WriteLog($"Condition meet.");
+            }
         }
 
         protected async Task OnUIThread(Func<Task> task)
@@ -106,15 +138,17 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForChat()
         {
+            WriteLog("Waiting for the Chat ...");
+
             bool isChatLoaded = false;
             await CodyPackage.ShowToolWindowAsync();
+            WriteLog("ShowToolWindowAsync called.");
 
             var viewModel = CodyPackage.MainViewModel;
             await WaitForAsync(() => viewModel.IsChatLoaded);
 
             isChatLoaded = viewModel.IsChatLoaded;
-            CodyPackage.Logger.Debug($"Chat loaded:{isChatLoaded}");
-           
+            WriteLog($"Chat loaded:{isChatLoaded}");
         }
     }
 }
