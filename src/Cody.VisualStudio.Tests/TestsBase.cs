@@ -19,22 +19,23 @@ namespace Cody.VisualStudio.Tests
 
         protected CodyPackage CodyPackage;
 
-        protected IVsUIShell UIShell;
-        protected DTE2 Dte;
-
-        public TestsBase(ITestOutputHelper output)
+        protected TestsBase(ITestOutputHelper output)
         {
             _logger = output;
 
             WriteLog("[TestBase] Initialized.");
-
-            Dte = (DTE2)Package.GetGlobalService(typeof(DTE));
-            UIShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell));
         }
+
         public void WriteLog(string message, string type = "", [CallerMemberName] string callerName = "")
         {
             _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
         }
+
+        private IVsUIShell _uiShell;
+        protected IVsUIShell UIShell => _uiShell ?? (_uiShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell)));
+
+        private DTE2 _dte;
+        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(DTE)));
 
         protected void OpenSolution(string path) => Dte.Solution.Open(path);
 
