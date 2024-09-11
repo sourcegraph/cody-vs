@@ -36,7 +36,8 @@ namespace Cody.VisualStudio.Tests
             }
             finally
             {
-                settingsService.AccessToken = accessToken; // make it valid
+                if (accessToken != null)
+                    settingsService.AccessToken = accessToken; // make it valid
             }
 
             // then
