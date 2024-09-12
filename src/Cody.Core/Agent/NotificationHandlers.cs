@@ -26,6 +26,7 @@ namespace Cody.Core.Agent
 
         public event EventHandler<string> OnRegisterWebViewRequest;
         public event EventHandler OnOptionsPageShowRequest;
+        public event EventHandler OnFocusSidebarRequest;
 
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
@@ -211,6 +212,12 @@ namespace Cody.Core.Agent
         {
             _logger.Debug(key, $@"SecretDelete - {key}");
             _secretStorage.Delete(key);
+        }
+
+        [AgentCallback("window/focusSidebar")]
+        public void FocusSidebar(object param)
+        {
+            OnFocusSidebarRequest?.Invoke(this, EventArgs.Empty);
         }
     }
 }

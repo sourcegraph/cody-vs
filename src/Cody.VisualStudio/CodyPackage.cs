@@ -18,7 +18,6 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
-using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
@@ -33,8 +32,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Cody.UI.ViewModels;
+using EnvDTE;
+using EnvDTE80;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.TaskStatusCenter;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Cody.VisualStudio
 {
@@ -141,6 +143,9 @@ namespace Cody.VisualStudio
             ProgressService = new ProgressService(statusCenterService);
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
+            NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
+
+
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 
             var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
@@ -164,6 +169,22 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger.Error($"Navigation to '{nameof(GeneralOptionsPage)}' failed.", ex);
+            }
+        }
+
+        private void HandleOnFocusSidebarRequest(object sender, EventArgs e)
+        {
+            try
+            {
+                var dte = (DTE2)Package.GetGlobalService(typeof(DTE));
+                var mainWindow = dte.MainWindow;
+
+                mainWindow.Visible = true;
+                mainWindow.SetFocus();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed.", ex);
             }
         }
 
