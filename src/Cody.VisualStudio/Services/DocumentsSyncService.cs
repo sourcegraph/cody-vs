@@ -87,8 +87,15 @@ namespace Cody.VisualStudio.Services
             IVsTextView ppView = pvar as IVsTextView;
             if (ppView == null && pvar is IVsCodeWindow vsCodeWindow)
             {
-                if(vsCodeWindow.GetPrimaryView(out ppView) != 0)
-                    vsCodeWindow.GetSecondaryView(out ppView);
+                try
+                {
+                    if (vsCodeWindow.GetPrimaryView(out ppView) != 0)
+                        vsCodeWindow.GetSecondaryView(out ppView);
+                }
+                catch
+                {
+                    return null;
+                }
             }
 
             return ppView;
