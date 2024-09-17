@@ -67,6 +67,9 @@ namespace Cody.Core.Agent
             };
 
             var result = await client.Initialize(clientInfo);
+            log.Debug("Calling Initialize() on the agent finished.");
+
+            //needs to wait before calling ResolveWebviewView(), if not ResolveWebviewView() will fail
 
             if (result.Authenticated == true)
             {

@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Cody.Core.Agent;
+using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -13,6 +15,7 @@ namespace Cody.VisualStudio.Client
         private ILog agentLog;
         private IAgentConnector connector;
         private JsonRpc jsonRpc;
+        private IAgentService _proxy;
 
         public AgentClient(AgentClientOptions options, ILog log, ILog agentLog)
         {
@@ -22,6 +25,7 @@ namespace Cody.VisualStudio.Client
         }
 
         public bool IsConnected { get; private set; }
+        public bool IsInitialized { get; private set; }
 
         public void Start()
         {
@@ -52,8 +56,29 @@ namespace Cody.VisualStudio.Client
             }
 
             jsonRpc.StartListening();
-            IsConnected = true;
-            log.Info("A connection with the agent has been established.");
+        }
+
+        public async Task<IAgentService> Initialize(ClientInfo clientInfo)
+        {
+            CreateAgentService();
+
+            var initialize = await _proxy.Initialize(clientInfo);
+            IsInitialized = true;
+            log.Info("Agent initialized.");
+
+            if (initialize.Authenticated == true)
+            {
+                //StatusbarService.SetText($"Hello {initialize.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
+                log.Info("Authenticated.");
+            }
+            else
+            {
+                log.Warn("Authentication failed. Please check the validity of the access token.");
+            }
+
+            //_proxy.Initialized();
+
+            return _proxy;
         }
 
         private void OnDisconnected(object sender, JsonRpcDisconnectedEventArgs e)
@@ -61,10 +86,13 @@ namespace Cody.VisualStudio.Client
             log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
         }
 
-        public T CreateAgentService<T>() where T : class
+        private void CreateAgentService()
         {
-            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<T>() };
-            return jsonRpc.Attach<T>(proxyOptions);
+            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentService>() };
+            _proxy = jsonRpc.Attach<IAgentService>(proxyOptions);
+
+            IsConnected = true;
+            log.Info("A connection with the agent has been established.");
         }
 
         private void OnErrorReceived(object sender, string error)
