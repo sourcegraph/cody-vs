@@ -268,12 +268,27 @@ namespace Cody.VisualStudio
                 };
 
                 AgentClient = new AgentClient(options, Logger, AgentLogger);
+                AgentClient.OnInitialized += OnAgentInitialized;
 
                 WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed.", ex);
+            }
+        }
+
+        private void OnAgentInitialized(object sender, ServerInfo e)
+        {
+            if (e.Authenticated == true)
+            {
+                StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
+
+                Logger.Info("Authenticated.");
+            }
+            else
+            {
+                Logger.Warn("Authentication failed. Please check the validity of the access token.");
             }
         }
 

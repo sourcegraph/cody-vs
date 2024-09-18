@@ -95,17 +95,24 @@ namespace Cody.Core.Infrastructure
 
                                 try
                                 {
-                                    //_agentProxy.IsInitialized(), set to true after
-
+                                    var startTime = DateTime.Now;
+                                    var timeout = TimeSpan.FromMinutes(1);
                                     while (!_agentProxy.IsInitialized)
                                     {
                                         _logger.Debug("Waiting for Agent initialization ...");
-
                                         await Task.Delay(TimeSpan.FromSeconds(1));
+
+                                        var nowTime = DateTime.Now;
+                                        var currentSpan = nowTime - startTime;
+                                        if (currentSpan >= timeout)
+                                        {
+                                            var message = $"Agent initialization timeout! Waiting for more than {currentSpan.TotalSeconds} s.";
+                                            _logger.Error(message);
+
+                                            throw new Exception(message);
+                                        }
                                     }
 
-                                    //await Task.Delay(TimeSpan
-                                    //    .FromSeconds(2)); // HACK: TODO: IAgentProxy.IsConnected is not reliable
                                     await _agentService.ResolveWebviewView(new ResolveWebviewViewParams
                                     {
                                         // cody.chat for sidebar view, or cody.editorPanel for editor panel

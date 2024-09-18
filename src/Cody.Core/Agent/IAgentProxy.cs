@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Cody.Core.Agent.Protocol;
 
@@ -9,5 +10,6 @@ namespace Cody.Core.Agent
         bool IsInitialized { get; }
         void Start();
         Task<IAgentService> Initialize(ClientInfo clientInfo);
+        event EventHandler<ServerInfo> OnInitialized;
     }
 }

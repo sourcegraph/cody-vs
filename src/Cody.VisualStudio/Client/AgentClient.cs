@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
@@ -16,6 +17,8 @@ namespace Cody.VisualStudio.Client
         private IAgentConnector connector;
         private JsonRpc jsonRpc;
         private IAgentService _proxy;
+
+        public event EventHandler<ServerInfo> OnInitialized;
 
         public AgentClient(AgentClientOptions options, ILog log, ILog agentLog)
         {
@@ -66,17 +69,7 @@ namespace Cody.VisualStudio.Client
             IsInitialized = true;
             log.Info("Agent initialized.");
 
-            if (initialize.Authenticated == true)
-            {
-                //StatusbarService.SetText($"Hello {initialize.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
-                log.Info("Authenticated.");
-            }
-            else
-            {
-                log.Warn("Authentication failed. Please check the validity of the access token.");
-            }
-
-            //_proxy.Initialized();
+            OnInitialized?.Invoke(this, initialize);
 
             return _proxy;
         }
