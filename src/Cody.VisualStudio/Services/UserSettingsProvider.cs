@@ -17,7 +17,7 @@ namespace Cody.VisualStudio.Services
             _settingsManager = new ShellSettingsManager(serviceProvider);
             _userSettingsStore = _settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
 
-            if(!_userSettingsStore.CollectionExists(CollectionName))
+            if (!_userSettingsStore.CollectionExists(CollectionName))
                 _userSettingsStore.CreateCollection(CollectionName);
         }
 

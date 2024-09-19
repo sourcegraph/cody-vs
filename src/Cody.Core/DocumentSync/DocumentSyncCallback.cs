@@ -1,4 +1,4 @@
-﻿using Cody.Core.Agent;
+using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 using System;

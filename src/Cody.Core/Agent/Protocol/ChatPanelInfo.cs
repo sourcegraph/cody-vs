@@ -1,4 +1,4 @@
-﻿namespace Cody.Core.Agent.Protocol
+namespace Cody.Core.Agent.Protocol
 {
     public class ChatPanelInfo
     {

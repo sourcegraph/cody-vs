@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Cody.Core.Ide;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell.Interop;

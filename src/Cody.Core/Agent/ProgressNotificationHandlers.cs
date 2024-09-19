@@ -25,7 +25,7 @@ namespace Cody.Core.Agent
         public void Start(ProgressStartParams progressStart)
         {
             Action cancelAction = null;
-            if(progressStart.Options.Cancellable == true)
+            if (progressStart.Options.Cancellable == true)
             {
                 cancelAction = () => agentService.CancelProgress(progressStart.Id);
             };

@@ -13,7 +13,7 @@ using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
 {
-    public abstract class TestsBase: ITestLogger
+    public abstract class TestsBase : ITestLogger
     {
         private readonly ITestOutputHelper _logger;
 
@@ -85,7 +85,7 @@ namespace Cody.VisualStudio.Tests
         {
             var guid = new Guid(Guids.CodyChatToolWindowString);
             UIShell.FindToolWindow((uint)__VSFINDTOOLWIN.FTW_fFrameOnly, ref guid, out IVsWindowFrame windowFrame);
-            
+
             return windowFrame.IsVisible() == 0;
         }
 

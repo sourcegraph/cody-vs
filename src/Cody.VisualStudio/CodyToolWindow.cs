@@ -39,7 +39,7 @@ namespace Cody.VisualStudio
             var logger = package.Logger;
             var notificationsHandlers = package.NotificationHandlers;
             var webViewsManager = package.WebViewsManager;
-            
+
             var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, logger);
             var view = new MainView
             {
@@ -49,7 +49,7 @@ namespace Cody.VisualStudio
             package.MainViewModel = viewModel;
             package.MainView = view;
             base.Content = view;
-            
+
         }
 
         private CodyPackage GetPackage()

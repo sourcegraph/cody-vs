@@ -1,4 +1,4 @@
-﻿using Cody.Core.Logging;
+using Cody.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +43,7 @@ namespace Cody.AgentTester
         private void WriteToConsole(string prefix, string message, string callerName, Exception ex = null)
         {
             Console.WriteLine($"{prefix.ToUpper()} {callerName}: {message}");
-            if(ex != null) Console.WriteLine(ex.ToString());
+            if (ex != null) Console.WriteLine(ex.ToString());
         }
     }
 }

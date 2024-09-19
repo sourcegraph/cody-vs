@@ -108,7 +108,7 @@ namespace Cody.VisualStudio.Options
                 if (_control == null)
                 {
                     _logger.Debug("Creating options control ...");
-                    
+
                     _control = new GeneralOptionsControl();
                     _generalOptionsViewModel = new GeneralOptionsViewModel(_logger);
                     _control.DataContext = _generalOptionsViewModel;

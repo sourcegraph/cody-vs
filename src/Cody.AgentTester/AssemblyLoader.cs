@@ -70,10 +70,10 @@ namespace Cody.AgentTester
         private static string finalPath = null;
         private static string SelectStreamJsonRpcPath()
         {
-            if(!string.IsNullOrEmpty(finalPath)) return finalPath;
+            if (!string.IsNullOrEmpty(finalPath)) return finalPath;
 
             var vsPath = SelectInstallPath();
-            foreach(var folder in folders)
+            foreach (var folder in folders)
             {
                 var path = Path.Combine(vsPath, folder);
                 var libPath = Path.Combine(path, "StreamJsonRpc.dll");
