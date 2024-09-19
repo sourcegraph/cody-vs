@@ -53,7 +53,6 @@
     <Compile Include="Agent\AgentCallbackAttribute.cs" />
     <Compile Include="Agent\IAgentProxy.cs" />
     <Compile Include="Agent\IAgentService.cs" />
-    <Compile Include="Agent\InitializeCallback.cs" />
     <Compile Include="Agent\INotificationHandler.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />

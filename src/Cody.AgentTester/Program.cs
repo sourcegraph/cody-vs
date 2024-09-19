@@ -47,8 +47,6 @@ namespace Cody.AgentTester
 
             client.Start();
 
-            agentService = client.CreateAgentService<IAgentService>();
-
             await Initialize();
 
             Console.ReadKey();
@@ -97,8 +95,6 @@ namespace Cody.AgentTester
             };
 
             await agentService.Initialize(clientInfo);
-
-            agentService.Initialized();
         }
 
 

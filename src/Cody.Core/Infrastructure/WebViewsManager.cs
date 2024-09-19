@@ -21,6 +21,18 @@ namespace Cody.Core.Infrastructure
         WebChatHostInitialized
     }
 
+    public class WebViewEvent
+    {
+        public WebViewEvent(WebViewsEventTypes type, string viewId = null)
+        {
+            Type = type;
+            ViewId = viewId;
+        }
+
+        public WebViewsEventTypes Type { get;}
+        public string ViewId { get; }
+    }
+
     public class WebViewsManager : IWebViewsManager, IDisposable
     {
         private readonly IAgentProxy _agentProxy;
@@ -29,8 +41,9 @@ namespace Cody.Core.Infrastructure
         private readonly ILog _logger;
 
         private List<IWebChatHost> _chatHosts;
+        private List<WebViewEvent> _processedWebViewsRequests;
 
-        private readonly BlockingCollection<WebViewsEventTypes> _events; //TODO: when custom editors will be introduced, make it richer, like BlockingCollection<WebViewsEvents>, where WebViewsEvents will be a class
+        private readonly BlockingCollection<WebViewEvent> _events; //TODO: when custom editors will be introduced, make it richer, like BlockingCollection<WebViewsEvents>, where WebViewsEvents will be a class
 
         public WebViewsManager(IAgentProxy agentProxy, INotificationHandler notificationHandler, ILog logger)
         {
@@ -39,7 +52,8 @@ namespace Cody.Core.Infrastructure
             _logger = logger;
 
             _chatHosts = new List<IWebChatHost>();
-            _events = new BlockingCollection<WebViewsEventTypes>();
+            _events = new BlockingCollection<WebViewEvent>();
+            _processedWebViewsRequests = new List<WebViewEvent>();
 
             _notificationHandler.OnRegisterWebViewRequest += OnRegisterWebViewRequestHandler;
 
@@ -60,11 +74,14 @@ namespace Cody.Core.Infrastructure
                 {
                     var e = _events.Take(); // blocks until an item is available to be removed
 
-                    _logger.Debug($"Processing event '{e}' ...");
-                    if (e == WebViewsEventTypes.RegisterWebViewRequest
-                        || e == WebViewsEventTypes.WebChatHostInitialized
+                    _logger.Debug($"Processing event '{e.Type}' ...");
 
-                        )
+                    _processedWebViewsRequests.Add(e);
+                    _logger.Debug($"{e.Type}:{e.ViewId} added to processed collection.");
+
+                    var isRegisterWebViewRequestProcessed = _processedWebViewsRequests.Exists(w => w.Type == WebViewsEventTypes.RegisterWebViewRequest);
+                    var isWebChatHostInitialized = _processedWebViewsRequests.Exists(w => w.Type == WebViewsEventTypes.WebChatHostInitialized);
+                    if (isRegisterWebViewRequestProcessed && isWebChatHostInitialized)
                     {
                         // check if there is IWebChatHost available
                         var chatHost = _chatHosts.FirstOrDefault(); // TODO: modify when introducing custom editors
@@ -78,13 +95,24 @@ namespace Cody.Core.Infrastructure
 
                                 try
                                 {
-                                    if (!_agentProxy.IsConnected)
+                                    var startTime = DateTime.Now;
+                                    var timeout = TimeSpan.FromMinutes(1);
+                                    while (!_agentProxy.IsInitialized)
                                     {
-                                        _logger.Debug("Agent not connected.");
-                                        continue;
+                                        _logger.Debug("Waiting for Agent initialization ...");
+                                        await Task.Delay(TimeSpan.FromSeconds(1));
+
+                                        var nowTime = DateTime.Now;
+                                        var currentSpan = nowTime - startTime;
+                                        if (currentSpan >= timeout)
+                                        {
+                                            var message = $"Agent initialization timeout! Waiting for more than {currentSpan.TotalSeconds} s.";
+                                            _logger.Error(message);
+
+                                            throw new Exception(message);
+                                        }
                                     }
 
-                                    await Task.Delay(TimeSpan.FromSeconds(1)); // HACK: TODO: IAgentProxy.IsConnected is not reliable
                                     await _agentService.ResolveWebviewView(new ResolveWebviewViewParams
                                     {
                                         // cody.chat for sidebar view, or cody.editorPanel for editor panel
@@ -119,7 +147,7 @@ namespace Cody.Core.Infrastructure
         {
             try
             {
-                _events.Add(WebViewsEventTypes.RegisterWebViewRequest);
+                _events.Add(new WebViewEvent(WebViewsEventTypes.RegisterWebViewRequest, viewId));
 
                 _logger.Debug($"Registered WebView:'{viewId}' request.");
 
@@ -140,7 +168,7 @@ namespace Cody.Core.Infrastructure
             }
 
             _chatHosts.Add(chatHost);
-            _events.Add(WebViewsEventTypes.WebChatHostInitialized);
+            _events.Add(new WebViewEvent(WebViewsEventTypes.WebChatHostInitialized));
         }
 
         public void Dispose()

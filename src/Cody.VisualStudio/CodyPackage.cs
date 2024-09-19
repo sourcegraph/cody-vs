@@ -88,7 +88,6 @@ namespace Cody.VisualStudio
         public MainViewModel MainViewModel;
 
         public MainView MainView;
-        public InitializeCallback InitializeService;
         public NotificationHandlers NotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
@@ -136,7 +135,6 @@ namespace Cody.VisualStudio
             UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
             StatusbarService = new StatusbarService();
-            InitializeService = new InitializeCallback(UserSettingsService, VersionService, VsVersionService, StatusbarService, SolutionService, Logger);
             ThemeService = new ThemeService(this, Logger);
             FileService = new FileService(this, Logger);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
@@ -194,7 +192,7 @@ namespace Cody.VisualStudio
             {
                 Logger.Debug($"Changing authorization details ...");
 
-                var config = InitializeService.GetConfiguration();
+                var config = GetConfiguration();
                 var status = await AgentService.ConfigurationChange(config);
 
                 UpdateCurrentWorkspaceFolder();
@@ -277,6 +275,9 @@ namespace Cody.VisualStudio
                 var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
                 var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
+                if (devPort != null)
+                    Logger.Debug($"Connecting to the agent using port:{devPort}");
+
                 var options = new AgentClientOptions
                 {
                     CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
@@ -288,6 +289,7 @@ namespace Cody.VisualStudio
                 };
 
                 AgentClient = new AgentClient(options, Logger, AgentLogger);
+                AgentClient.OnInitialized += OnAgentInitialized;
 
                 WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
             }
@@ -295,6 +297,72 @@ namespace Cody.VisualStudio
             {
                 Logger.Error("Failed.", ex);
             }
+        }
+
+        private void OnAgentInitialized(object sender, ServerInfo e)
+        {
+            if (e.Authenticated == true)
+            {
+                StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
+
+                Logger.Info("Authenticated.");
+            }
+            else
+            {
+                Logger.Warn("Authentication failed. Please check the validity of the access token.");
+            }
+        }
+
+        private ClientInfo GetClientInfo()
+        {
+            var clientInfo = new ClientInfo
+            {
+                Name = "VisualStudio",
+                Version = VersionService.Full,
+                IdeVersion = VsVersionService.Version.ToString(),
+                WorkspaceRootUri = SolutionService.GetSolutionDirectory(),
+                Capabilities = new ClientCapabilities
+                {
+                    Authentication = Capability.Enabled,
+                    Completions = "none",
+                    Edit = Capability.None,
+                    EditWorkspace = Capability.None,
+                    ProgressBars = Capability.Enabled,
+                    CodeLenses = Capability.None,
+                    ShowDocument = Capability.Enabled,
+                    Ignore = Capability.Enabled,
+                    UntitledDocuments = Capability.None,
+                    Webview = "native",
+                    WebviewNativeConfig = new WebviewCapabilities
+                    {
+                        View = WebviewView.Single,
+                        CspSource = "'self' https://cody.vs",
+                        WebviewBundleServingPrefix = "https://cody.vs",
+                    },
+                    WebviewMessages = "string-encoded",
+                    GlobalState = "server-managed",
+                    Secrets = "client-managed",
+                },
+                ExtensionConfiguration = GetConfiguration()
+            };
+
+            return clientInfo;
+        }
+
+        private ExtensionConfiguration GetConfiguration()
+        {
+            var config = new ExtensionConfiguration
+            {
+                AnonymousUserID = UserSettingsService.AnonymousUserID,
+                ServerEndpoint = UserSettingsService.ServerEndpoint,
+                Proxy = null,
+                AccessToken = UserSettingsService.AccessToken,
+                AutocompleteAdvancedProvider = null,
+                Debug = true,
+                VerboseDebug = true,
+            };
+
+            return config;
         }
 
         private async Task InitializeAgent()
@@ -306,10 +374,10 @@ namespace Cody.VisualStudio
                 _ = Task.Run(() => AgentClient.Start())
                 .ContinueWith(async x =>
                 {
-                    AgentService = AgentClient.CreateAgentService<IAgentService>();
-                    WebViewsManager.SetAgentService(AgentService);
+                    var clientConfig = GetClientInfo();
+                    AgentService = await AgentClient.Initialize(clientConfig);
 
-                    await InitializeService.Initialize(AgentService);
+                    WebViewsManager.SetAgentService(AgentService);
                     NotificationHandlers.SetAgentClient(AgentService);
                     ProgressNotificationHandlers.SetAgentService(AgentService);
                 })

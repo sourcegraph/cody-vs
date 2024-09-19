@@ -69,7 +69,7 @@ namespace Cody.Core.Agent
         }
 
         [AgentCallback("webview/registerWebviewViewProvider")]
-        public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
+        public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
             _logger.Debug(viewId);
             OnRegisterWebViewRequest?.Invoke(this, viewId);
