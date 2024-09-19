@@ -40,8 +40,10 @@ namespace Cody.Core.Infrastructure
         private readonly INotificationHandler _notificationHandler;
         private readonly ILog _logger;
 
-        private List<IWebChatHost> _chatHosts;
-        private List<WebViewEvent> _processedWebViewsRequests;
+        private readonly List<IWebChatHost> _chatHosts;
+        private readonly List<WebViewEvent> _processedWebViewsRequests;
+
+        private readonly TimeSpan _agentInitializationTimeout = TimeSpan.FromMinutes(1);
 
         private readonly BlockingCollection<WebViewEvent> _events; //TODO: when custom editors will be introduced, make it richer, like BlockingCollection<WebViewsEvents>, where WebViewsEvents will be a class
 
@@ -95,24 +97,7 @@ namespace Cody.Core.Infrastructure
 
                                 try
                                 {
-                                    var startTime = DateTime.Now;
-                                    var timeout = TimeSpan.FromMinutes(1);
-                                    while (!_agentProxy.IsInitialized)
-                                    {
-                                        _logger.Debug("Waiting for Agent initialization ...");
-                                        await Task.Delay(TimeSpan.FromSeconds(1));
-
-                                        var nowTime = DateTime.Now;
-                                        var currentSpan = nowTime - startTime;
-                                        if (currentSpan >= timeout)
-                                        {
-                                            var message = $"Agent initialization timeout! Waiting for more than {currentSpan.TotalSeconds} s.";
-                                            _logger.Error(message);
-
-                                            throw new Exception(message);
-                                        }
-                                    }
-
+                                    await WaitForAgentInitialization();
                                     await _agentService.ResolveWebviewView(new ResolveWebviewViewParams
                                     {
                                         // cody.chat for sidebar view, or cody.editorPanel for editor panel
@@ -140,6 +125,26 @@ namespace Cody.Core.Infrastructure
             catch (Exception ex)
             {
                 _logger.Debug("Processing events queue stopped.", ex);
+            }
+        }
+
+        private async Task WaitForAgentInitialization()
+        {
+            var startTime = DateTime.Now;
+            while (!_agentProxy.IsInitialized)
+            {
+                _logger.Debug("Waiting for Agent initialization ...");
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
+                var nowTime = DateTime.Now;
+                var currentSpan = nowTime - startTime;
+                if (currentSpan >= _agentInitializationTimeout)
+                {
+                    var message = $"Agent initialization timeout! Waiting for more than {currentSpan.TotalSeconds} s.";
+                    _logger.Error(message);
+
+                    throw new Exception(message);
+                }
             }
         }
 

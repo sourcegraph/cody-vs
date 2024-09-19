@@ -108,7 +108,8 @@ namespace Cody.VisualStudio
 
                 InitializeServices();
                 await InitOleMenu();
-                await InitializeAgent();
+
+                InitializeAgent();
 
             }
             catch (Exception ex)
@@ -365,33 +366,35 @@ namespace Cody.VisualStudio
             return config;
         }
 
-        private async Task InitializeAgent()
+        private void InitializeAgent()
         {
             try
             {
                 PrepareAgentConfiguration();
 
-                _ = Task.Run(() => AgentClient.Start())
-                .ContinueWith(async x =>
+                _ = Task.Run(async () =>
                 {
-                    var clientConfig = GetClientInfo();
-                    AgentService = await AgentClient.Initialize(clientConfig);
+                    try
+                    {
+                        AgentClient.Start();
 
-                    WebViewsManager.SetAgentService(AgentService);
-                    NotificationHandlers.SetAgentClient(AgentService);
-                    ProgressNotificationHandlers.SetAgentService(AgentService);
-                })
-                .ContinueWith(x =>
-                {
-                    if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
-                    SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
-                    SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
-                })
-                .ContinueWith(t =>
-                {
-                    foreach (var ex in t.Exception.Flatten().InnerExceptions)
-                        Logger.Error("Agent connecting error", ex);
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                        var clientConfig = GetClientInfo();
+                        AgentService = await AgentClient.Initialize(clientConfig);
+
+                        WebViewsManager.SetAgentService(AgentService);
+                        NotificationHandlers.SetAgentClient(AgentService);
+                        ProgressNotificationHandlers.SetAgentService(AgentService);
+
+                        if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
+                        SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
+                        SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Agent initialization failed.", ex);
+                    }
+
+                });
             }
             catch (Exception ex)
             {
