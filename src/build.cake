@@ -171,7 +171,7 @@ Task("Restore")
 });
 
 Task("Publish")
-	//.IsDependentOn("Build")
+	.IsDependentOn("Build")
 	.Does(() =>
 {
 	var args = new ProcessSettings().WithArguments(x => x
