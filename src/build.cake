@@ -7,6 +7,7 @@ var configuration = Argument("configuration", "Release");
 
 
 var agentDir = Directory("./Cody.VisualStudio/Agent");
+var agentWebViewDir = agentDir + Directory("webviews");
 var codyDevDir = Directory("../../cody");
 var codyDir = Directory("../cody-dist");
 var nodeBinariesDir = Directory("../node-binaries");
@@ -18,6 +19,27 @@ var buildExtensionFile = buildDir + File("Cody.VisualStudio.vsix");
 var publishManifestFile = buildDir + File("Marketplace/manifest.json");
 
 var vsixPublisherFile = VSWhereLatest() + File("/VSSDK/VisualStudioIntegration/Tools/Bin/VsixPublisher.exe");
+
+var notIncludeFiles = new string[] 
+{
+	"tree-sitter-bash.wasm",
+	"tree-sitter-dart.wasm",
+	"tree-sitter-elisp.wasm",
+	"tree-sitter-elixir.wasm",
+	"tree-sitter-elm.wasm",
+	"tree-sitter-go.wasm",
+	"tree-sitter-java.wasm",
+	"tree-sitter-kotlin.wasm",
+	"tree-sitter-lua.wasm",
+	"tree-sitter-objc.wasm",
+	"tree-sitter-ocaml.wasm",
+	"tree-sitter-rescript.wasm",
+	"tree-sitter-ruby.wasm",
+	"tree-sitter-rust.wasm",
+	"tree-sitter-scala.wasm",
+	"tree-sitter-swift.wasm",
+	"tree-sitter-php.wasm"
+};
 
 
 var codyRepo = "https://github.com/sourcegraph/cody.git";
@@ -91,10 +113,16 @@ Task("BuildCodyAgent")
 	Information($"--> Copying the agent to '{agentDir}'");
 	CreateDirectory(agentDir);
 	CopyDirectory(codyAgentDistDir, agentDir);
+	
+	foreach(var fileToRemove in notIncludeFiles)
+		DeleteFile(agentDir + File(fileToRemove));
 
 	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("agent/dist/webviews"));
-	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentDir}' ...");
-	CopyDirectory(codyWebviewsFolder, $"{agentDir}/webviews");
+	Information($"--> Cleaning '{agentWebViewDir}' ...");
+	CreateDirectory(agentWebViewDir);
+	
+	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentWebViewDir}' ...");
+	CopyDirectory(codyWebviewsFolder, agentWebViewDir);
 
 
 	// removing pnpm build:root artefacts (/src and /scripts folders)
