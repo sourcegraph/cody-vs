@@ -131,8 +131,10 @@ namespace Cody.Core.Infrastructure
         private async Task WaitForAgentInitialization()
         {
             var startTime = DateTime.Now;
-            while (!_agentProxy.IsInitialized)
+            while (!_agentProxy.IsInitialized || _agentService == null)
             {
+                if (_agentService == null) _logger.Debug("AgentService is NULL !!!");
+
                 _logger.Debug("Waiting for Agent initialization ...");
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -146,6 +148,8 @@ namespace Cody.Core.Infrastructure
                     throw new Exception(message);
                 }
             }
+
+            _logger.Debug($"IsInitialized:{_agentProxy.IsInitialized} AgentService:{_agentService}");
         }
 
         private void OnRegisterWebViewRequestHandler(object sender, string viewId)
