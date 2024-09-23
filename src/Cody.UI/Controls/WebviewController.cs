@@ -117,12 +117,19 @@ namespace Cody.UI.Controls
 
         public async Task PostWebMessageAsJson(string message)
         {
-            // From agent to webview.
-            await Application.Current.Dispatcher.InvokeAsync(() =>
+            try
             {
-                _webview.PostWebMessageAsJson(message);
-                System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson");
-            });
+                // From agent to webview.
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _webview.PostWebMessageAsJson(message);
+                    System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson");
+                });
+            }
+            catch (TaskCanceledException)
+            {
+                System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson task canceled");
+            }
         }
 
         private async Task ApplyVsCodeApiScript()
