@@ -1,4 +1,4 @@
-﻿namespace Cody.VisualStudio.Tests
+namespace Cody.VisualStudio.Tests
 {
     public static class VsVersion
     {

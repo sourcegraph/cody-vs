@@ -1,4 +1,4 @@
-﻿namespace Cody.Core.Logging
+namespace Cody.Core.Logging
 {
     public interface IOutputWindowPane
     {

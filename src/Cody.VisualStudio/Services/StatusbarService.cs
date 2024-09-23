@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
@@ -25,8 +25,8 @@ namespace Cody.VisualStudio.Services
                 statusBar.SetText(text);
                 return Task.CompletedTask;
             });
-            
-            
+
+
         }
     }
 }

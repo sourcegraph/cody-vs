@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public abstract class PlaywrightTestsBase: TestsBase
+    public abstract class PlaywrightTestsBase : TestsBase
     {
         protected string CdpAddress = $"http://localhost:{9222}";
 
@@ -145,10 +145,10 @@ namespace Cody.VisualStudio.Tests
                 var content = await item.TextContentAsync();
                 var parts = content.Split(':');
                 tag.Name = parts.First();
-                if(parts.Length > 1)
+                if (parts.Length > 1)
                 {
                     var lines = parts[1].Split('-');
-                    if(lines.Length > 1)
+                    if (lines.Length > 1)
                     {
                         tag.StartLine = int.Parse(lines[0]);
                         tag.EndLine = int.Parse(lines[1]);

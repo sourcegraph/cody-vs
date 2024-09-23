@@ -9,7 +9,7 @@ using StreamJsonRpc;
 
 namespace Cody.VisualStudio.Client
 {
-    public class AgentClient: IAgentProxy
+    public class AgentClient : IAgentProxy
     {
         private AgentClientOptions options;
         private ILog log;

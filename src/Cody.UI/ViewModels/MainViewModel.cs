@@ -36,7 +36,7 @@ namespace Cody.UI.ViewModels
             };
         }
 
-        private async void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)
+        private void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)
         {
             NotificationHandlers.SendWebviewMessage(e.Handle, e.Messsage);
         }

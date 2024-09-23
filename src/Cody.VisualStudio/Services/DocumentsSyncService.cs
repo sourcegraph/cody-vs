@@ -69,7 +69,7 @@ namespace Cody.VisualStudio.Services
                 }
 
                 if (activeCookie != 0)
-                    ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame); 
+                    ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame);
             }
             catch (Exception ex)
             {
@@ -158,8 +158,8 @@ namespace Cody.VisualStudio.Services
             bool swap = false;
             int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
             if (textView != null && ThreadHelper.CheckAccess()) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
-            
-            if(startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
+
+            if (startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
 
             return new DocumentRange
             {
@@ -207,7 +207,7 @@ namespace Cody.VisualStudio.Services
                 if (fFirstShow == 1)
                 {
                     var content = rdt.GetRunningDocumentContents(docCookie);
-                    
+
                     var docRange = GetDocumentSelection(textView);
                     var visibleRange = GetVisibleRange(textView);
 
@@ -218,7 +218,7 @@ namespace Cody.VisualStudio.Services
 
                 if (textView != null)
                 {
-                    if(activeDocument != null)
+                    if (activeDocument != null)
                     {
                         activeDocument.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
                         activeDocument.Selection.SelectionChanged -= OnSelectionChanged;
@@ -336,5 +336,5 @@ namespace Cody.VisualStudio.Services
         }
     }
 
-    
+
 }

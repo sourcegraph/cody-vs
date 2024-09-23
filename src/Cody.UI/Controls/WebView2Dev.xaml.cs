@@ -67,7 +67,7 @@ namespace Cody.UI.Controls
 
                 Logger?.Error("Failed.", ex);
             }
-            
+
         }
 
         private async void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
@@ -118,7 +118,7 @@ namespace Cody.UI.Controls
 
         public static readonly DependencyProperty HtmlProperty = DependencyProperty.Register(
             "Html", typeof(string), typeof(WebView2Dev),
-            new PropertyMetadata(null, async (d, e) =>
+            new PropertyMetadata(null, (d, e) =>
             {
                 _controller.SetHtml(e.NewValue as string);
             }));
@@ -159,7 +159,7 @@ namespace Cody.UI.Controls
 
         public static readonly DependencyProperty LoggerProperty = DependencyProperty.Register(
             "Logger", typeof(ILog), typeof(WebView2Dev),
-            new PropertyMetadata(null, async (d, e) =>
+            new PropertyMetadata(null, (d, e) =>
             {
                 var logger = e.NewValue as ILog;
                 if (logger != null)

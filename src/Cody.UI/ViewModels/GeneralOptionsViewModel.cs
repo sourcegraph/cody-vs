@@ -5,7 +5,7 @@ using Cody.UI.MVVM;
 
 namespace Cody.UI.ViewModels
 {
-    public class GeneralOptionsViewModel: NotifyPropertyChangedBase
+    public class GeneralOptionsViewModel : NotifyPropertyChangedBase
     {
         private readonly ILog _logger;
 
@@ -31,7 +31,7 @@ namespace Cody.UI.ViewModels
                 uri = new Uri("https://community.sourcegraph.com/").AbsoluteUri;
                 Process.Start(new ProcessStartInfo(uri));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Error($"Opening '{uri}' failed.", ex);
             }

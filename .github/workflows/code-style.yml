@@ -1,0 +1,19 @@
+name: Code Style Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Check Formatting
+      run: dotnet format ./src/ --verify-no-changes -v:diag
+    

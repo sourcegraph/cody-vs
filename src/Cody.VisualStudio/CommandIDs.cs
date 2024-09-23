@@ -1,4 +1,4 @@
-﻿namespace Cody.VisualStudio
+namespace Cody.VisualStudio
 {
     internal static class CommandIds
     {

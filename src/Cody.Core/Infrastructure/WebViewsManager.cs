@@ -29,7 +29,7 @@ namespace Cody.Core.Infrastructure
             ViewId = viewId;
         }
 
-        public WebViewsEventTypes Type { get;}
+        public WebViewsEventTypes Type { get; }
         public string ViewId { get; }
     }
 
@@ -181,5 +181,5 @@ namespace Cody.Core.Infrastructure
             _events?.Dispose();
         }
     }
-    
+
 }
