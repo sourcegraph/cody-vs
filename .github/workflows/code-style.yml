@@ -3,7 +3,7 @@ name: Code Style Checks
 on:
   push:
     branches:
-      - piotr/code-style-checks
+      - main
   pull_request:
     branches:
       - main
@@ -13,11 +13,6 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-
-    - name: Dotnet Restore
-      run: |
-        cd src
-        dotnet restore
 
     - name: Check Formatting
       run: dotnet format ./src/ --verify-no-changes -v:diag
