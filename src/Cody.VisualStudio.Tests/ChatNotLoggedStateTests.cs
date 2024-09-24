@@ -29,10 +29,8 @@ namespace Cody.VisualStudio.Tests
                 accessToken = await GetAccessToken();
                 if (accessToken != null)
                     await SetAccessToken("INVALID");
-                    
 
                 // when
-
                 var getStarted = Page.GetByText(text);
                 textContents = await getStarted.AllTextContentsAsync();
             }
