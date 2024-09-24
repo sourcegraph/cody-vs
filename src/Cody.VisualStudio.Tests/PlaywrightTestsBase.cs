@@ -49,6 +49,13 @@ namespace Cody.VisualStudio.Tests
                 await WaitForChat();
                 WriteLog("Chat initialized and loaded.");
 
+                var accessToken = Environment.GetEnvironmentVariable("Access_Token_UI_Tests");
+                if (accessToken != null)
+                {
+                    WriteLog("Using Access Token.");
+                    CodyPackage.UserSettingsService.AccessToken = accessToken;
+                }
+
                 Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
                 WriteLog("Playwright created.");
 
@@ -97,6 +104,21 @@ namespace Cody.VisualStudio.Tests
 
                 return Task.CompletedTask;
             });
+        }
+
+        protected async Task<string> GetAccessToken()
+        {
+            await WaitForPlaywrightAsync();
+
+            var accessToken = CodyPackage.UserSettingsService.AccessToken;
+
+            return accessToken;
+        }
+
+        protected async Task SetAccessToken(string accessToken)
+        {
+            CodyPackage.UserSettingsService.AccessToken = accessToken;
+            await Task.Delay(TimeSpan.FromMilliseconds(500)); // wait for the Chat to response
         }
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();

@@ -133,8 +133,6 @@ namespace Cody.Core.Infrastructure
             var startTime = DateTime.Now;
             while (!_agentProxy.IsInitialized || _agentService == null)
             {
-                if (_agentService == null) _logger.Debug("AgentService is NULL !!!");
-
                 _logger.Debug("Waiting for Agent initialization ...");
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
