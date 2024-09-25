@@ -46,7 +46,7 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "9a7e712ffce1b90bf2627dd528a68a803b7959ee";
+var codyCommit = "cdd2f17f49a70ab667af9aba09482e8831214814";
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
@@ -79,14 +79,14 @@ Task("BuildCodyAgent")
 
 	if (!isDevMode)
 	{
+		Information($"--> git pull ...");
+		GitPull(codyDir, "cake", "cake@cake.com");
+		
 		Information($"--> Checkout '{branchName}' ...");
 		GitCheckout(codyDir, branchName);
 
-
-		//GitCheckout(codyDir, codyCommit);
-
-		Information($"--> git pull ...");
-		GitPull(codyDir, "cake", "cake@cake.com");
+        Information($"--> Checkout '{branchName}' using commit {codyCommit} ...");
+		GitCheckout(codyDir, codyCommit);
 	}
 
 	Information($"--> Cleaning '{codyAgentDistDir}' ...");
