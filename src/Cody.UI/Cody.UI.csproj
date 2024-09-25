@@ -37,6 +37,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,33 +50,18 @@
     <Compile Include="..\Cody.VisualStudio\Properties\AssemblyVersion.cs">
       <Link>Properties\AssemblyVersion.cs</Link>
     </Compile>
+    <Compile Include="Controls\CodyWebView.cs" />
     <Compile Include="Controls\Options\GeneralOptionsControl.xaml.cs">
       <DependentUpon>GeneralOptionsControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\WebView2Dev.xaml.cs">
-      <DependentUpon>WebView2Dev.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="MVVM\NotifyPropertyChangedBase.cs" />
     <Compile Include="MVVM\DelegateCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\GeneralOptionsViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="Views\MainView.xaml.cs">
-      <DependentUpon>MainView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\WebviewController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\Options\GeneralOptionsControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\WebView2Dev.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -92,6 +78,8 @@
       <Version>1.0.2592.51</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Views\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

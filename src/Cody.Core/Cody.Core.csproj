@@ -51,9 +51,8 @@
     </Compile>
     <Compile Include="Agent\AgentCallAttribute.cs" />
     <Compile Include="Agent\AgentCallbackAttribute.cs" />
-    <Compile Include="Agent\IAgentProxy.cs" />
-    <Compile Include="Agent\IAgentService.cs" />
-    <Compile Include="Agent\INotificationHandler.cs" />
+    <Compile Include="Agent\IAgentClient.cs" />
+    <Compile Include="Agent\IInjectAgentClient.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
@@ -82,16 +81,16 @@
     <Compile Include="Agent\Protocol\ServerInfo.cs" />
     <Compile Include="Agent\Protocol\WebviewCapabilities.cs" />
     <Compile Include="Agent\Protocol\ResolveWebviewViewParams.cs" />
-    <Compile Include="Agent\SetHtmlEvent.cs" />
-    <Compile Include="Agent\WebviewMessageHandler.cs" />
+    <Compile Include="Agent\WebviewCommandsHandler.cs" />
+    <Compile Include="Agent\WebViewNotificationHandlers.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
+    <Compile Include="Infrastructure\ICodyWebView.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
     <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
-    <Compile Include="Infrastructure\WebViewsManager.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />
     <Compile Include="Infrastructure\ISolutionService.cs" />
     <Compile Include="Infrastructure\IStatusbarService.cs" />

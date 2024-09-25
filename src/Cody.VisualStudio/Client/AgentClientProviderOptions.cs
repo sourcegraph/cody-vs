@@ -1,17 +1,12 @@
-using Cody.Core.Agent;
+using Cody.Core.Agent.Protocol;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Client
 {
-    public class AgentClientOptions
+    public class AgentClientProviderOptions
     {
         public bool Debug { get; set; }
-
-        public bool RestartAgentOnFailure { get; set; } = true;
 
         public bool ConnectToRemoteAgent { get; set; } = false;
 
@@ -23,5 +18,7 @@ namespace Cody.VisualStudio.Client
         public string AgentDirectory { get; set; }
 
         public List<object> CallbackHandlers { get; set; } = new List<object>();
+
+        public ClientInfo ClientInfo { get; set; }
     }
 }

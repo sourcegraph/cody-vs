@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
-    public interface INotificationHandler
+    public interface IInjectAgentClient
     {
-        event EventHandler OnOptionsPageShowRequest;
-        event EventHandler<string> OnRegisterWebViewRequest;
+        IAgentClient AgentClient { set; }
     }
 }

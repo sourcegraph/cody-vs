@@ -70,7 +70,7 @@ namespace Cody.VisualStudio.Tests
 
             windowFrame.Show();
 
-            await WaitForAsync(() => CodyPackage.MainViewModel.IsChatLoaded);
+            await CodyPackage.CodyWebView.WaitUntilChatReady();
         }
 
         protected async Task CloseCodyChatToolWindow()
@@ -140,15 +140,13 @@ namespace Cody.VisualStudio.Tests
         {
             WriteLog("Waiting for the Chat ...");
 
-            bool isChatLoaded = false;
             await CodyPackage.ShowToolWindowAsync();
             WriteLog("ShowToolWindowAsync called.");
 
-            var viewModel = CodyPackage.MainViewModel;
-            await WaitForAsync(() => viewModel.IsChatLoaded);
+            await CodyPackage.CodyWebView.WaitUntilWebViewReady();
+            await CodyPackage.CodyWebView.WaitUntilChatReady();
 
-            isChatLoaded = viewModel.IsChatLoaded;
-            WriteLog($"Chat loaded:{isChatLoaded}");
+            WriteLog($"Chat loaded");
         }
     }
 }

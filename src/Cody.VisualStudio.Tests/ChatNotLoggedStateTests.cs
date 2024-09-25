@@ -19,6 +19,7 @@ namespace Cody.VisualStudio.Tests
             // given
             var codyPackage = await GetPackageAsync();
             var settingsService = codyPackage.UserSettingsService;
+            settingsService.AccessToken = settingsService.AccessToken.Replace("INVALID", "");
             var accessToken = codyPackage.UserSettingsService.AccessToken;
 
             var text = "Cody Free or Cody Pro";

@@ -46,8 +46,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Client\AgentClient.cs" />
-    <Compile Include="Client\AgentClientOptions.cs" />
+    <Compile Include="Client\AgentClientProvider.cs" />
+    <Compile Include="Client\AgentClientProviderOptions.cs" />
     <Compile Include="Client\AgentJsonMessageFormatter.cs" />
     <Compile Include="Client\AgentProcessConnector.cs" />
     <Compile Include="Client\IAgentConnector.cs" />
@@ -112,6 +112,7 @@
     <Reference Include="System" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>

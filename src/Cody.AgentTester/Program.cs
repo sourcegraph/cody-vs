@@ -4,22 +4,19 @@ using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Services;
-using Microsoft.VisualStudio.Setup.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Cody.AgentTester
 {
     internal class Program
     {
-        private static AgentClient client;
+        private static AgentClientProvider clientProvider;
         private static readonly ConsoleLogger logger = new ConsoleLogger();
         private static readonly ConsoleLogger agentLogger = new ConsoleLogger();
-        private static IAgentService agentService;
+        private static IAgentClient agentClient;
 
         static async Task Main(string[] args)
         {
@@ -33,28 +30,25 @@ namespace Cody.AgentTester
             var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider());
             var settingsService = new UserSettingsService(new MemorySettingsProvider(), secretStorageService, logger);
             var editorService = new FileService(new FakeServiceProvider(), logger);
-            var options = new AgentClientOptions
+            var options = new AgentClientProviderOptions
             {
-                CallbackHandlers = new List<object> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService) },
+                CallbackHandlers = new List<object> { new NotificationHandlers(logger, editorService, secretStorageService) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
-                RestartAgentOnFailure = true,
                 Debug = true,
                 ConnectToRemoteAgent = devPort != null,
                 RemoteAgentPort = portNumber,
+                ClientInfo = GetClientInfo()
             };
 
-            client = new AgentClient(options, logger, agentLogger);
-
-            client.Start();
-
-            await Initialize();
+            clientProvider = new AgentClientProvider(options, logger, agentLogger);
+            agentClient = await clientProvider.CreateAgentClient();
 
             Console.ReadKey();
         }
 
-        private static async Task Initialize()
+        private static ClientInfo GetClientInfo()
         {
-            var clientInfo = new ClientInfo
+            return new ClientInfo
             {
                 Name = "VisualStudio",
                 Version = "1.0",
@@ -93,8 +87,6 @@ namespace Cody.AgentTester
 
                 }
             };
-
-            await agentService.Initialize(clientInfo);
         }
 
 

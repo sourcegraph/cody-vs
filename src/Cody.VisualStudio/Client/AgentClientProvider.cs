@@ -9,18 +9,17 @@ using StreamJsonRpc;
 
 namespace Cody.VisualStudio.Client
 {
-    public class AgentClient : IAgentProxy
+    public class AgentClientProvider
     {
-        private AgentClientOptions options;
+        private AgentClientProviderOptions options;
         private ILog log;
         private ILog agentLog;
         private IAgentConnector connector;
         private JsonRpc jsonRpc;
-        private IAgentService _proxy;
 
-        public event EventHandler<ServerInfo> OnInitialized;
+        public event EventHandler<ServerInfo> Initialized;
 
-        public AgentClient(AgentClientOptions options, ILog log, ILog agentLog)
+        public AgentClientProvider(AgentClientProviderOptions options, ILog log, ILog agentLog)
         {
             this.options = options;
             this.log = log;
@@ -30,10 +29,8 @@ namespace Cody.VisualStudio.Client
         public bool IsConnected { get; private set; }
         public bool IsInitialized { get; private set; }
 
-        public void Start()
+        public async Task<IAgentClient> CreateAgentClient()
         {
-            if (IsConnected) return;
-
             connector = CreateConnector();
             connector.ErrorReceived += OnErrorReceived;
             connector.Disconnected += OnAgentDisconnected;
@@ -52,26 +49,29 @@ namespace Cody.VisualStudio.Client
             jsonRpc = new JsonRpc(handler);
             jsonRpc.Disconnected += OnDisconnected;
 
+            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentClient>() };
+            var proxy = jsonRpc.Attach<IAgentClient>(proxyOptions);
+
             foreach (var target in options.CallbackHandlers)
             {
                 var methods = NameTransformer.GetCallbackMethods(target.GetType());
                 foreach (var method in methods) jsonRpc.AddLocalRpcMethod(method.Key, target, method.Value);
+
+                if(target is IInjectAgentClient targetWithAgentClient) targetWithAgentClient.AgentClient = proxy;
             }
 
             jsonRpc.StartListening();
-        }
+            IsConnected = true;
+            log.Info("A connection with the agent has been established.");
 
-        public async Task<IAgentService> Initialize(ClientInfo clientInfo)
-        {
-            CreateAgentService();
-
-            var initialize = await _proxy.Initialize(clientInfo);
-            IsInitialized = true;
-            log.Info("Agent initialized.");
-
-            OnInitialized?.Invoke(this, initialize);
-
-            return _proxy;
+            if(options.ClientInfo != null)
+            {
+                var initialize = await proxy.Initialize(options.ClientInfo);
+                IsInitialized = true;
+                Initialized?.Invoke(this, initialize);
+                log.Info("Agent initialized.");
+            }
+            return proxy;
         }
 
         private void OnDisconnected(object sender, JsonRpcDisconnectedEventArgs e)
@@ -79,19 +79,7 @@ namespace Cody.VisualStudio.Client
             log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
         }
 
-        private void CreateAgentService()
-        {
-            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentService>() };
-            _proxy = jsonRpc.Attach<IAgentService>(proxyOptions);
-
-            IsConnected = true;
-            log.Info("A connection with the agent has been established.");
-        }
-
-        private void OnErrorReceived(object sender, string error)
-        {
-            agentLog.Error(error);
-        }
+        private void OnErrorReceived(object sender, string error) => agentLog.Error(error);
 
         private IAgentConnector CreateConnector()
         {
@@ -115,20 +103,6 @@ namespace Cody.VisualStudio.Client
             DisconnectInternal();
             if (exitCode == 0) log.Info("The agent's connection has ended.");
             else log.Error($"The agent connection unexpectedly ended with code {exitCode}.");
-
-            if (options.RestartAgentOnFailure && exitCode != 0)
-            {
-                log.Info("Restarting the agent.");
-
-                Start();
-            }
-        }
-
-        public void Stop()
-        {
-            if (!IsConnected) return;
-
-            DisconnectInternal();
         }
 
         private void DisconnectInternal()
@@ -142,6 +116,7 @@ namespace Cody.VisualStudio.Client
             connector = null;
 
             IsConnected = false;
+            IsInitialized = false;
             log.Info("The connection with the agent has been terminated.");
         }
     }

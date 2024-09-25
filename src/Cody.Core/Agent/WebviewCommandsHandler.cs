@@ -6,13 +6,13 @@ using System;
 
 namespace Cody.Core.Agent
 {
-    public class WebviewMessageHandler
+    public class WebviewCommandsHandler
     {
         private readonly IUserSettingsService _settingsService;
         private readonly IFileService _fileService;
         private readonly Action _onOptionsPageShowRequest;
 
-        public WebviewMessageHandler(IUserSettingsService settingsService, IFileService fileService, Action onOptionsPageShowRequest)
+        public WebviewCommandsHandler(IUserSettingsService settingsService, IFileService fileService, Action onOptionsPageShowRequest)
         {
             _settingsService = settingsService;
             _fileService = fileService;
