@@ -35,6 +35,8 @@ jobs:
         dotnet cake
 
     - name: Tests
+      env: 
+        Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
       run: |
         cd src
         dotnet cake --target Tests

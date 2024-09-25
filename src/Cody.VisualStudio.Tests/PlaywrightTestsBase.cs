@@ -118,7 +118,7 @@ namespace Cody.VisualStudio.Tests
         protected async Task SetAccessToken(string accessToken)
         {
             CodyPackage.UserSettingsService.AccessToken = accessToken;
-            await Task.Delay(TimeSpan.FromMilliseconds(500)); // wait for the Chat to response
+            await Task.Delay(TimeSpan.FromMilliseconds(2000)); // wait for the Chat to response
         }
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
@@ -160,6 +160,8 @@ namespace Cody.VisualStudio.Tests
             var tagsList = new List<ContextTag>();
 
             var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
+            if (chatBox == null) throw new Exception("ChatBox is null. Probably not authenticated.");
+
             var list = await chatBox.QuerySelectorAllAsync("span[data-lexical-decorator='true']");
             foreach (var item in list)
             {

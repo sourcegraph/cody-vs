@@ -44,7 +44,12 @@ namespace Cody.VisualStudio.Tests
         private DTE2 _dte;
         protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(DTE)));
 
-        protected void OpenSolution(string path) => Dte.Solution.Open(path);
+        protected async Task OpenSolution(string path)
+        {
+            Dte.Solution.Open(path);
+
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
 
         protected void CloseSolution() => Dte.Solution.Close();
 

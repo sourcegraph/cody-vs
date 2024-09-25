@@ -2,23 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EnvDTE;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatLoggedBasicTests : PlaywrightInitializationTests
+    public class ChatLoggedBasicTests: PlaywrightTestsBase
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
-            OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await WaitForPlaywrightAsync();
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
             var tags = await GetChatContextTags();
