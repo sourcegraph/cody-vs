@@ -17,7 +17,7 @@ namespace Cody.VisualStudio.Tests
     {
         private readonly ITestOutputHelper _logger;
 
-        protected CodyPackage CodyPackage;
+        protected static CodyPackage CodyPackage;
 
         protected TestsBase(ITestOutputHelper output)
         {
@@ -55,6 +55,8 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task OpenDocument(string path, int? selectLineStart = null, int? selectLineEnd = null)
         {
+            WriteLog($"CodyPackage: {CodyPackage} ");
+
             VsShellUtilities.OpenDocument(CodyPackage, path, Guid.Empty, out _, out _, out IVsWindowFrame frame);
             frame.Show();
 

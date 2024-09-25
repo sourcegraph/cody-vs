@@ -28,12 +28,12 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("ConsoleApp1", tags.Last().Name);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
-            OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await WaitForPlaywrightAsync();
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
             const int startLine = 3; const int endLine = 5;
