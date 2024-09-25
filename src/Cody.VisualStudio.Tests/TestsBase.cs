@@ -28,7 +28,14 @@ namespace Cody.VisualStudio.Tests
 
         public void WriteLog(string message, string type = "", [CallerMemberName] string callerName = "")
         {
-            _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
+            try
+            {
+                _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
+            }
+            catch
+            {
+                // ignored, because of https://github.com/xunit/xunit/issues/2146
+            }
         }
 
         private IVsUIShell _uiShell;
