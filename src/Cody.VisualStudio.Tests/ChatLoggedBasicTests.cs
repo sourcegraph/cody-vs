@@ -48,7 +48,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Can_you_close_and_reopen_chat_tool_window()
         {
             await WaitForPlaywrightAsync();
