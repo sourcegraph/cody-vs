@@ -29,6 +29,9 @@ namespace Cody.Core.Agent
                 // or for messages that are intercepted but should still be forwarded to the agent.
                 switch (json.command?.ToString())
                 {
+                    case "ready":
+                    case "initialized":
+                        return HandleInitializationCommands(json);
                     case "auth":
                         return HandleAuthCommand(json);
                     case "command":
@@ -44,6 +47,8 @@ namespace Cody.Core.Agent
                 return false;
             }
         }
+
+        private bool HandleInitializationCommands(dynamic json) => true;
 
         private bool HandleAuthCommand(dynamic json)
         {

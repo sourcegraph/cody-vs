@@ -35,7 +35,7 @@ namespace Cody.Core.Agent
             bool handled = webviewWebMessageHandler.HandleMessage(message);
             if (!handled)
             {
-                await AgentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+                await AgentClient?.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
                 {
                     Id = SidebarHandle,
                     MessageStringEncoded = message
