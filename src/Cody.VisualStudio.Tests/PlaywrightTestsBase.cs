@@ -66,6 +66,8 @@ namespace Cody.VisualStudio.Tests
                 Context = Browser.Contexts[0];
                 Page = Context.Pages[0];
 
+                Page.SetDefaultTimeout((float)TimeSpan.FromMinutes(5).TotalMilliseconds);
+
                 _isInitialized = true;
             }
             finally
