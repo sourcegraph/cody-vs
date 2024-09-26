@@ -27,7 +27,7 @@ namespace Cody.Core.Agent
             this.webviewWebMessageHandler = webviewWebMessageHandler;
             this.logger = logger;
 
-            codyWebView.SendWebMessage += OnWebViewSendWebMessage;   
+            codyWebView.SendWebMessage += OnWebViewSendWebMessage;
         }
 
         private async void OnWebViewSendWebMessage(object sender, string message)
@@ -41,7 +41,7 @@ namespace Cody.Core.Agent
                     MessageStringEncoded = message
                 });
             }
-        } 
+        }
 
 
         [AgentCallback("webview/registerWebviewViewProvider")]

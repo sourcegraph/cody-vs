@@ -57,14 +57,14 @@ namespace Cody.VisualStudio.Client
                 var methods = NameTransformer.GetCallbackMethods(target.GetType());
                 foreach (var method in methods) jsonRpc.AddLocalRpcMethod(method.Key, target, method.Value);
 
-                if(target is IInjectAgentClient targetWithAgentClient) targetWithAgentClient.AgentClient = proxy;
+                if (target is IInjectAgentClient targetWithAgentClient) targetWithAgentClient.AgentClient = proxy;
             }
 
             jsonRpc.StartListening();
             IsConnected = true;
             log.Info("A connection with the agent has been established.");
 
-            if(options.ClientInfo != null)
+            if (options.ClientInfo != null)
             {
                 var initialize = await proxy.Initialize(options.ClientInfo);
                 IsInitialized = true;
