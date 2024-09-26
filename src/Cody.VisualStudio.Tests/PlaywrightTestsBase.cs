@@ -146,8 +146,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task<string[]> GetTodayChatHistory()
         {
-            var todaySection = await Page.QuerySelectorAsync("div[id='radix-:r11:']") ??
-                await Page.QuerySelectorAsync("div[id='radix-:r1b:']");
+            var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
 
             return (await todaySection.QuerySelectorAllAsync("button span"))
                 .Select(async x => await x.TextContentAsync())

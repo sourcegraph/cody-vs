@@ -49,7 +49,7 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Can_you_close_and_reopen_chat_tool_window()
+        public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
             await WaitForPlaywrightAsync();
 
@@ -62,8 +62,8 @@ namespace Cody.VisualStudio.Tests
             Assert.True(isOpen);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
-        public async Task Does_chat_history_show_up_after_you_have_submitting_a_chat_close_and_reopen_window()
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";

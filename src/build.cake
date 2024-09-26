@@ -46,7 +46,7 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "cdd2f17f49a70ab667af9aba09482e8831214814";
+var codyCommit = "503154d7b220be0ebcfff5d58e6348293a98ff63"; // points to https://github.com/sourcegraph/cody/pull/5532 in the main branch
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
@@ -79,8 +79,15 @@ Task("BuildCodyAgent")
 
 	if (!isDevMode)
 	{
-		Information($"--> git pull ...");
-		GitPull(codyDir, "cake", "cake@cake.com");
+
+        if (DirectoryExists(codyDir))
+        {
+            Information($"--> Switching to branch {branchName} ...");
+            GitCheckout(codyDir, branchName);
+        }
+
+        Information($"--> git pull ...");
+		GitPull(codyDir, "cake", "cake@cake.com", "", "", "origin");
 		
 		Information($"--> Checkout '{branchName}' ...");
 		GitCheckout(codyDir, branchName);
