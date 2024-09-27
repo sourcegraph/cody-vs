@@ -34,7 +34,7 @@ namespace Cody.VisualStudio.Client
             process.StartInfo.CreateNoWindow = true;
             process.EnableRaisingEvents = true;
 
-            if(options.AcceptNonTrustedCertificates)
+            if (options.AcceptNonTrustedCertificates)
                 process.StartInfo.EnvironmentVariables["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
             process.Exited += OnProcessExited;

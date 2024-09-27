@@ -218,7 +218,6 @@ namespace Cody.VisualStudio
                 }
                 else
                 {
-                    
                     throw new NotSupportedException($"Cannot get {nameof(OleMenuCommandService)}");
                 }
             }
