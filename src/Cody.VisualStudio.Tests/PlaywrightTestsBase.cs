@@ -66,9 +66,9 @@ namespace Cody.VisualStudio.Tests
                 Context = Browser.Contexts[0];
                 Page = Context.Pages[0];
 
-                var playwrightTimeout = (float)TimeSpan.FromMinutes(5).TotalMilliseconds;
-                Page.SetDefaultNavigationTimeout(playwrightTimeout);
-                Page.SetDefaultTimeout(playwrightTimeout);
+                //var playwrightTimeout = (float)TimeSpan.FromMinutes(3).TotalMilliseconds;
+                //Page.SetDefaultNavigationTimeout(playwrightTimeout);
+                //Page.SetDefaultTimeout(playwrightTimeout);
 
                 _isInitialized = true;
             }

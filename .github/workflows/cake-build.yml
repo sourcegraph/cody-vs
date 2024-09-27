@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ piotr/ci-ui-tests-access-token ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
