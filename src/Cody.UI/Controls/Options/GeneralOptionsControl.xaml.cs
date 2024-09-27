@@ -18,6 +18,7 @@ namespace Cody.UI.Controls.Options
             // This is a workaround to get bindings updated. The second solution is to use NotifyPropertyChange for every TextBox in the Xaml, but current solution is a little more "clean" - everything is clearly visible in a one place.
             SourcegraphUrlTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
             ConfigurationsTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+            AcceptNonTrustedCertCheckBox.GetBindingExpression(CheckBox.IsCheckedProperty)?.UpdateSource();
         }
     }
 }
