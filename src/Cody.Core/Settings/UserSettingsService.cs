@@ -101,5 +101,15 @@ namespace Cody.Core.Settings
             get => GetOrDefault(nameof(CodySettings), string.Empty);
             set => Set(nameof(CodySettings), value);
         }
+
+        public bool AcceptNonTrustedCert
+        {
+            get
+            {
+                var value = GetOrDefault(nameof(AcceptNonTrustedCert), false.ToString());
+                return bool.Parse(value);
+            }
+            set => Set(nameof(AcceptNonTrustedCert), value.ToString());
+        }
     }
 }

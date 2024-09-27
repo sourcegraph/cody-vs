@@ -1,4 +1,5 @@
 using Cody.Core.Agent;
+using Microsoft.VisualStudio.Shell.FindAllReferences;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace Cody.VisualStudio.Client
         /// If non-null, the TCP port to connect to an existing Agent instance on.
         /// </summary>
         public int RemoteAgentPort { get; set; } = 3113;
+
+        public bool AcceptNonTrustedCertificates { get; set; } = false;
 
         public string AgentDirectory { get; set; }
 
