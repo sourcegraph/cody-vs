@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatLoggedBasicTests: PlaywrightTestsBase
+    public class ChatLoggedBasicTests : PlaywrightTestsBase
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
