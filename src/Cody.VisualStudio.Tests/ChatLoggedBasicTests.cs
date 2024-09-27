@@ -14,36 +14,6 @@ namespace Cody.VisualStudio.Tests
         }
 
         //[VsFact(Version = VsVersion.VS2022)]
-        public async Task Loads_Properly_InLoggedState()
-        {
-            // given
-            var codyPackage = await GetPackageAsync();
-            var settingsService = codyPackage.UserSettingsService;
-            var accessToken = codyPackage.UserSettingsService.AccessToken;
-
-            var text = "Cody Free or Cody Pro";
-            IReadOnlyList<string> textContents;
-            try
-            {
-                await WaitForPlaywrightAsync();
-                codyPackage.UserSettingsService.AccessToken += "INVALID";
-                await Task.Delay(TimeSpan.FromMilliseconds(500)); // wait for the Chat to response
-
-                // when
-
-                var getStarted = Page.GetByText(text);
-                textContents = await getStarted.AllTextContentsAsync();
-            }
-            finally
-            {
-                settingsService.AccessToken = accessToken; // make it valid
-            }
-
-            // then
-            Assert.Equal(text, textContents.First());
-        }
-
-        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
