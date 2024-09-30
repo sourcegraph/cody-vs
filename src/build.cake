@@ -20,7 +20,7 @@ var publishManifestFile = buildDir + File("Marketplace/manifest.json");
 
 var vsixPublisherFile = VSWhereLatest() + File("/VSSDK/VisualStudioIntegration/Tools/Bin/VsixPublisher.exe");
 
-var notIncludeFiles = new string[]
+var notIncludeFiles = new string[] 
 {
 	"tree-sitter-bash.wasm",
 	"tree-sitter-dart.wasm",
@@ -47,7 +47,7 @@ var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.1
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
 // The latest tag of the stable release from the cody repository https://github.com/sourcegraph/cody/tags
-var lastCodyStableReleaseTag = "vscode-v1.34.3";
+var codyStableReleaseTag = "vscode-v1.34.3";
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
@@ -89,15 +89,15 @@ Task("BuildCodyAgent")
 
         Information($"--> git pull ...");
 		GitPull(codyDir, "cake", "cake@cake.com", "", "", "origin");
-
+		
 		Information($"--> Checkout '{branchName}' ...");
 		GitCheckout(codyDir, branchName);
 
         Information($"--> Fetching all tags...");
         GitFetch(codyDir, "origin", new GitFetchSettings { Tags = true });
 
-        Information($"--> Checkout latest stable release using tag {lastCodyStableReleaseTag} ...");
-		GitCheckout(codyDir, lastCodyStableReleaseTag);
+        Information($"--> Checkout latest stable release using tag {codyStableReleaseTag} ...");
+		GitCheckout(codyDir, codyStableReleaseTag);
 	}
 
 	Information($"--> Cleaning '{codyAgentDistDir}' ...");
@@ -124,14 +124,14 @@ Task("BuildCodyAgent")
 	Information($"--> Copying the agent to '{agentDir}'");
 	CreateDirectory(agentDir);
 	CopyDirectory(codyAgentDistDir, agentDir);
-
+	
 	foreach(var fileToRemove in notIncludeFiles)
 		DeleteFile(agentDir + File(fileToRemove));
 
 	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("agent/dist/webviews"));
 	Information($"--> Cleaning '{agentWebViewDir}' ...");
 	CreateDirectory(agentWebViewDir);
-
+	
 	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentWebViewDir}' ...");
 	CopyDirectory(codyWebviewsFolder, agentWebViewDir);
 
@@ -192,7 +192,7 @@ Task("Tests")
 		Verbosity = Verbosity.Minimal
 	});
 
-//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings
+//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
 //    {
 //        NoBuild = true,
 //        NoRestore = true
