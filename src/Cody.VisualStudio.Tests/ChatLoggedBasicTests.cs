@@ -2,23 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EnvDTE;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatLoggedBasicTests : PlaywrightInitializationTests
+    public class ChatLoggedBasicTests : PlaywrightTestsBase
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
-            OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await WaitForPlaywrightAsync();
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
             var tags = await GetChatContextTags();
@@ -27,12 +28,12 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("ConsoleApp1", tags.Last().Name);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
-            OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await WaitForPlaywrightAsync();
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
             const int startLine = 3; const int endLine = 5;
@@ -47,8 +48,8 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
-        public async Task Can_you_close_and_reopen_chat_tool_window()
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
             await WaitForPlaywrightAsync();
 
@@ -62,7 +63,7 @@ namespace Cody.VisualStudio.Tests
         }
 
         //[VsFact(Version = VsVersion.VS2022)]
-        public async Task Does_chat_history_show_up_after_you_have_submitting_a_chat_close_and_reopen_window()
+        public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";

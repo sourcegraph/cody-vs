@@ -65,5 +65,18 @@ namespace Cody.UI.ViewModels
             }
         }
 
+        private bool _acceptNonTrustedCert;
+        public bool AcceptNonTrustedCert
+        {
+            get => _acceptNonTrustedCert;
+            set
+            {
+                if (SetProperty(ref _acceptNonTrustedCert, value))
+                {
+                    _logger.Debug($"AcceptNonTrustedCert set:{SourcegraphUrl}");
+                }
+            }
+        }
+
     }
 }

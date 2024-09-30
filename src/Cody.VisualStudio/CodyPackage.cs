@@ -35,6 +35,7 @@ using EnvDTE80;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
+using System.Net;
 using Cody.UI.Controls;
 
 namespace Cody.VisualStudio
@@ -295,8 +296,9 @@ namespace Cody.VisualStudio
                     AgentDirectory = agentDir,
                     ConnectToRemoteAgent = devPort != null,
                     RemoteAgentPort = portNumber,
-                    Debug = true,
-                    ClientInfo = GetClientInfo()
+                    ClientInfo = GetClientInfo(),
+                    AcceptNonTrustedCertificates = UserSettingsService.AcceptNonTrustedCert,
+                    Debug = true
                 };
 
                 AgentClientProvider = new AgentClientProvider(options, Logger, AgentLogger);
@@ -447,6 +449,35 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger?.Error("After close solution error.", ex);
+            }
+        }
+
+        private async Task TestServerConnection(string serverAddress)
+        {
+            if (string.IsNullOrWhiteSpace(serverAddress)) return;
+
+            using (WebClient webClient = new WebClient())
+            {
+                try
+                {
+                    await webClient.DownloadStringTaskAsync(serverAddress);
+                }
+                catch (WebException ex) when (ex.Status == WebExceptionStatus.TrustFailure)
+                {
+                    if (!UserSettingsService.AcceptNonTrustedCert)
+                    {
+                        AgentLogger.Warn("SSL certificate problem: self-signed certificate in servers certificate chain. " +
+                            "Consider using 'Accept non-trusted certificates' option in Cody settings window.");
+                    }
+                    else
+                    {
+                        AgentLogger.Warn("SSL certificate problem.");
+                    }
+                }
+                catch
+                {
+                    AgentLogger.Warn($"Connection problem with '{serverAddress}'");
+                }
             }
         }
 

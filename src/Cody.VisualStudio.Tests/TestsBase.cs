@@ -17,7 +17,7 @@ namespace Cody.VisualStudio.Tests
     {
         private readonly ITestOutputHelper _logger;
 
-        protected CodyPackage CodyPackage;
+        protected static CodyPackage CodyPackage;
 
         protected TestsBase(ITestOutputHelper output)
         {
@@ -28,7 +28,14 @@ namespace Cody.VisualStudio.Tests
 
         public void WriteLog(string message, string type = "", [CallerMemberName] string callerName = "")
         {
-            _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
+            try
+            {
+                _logger.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{type}] [{callerName}] [ThreadId:{Thread.CurrentThread.ManagedThreadId}] {message}");
+            }
+            catch
+            {
+                // ignored, because of https://github.com/xunit/xunit/issues/2146
+            }
         }
 
         private IVsUIShell _uiShell;
@@ -37,12 +44,19 @@ namespace Cody.VisualStudio.Tests
         private DTE2 _dte;
         protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(DTE)));
 
-        protected void OpenSolution(string path) => Dte.Solution.Open(path);
+        protected async Task OpenSolution(string path)
+        {
+            Dte.Solution.Open(path);
+
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
 
         protected void CloseSolution() => Dte.Solution.Close();
 
         protected async Task OpenDocument(string path, int? selectLineStart = null, int? selectLineEnd = null)
         {
+            WriteLog($"CodyPackage: {CodyPackage} ");
+
             VsShellUtilities.OpenDocument(CodyPackage, path, Guid.Empty, out _, out _, out IVsWindowFrame frame);
             frame.Show();
 
@@ -105,7 +119,7 @@ namespace Cody.VisualStudio.Tests
         protected async Task WaitForAsync(Func<bool> condition)
         {
             var startTime = DateTime.Now;
-            var timeout = TimeSpan.FromMinutes(5);
+            var timeout = TimeSpan.FromMinutes(2);
             while (!condition.Invoke())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));

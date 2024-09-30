@@ -49,6 +49,13 @@ namespace Cody.VisualStudio.Tests
                 await WaitForChat();
                 WriteLog("Chat initialized and loaded.");
 
+                var accessToken = Environment.GetEnvironmentVariable("Access_Token_UI_Tests");
+                if (accessToken != null)
+                {
+                    WriteLog("Using Access Token.");
+                    CodyPackage.UserSettingsService.AccessToken = accessToken;
+                }
+
                 Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
                 WriteLog("Playwright created.");
 
@@ -58,6 +65,10 @@ namespace Cody.VisualStudio.Tests
 
                 Context = Browser.Contexts[0];
                 Page = Context.Pages[0];
+
+                //var playwrightTimeout = (float)TimeSpan.FromMinutes(3).TotalMilliseconds;
+                //Page.SetDefaultNavigationTimeout(playwrightTimeout);
+                //Page.SetDefaultTimeout(playwrightTimeout);
 
                 _isInitialized = true;
             }
@@ -99,6 +110,21 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
+        protected async Task<string> GetAccessToken()
+        {
+            await WaitForPlaywrightAsync();
+
+            var accessToken = CodyPackage.UserSettingsService.AccessToken;
+
+            return accessToken;
+        }
+
+        protected async Task SetAccessToken(string accessToken)
+        {
+            CodyPackage.UserSettingsService.AccessToken = accessToken;
+            await Task.Delay(TimeSpan.FromMilliseconds(2000)); // wait for the Chat to response
+        }
+
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
 
         protected async Task ShowHistoryTab() => await Page.GetByTestId("tab-history").ClickAsync();
@@ -124,8 +150,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task<string[]> GetTodayChatHistory()
         {
-            var todaySection = await Page.QuerySelectorAsync("div[id='radix-:r11:']") ??
-                await Page.QuerySelectorAsync("div[id='radix-:r1b:']");
+            var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
 
             return (await todaySection.QuerySelectorAllAsync("button span"))
                 .Select(async x => await x.TextContentAsync())
@@ -138,6 +163,8 @@ namespace Cody.VisualStudio.Tests
             var tagsList = new List<ContextTag>();
 
             var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
+            if (chatBox == null) throw new Exception("ChatBox is null. Probably not authenticated.");
+
             var list = await chatBox.QuerySelectorAllAsync("span[data-lexical-decorator='true']");
             foreach (var item in list)
             {
