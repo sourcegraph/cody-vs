@@ -14,6 +14,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Security
 
+## [0.0.2]
+
+### Added
+
+- Option to "Accept non-trusted certificates" in user options. [pull/100](https://github.com/sourcegraph/cody-vs/pull/100)
+
+### Fixed
+
+- Visual Studio not focused after auth redirection. [pull/89](https://github.com/sourcegraph/cody-vs/pull/89)
+- Cody Chat stuck in loading view. [pull/99](https://github.com/sourcegraph/cody-vs/pull/99)
+
 ## [0.0.1]
 
 ### Added
