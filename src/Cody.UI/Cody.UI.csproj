@@ -89,7 +89,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.0-previews-4-31709-430" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Web.WebView2">
-      <Version>1.0.2592.51</Version>
+      <Version>1.0.2792.45</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />
