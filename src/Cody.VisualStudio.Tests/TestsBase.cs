@@ -158,7 +158,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog("ShowToolWindowAsync called.");
 
             await CodyPackage.CodyWebView.WaitUntilWebViewReady();
-            //await CodyPackage.CodyWebView.WaitUntilChatReady();
+            await CodyPackage.CodyWebView.WaitUntilChatReady();
 
             WriteLog($"Chat loaded");
         }
