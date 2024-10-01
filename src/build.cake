@@ -148,7 +148,6 @@ Task("BuildCodyAgent")
 
 });
 
-
 Task("DownloadNode")
 	.Does(() =>
 {
@@ -182,19 +181,6 @@ Task("Build")
 	});
 });
 
-Task("BuildExtension")
-	.IsDependentOn("DownloadNode")
-	.IsDependentOn("Restore")
-	.Does(() =>
-{
-	MSBuild("./Cody.sln", new MSBuildSettings
-	{
-		Configuration = configuration,
-		PlatformTarget = PlatformTarget.MSIL,
-		Verbosity = Verbosity.Minimal
-	});
-});
-
 Task("BuildDebug")
 	.IsDependentOn("DownloadNode")
 	.IsDependentOn("Restore")
@@ -203,20 +189,27 @@ Task("BuildDebug")
 	MSBuild("./Cody.sln", new MSBuildSettings
 	{
 		Configuration = "Debug",
-		PlatformTarget = PlatformTarget.MSIL,
+        PlatformTarget = PlatformTarget.MSIL,
 		Verbosity = Verbosity.Minimal
 	});
 });
 
 Task("Tests")
+	//.IsDependentOn("Build")
 	.Does(() =>
 {
 	MSBuild("./Cody.sln", new MSBuildSettings
 	{
 		Configuration = "Debug",
-		PlatformTarget = PlatformTarget.MSIL,
+        PlatformTarget = PlatformTarget.MSIL,
 		Verbosity = Verbosity.Minimal
 	});
+
+//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
+//    {
+//        NoBuild = true,
+//        NoRestore = true
+//    });
 });
 
 Task("Restore")

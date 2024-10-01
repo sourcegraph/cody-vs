@@ -1,4 +1,4 @@
-﻿name: Cake Build
+﻿﻿name: Cake Build
 
 on:
   push:
@@ -37,22 +37,34 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
+      - name: Cache Cody Agent build
+        uses: actions/cache@v3
+        with:
+          path: cody-dist/agent
+          key: ${{ runner.os }}-cody-dist-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cody-dist-
+
       - name: Common Build Setup
         run: |
           cd src
           dotnet tool restore
           corepack enable
 
-      - name: Build Cody Agent if needed
+      - name: Build Cody Agent
         run: |
           cd src
           corepack install --global pnpm@8.6.7
           dotnet cake --target=BuildCodyAgent
 
-      - name: Build & Tests
+      - name: Build Extension & Tests
+        run: |
+          cd src
+          dotnet cake --target=BuildDebug
+
+      - name: Run Tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         run: |
           cd src
-          dotnet cake --target=BuildDebug
           dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed
