@@ -151,8 +151,7 @@ Task("BuildCodyAgent")
 Task("BuildCodyAgentIfNeeded")
     .Does(() =>
 {
-    var codyAgentDistDir = MakeAbsolute(codyDir + Directory("agent/dist"));
-    if (!DirectoryExists(codyAgentDistDir))
+    if (!DirectoryExists(agentDir))
     {
         Information("Cody Agent dist directory not found. Building Cody Agent...");
         RunTarget("BuildCodyAgent");
