@@ -85,7 +85,7 @@ namespace Cody.UI.Controls
             {
                 Dispatcher.Invoke(() => CoreWebView2.PostWebMessageAsJson(message));
             }
-            catch(TaskCanceledException) { }
+            catch (TaskCanceledException) { }
 
             if (message.StartsWith("{\"type\":\"rpc/response\"") && message.EndsWith("\"streamEvent\":\"complete\"}}"))
                 chatReady.TrySetResult(true);
