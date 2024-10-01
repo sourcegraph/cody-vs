@@ -57,15 +57,10 @@ jobs:
           corepack install --global pnpm@8.6.7
           dotnet cake --target=BuildCodyAgentIfNeeded
 
-      - name: Build Extension
-        run: |
-          cd src
-          dotnet cake --target=BuildExtension
-
-      - name: Tests
+      - name: Build & Tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         run: |
           cd src
-          dotnet cake --target Tests
+          dotnet cake --target=BuildDebug
           dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed

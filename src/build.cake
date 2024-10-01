@@ -210,22 +210,28 @@ Task("BuildExtension")
 	});
 });
 
-Task("Tests")
-	//.IsDependentOn("Build")
+Task("BuildDebug")
+	.IsDependentOn("DownloadNode")
+	.IsDependentOn("Restore")
 	.Does(() =>
 {
 	MSBuild("./Cody.sln", new MSBuildSettings
 	{
 		Configuration = "Debug",
-        PlatformTarget = PlatformTarget.MSIL,
+		PlatformTarget = PlatformTarget.MSIL,
 		Verbosity = Verbosity.Minimal
 	});
+});
 
-//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
-//    {
-//        NoBuild = true,
-//        NoRestore = true
-//    });
+Task("Tests")
+	.Does(() =>
+{
+	MSBuild("./Cody.sln", new MSBuildSettings
+	{
+		Configuration = "Debug",
+		PlatformTarget = PlatformTarget.MSIL,
+		Verbosity = Verbosity.Minimal
+	});
 });
 
 Task("Restore")
