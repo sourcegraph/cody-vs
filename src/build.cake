@@ -151,7 +151,7 @@ Task("BuildCodyAgent")
 Task("BuildCodyAgentIfNeeded")
     .Does(() =>
 {
-    if (!DirectoryExists(codyDir))
+    if (!DirectoryExists(codyDir) || !DirectoryExists(agentDir))
     {
         Information("Cody Agent dist directory not found. Building Cody Agent...");
         RunTarget("BuildCodyAgent");
