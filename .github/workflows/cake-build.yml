@@ -37,13 +37,13 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
-      - name: Cache node_modules
+      - name: Cache cody-dist
         uses: actions/cache@v3
         with:
-          path: cody-dist/agent/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: cody-dist
+          key: ${{ runner.os }}-cody-dist-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-cody-dist-
 
       - name: Common Build Setup
         run: |
@@ -51,11 +51,11 @@ jobs:
           dotnet tool restore
           corepack enable
 
-      - name: Build Cody Agent
+      - name: Build Cody Agent if needed
         run: |
           cd src
           corepack install --global pnpm@8.6.7
-          dotnet cake --target=BuildCodyAgent
+          dotnet cake --target=BuildCodyAgentIfNeeded
 
       - name: Build Extension
         run: |
