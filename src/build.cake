@@ -81,13 +81,13 @@ Task("BuildCodyAgent")
 	if (!isDevMode)
 	{
 
-		if (DirectoryExists(codyDir))
-		{
-			Information($"--> Switching to branch {branchName} ...");
-			GitCheckout(codyDir, branchName);
-		}
+        if (DirectoryExists(codyDir))
+        {
+            Information($"--> Switching to branch {branchName} ...");
+            GitCheckout(codyDir, branchName);
+        }
 
-		Information($"--> git pull ...");
+        Information($"--> git pull ...");
 		GitPull(codyDir, "cake", "cake@cake.com", "", "", "origin");
 
 		Information($"--> Checkout '{branchName}' ...");
@@ -105,8 +105,8 @@ Task("BuildCodyAgent")
 
 	Context.Environment.WorkingDirectory = codyAgentDir;
 
-    Information($"--> pnpm install ...");
-    PnpmInstall();
+	Information($"--> pnpm install ...");
+	PnpmInstall();
 
 	Information($"--> pnpm build ...");
 	PnpmRun("build");
@@ -188,7 +188,7 @@ Task("Tests")
 	MSBuild("./Cody.sln", new MSBuildSettings
 	{
 		Configuration = "Debug",
-		PlatformTarget = PlatformTarget.MSIL,
+        PlatformTarget = PlatformTarget.MSIL,
 		Verbosity = Verbosity.Minimal
 	});
 
@@ -200,13 +200,13 @@ Task("Tests")
 });
 
 Task("Restore")
-	.Does(() =>
+    .Does(() =>
 {
 	Information($"Restore ...");
-	MSBuild("./Cody.sln", new MSBuildSettings {
-		Targets = { "Restore" },
-		Verbosity = Verbosity.Minimal
-	});
+    MSBuild("./Cody.sln", new MSBuildSettings {
+        Targets = { "Restore" },
+        Verbosity = Verbosity.Minimal
+    });
 });
 
 Task("Publish")
