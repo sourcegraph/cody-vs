@@ -31,10 +31,10 @@ namespace Cody.VisualStudio.Tests
 
         private async Task InitializeAsync()
         {
-            await _sync.WaitAsync();
+            //await _sync.WaitAsync();
 
-            try
-            {
+            //try
+            //{
                 if (_isInitialized)
                 {
                     WriteLog("PlaywrightTestsBase already initialized!");
@@ -71,11 +71,11 @@ namespace Cody.VisualStudio.Tests
                 //Page.SetDefaultTimeout(playwrightTimeout);
 
                 _isInitialized = true;
-            }
-            finally
-            {
-                _sync.Release();
-            }
+            //}
+            //finally
+            //{
+               // _sync.Release();
+            //}
         }
 
         protected async Task WaitForPlaywrightAsync()
