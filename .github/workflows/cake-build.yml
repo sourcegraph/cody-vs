@@ -9,7 +9,13 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    # this now uses a dedicated large runner from GitHub running the following specs:
+    # 8-core, 32GB RAM, 300GB SSD
+    runs-on:
+      # this group only allows access to this workflow
+      group: cody-vs-large-runner
+    # do we want to run this on forks?
+    if: github.repository_owner == 'sourcegraph'
 
     steps:
     - uses: actions/checkout@v3
