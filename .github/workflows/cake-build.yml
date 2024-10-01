@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -12,32 +12,45 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.3
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.3
 
-    - name: ⚙️ Prepare Visual Studio
-      run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
+      - name: ⚙️ Prepare Visual Studio
+        run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
 
-    - name: Install Cake.Tool
-      run: dotnet tool install --global Cake.Tool
+      - name: Install Cake.Tool
+        run: dotnet tool install --global Cake.Tool
 
-    - name: Restore NuGet packages
-      run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
+      - name: Restore NuGet packages
+        run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
-    - name: Build Release
-      run: |
-        cd src
-        dotnet tool restore
-        corepack enable
-        corepack install --global pnpm@8.6.7
-        dotnet cake
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: src/cody/agent/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-    - name: Tests
-      env: 
-        Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-      run: |
-        cd src
-        dotnet cake --target Tests
-        dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed
+      - name: PnpmInstall
+        run: |
+          cd src
+          dotnet cake --target=PnpmInstall
+
+      - name: Build Release
+        run: |
+          cd src
+          dotnet tool restore
+          corepack enable
+          corepack install --global pnpm@8.6.7
+          dotnet cake
+
+      - name: Tests
+        env:
+          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
+        run: |
+          cd src
+          dotnet cake --target Tests
+          dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed

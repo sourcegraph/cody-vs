@@ -54,7 +54,20 @@ var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 // TASKS
 //////////////////////////////////////////////////////////////////////
 
+Task("PnpmInstall")
+    .Does(() =>
+{
+    var codyAgentDir = MakeAbsolute(codyDir + Directory("agent"));
+    Context.Environment.WorkingDirectory = codyAgentDir;
+
+    Information($"--> pnpm install ...");
+    PnpmInstall();
+
+    Context.Environment.WorkingDirectory = solutionDir;
+});
+
 Task("BuildCodyAgent")
+    .IsDependentOn("PnpmInstall")
 	.Does(() =>
 {
 
@@ -100,9 +113,6 @@ Task("BuildCodyAgent")
 	CleanDirectory(codyAgentDistDir);
 
 	Context.Environment.WorkingDirectory = codyAgentDir;
-
-	Information($"--> pnpm install ...");
-	PnpmInstall();
 
 	Information($"--> pnpm build ...");
 	PnpmRun("build");
