@@ -7,6 +7,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# concurrency prevents multiple instances of the workflow from running at the same time,
+# using `cancel-in-progress` to cancel any existing runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     # this now uses a dedicated large runner from GitHub running the following specs:
