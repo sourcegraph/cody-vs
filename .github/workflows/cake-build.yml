@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ piotr/ci-tests-reports ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
