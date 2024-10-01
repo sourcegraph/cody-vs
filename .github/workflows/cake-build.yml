@@ -43,8 +43,6 @@ jobs:
     #     path: '**/node_modules'
     #     key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-    - name: 'checkout src director'
-      run : cd src
 
     - uses: actions/cache@v4
       with:
@@ -53,6 +51,7 @@ jobs:
 
     - name: Build Release
       run: |
+        cd src
         dotnet tool restore
         corepack enable
         corepack install --global pnpm@8.6.7
