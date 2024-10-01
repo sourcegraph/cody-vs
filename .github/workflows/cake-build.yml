@@ -23,26 +23,33 @@ jobs:
       - name: Install Cake.Tool
         run: dotnet tool install --global Cake.Tool
 
+      - name: Restore NuGet packages
+        run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
+
       - name: Cache node_modules
         uses: actions/cache@v3
         with:
-          path: src/cody/agent/node_modules
+          path: cody-dist/agent/node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: PnpmInstall
-        run: |
-          cd src
-          dotnet tool restore
-          dotnet cake --target=PnpmInstall
-
-      - name: Build Release
+      - name: Common Build Setup
         run: |
           cd src
           dotnet tool restore
           corepack enable
-          dotnet cake
+
+      - name: Build Cody Agent
+        run: |
+          cd src
+          corepack install --global pnpm@8.6.7
+          dotnet cake --target=BuildCodyAgent
+
+      - name: Build Extension
+        run: |
+          cd src
+          dotnet cake --target=BuildExtension
 
       - name: Tests
         env:
