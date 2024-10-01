@@ -105,11 +105,8 @@ Task("BuildCodyAgent")
 
 	Context.Environment.WorkingDirectory = codyAgentDir;
 
-	if (!DirectoryExists('node_modules'))
-	{
-		Information($"--> pnpm install ...");
-		PnpmInstall();
-	}
+    Information($"--> pnpm install ...");
+    PnpmInstall();
 
 	Information($"--> pnpm build ...");
 	PnpmRun("build");
