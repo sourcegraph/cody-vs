@@ -181,7 +181,7 @@ Task("Build")
 	});
 });
 
-Task("BuildDebug")
+Task("DebugBuild")
 	.IsDependentOn("DownloadNode")
 	.IsDependentOn("Restore")
 	.Does(() =>

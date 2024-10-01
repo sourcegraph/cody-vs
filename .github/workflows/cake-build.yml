@@ -2,9 +2,11 @@
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 # concurrency prevents multiple instances of the workflow from running at the same time,
@@ -55,12 +57,12 @@ jobs:
         run: |
           cd src
           corepack install --global pnpm@8.6.7
-          dotnet cake --target=BuildCodyAgent
+          dotnet cake --target BuildCodyAgent
 
       - name: Build Extension & Tests
         run: |
           cd src
-          dotnet cake --target=BuildDebug
+          dotnet cake --target DebugBuild
 
       - name: Run Tests
         env:
