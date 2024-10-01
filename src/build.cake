@@ -20,7 +20,7 @@ var publishManifestFile = buildDir + File("Marketplace/manifest.json");
 
 var vsixPublisherFile = VSWhereLatest() + File("/VSSDK/VisualStudioIntegration/Tools/Bin/VsixPublisher.exe");
 
-var notIncludeFiles = new string[] 
+var notIncludeFiles = new string[]
 {
 	"tree-sitter-bash.wasm",
 	"tree-sitter-dart.wasm",
@@ -89,7 +89,7 @@ Task("BuildCodyAgent")
 
         Information($"--> git pull ...");
 		GitPull(codyDir, "cake", "cake@cake.com", "", "", "origin");
-		
+
 		Information($"--> Checkout '{branchName}' ...");
 		GitCheckout(codyDir, branchName);
 
@@ -105,8 +105,10 @@ Task("BuildCodyAgent")
 
 	Context.Environment.WorkingDirectory = codyAgentDir;
 
-	Information($"--> pnpm install ...");
-	PnpmInstall();
+    if !(DirectoryExists('node_modules')) {
+        Information($"--> pnpm install ...");
+        PnpmInstall();
+    }
 
 	Information($"--> pnpm build ...");
 	PnpmRun("build");
@@ -124,14 +126,14 @@ Task("BuildCodyAgent")
 	Information($"--> Copying the agent to '{agentDir}'");
 	CreateDirectory(agentDir);
 	CopyDirectory(codyAgentDistDir, agentDir);
-	
+
 	foreach(var fileToRemove in notIncludeFiles)
 		DeleteFile(agentDir + File(fileToRemove));
 
 	var codyWebviewsFolder = MakeAbsolute(codyDir + Directory("agent/dist/webviews"));
 	Information($"--> Cleaning '{agentWebViewDir}' ...");
 	CreateDirectory(agentWebViewDir);
-	
+
 	Information($"--> Copying the webviews from '{codyWebviewsFolder}' to '{agentWebViewDir}' ...");
 	CopyDirectory(codyWebviewsFolder, agentWebViewDir);
 
@@ -192,7 +194,7 @@ Task("Tests")
 		Verbosity = Verbosity.Minimal
 	});
 
-//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings 
+//	DotNetTest("./Cody.VisualStudio.Tests/bin/Debug/Cody.VisualStudio.Tests.dll", new DotNetTestSettings
 //    {
 //        NoBuild = true,
 //        NoRestore = true

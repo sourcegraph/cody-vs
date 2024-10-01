@@ -37,6 +37,17 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
+    # - name: Load node_modules
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: '**/node_modules'
+    #     key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+    - uses: actions/cache@v4
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
     - name: Build Release
       run: |
         cd src
