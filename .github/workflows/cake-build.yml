@@ -37,22 +37,20 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
-      - name: Common Build Setup
+      - name: Build Cody Agent
         run: |
           cd src
           dotnet tool restore
           corepack enable
-
-      - name: Build Cody Agent if needed
-        run: |
-          cd src
           corepack install --global pnpm@8.6.7
           dotnet cake --target=BuildCodyAgent
 
-      - name: Build & Tests
+      - name: Build
+        run: |
+          dotnet cake --target=BuildDebug
+
+      - name: Tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         run: |
-          cd src
-          dotnet cake --target=BuildDebug
           dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed
