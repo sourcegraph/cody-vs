@@ -23,9 +23,6 @@ jobs:
       - name: Install Cake.Tool
         run: dotnet tool install --global Cake.Tool
 
-      - name: Restore NuGet packages
-        run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
-
       - name: Cache node_modules
         uses: actions/cache@v3
         with:
@@ -37,6 +34,7 @@ jobs:
       - name: PnpmInstall
         run: |
           cd src
+          dotnet tool restore
           dotnet cake --target=PnpmInstall
 
       - name: Build Release
@@ -44,7 +42,6 @@ jobs:
           cd src
           dotnet tool restore
           corepack enable
-          corepack install --global pnpm@8.6.7
           dotnet cake
 
       - name: Tests
