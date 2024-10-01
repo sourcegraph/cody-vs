@@ -15,6 +15,7 @@ namespace Cody.Core.Agent
         private ICodyWebView codyWebView;
         private WebviewCommandsHandler webviewWebMessageHandler;
         private ILog logger;
+        private TaskCompletionSource<bool> agentInitialized = new TaskCompletionSource<bool>();
 
         public IAgentClient AgentClient { set; private get; }
 
@@ -43,10 +44,13 @@ namespace Cody.Core.Agent
             }
         }
 
+        public void SetAgentInitialized() => agentInitialized.TrySetResult(true);
 
         [AgentCallback("webview/registerWebviewViewProvider")]
         public async Task RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
         {
+            await agentInitialized.Task;
+
             await AgentClient.ResolveWebviewView(new ResolveWebviewViewParams
             {
                 ViewId = viewId,

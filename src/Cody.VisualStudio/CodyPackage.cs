@@ -312,6 +312,8 @@ namespace Cody.VisualStudio
 
         private void OnAgentInitialized(object sender, ServerInfo e)
         {
+            WebViewNotificationHandlers.SetAgentInitialized();
+
             if (e.Authenticated == true)
             {
                 StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
