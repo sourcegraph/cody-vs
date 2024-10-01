@@ -51,11 +51,11 @@ jobs:
           dotnet tool restore
           corepack enable
 
-      - name: Build Cody Agent
+      - name: Build Cody Agent if needed
         run: |
           cd src
           corepack install --global pnpm@8.6.7
-          dotnet cake --target=BuildCodyAgent
+          dotnet cake --target=BuildCodyAgentIfNeeded
 
       - name: Build Extension
         run: |

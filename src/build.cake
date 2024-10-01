@@ -148,6 +148,21 @@ Task("BuildCodyAgent")
 
 });
 
+Task("BuildCodyAgentIfNeeded")
+    .Does(() =>
+{
+    var codyAgentDistDir = MakeAbsolute(codyDir + Directory("agent/dist"));
+    if (!DirectoryExists(codyAgentDistDir))
+    {
+        Information("Cody Agent dist directory not found. Building Cody Agent...");
+        RunTarget("BuildCodyAgent");
+    }
+    else
+    {
+        Information("Cody Agent dist directory already exists. Skipping build.");
+    }
+});
+
 Task("DownloadNode")
 	.Does(() =>
 {
