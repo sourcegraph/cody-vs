@@ -11,6 +11,7 @@ jobs:
   build:
     # this now uses a dedicated large runner from GitHub running the following specs:
     # 8-core, 32GB RAM, 300GB SSD
+    # https://github.com/organizations/sourcegraph/settings/actions/runner-groups/6
     runs-on:
       # this group only allows access to this workflow
       group: cody-vs-large-runner
