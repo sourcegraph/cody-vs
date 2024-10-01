@@ -37,14 +37,6 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
-      - name: Cache cody-dist
-        uses: actions/cache@v3
-        with:
-          path: cody-dist
-          key: ${{ runner.os }}-cody-dist-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-cody-dist-
-
       - name: Common Build Setup
         run: |
           cd src
@@ -55,7 +47,7 @@ jobs:
         run: |
           cd src
           corepack install --global pnpm@8.6.7
-          dotnet cake --target=BuildCodyAgentIfNeeded
+          dotnet cake --target=BuildCodyAgent
 
       - name: Build & Tests
         env:
