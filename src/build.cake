@@ -181,6 +181,19 @@ Task("Build")
 	});
 });
 
+Task("BuildDebug")
+	.IsDependentOn("DownloadNode")
+	.IsDependentOn("Restore")
+	.Does(() =>
+{
+	MSBuild("./Cody.sln", new MSBuildSettings
+	{
+		Configuration = "Debug",
+        PlatformTarget = PlatformTarget.MSIL,
+		Verbosity = Verbosity.Minimal
+	});
+});
+
 Task("Tests")
 	//.IsDependentOn("Build")
 	.Does(() =>
