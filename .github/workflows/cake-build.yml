@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 # concurrency prevents multiple instances of the workflow from running at the same time,
