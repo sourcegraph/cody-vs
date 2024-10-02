@@ -57,7 +57,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cody-dist-
 
-      - name: Build Extension
+      - name: Build Extension (Debug)
         run: |
           cd src
           dotnet cake --target=BuildDebug
