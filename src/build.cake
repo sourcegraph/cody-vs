@@ -94,7 +94,7 @@ Task("BuildCodyAgent")
 		GitCheckout(codyDir, branchName);
 
         Information($"--> Fetching all tags...");
-        GitFetch(codyDir, "origin");
+        GitFetchTags(codyDir, "origin");
 
         Information($"--> Checkout latest stable release using tag {codyStableReleaseTag} ...");
 		GitCheckout(codyDir, codyStableReleaseTag);
