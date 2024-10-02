@@ -46,7 +46,8 @@ var codyRepo = "https://github.com/sourcegraph/cody.git";
 var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-x64.exe";
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
-var codyCommit = "503154d7b220be0ebcfff5d58e6348293a98ff63"; // points to https://github.com/sourcegraph/cody/pull/5532 in the main branch
+// The latest tag of the stable release from the cody repository https://github.com/sourcegraph/cody/tags
+var codyStableReleaseTag = "vscode-v1.34.3";
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
@@ -92,8 +93,11 @@ Task("BuildCodyAgent")
 		Information($"--> Checkout '{branchName}' ...");
 		GitCheckout(codyDir, branchName);
 
-        Information($"--> Checkout '{branchName}' using commit {codyCommit} ...");
-		GitCheckout(codyDir, codyCommit);
+        Information($"--> Fetching all tags...");
+        GitFetch(codyDir, "origin");
+
+        Information($"--> Checkout latest stable release using tag {codyStableReleaseTag} ...");
+		GitCheckout(codyDir, codyStableReleaseTag);
 	}
 
 	Information($"--> Cleaning '{codyAgentDistDir}' ...");
@@ -144,6 +148,20 @@ Task("BuildCodyAgent")
 
 });
 
+Task("BuildCodyAgentIfNeeded")
+    .Does(() =>
+{
+    if (!DirectoryExists(codyDir) || !DirectoryExists(agentDir))
+    {
+        Information("Cody Agent dist directory not found. Building Cody Agent...");
+        RunTarget("BuildCodyAgent");
+    }
+    else
+    {
+        Information("Cody Agent dist directory already exists. Skipping build.");
+    }
+});
+
 Task("DownloadNode")
 	.Does(() =>
 {
@@ -173,6 +191,19 @@ Task("Build")
 	{
 		Configuration = configuration,
 		PlatformTarget = PlatformTarget.MSIL,
+		Verbosity = Verbosity.Minimal
+	});
+});
+
+Task("BuildDebug")
+	.IsDependentOn("DownloadNode")
+	.IsDependentOn("Restore")
+	.Does(() =>
+{
+	MSBuild("./Cody.sln", new MSBuildSettings
+	{
+		Configuration = "Debug",
+        PlatformTarget = PlatformTarget.MSIL,
 		Verbosity = Verbosity.Minimal
 	});
 });

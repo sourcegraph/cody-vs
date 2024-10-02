@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Cody.VisualStudio" Version="0.0.1" Language="en-US" Publisher="sourcegraph" />
+        <Identity Id="Cody.VisualStudio" Version="0.0.2" Language="en-US" Publisher="sourcegraph" />
         <DisplayName>Cody for Visual Studio - AI Coding Assistant</DisplayName>
         <Description xml:space="preserve">AI coding assistant that uses search and codebase context to help you write code faster!</Description>
         <MoreInfo>https://sourcegraph.com/cody</MoreInfo>

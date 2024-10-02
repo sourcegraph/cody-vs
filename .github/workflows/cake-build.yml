@@ -2,42 +2,78 @@
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
+
+# concurrency prevents multiple instances of the workflow from running at the same time,
+# using `cancel-in-progress` to cancel any existing runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: windows-latest
+    # this now uses a dedicated large runner from GitHub running the following specs:
+    # 8-core, 32GB RAM, 300GB SSD
+    # https://github.com/organizations/sourcegraph/settings/actions/runner-groups/6
+    runs-on: 16gb_16_core_large_window_runner
+    # do we want to run this on forks?
+    if: github.repository_owner == 'sourcegraph'
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.3
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.3
 
-    - name: ⚙️ Prepare Visual Studio
-      run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
+      - name: ⚙️ Prepare Visual Studio
+        run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
 
-    - name: Install Cake.Tool
-      run: dotnet tool install --global Cake.Tool
+      - name: Install Cake.Tool
+        run: dotnet tool install --global Cake.Tool
 
-    - name: Restore NuGet packages
-      run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
+      - name: Restore NuGet packages
+        run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
 
-    - name: Build Release
-      run: |
-        cd src
-        dotnet tool restore
-        corepack enable
-        corepack install --global pnpm@8.6.7
-        dotnet cake
+      - name: Common Build Setup
+        run: |
+          cd src
+          dotnet tool restore
+          corepack enable
 
-    - name: Tests
-      env: 
-        Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-      run: |
-        cd src
-        dotnet cake --target Tests
-        dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed
+      - name: Build Cody Agent if needed
+        run: |
+          cd src
+          corepack install --global pnpm@8.6.7
+          dotnet cake --target=BuildCodyAgentIfNeeded
+
+      - name: Cache cody-dist
+        uses: actions/cache@v3
+        with:
+          path: cody-dist/agent
+          key: ${{ runner.os }}-cody-dist-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cody-dist-
+
+      - name: Build Extension (Debug)
+        run: |
+          cd src
+          dotnet cake --target=BuildDebug
+
+      - name: Tests
+        env:
+          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
+        run: |
+          cd src
+          dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed -l:trx
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        if: always()
+        with:
+          files: |
+            src\TestResults/**/*.xml
+            src\TestResults/**/*.trx
+            src\TestResults/**/*.json
