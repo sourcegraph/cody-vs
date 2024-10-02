@@ -4,22 +4,19 @@ using Cody.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
-    public class ProgressNotificationHandlers
+    public class ProgressNotificationHandlers : IInjectAgentClient
     {
         private IProgressService progressService;
-        private IAgentService agentService;
+
+        public IAgentClient AgentClient { set; private get; }
 
         public ProgressNotificationHandlers(IProgressService progressService)
         {
             this.progressService = progressService;
         }
-
-        public void SetAgentService(IAgentService agentService) => this.agentService = agentService;
 
         [AgentCallback("progress/start", deserializeToSingleObject: true)]
         public void Start(ProgressStartParams progressStart)
@@ -27,7 +24,7 @@ namespace Cody.Core.Agent
             Action cancelAction = null;
             if (progressStart.Options.Cancellable == true)
             {
-                cancelAction = () => agentService.CancelProgress(progressStart.Id);
+                cancelAction = () => AgentClient.CancelProgress(progressStart.Id);
             };
 
             progressService.Start(progressStart.Id, progressStart.Options.Title, cancelAction);

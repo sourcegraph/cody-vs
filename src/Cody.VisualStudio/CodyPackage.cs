@@ -7,8 +7,6 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Workspace;
-using Cody.UI.Controls;
-using Cody.UI.Views;
 using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Options;
@@ -38,6 +36,7 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using System.Net;
+using Cody.UI.Controls;
 
 namespace Cody.VisualStudio
 {
@@ -75,22 +74,22 @@ namespace Cody.VisualStudio
 
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
-        public IAgentService AgentService;
+        public IAgentClient AgentClient;
         public IUserSettingsService UserSettingsService;
         public IStatusbarService StatusbarService;
         public IThemeService ThemeService;
         public ISolutionService SolutionService;
-        public IWebViewsManager WebViewsManager;
         public IProgressService ProgressService;
-        public IAgentProxy AgentClient;
         public ISecretStorageService SecretStorageService;
 
         public GeneralOptionsViewModel GeneralOptionsViewModel;
-        public MainViewModel MainViewModel;
 
-        public MainView MainView;
+        public AgentClientProvider AgentClientProvider;
         public NotificationHandlers NotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
+        public WebViewNotificationHandlers WebViewNotificationHandlers;
+        public WebviewCommandsHandler WebviewWebMessageHandler;
+        public CodyWebView CodyWebView;
         public DocumentsSyncService DocumentsSyncService;
         public IFileService FileService;
         public IVsUIShell VsUIShell;
@@ -141,16 +140,15 @@ namespace Cody.VisualStudio
             FileService = new FileService(this, Logger);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
-            NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
+            NotificationHandlers = new NotificationHandlers(AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
 
-
+            WebviewWebMessageHandler = new WebviewCommandsHandler(UserSettingsService, FileService, ShowOptionsPage);
+            CodyWebView = new CodyWebView(ThemeService.GetThemingScript());
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
+            WebViewNotificationHandlers = new WebViewNotificationHandlers(CodyWebView, WebviewWebMessageHandler, Logger);
 
-            var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
-            ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
-            NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
+            ThemeService.ThemeChanged += OnThemeChanged;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
@@ -160,7 +158,19 @@ namespace Cody.VisualStudio
             Logger.Info($"Visual Studio version: {VsVersionService.Version}");
         }
 
-        private void HandleOnOptionsPageShowRequest(object sender, EventArgs e)
+        private async void OnThemeChanged(object sender, IColorThemeChangedEvent e)
+        {
+            try
+            {
+                await CodyWebView?.ChangeColorTheme(e.ThemingScript);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Theme change error", ex);
+            }
+        }
+
+        private void ShowOptionsPage()
         {
             try
             {
@@ -195,7 +205,7 @@ namespace Cody.VisualStudio
                 Logger.Debug($"Changing authorization details ...");
 
                 var config = GetConfiguration();
-                var status = await AgentService.ConfigurationChange(config);
+                var status = await AgentClient.ConfigurationChange(config);
 
                 UpdateCurrentWorkspaceFolder();
 
@@ -280,21 +290,19 @@ namespace Cody.VisualStudio
                 if (devPort != null)
                     Logger.Debug($"Connecting to the agent using port:{devPort}");
 
-                var options = new AgentClientOptions
+                var options = new AgentClientProviderOptions
                 {
-                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
+                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers, WebViewNotificationHandlers },
                     AgentDirectory = agentDir,
-                    RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = devPort != null,
                     RemoteAgentPort = portNumber,
+                    ClientInfo = GetClientInfo(),
                     AcceptNonTrustedCertificates = UserSettingsService.AcceptNonTrustedCert,
                     Debug = true
                 };
 
-                AgentClient = new AgentClient(options, Logger, AgentLogger);
-                AgentClient.OnInitialized += OnAgentInitialized;
-
-                WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
+                AgentClientProvider = new AgentClientProvider(options, Logger, AgentLogger);
+                AgentClientProvider.Initialized += OnAgentInitialized;
             }
             catch (Exception ex)
             {
@@ -304,6 +312,8 @@ namespace Cody.VisualStudio
 
         private void OnAgentInitialized(object sender, ServerInfo e)
         {
+            WebViewNotificationHandlers.SetAgentInitialized();
+
             if (e.Authenticated == true)
             {
                 StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
@@ -378,15 +388,7 @@ namespace Cody.VisualStudio
                 {
                     try
                     {
-                        await TestServerConnection(UserSettingsService.ServerEndpoint);
-                        AgentClient.Start();
-
-                        var clientConfig = GetClientInfo();
-                        AgentService = await AgentClient.Initialize(clientConfig);
-
-                        WebViewsManager.SetAgentService(AgentService);
-                        NotificationHandlers.SetAgentClient(AgentService);
-                        ProgressNotificationHandlers.SetAgentService(AgentService);
+                        AgentClient = await AgentClientProvider.CreateAgentClient();
 
                         if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
                         SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
@@ -419,11 +421,11 @@ namespace Cody.VisualStudio
                 {
                     Uris = new List<string> { solutionUri }
                 };
-                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                AgentClient.WorkspaceFolderDidChange(workspaceFolderEvent);
 
                 if (DocumentsSyncService == null)
                 {
-                    var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
+                    var documentSyncCallback = new DocumentSyncCallback(AgentClient, Logger);
                     DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, Logger);
                 }
                 DocumentsSyncService.Initialize();
@@ -443,7 +445,7 @@ namespace Cody.VisualStudio
                 {
                     Uris = new List<string>()
                 };
-                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                AgentClient.WorkspaceFolderDidChange(workspaceFolderEvent);
 
             }
             catch (Exception ex)

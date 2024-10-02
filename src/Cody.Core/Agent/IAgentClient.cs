@@ -8,7 +8,7 @@ namespace Cody.Core.Agent
     //---------------------------------------------------------
     // For notifications return type MUST be void!
     //---------------------------------------------------------
-    public interface IAgentService
+    public interface IAgentClient
     {
         [AgentCall("initialize")]
         Task<ServerInfo> Initialize(ClientInfo clientInfo);

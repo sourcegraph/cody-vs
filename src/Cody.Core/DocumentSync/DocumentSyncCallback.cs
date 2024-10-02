@@ -11,9 +11,9 @@ namespace Cody.Core.DocumentSync
     public class DocumentSyncCallback : IDocumentSyncActions
     {
         private ILog logger;
-        private IAgentService agentService;
+        private IAgentClient agentService;
 
-        public DocumentSyncCallback(IAgentService agentService, ILog logger)
+        public DocumentSyncCallback(IAgentClient agentService, ILog logger)
         {
             this.agentService = agentService;
             this.logger = logger;

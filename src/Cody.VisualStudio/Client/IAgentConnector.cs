@@ -5,7 +5,7 @@ namespace Cody.VisualStudio.Client
 {
     public interface IAgentConnector
     {
-        void Connect(AgentClientOptions options);
+        void Connect(AgentClientProviderOptions options);
 
         void Disconnect();
 

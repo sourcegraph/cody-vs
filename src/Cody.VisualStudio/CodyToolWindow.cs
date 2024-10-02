@@ -1,8 +1,6 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
-using Cody.UI.ViewModels;
-using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -31,24 +29,8 @@ namespace Cody.VisualStudio
         {
             this.Caption = "Cody";
 
-            // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
-            // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
-            // the object returned by the Content property.
-
             var package = GetPackage();
-            var logger = package.Logger;
-            var notificationsHandlers = package.NotificationHandlers;
-            var webViewsManager = package.WebViewsManager;
-
-            var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, logger);
-            var view = new MainView
-            {
-                DataContext = viewModel
-            };
-
-            package.MainViewModel = viewModel;
-            package.MainView = view;
-            base.Content = view;
+            base.Content = package.CodyWebView;
 
         }
 

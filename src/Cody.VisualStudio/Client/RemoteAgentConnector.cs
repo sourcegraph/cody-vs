@@ -16,7 +16,7 @@ namespace Cody.VisualStudio.Client
         public event EventHandler<int> Disconnected;
         public event EventHandler<string> ErrorReceived;
 
-        public void Connect(AgentClientOptions options)
+        public void Connect(AgentClientProviderOptions options)
         {
             client = new TcpClient();
             client.Connect(IPAddress.Loopback, options.RemoteAgentPort);

@@ -46,7 +46,7 @@ namespace Cody.VisualStudio.Tests
             await codyPackage.ShowToolWindowAsync();
 
             // then
-            Assert.NotNull(codyPackage.MainView);
+            Assert.NotNull(codyPackage.CodyWebView);
         }
     }
 }
