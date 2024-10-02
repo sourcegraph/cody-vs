@@ -46,15 +46,15 @@ namespace Cody.VisualStudio.Tests
                 CodyPackage = await GetPackageAsync();
                 WriteLog("CodyPackage loaded.");
 
-                await WaitForChat();
-                WriteLog("Chat initialized and loaded.");
-
                 var accessToken = Environment.GetEnvironmentVariable("Access_Token_UI_Tests");
                 if (accessToken != null)
                 {
                     WriteLog("Using Access Token.");
                     CodyPackage.UserSettingsService.AccessToken = accessToken;
                 }
+
+                await WaitForChat();
+                WriteLog("Chat initialized and loaded.");
 
                 Playwright = await Microsoft.Playwright.Playwright.CreateAsync();
                 WriteLog("Playwright created.");
