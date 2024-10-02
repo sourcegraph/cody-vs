@@ -15,13 +15,16 @@
              d:DesignWidth="400"
              >
     <Grid Background="Transparent">
+
         <TextBlock
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             TextAlignment="Center"
             Text="Loading Cody chat..."
+            Visibility="{Binding IsChatLoaded, Converter={x:Static converters:BooleanToVisibilityConverter.InvertedHidden}}"
             />
-            <controls:WebView2Dev 
+            <controls:WebView2Dev
+                Background="Transparent"
                 Html="{Binding Html}"
                 SendMessage="{Binding WebviewMessageSendCommand }"
                 PostMessage="{Binding PostMessage}"
