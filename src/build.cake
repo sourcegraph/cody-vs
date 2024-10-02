@@ -148,6 +148,20 @@ Task("BuildCodyAgent")
 
 });
 
+Task("BuildCodyAgentIfNeeded")
+    .Does(() =>
+{
+    if (!DirectoryExists(codyDir) || !DirectoryExists(agentDir))
+    {
+        Information("Cody Agent dist directory not found. Building Cody Agent...");
+        RunTarget("BuildCodyAgent");
+    }
+    else
+    {
+        Information("Cody Agent dist directory already exists. Skipping build.");
+    }
+});
+
 Task("DownloadNode")
 	.Does(() =>
 {
@@ -177,6 +191,19 @@ Task("Build")
 	{
 		Configuration = configuration,
 		PlatformTarget = PlatformTarget.MSIL,
+		Verbosity = Verbosity.Minimal
+	});
+});
+
+Task("BuildDebug")
+	.IsDependentOn("DownloadNode")
+	.IsDependentOn("Restore")
+	.Does(() =>
+{
+	MSBuild("./Cody.sln", new MSBuildSettings
+	{
+		Configuration = "Debug",
+        PlatformTarget = PlatformTarget.MSIL,
 		Verbosity = Verbosity.Minimal
 	});
 });
