@@ -162,7 +162,7 @@ namespace Cody.VisualStudio
         {
             try
             {
-                await CodyWebView.ChangeColorTheme(e.ThemingScript);
+                await CodyWebView?.ChangeColorTheme(e.ThemingScript);
             }
             catch (Exception ex)
             {
