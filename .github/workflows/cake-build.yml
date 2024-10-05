@@ -50,7 +50,7 @@ jobs:
           dotnet cake --target=BuildCodyAgentIfNeeded
 
       - name: Cache cody-dist
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: cody-dist/agent
           key: ${{ runner.os }}-cody-dist-${{ github.sha }}
