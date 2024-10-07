@@ -27,22 +27,28 @@ namespace Cody.VisualStudio.Proposals
 
         public override Task<ProposalManagerBase> GetProposalManagerAsync(ITextView view, CancellationToken cancel)
         {
+            InitializeLogger();
 
+            return Task.FromResult<ProposalManagerBase>(new CodyProposalManager(_logger));
+        }
+
+        private void InitializeLogger()
+        {
             try
             {
-                var package = GetPackage();
+                if (_logger == null)
+                {
+                    var package = GetPackage();
+                    if (package != null)
+                        _logger = package.Logger;
 
-                if (package != null)
-                    _logger = package.Logger;
-
-                _logger?.Debug("Init.");
+                    _logger?.Debug("Init.");
+                }
             }
             catch (Exception ex)
             {
                 ;
             }
-
-            return Task.FromResult<ProposalManagerBase>(new CodyProposalManager(_logger));
         }
 
         private CodyPackage GetPackage()
