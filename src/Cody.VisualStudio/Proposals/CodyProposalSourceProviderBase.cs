@@ -43,6 +43,8 @@ namespace Cody.VisualStudio.Proposals
             var wpfView = view as IWpfTextView;
             if (wpfView == null) return Task.FromResult<ProposalSourceBase>(null);
 
+            _logger?.Debug("Init.");
+
             return Task.FromResult<ProposalSourceBase>( new CodyProposalSource(wpfView, _logger));
         }
 
@@ -106,6 +108,8 @@ namespace Cody.VisualStudio.Proposals
         public override Task<ProposalCollectionBase> RequestProposalsAsync(VirtualSnapshotPoint caret, CompletionState completionState, ProposalScenario scenario,
             char triggeringCharacter, CancellationToken cancel)
         {
+            _logger?.Debug("Init.");
+
             return Task.FromResult<ProposalCollectionBase>(new CodyProposalCollection());
         }
     }
