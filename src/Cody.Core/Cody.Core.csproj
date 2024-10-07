@@ -57,11 +57,16 @@
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
+    <Compile Include="Agent\Protocol\AutocompleteItem.cs" />
+    <Compile Include="Agent\Protocol\AutocompleteParams.cs" />
+    <Compile Include="Agent\Protocol\AutocompleteResult.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\CompletionItemParams.cs" />
     <Compile Include="Agent\Protocol\ProgressOptions.cs" />
     <Compile Include="Agent\Protocol\ProgressReportParams.cs" />
     <Compile Include="Agent\Protocol\ProgressStartParams.cs" />
     <Compile Include="Agent\Protocol\SaveDialogOptionsParams.cs" />
+    <Compile Include="Agent\Protocol\SelectedCompletionInfo.cs" />
     <Compile Include="Agent\Protocol\TestProgress.cs" />
     <Compile Include="Agent\Protocol\WorkspaceFolderDidChangeEvent.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParamsOptions.cs" />
