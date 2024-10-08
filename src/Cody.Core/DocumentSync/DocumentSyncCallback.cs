@@ -27,7 +27,7 @@ namespace Cody.Core.DocumentSync
 
         public void OnChanged(string fullPath, DocumentRange visibleRange, DocumentRange selection, IEnumerable<DocumentChange> changes)
         {
-            logger.Debug($"Sending didChange() for '{fullPath}', s:{selection}, v:{visibleRange}, c:{string.Join("", changes)}");
+            //logger.Debug($"Sending didChange() for '{fullPath}', s:{selection}, v:{visibleRange}, c:{string.Join("", changes)}");
 
             Range vRange = null;
             if (visibleRange != null)
@@ -101,7 +101,7 @@ namespace Cody.Core.DocumentSync
 
         public void OnFocus(string fullPath)
         {
-            logger.Debug($"Sending DidFocus() for '{fullPath}'");
+            //logger.Debug($"Sending DidFocus() for '{fullPath}'");
             agentService.DidFocus(new CodyFilePath { Uri = ToUri(fullPath) });
 
         }
