@@ -2,6 +2,7 @@ using Cody.Core.Agent.Protocol;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Cody.Core.Agent
 {
@@ -62,7 +63,7 @@ namespace Cody.Core.Agent
         void CancelProgress(string id);
 
         [AgentCall("autocomplete/execute")]
-        Task<AutocompleteResult> Autocomplete(AutocompleteParams autocomplete);
+        Task<AutocompleteResult> Autocomplete(AutocompleteParams autocomplete, CancellationToken cancellationToken);
 
         [AgentCall("autocomplete/clearLastCandidate")]
         void ClearLastCandidate();

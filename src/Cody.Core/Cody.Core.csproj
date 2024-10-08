@@ -89,6 +89,7 @@
     <Compile Include="Agent\Protocol\ResolveWebviewViewParams.cs" />
     <Compile Include="Agent\SetHtmlEvent.cs" />
     <Compile Include="Agent\WebviewMessageHandler.cs" />
+    <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />

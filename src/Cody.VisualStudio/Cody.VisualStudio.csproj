@@ -54,6 +54,9 @@
     <Compile Include="Client\NameTransformer.cs" />
     <Compile Include="Client\RemoteAgentConnector.cs" />
     <Compile Include="CodyToolWindow.cs" />
+    <Compile Include="Completions\CodyProposalCollection.cs" />
+    <Compile Include="Completions\CodyProposalSource.cs" />
+    <Compile Include="Completions\CodyProposalSourceProvider.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
     <Compile Include="Infrastructure\WindowPaneLogger.cs" />
     <Compile Include="Infrastructure\VsConstants.cs" />
@@ -115,6 +118,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Language">
+      <Version>17.11.260</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.0-previews-4-31709-430" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.6.2164">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

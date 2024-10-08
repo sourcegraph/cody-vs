@@ -96,6 +96,8 @@ namespace Cody.VisualStudio
         public IVsUIShell VsUIShell;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
 
+        public static IAgentService AgentServiceInstance;
+
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
 
@@ -327,8 +329,8 @@ namespace Cody.VisualStudio
                 Capabilities = new ClientCapabilities
                 {
                     Authentication = Capability.Enabled,
-                    Completions = "none",
-                    Edit = Capability.None,
+                    //Completions = "none",
+                    Edit = Capability.Enabled,
                     EditWorkspace = Capability.None,
                     ProgressBars = Capability.Enabled,
                     CodeLenses = Capability.None,
@@ -360,7 +362,7 @@ namespace Cody.VisualStudio
                 ServerEndpoint = UserSettingsService.ServerEndpoint,
                 Proxy = null,
                 AccessToken = UserSettingsService.AccessToken,
-                AutocompleteAdvancedProvider = null,
+                //AutocompleteAdvancedProvider = null,
                 Debug = true,
                 VerboseDebug = true,
             };
@@ -383,6 +385,7 @@ namespace Cody.VisualStudio
 
                         var clientConfig = GetClientInfo();
                         AgentService = await AgentClient.Initialize(clientConfig);
+                        AgentServiceInstance = AgentService;
 
                         WebViewsManager.SetAgentService(AgentService);
                         NotificationHandlers.SetAgentClient(AgentService);
