@@ -99,7 +99,7 @@ namespace Cody.Core.DocumentSync
         public void OnFocus(string fullPath)
         {
             trace.TraceEvent("DidFocus", "{0}", fullPath);
-            agentService.DidFocus(new CodyFilePath { Uri = ToUri(fullPath) });
+            agentService.DidFocus(new CodyFilePath { Uri = fullPath.ToUri() });
 
         }
 
@@ -151,7 +151,7 @@ namespace Cody.Core.DocumentSync
         public void OnSaved(string fullPath)
         {
             trace.TraceEvent("DidSave", "{0}", fullPath);
-            agentService.DidSave(new CodyFilePath { Uri = ToUri(fullPath) });
+            agentService.DidSave(new CodyFilePath { Uri = fullPath.ToUri() });
         }
     }
 }

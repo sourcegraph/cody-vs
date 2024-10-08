@@ -81,6 +81,8 @@ namespace Cody.VisualStudio
         public IVsUIShell VsUIShell;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
 
+        public static IAgentService AgentServiceInstance;
+
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
 
@@ -310,6 +312,7 @@ namespace Cody.VisualStudio
 
                         var clientConfig = ConfigurationService.GetClientInfo();
                         AgentService = await AgentClient.Initialize(clientConfig);
+                        AgentServiceInstance = AgentService;
 
                         WebViewsManager.SetAgentService(AgentService);
                         NotificationHandlers.SetAgentClient(AgentService);
