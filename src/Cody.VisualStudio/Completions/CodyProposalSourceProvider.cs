@@ -34,6 +34,7 @@ namespace Cody.VisualStudio.Completions
 
         public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
         {
+            SimpleLog.Info("GetProposalSourceAsync begin");
             IWpfTextView wpfTextView = view as IWpfTextView;
             if (wpfTextView != null && view.Roles.Contains("DOCUMENT") && view.Roles.Contains("EDITABLE"))
             {
@@ -41,6 +42,7 @@ namespace Cody.VisualStudio.Completions
                 var vsTextView = editorAdaptersFactoryService.GetViewAdapter(view);
                 if (document != null && vsTextView != null)
                 {
+                    SimpleLog.Info($"CodyProposalSource for '{document.FilePath}'");
                     return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, vsTextView));
                 }
             }

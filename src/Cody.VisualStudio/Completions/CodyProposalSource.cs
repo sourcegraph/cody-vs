@@ -34,8 +34,13 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
+            SimpleLog.Info("RequestProposalsAsync begin");
             agentService = CodyPackage.AgentServiceInstance;
-            if (agentService == null) return null;
+            if (agentService == null)
+            {
+                SimpleLog.Warning("Agent service not jet ready");
+                return null;
+            }
 
             try
             {
@@ -49,13 +54,13 @@ namespace Cody.VisualStudio.Completions
                 };
                 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(line).GetText();
-                System.Diagnostics.Debug.WriteLine($"XX: Before call vs:{caret.VirtualSpaces} poslc:{line}:{col} pos:{caret.Position.Position} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
+                SimpleLog.Info($"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{line}:{col} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
                 var autocompleteResult = await agentService.Autocomplete(autocomplete, cancel);
 
-                if(autocompleteResult.Items.Length == 0) System.Diagnostics.Debug.WriteLine($"XX: No autocoplite");
-                else System.Diagnostics.Debug.WriteLine($"XX: {autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
-                System.Diagnostics.Debug.WriteLine($"XX: si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan}");
-                System.Diagnostics.Debug.WriteLine($"XX: cs'{textDocument.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(line).GetText()}'");
+                if(autocompleteResult.Items.Length == 0) SimpleLog.Info($"no autocoplite to show");
+                else SimpleLog.Info($"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
+            
+                System.Diagnostics.Debug.WriteLine($"After cs'{textDocument.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(line).GetText()}'");
 
                 var proposalList = new List<ProposalBase>();
                 if (autocompleteResult != null && autocompleteResult.Items.Any())
