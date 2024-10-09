@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -34,18 +33,18 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
-            SimpleLog.Info("RequestProposalsAsync begin");
+            SimpleLog.Info("CodyProposalManager", "begin");
             agentService = CodyPackage.AgentServiceInstance;
             if (agentService == null)
             {
-                SimpleLog.Warning("Agent service not jet ready");
+                SimpleLog.Warning("CodyProposalManager", "Agent service not jet ready");
                 return null;
             }
 
             try
             {
                 vsTextView.GetLineAndColumn(caret.Position.Position, out int line, out int col);
-                
+
                 var autocomplete = new AutocompleteParams
                 {
                     Uri = textDocument.FilePath.ToUri(),
@@ -54,11 +53,11 @@ namespace Cody.VisualStudio.Completions
                 };
                 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(line).GetText();
-                SimpleLog.Info($"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{line}:{col} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
+                SimpleLog.Info("CodyProposalManager", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{line}:{col} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
                 var autocompleteResult = await agentService.Autocomplete(autocomplete, cancel);
 
-                if(autocompleteResult.Items.Length == 0) SimpleLog.Info($"no autocoplite to show");
-                else SimpleLog.Info($"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
+                if(autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalManager", $"no autocoplite to show");
+                else SimpleLog.Info("CodyProposalManager", $"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
             
                 System.Diagnostics.Debug.WriteLine($"After cs'{textDocument.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(line).GetText()}'");
 
@@ -76,8 +75,7 @@ namespace Cody.VisualStudio.Completions
 
                         var edits = new List<ProposedEdit>(1)
                         {
-                            new ProposedEdit(new SnapshotSpan(start, end), autocompleteItem.InsertText)
-                            //new ProposedEdit(new SnapshotSpan(newPoint.Position, 0), autocompleteItem.InsertText)
+                            new ProposedEdit(new SnapshotSpan(start, 0), autocompleteItem.InsertText)
                         };
 
                         var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: autocompleteItem.Id, flags: ProposalFlags.FormatAfterCommit);
@@ -91,10 +89,23 @@ namespace Cody.VisualStudio.Completions
             }
             catch (OperationCanceledException ex)
             {
-                System.Diagnostics.Debug.WriteLine($"XX: Canceled");
+                SimpleLog.Error("CodyProposalManager", "canceled");
             }
 
             return null;
+        }
+
+        private Position ToLineColPosition(SnapshotPoint point)
+        {
+            var containgLine = point.GetContainingLine();
+            int col = point.Position - containgLine.Start.Position;
+            return new Position { Line = containgLine.LineNumber, Character = col };
+        }
+
+        private int ToPosition(ITextSnapshot textSnapshot, int line, int col)
+        {
+            var containgLine = textSnapshot.GetLineFromLineNumber(line);
+            return containgLine.Start.Position + col;
         }
     }
 }

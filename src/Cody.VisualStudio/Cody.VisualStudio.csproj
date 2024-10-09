@@ -55,6 +55,8 @@
     <Compile Include="Client\RemoteAgentConnector.cs" />
     <Compile Include="CodyToolWindow.cs" />
     <Compile Include="Completions\CodyProposalCollection.cs" />
+    <Compile Include="Completions\CodyProposalManager.cs" />
+    <Compile Include="Completions\CodyProposalManagerProvider.cs" />
     <Compile Include="Completions\CodyProposalSource.cs" />
     <Compile Include="Completions\CodyProposalSourceProvider.cs" />
     <Compile Include="Completions\SimpleLog.cs" />
