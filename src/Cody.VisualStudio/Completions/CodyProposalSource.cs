@@ -58,8 +58,6 @@ namespace Cody.VisualStudio.Completions
 
                 if(autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalManager", $"no autocoplite to show");
                 else SimpleLog.Info("CodyProposalManager", $"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
-            
-                System.Diagnostics.Debug.WriteLine($"After cs'{textDocument.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(line).GetText()}'");
 
                 var proposalList = new List<ProposalBase>();
                 if (autocompleteResult != null && autocompleteResult.Items.Any())
@@ -73,9 +71,14 @@ namespace Cody.VisualStudio.Completions
                         vsTextView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
                         var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
+                        var completionText = autocompleteItem.InsertText;
+                        int insertionStart = caret.IsInVirtualSpace ? completionText.TakeWhile(char.IsWhiteSpace).Count() : 0;
+                        completionText = completionText.Substring(insertionStart);
+
+
                         var edits = new List<ProposedEdit>(1)
                         {
-                            new ProposedEdit(new SnapshotSpan(start, 0), autocompleteItem.InsertText)
+                            new ProposedEdit(new SnapshotSpan(start, end), completionText)
                         };
 
                         var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: autocompleteItem.Id, flags: ProposalFlags.FormatAfterCommit);

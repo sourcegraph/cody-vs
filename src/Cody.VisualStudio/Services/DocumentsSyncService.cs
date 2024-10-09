@@ -11,6 +11,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Threading;
+using Cody.VisualStudio.Completions;
 
 namespace Cody.VisualStudio.Services
 {
@@ -264,6 +265,7 @@ namespace Cody.VisualStudio.Services
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
                 documentActions.OnChanged(path, visibleRange, selection, changes);
+                SimpleLog.Info("DocumentsSyncService", $"change: '{changes.FirstOrDefault()?.Text}'");
             }
             catch (Exception ex)
             {
