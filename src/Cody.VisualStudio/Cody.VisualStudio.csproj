@@ -61,6 +61,7 @@
     <Compile Include="Completions\CodyProposalManagerProvider.cs" />
     <Compile Include="Completions\CodyProposalSource.cs" />
     <Compile Include="Completions\CodyProposalSourceProvider.cs" />
+    <Compile Include="Completions\SimpleLog.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
     <Compile Include="Infrastructure\WindowPaneLogger.cs" />
     <Compile Include="Infrastructure\VsConstants.cs" />
