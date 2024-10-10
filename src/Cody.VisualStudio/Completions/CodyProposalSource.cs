@@ -33,11 +33,11 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
-            SimpleLog.Info("CodyProposalManager", "begin");
+            SimpleLog.Info("CodyProposalSource", "begin");
             agentService = CodyPackage.AgentServiceInstance;
             if (agentService == null)
             {
-                SimpleLog.Warning("CodyProposalManager", "Agent service not jet ready");
+                SimpleLog.Warning("CodyProposalSource", "Agent service not jet ready");
                 return null;
             }
 
@@ -53,35 +53,36 @@ namespace Cody.VisualStudio.Completions
                 };
                 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(line).GetText();
-                SimpleLog.Info("CodyProposalManager", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{line}:{col} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
+                SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{line}:{col} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
                 var autocompleteResult = await agentService.Autocomplete(autocomplete, cancel);
 
-                if(autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalManager", $"no autocoplite to show");
-                else SimpleLog.Info("CodyProposalManager", $"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
+                if(autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalSource", $"no autocoplite to show");
+                else SimpleLog.Info("CodyProposalSource", $"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
 
                 var proposalList = new List<ProposalBase>();
                 if (autocompleteResult != null && autocompleteResult.Items.Any())
                 {
-                    foreach (var autocompleteItem in autocompleteResult.Items)
+                    foreach (var (item, index) in autocompleteResult.Items.Select((item, index) => (item, index)))
                     {
-                        
-                        var range = autocompleteItem.Range;
-                        vsTextView.GetNearestPosition(range.Start.Line, range.Start.Character, out int startPos, out _);
-                        var start = new SnapshotPoint(caret.Position.Snapshot, startPos);
-                        vsTextView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
-                        var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
-                        var completionText = autocompleteItem.InsertText;
-                        int insertionStart = caret.IsInVirtualSpace ? completionText.TakeWhile(char.IsWhiteSpace).Count() : 0;
-                        completionText = completionText.Substring(insertionStart);
+                        //var range = autocompleteItem.Range;
+                        //vsTextView.GetNearestPosition(range.Start.Line, range.Start.Character, out int startPos, out _);
+                        //var start = new SnapshotPoint(caret.Position.Snapshot, startPos);
+                        //vsTextView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
+                        //var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
+                        //var completionText = autocompleteItem.InsertText;
+                        //int insertionStart = caret.IsInVirtualSpace ? completionText.TakeWhile(char.IsWhiteSpace).Count() : 0;
+                        //completionText = completionText.Substring(insertionStart);
+
+                        var completionText = autocompleteResult.CompletionEvent.Items[index].InsertText;
 
                         var edits = new List<ProposedEdit>(1)
                         {
-                            new ProposedEdit(new SnapshotSpan(start, end), completionText)
+                            new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
                         };
 
-                        var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: autocompleteItem.Id, flags: ProposalFlags.FormatAfterCommit);
+                        var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: item.Id, flags: ProposalFlags.FormatAfterCommit);
 
                         if (proposal != null) proposalList.Add(proposal);
                     }
@@ -92,7 +93,7 @@ namespace Cody.VisualStudio.Completions
             }
             catch (OperationCanceledException ex)
             {
-                SimpleLog.Error("CodyProposalManager", "canceled");
+                SimpleLog.Error("CodyProposalSource", "canceled");
             }
 
             return null;

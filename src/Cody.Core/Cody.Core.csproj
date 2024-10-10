@@ -61,6 +61,8 @@
     <Compile Include="Agent\Protocol\AutocompleteParams.cs" />
     <Compile Include="Agent\Protocol\AutocompleteResult.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
+    <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />
     <Compile Include="Agent\Protocol\CompletionItemParams.cs" />
     <Compile Include="Agent\Protocol\ProgressOptions.cs" />
     <Compile Include="Agent\Protocol\ProgressReportParams.cs" />

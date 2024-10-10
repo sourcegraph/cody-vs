@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent.Protocol
 {
-    public class AutocompleteResult
+    public class CompletionBookkeepingEvent
     {
-        public AutocompleteItem[] Items { get; set; }
-
-        public CompletionBookkeepingEvent CompletionEvent { get; set; }
+        public CompletionItemInfo[] Items { get; set; }
     }
 }
