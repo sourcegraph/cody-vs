@@ -11,7 +11,6 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Threading;
-using Cody.VisualStudio.Completions;
 
 namespace Cody.VisualStudio.Services
 {
@@ -265,7 +264,7 @@ namespace Cody.VisualStudio.Services
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
                 documentActions.OnChanged(path, visibleRange, selection, changes);
-                SimpleLog.Info("DocumentsSyncService", $"change: '{changes.FirstOrDefault()?.Text}'");
+                //SimpleLog.Info("DocumentsSyncService", $"change: '{changes.FirstOrDefault()?.Text}'");
             }
             catch (Exception ex)
             {
@@ -295,8 +294,8 @@ namespace Cody.VisualStudio.Services
 
             foreach (var change in textChanges)
             {
-                textView.GetLineAndColumn(change.NewPosition, out int startLine, out int startCol);
-                textView.GetLineAndColumn(change.NewEnd, out int endLine, out int endCol);
+                textView.GetLineAndColumn(change.OldSpan.Start, out int startLine, out int startCol);
+                textView.GetLineAndColumn(change.OldSpan.End, out int endLine, out int endCol);
 
                 var contentChange = new DocumentChange
                 {
