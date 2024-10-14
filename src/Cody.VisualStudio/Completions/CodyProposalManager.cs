@@ -1,3 +1,4 @@
+using Cody.Core.Logging;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
 using System;

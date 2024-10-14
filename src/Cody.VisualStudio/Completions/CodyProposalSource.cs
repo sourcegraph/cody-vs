@@ -1,6 +1,7 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
+using Cody.Core.Logging;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
