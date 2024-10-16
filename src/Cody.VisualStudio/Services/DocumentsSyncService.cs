@@ -276,7 +276,6 @@ namespace Cody.VisualStudio.Services
 
                 trace.TraceEvent("OnChanged", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
-                //SimpleLog.Info("DocumentsSyncService", $"change: '{changes.FirstOrDefault()?.Text}'");
             }
             catch (Exception ex)
             {
