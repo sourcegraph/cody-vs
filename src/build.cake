@@ -5,7 +5,6 @@
 var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");
 
-
 var agentDir = Directory("./Cody.VisualStudio/Agent");
 var agentWebViewDir = agentDir + Directory("webviews");
 var codyDevDir = Directory("../../cody");
@@ -47,7 +46,8 @@ var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.1
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
 // The latest tag of the stable release from the cody repository https://github.com/sourcegraph/cody/tags
-var codyStableReleaseTag = "vscode-v1.34.3";
+var codyStableReleaseTag = "vscode-v1.38.1";
+var codyBranch = Argument("cody-branch", codyStableReleaseTag);
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
@@ -96,8 +96,8 @@ Task("BuildCodyAgent")
         Information($"--> Fetching all tags...");
         GitFetchTags(codyDir, "origin");
 
-        Information($"--> Checkout latest stable release using tag {codyStableReleaseTag} ...");
-		GitCheckout(codyDir, codyStableReleaseTag);
+        Information($"--> Checkout specified branch or tag: {codyBranch} ...");
+        GitCheckout(codyDir, codyBranch);
 	}
 
 	Information($"--> Cleaning '{codyAgentDistDir}' ...");
