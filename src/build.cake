@@ -5,7 +5,6 @@
 var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");
 
-
 var agentDir = Directory("./Cody.VisualStudio/Agent");
 var agentWebViewDir = agentDir + Directory("webviews");
 var codyDevDir = Directory("../../cody");
@@ -96,8 +95,8 @@ Task("BuildCodyAgent")
         Information($"--> Fetching all tags...");
         GitFetchTags(codyDir, "origin");
 
-        Information($"--> Checkout latest stable release using tag {codyStableReleaseTag} ...");
-		GitCheckout(codyDir, codyStableReleaseTag);
+        Information($"--> Checkout specified branch or tag: {codyBranch} ...");
+        GitCheckout(codyDir, codyBranch);
 	}
 
 	Information($"--> Cleaning '{codyAgentDistDir}' ...");
