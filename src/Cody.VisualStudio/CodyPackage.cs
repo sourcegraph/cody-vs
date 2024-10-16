@@ -133,7 +133,7 @@ namespace Cody.VisualStudio
             Logger = loggerFactory.Create();
 
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
-            SolutionService = new SolutionService(vsSolution);
+            SolutionService = new SolutionService(vsSolution, Logger);
             VersionService = loggerFactory.GetVersionService();
             VsVersionService = new VsVersionService(Logger);
 
@@ -426,6 +426,7 @@ namespace Cody.VisualStudio
                     Uris = new List<string> { solutionUri }
                 };
                 AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                Logger.Debug($"Workspace updated:{solutionUri}");
 
                 if (DocumentsSyncService == null)
                 {
