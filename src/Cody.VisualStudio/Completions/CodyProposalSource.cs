@@ -20,6 +20,7 @@ namespace Cody.VisualStudio.Completions
 
         private ITextDocument textDocument;
         private IVsTextView vsTextView;
+        private static CancellationTokenSource prevCancellationTokenSource;
 
         public CodyProposalSource(ITextDocument textDocument, IVsTextView vsTextView)
         {
@@ -44,46 +45,59 @@ namespace Cody.VisualStudio.Completions
 
             try
             {
-                vsTextView.GetLineAndColumn(caret.Position.Position, out int line, out int col);
+                prevCancellationTokenSource?.Cancel();
+
+                vsTextView.GetLineAndColumn(caret.Position.Position, out int caretline, out int caretCol);
 
                 var autocomplete = new AutocompleteParams
                 {
                     Uri = textDocument.FilePath.ToUri(),
-                    Position = new Position { Line = line, Character = col },
+                    Position = new Position { Line = caretline, Character = caretCol + caret.VirtualSpaces },
                     TriggerKind = scenario == ProposalScenario.ExplicitInvocation ? TriggerKind.Invoke : TriggerKind.Automatic
                 };
-                
-                var lineText = caret.Position.Snapshot.GetLineFromLineNumber(line).GetText();
-                SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{line}:{col} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
-                var autocompleteResult = await agentService.Autocomplete(autocomplete, cancel);
 
-                if(autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalSource", $"no autocoplite to show");
-                else SimpleLog.Info("CodyProposalSource", $"{autocompleteResult.Items.First().Range.Start.Line}:{autocompleteResult.Items.First().Range.Start.Character} autocomplite:'{autocompleteResult.Items.First().InsertText}'");
+                var lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText();
+                SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{caretline}:{caretCol} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
+
+                var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancel);
+                cancellationTokenSource.CancelAfter(4000); //timeout for Autocomplete
+                prevCancellationTokenSource = cancellationTokenSource;
+
+                var autocompleteResult = await agentService.Autocomplete(autocomplete, cancellationTokenSource.Token);
+
+                if (autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalSource", $"no autocoplite to show");
+                else
+                {
+                    foreach (var item in autocompleteResult.Items)
+                    {
+                        SimpleLog.Info("CodyProposalSource", $"autocomplite: {item.Range.Start.Line}:{item.Range.Start.Character}-{item.Range.End.Line}:{item.Range.End.Character} '{item.InsertText}'");
+                    }
+                }
 
                 var proposalList = new List<ProposalBase>();
                 if (autocompleteResult != null && autocompleteResult.Items.Any())
                 {
-                    foreach (var (item, index) in autocompleteResult.Items.Select((item, index) => (item, index)))
+                    foreach (var item in autocompleteResult.Items)
                     {
 
-                        //var range = autocompleteItem.Range;
-                        //vsTextView.GetNearestPosition(range.Start.Line, range.Start.Character, out int startPos, out _);
+                        //var range = item.Range;
+                        ////vsTextView.GetNearestPosition(range.Start.Line, range.Start.Character, out int startPos, out _);
+                        //var startPos = ToPosition(caret.Position.Snapshot, range.Start.Line, range.Start.Character);
                         //var start = new SnapshotPoint(caret.Position.Snapshot, startPos);
-                        //vsTextView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
+                        ////vsTextView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
+                        //var endPos = ToPosition(caret.Position.Snapshot, range.End.Line, range.End.Character);
                         //var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
-                        //var completionText = autocompleteItem.InsertText;
-                        //int insertionStart = caret.IsInVirtualSpace ? completionText.TakeWhile(char.IsWhiteSpace).Count() : 0;
-                        //completionText = completionText.Substring(insertionStart);
-
-                        var completionText = autocompleteResult.CompletionEvent.Items[index].InsertText;
+                        var completionText = item.InsertText;
+                        int insertionStart = caret.IsInVirtualSpace ? completionText.TakeWhile(char.IsWhiteSpace).Count() : 0;
+                        completionText = completionText.Substring(insertionStart);
 
                         var edits = new List<ProposedEdit>(1)
                         {
                             new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
                         };
 
-                        var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: item.Id, flags: ProposalFlags.FormatAfterCommit);
+                        var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: item.Id, flags: ProposalFlags.SingleTabToAccept);
 
                         if (proposal != null) proposalList.Add(proposal);
                     }
@@ -92,9 +106,13 @@ namespace Cody.VisualStudio.Completions
                     return collection;
                 }
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
-                SimpleLog.Error("CodyProposalSource", "canceled");
+                SimpleLog.Warning("CodyProposalSource", "canceled");
+            }
+            catch (Exception ex)
+            {
+                SimpleLog.Error("CodyProposalSource", ex.ToString());
             }
 
             return null;

@@ -23,6 +23,7 @@ namespace Cody.Core.DocumentSync
         public void OnChanged(string fullPath, DocumentRange visibleRange, DocumentRange selection, IEnumerable<DocumentChange> changes)
         {
             logger.Debug($"Sending didChange() for '{fullPath}', s:{selection}, v:{visibleRange}, c:{string.Join("", changes)}");
+            SimpleLog.Info("DocumentSyncCallback", $"changes: {string.Join("", changes)}, s:{selection}, v:{visibleRange}");
 
             Range vRange = null;
             if (visibleRange != null)
