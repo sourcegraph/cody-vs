@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [main]
+    branches: [piotr/ms-vs-language-lib-dev-pipline-exp]
   pull_request:
     branches: [main]
   workflow_dispatch:
