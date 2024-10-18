@@ -37,21 +37,6 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        private string _codyConfig;
-
-        public string CodyConfigurations
-        {
-            get => _codyConfig;
-            set
-            {
-                if (SetProperty(ref _codyConfig, value))
-                {
-                    _logger.Debug($"Cody Configurations set:{CodyConfigurations}");
-                }
-
-            }
-        }
-
         private string _customConfiguration;
 
         public string CustomConfiguration
@@ -88,7 +73,7 @@ namespace Cody.UI.ViewModels
             {
                 if (SetProperty(ref _acceptNonTrustedCert, value))
                 {
-                    _logger.Debug($"AcceptNonTrustedCert set:{SourcegraphUrl}");
+                    _logger.Debug($"AcceptNonTrustedCert set:{AcceptNonTrustedCert}");
                 }
             }
         }

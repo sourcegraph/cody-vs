@@ -8,7 +8,6 @@ namespace Cody.Core.Settings
 
         string AccessToken { get; set; }
         string ServerEndpoint { get; set; }
-        string CodySettings { get; set; }
         string CustomConfiguration { get; set; }
         bool AcceptNonTrustedCert { get; set; }
 

@@ -95,13 +95,6 @@ namespace Cody.Core.Settings
             }
         }
 
-
-        public string CodySettings
-        {
-            get => GetOrDefault(nameof(CodySettings), string.Empty);
-            set => Set(nameof(CodySettings), value);
-        }
-
         public string CustomConfiguration
         {
             get => GetOrDefault(nameof(CustomConfiguration), string.Empty);

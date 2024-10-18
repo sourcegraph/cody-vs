@@ -17,80 +17,12 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
-
                 </Grid.ColumnDefinitions>
-
-
-                <!--Cody Configurations-->
-                <Label 
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Content="Cody Settings"
-                    />
-
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Width="400"
-                    Height="50"
-                    Text="{Binding Configurations, Mode=TwoWay}"
-                    ToolTip="Your Cody configuration JSON file."
-                    Name="ConfigurationsTextBox"
-                    />
-
-                <!--Custom Configuration-->
-                <StackPanel
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    >
-                    <Label Content="Custom Configuration" />
-                    <Label Content="(requires VS restart)" HorizontalAlignment="Center"
-                           Padding="0"
-                           />
-                </StackPanel>
-
-                <TextBox
-                    Margin="0 2 0 5"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Width="400"
-                    Height="100"
-                    Text="{Binding CustomConfiguration, Mode=TwoWay}"
-                    TextWrapping="Wrap"
-                    AcceptsReturn="True"
-                    AcceptsTab="True"
-                    ToolTip="Your Cody configuration JSON file."
-                    Name="CustomConfigurationTextBox"
-                />
-
-                <CheckBox
-                    Name="AcceptNonTrustedCertCheckBox"
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Margin="0 5 0 0"
-                    IsChecked="{Binding AcceptNonTrustedCert, Mode=TwoWay}"
-                    Content="Accept non-trusted certificates (requires restart)"
-                 />
-
-                <!--Get Help-->
-                <Button 
-                    Margin="0 5 0 0"
-                    Grid.Row="4"
-                    Grid.Column="1"
-                    Height="25"
-                    Width="100"
-                    Content="Get Help"
-                    HorizontalAlignment="Left"
-                    Command="{Binding ActivateBetaCommand}"
-                />
-
-
 
                 <!--Sourcegraph URL-->
                 <Label
@@ -108,6 +40,58 @@
                     Text="{Binding SourcegraphUrl, Mode=TwoWay}"
                     ToolTip="Enter the URL of the Sourcegraph instance. For example, https://sourcegraph.example.com"
                 />
+
+                <!--Custom Cody Configuration-->
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    >
+                    <Label Content="Cody Settings (JSON)" />
+                    <Label Content="(requires restart)" HorizontalAlignment="Center"
+                           Padding="0"
+                           />
+                </StackPanel>
+
+                <TextBox
+                    Margin="0 2 0 5"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="400"
+                    Height="100"
+                    Text="{Binding CustomConfiguration, Mode=TwoWay}"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    AcceptsTab="True"
+                    ToolTip="Your Cody configuration JSON file."
+                    Name="CustomConfigurationTextBox"
+                />
+
+                <!--Accept non-trusted certificates -->
+                <CheckBox
+                    Name="AcceptNonTrustedCertCheckBox"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0 5 0 0"
+                    IsChecked="{Binding AcceptNonTrustedCert, Mode=TwoWay}"
+                    ToolTip="Your Cody configuration JSON file."
+                    Content="Accept non-trusted certificates (requires restart)"
+                 />
+
+                <!--Get Help-->
+                <Button 
+                    Margin="0 5 0 0"
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Height="25"
+                    Width="100"
+                    Content="Get Help"
+                    HorizontalAlignment="Left"
+                    Command="{Binding ActivateBetaCommand}"
+                />
+
+
+
+                
             </Grid>
         </GroupBox>
     </Grid>
