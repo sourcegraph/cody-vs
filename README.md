@@ -1,8 +1,8 @@
 # Cody for Visual Studio
 
-## Preview Status
+🚧 [Cody for Visual Studio](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) is currently in private preview.
 
-🚧 [Cody for Visual Studio](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) is currently in preview. **It is intended for testing purposes only and may not be suitable for production use.**
+**It is intended for testing purposes only and may not be suitable for production use.**
 
 ## AI that uses your codebase as context
 
