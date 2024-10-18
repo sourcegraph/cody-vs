@@ -52,6 +52,21 @@ namespace Cody.UI.ViewModels
             }
         }
 
+        private string _customConfiguration;
+
+        public string CustomConfiguration
+        {
+            get => _customConfiguration;
+            set
+            {
+                if (SetProperty(ref _customConfiguration, value))
+                {
+                    _logger.Debug($"Custom Configurations set:{CustomConfiguration}");
+                }
+
+            }
+        }
+
         private string _sourcegraphUrl;
         public string SourcegraphUrl
         {

@@ -38,6 +38,7 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace Cody.VisualStudio
 {
@@ -363,9 +364,26 @@ namespace Cody.VisualStudio
                 AutocompleteAdvancedProvider = null,
                 Debug = true,
                 VerboseDebug = true,
+                CustomConfiguration = GetCustomConfiguration()
             };
 
             return config;
+        }
+
+        private Dictionary<string, object> GetCustomConfiguration()
+        {
+            var customConfiguration = UserSettingsService.CustomConfiguration;
+            try
+            {
+                var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfiguration);
+                return config;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Deserializing custom configuration failed.", ex);
+            }
+
+            return null;
         }
 
         private void InitializeAgent()

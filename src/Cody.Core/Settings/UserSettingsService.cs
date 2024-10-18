@@ -102,6 +102,12 @@ namespace Cody.Core.Settings
             set => Set(nameof(CodySettings), value);
         }
 
+        public string CustomConfiguration
+        {
+            get => GetOrDefault(nameof(CustomConfiguration), string.Empty);
+            set => Set(nameof(CustomConfiguration), value);
+        }
+
         public bool AcceptNonTrustedCert
         {
             get
