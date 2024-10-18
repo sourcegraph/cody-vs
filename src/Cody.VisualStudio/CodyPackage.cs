@@ -38,6 +38,7 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace Cody.VisualStudio
 {
@@ -84,6 +85,7 @@ namespace Cody.VisualStudio
         public IProgressService ProgressService;
         public IAgentProxy AgentClient;
         public ISecretStorageService SecretStorageService;
+        public IConfigurationService ConfigurationService;
 
         public GeneralOptionsViewModel GeneralOptionsViewModel;
         public MainViewModel MainViewModel;
@@ -135,6 +137,8 @@ namespace Cody.VisualStudio
             SecretStorageService = new SecretStorageService(vsSecretStorage);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
             UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
+
+            ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
             StatusbarService = new StatusbarService();
             ThemeService = new ThemeService(this, Logger);
@@ -194,7 +198,7 @@ namespace Cody.VisualStudio
             {
                 Logger.Debug($"Changing authorization details ...");
 
-                var config = GetConfiguration();
+                var config = ConfigurationService.GetConfiguration();
                 var status = await AgentService.ConfigurationChange(config);
 
                 UpdateCurrentWorkspaceFolder();
@@ -316,58 +320,6 @@ namespace Cody.VisualStudio
             }
         }
 
-        private ClientInfo GetClientInfo()
-        {
-            var clientInfo = new ClientInfo
-            {
-                Name = "VisualStudio",
-                Version = VersionService.Full,
-                IdeVersion = VsVersionService.Version.ToString(),
-                WorkspaceRootUri = SolutionService.GetSolutionDirectory(),
-                Capabilities = new ClientCapabilities
-                {
-                    Authentication = Capability.Enabled,
-                    Completions = "none",
-                    Edit = Capability.None,
-                    EditWorkspace = Capability.None,
-                    ProgressBars = Capability.Enabled,
-                    CodeLenses = Capability.None,
-                    ShowDocument = Capability.Enabled,
-                    Ignore = Capability.Enabled,
-                    UntitledDocuments = Capability.None,
-                    Webview = "native",
-                    WebviewNativeConfig = new WebviewCapabilities
-                    {
-                        View = WebviewView.Single,
-                        CspSource = "'self' https://cody.vs",
-                        WebviewBundleServingPrefix = "https://cody.vs",
-                    },
-                    WebviewMessages = "string-encoded",
-                    GlobalState = "server-managed",
-                    Secrets = "client-managed",
-                },
-                ExtensionConfiguration = GetConfiguration()
-            };
-
-            return clientInfo;
-        }
-
-        private ExtensionConfiguration GetConfiguration()
-        {
-            var config = new ExtensionConfiguration
-            {
-                AnonymousUserID = UserSettingsService.AnonymousUserID,
-                ServerEndpoint = UserSettingsService.ServerEndpoint,
-                Proxy = null,
-                AccessToken = UserSettingsService.AccessToken,
-                AutocompleteAdvancedProvider = null,
-                Debug = true,
-                VerboseDebug = true,
-            };
-
-            return config;
-        }
-
         private void InitializeAgent()
         {
             try
@@ -381,7 +333,7 @@ namespace Cody.VisualStudio
                         await TestServerConnection(UserSettingsService.ServerEndpoint);
                         AgentClient.Start();
 
-                        var clientConfig = GetClientInfo();
+                        var clientConfig = ConfigurationService.GetClientInfo();
                         AgentService = await AgentClient.Initialize(clientConfig);
 
                         WebViewsManager.SetAgentService(AgentService);

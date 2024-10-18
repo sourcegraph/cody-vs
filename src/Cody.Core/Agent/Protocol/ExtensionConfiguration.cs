@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Cody.Core.Agent.Protocol
 {
     public class ExtensionConfiguration
@@ -17,6 +19,9 @@ namespace Cody.Core.Agent.Protocol
         public bool VerboseDebug { get; set; }
 
         public string Codebase { get; set; }
+
+        public Dictionary<string, object> CustomConfiguration { get; set; }
+
 
         public override string ToString()
         {

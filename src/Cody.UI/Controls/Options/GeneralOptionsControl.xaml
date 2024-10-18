@@ -22,27 +22,51 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
-
                 </Grid.ColumnDefinitions>
 
-
-                <!--Cody Configurations-->
-                <Label 
-                    Grid.Row="1"
+                <!--Sourcegraph URL-->
+                <Label
+                    Grid.Row="0"
                     Grid.Column="0"
-                    Content="Cody Settings"
-                    />
+                    Content="Sourcegraph URL"
+                />
 
                 <TextBox
+                    Name="SourcegraphUrlTextBox"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Width="400"
+                    Height="20"
+                    Text="{Binding SourcegraphUrl, Mode=TwoWay}"
+                    ToolTip="Enter the URL of the Sourcegraph instance. For example, https://sourcegraph.example.com"
+                />
+
+                <!--Custom Cody Configuration-->
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    >
+                    <Label Content="Cody Settings (JSON)" />
+                    <Label Content="(requires restart)" HorizontalAlignment="Center"
+                           Padding="0"
+                           />
+                </StackPanel>
+
+                <TextBox
+                    Margin="0 2 0 5"
                     Grid.Row="1"
                     Grid.Column="1"
                     Width="400"
-                    Height="50"
-                    Text="{Binding Configurations, Mode=TwoWay}"
+                    Height="100"
+                    Text="{Binding CustomConfiguration, Mode=TwoWay}"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    AcceptsTab="True"
                     ToolTip="Your Cody configuration JSON file."
-                    Name="ConfigurationsTextBox"
-                    />
+                    Name="CustomConfigurationTextBox"
+                />
 
+                <!--Accept non-trusted certificates -->
                 <CheckBox
                     Name="AcceptNonTrustedCertCheckBox"
                     Grid.Row="2"
@@ -64,24 +88,9 @@
                     Command="{Binding ActivateBetaCommand}"
                 />
 
+
+
                 
-
-                <!--Sourcegraph URL-->
-                <Label
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Content="Sourcegraph URL"
-                />
-
-                <TextBox
-                    Name="SourcegraphUrlTextBox"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Width="400"
-                    Height="20"
-                    Text="{Binding SourcegraphUrl, Mode=TwoWay}"
-                    ToolTip="Enter the URL of the Sourcegraph instance. For example, https://sourcegraph.example.com"
-                />
             </Grid>
         </GroupBox>
     </Grid>

@@ -57,14 +57,13 @@ namespace Cody.VisualStudio.Options
         {
             _logger.Debug($"Settings page activated.");
 
-
-            var codyConfig = _settingsService.CodySettings;
+            var customConfiguration = _settingsService.CustomConfiguration;
             var sourcegraphUrl = _settingsService.ServerEndpoint;
             var acceptNonTrustedCert = _settingsService.AcceptNonTrustedCert;
 
-            _generalOptionsViewModel.CodyConfigurations = codyConfig;
             _generalOptionsViewModel.SourcegraphUrl = sourcegraphUrl;
             _generalOptionsViewModel.AcceptNonTrustedCert = acceptNonTrustedCert;
+            _generalOptionsViewModel.CustomConfiguration = customConfiguration;
 
             _logger.Debug($"Is canceled:{e.Cancel}");
 
@@ -74,11 +73,11 @@ namespace Cody.VisualStudio.Options
         {
             _logger.Debug($"{args.ApplyBehavior}");
 
-            var codyConfig = _generalOptionsViewModel.CodyConfigurations;
+            var customConfiguration = _generalOptionsViewModel.CustomConfiguration;
             var sourcegraphUrl = _generalOptionsViewModel.SourcegraphUrl;
             var acceptNonTrustedCert = _generalOptionsViewModel.AcceptNonTrustedCert;
 
-            _settingsService.CodySettings = codyConfig;
+            _settingsService.CustomConfiguration = customConfiguration;
             _settingsService.ServerEndpoint = sourcegraphUrl;
             _settingsService.AcceptNonTrustedCert = acceptNonTrustedCert;
         }
@@ -99,7 +98,7 @@ namespace Cody.VisualStudio.Options
 
         public override void ResetSettings()
         {
-            _settingsService.CodySettings = string.Empty;
+            _settingsService.CustomConfiguration = string.Empty;
             _settingsService.ServerEndpoint = string.Empty;
             _settingsService.AcceptNonTrustedCert = false;
 

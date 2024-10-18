@@ -37,16 +37,16 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        private string _codyConfig;
+        private string _customConfiguration;
 
-        public string CodyConfigurations
+        public string CustomConfiguration
         {
-            get => _codyConfig;
+            get => _customConfiguration;
             set
             {
-                if (SetProperty(ref _codyConfig, value))
+                if (SetProperty(ref _customConfiguration, value))
                 {
-                    _logger.Debug($"Cody Configurations set:{CodyConfigurations}");
+                    _logger.Debug($"Custom Configurations set:{CustomConfiguration}");
                 }
 
             }
@@ -73,7 +73,7 @@ namespace Cody.UI.ViewModels
             {
                 if (SetProperty(ref _acceptNonTrustedCert, value))
                 {
-                    _logger.Debug($"AcceptNonTrustedCert set:{SourcegraphUrl}");
+                    _logger.Debug($"AcceptNonTrustedCert set:{AcceptNonTrustedCert}");
                 }
             }
         }
