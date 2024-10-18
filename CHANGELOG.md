@@ -14,6 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Security
 
+## [0.0.3]
+
+### Added
+
+- "Cody Settings" in user options. [pull/118](https://github.com/sourcegraph/cody-vs/pull/118)
+
+
 ## [0.0.2]
 
 ### Added
