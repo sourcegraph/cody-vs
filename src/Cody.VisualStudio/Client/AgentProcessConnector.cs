@@ -37,6 +37,8 @@ namespace Cody.VisualStudio.Client
             if (options.AcceptNonTrustedCertificates)
                 process.StartInfo.EnvironmentVariables["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
+            //process.StartInfo.EnvironmentVariables["CODY_AGENT_TRACE_PATH"] = "c:/tmp/vs-agent.log";
+
             process.Exited += OnProcessExited;
             process.ErrorDataReceived += OnErrorDataReceived;
 

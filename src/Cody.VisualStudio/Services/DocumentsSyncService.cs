@@ -263,6 +263,7 @@ namespace Cody.VisualStudio.Services
                 var changes = GetContentChanges(e.Changes, activeDocument.TextView);
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
+                SimpleLog.Info("DocumentsSyncService", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
             }
             catch (Exception ex)
@@ -279,6 +280,7 @@ namespace Cody.VisualStudio.Services
                 var selection = GetDocumentSelection(activeDocument.TextView);
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
+                SimpleLog.Info("DocumentsSyncService", "OnSelectionChanged");
                 documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
             }
             catch (Exception ex)
@@ -293,8 +295,8 @@ namespace Cody.VisualStudio.Services
 
             foreach (var change in textChanges)
             {
-                textView.GetLineAndColumn(change.NewPosition, out int startLine, out int startCol);
-                textView.GetLineAndColumn(change.NewEnd, out int endLine, out int endCol);
+                textView.GetLineAndColumn(change.OldSpan.Start, out int startLine, out int startCol);
+                textView.GetLineAndColumn(change.OldSpan.End, out int endLine, out int endCol);
 
                 var contentChange = new DocumentChange
                 {

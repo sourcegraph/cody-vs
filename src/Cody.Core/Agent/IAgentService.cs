@@ -2,6 +2,7 @@ using Cody.Core.Agent.Protocol;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Cody.Core.Agent
 {
@@ -60,6 +61,18 @@ namespace Cody.Core.Agent
 
         [AgentCall("progress/cancel")]
         void CancelProgress(string id);
+
+        [AgentCall("autocomplete/execute")]
+        Task<AutocompleteResult> Autocomplete(AutocompleteParams autocomplete, CancellationToken cancellationToken);
+
+        [AgentCall("autocomplete/clearLastCandidate")]
+        void ClearLastCandidate();
+
+        [AgentCall("autocomplete/completionSuggested")]
+        void CompletionSuggested(CompletionItemParams completionItem);
+
+        [AgentCall("autocomplete/completionAccepted")]
+        void CompletionAccepted(CompletionItemParams completionItem);
 
         //---------------------------------------------------------
         // For notifications return type MUST be void!

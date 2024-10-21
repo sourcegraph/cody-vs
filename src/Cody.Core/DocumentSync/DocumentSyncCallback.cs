@@ -1,5 +1,6 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,15 +20,10 @@ namespace Cody.Core.DocumentSync
             this.logger = logger;
         }
 
-        private string ToUri(string path)
-        {
-            var uri = new Uri(path).AbsoluteUri;
-            return Regex.Replace(uri, "(file:///)(\\D+)(:)", m => m.Groups[1].Value + m.Groups[2].Value.ToLower() + "%3A");
-        }
-
         public void OnChanged(string fullPath, DocumentRange visibleRange, DocumentRange selection, IEnumerable<DocumentChange> changes)
         {
             logger.Debug($"Sending didChange() for '{fullPath}', s:{selection}, v:{visibleRange}, c:{string.Join("", changes)}");
+            SimpleLog.Info("DocumentSyncCallback", $"changes: {string.Join("", changes)}, s:{selection}, v:{visibleRange}");
 
             Range vRange = null;
             if (visibleRange != null)
@@ -49,7 +45,7 @@ namespace Cody.Core.DocumentSync
 
             var docState = new ProtocolTextDocument
             {
-                Uri = ToUri(fullPath),
+                Uri = fullPath.ToUri(),
                 VisibleRange = vRange,
                 Selection = new Range
                 {
@@ -92,7 +88,7 @@ namespace Cody.Core.DocumentSync
 
             var docState = new ProtocolTextDocument
             {
-                Uri = ToUri(fullPath),
+                Uri = fullPath.ToUri(),
             };
 
             // Only the 'uri' property is required, other properties are ignored.
@@ -102,7 +98,7 @@ namespace Cody.Core.DocumentSync
         public void OnFocus(string fullPath)
         {
             logger.Debug($"Sending DidFocus() for '{fullPath}'");
-            agentService.DidFocus(new CodyFilePath { Uri = ToUri(fullPath) });
+            agentService.DidFocus(new CodyFilePath { Uri = fullPath.ToUri() });
 
         }
 
@@ -130,7 +126,7 @@ namespace Cody.Core.DocumentSync
 
             var docState = new ProtocolTextDocument
             {
-                Uri = ToUri(fullPath),
+                Uri = fullPath.ToUri(),
                 Content = content,
                 VisibleRange = vRange,
                 Selection = new Range
@@ -155,7 +151,7 @@ namespace Cody.Core.DocumentSync
         {
             logger.Debug($"Sending DidSave() for '{fullPath}'");
 
-            agentService.DidSave(new CodyFilePath { Uri = ToUri(fullPath) });
+            agentService.DidSave(new CodyFilePath { Uri = fullPath.ToUri() });
         }
     }
 }
