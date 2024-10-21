@@ -29,9 +29,11 @@ namespace Cody.VisualStudio.Tests
 
             // when
             var logger = codyPackage.Logger;
+            var vsVersionService = codyPackage.VsVersionService;
             Assert.NotNull(logger);
 
             logger.Info("Hello World from integration tests!");
+            logger.Info($"Visual Studio Version:{vsVersionService.Version}");
 
             // then
         }
