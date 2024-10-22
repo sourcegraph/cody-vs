@@ -11,11 +11,15 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Threading;
+using Cody.Core.Trace;
+using Cody.VisualStudio.Completions;
 
 namespace Cody.VisualStudio.Services
 {
     public class DocumentsSyncService : IVsRunningDocTableEvents
     {
+        private static TraceLogger trace = new TraceLogger(nameof(DocumentsSyncService));
+
         private RunningDocumentTable rdt;
         private uint rdtCookie = 0;
 
@@ -263,7 +267,7 @@ namespace Cody.VisualStudio.Services
                 var changes = GetContentChanges(e.Changes, activeDocument.TextView);
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
-                SimpleLog.Info("DocumentsSyncService", "OnTextBufferChanged");
+                trace.TraceEvent("OnChanged", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
             }
             catch (Exception ex)
@@ -280,7 +284,7 @@ namespace Cody.VisualStudio.Services
                 var selection = GetDocumentSelection(activeDocument.TextView);
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
-                SimpleLog.Info("DocumentsSyncService", "OnSelectionChanged");
+                trace.TraceEvent("OnChanged", "OnSelectionChanged");
                 documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
             }
             catch (Exception ex)

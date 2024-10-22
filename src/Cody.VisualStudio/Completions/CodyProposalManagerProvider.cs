@@ -1,4 +1,5 @@
 using Cody.Core.Logging;
+using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
@@ -19,9 +20,11 @@ namespace Cody.VisualStudio.Completions
     [ContentType("any")]
     public class CodyProposalManagerProvider : ProposalManagerProviderBase
     {
+        private static TraceLogger trace = new TraceLogger(nameof(CodyProposalManagerProvider));
+
         public async override Task<ProposalManagerBase> GetProposalManagerAsync(ITextView view, CancellationToken cancel)
         {
-            SimpleLog.Info("CodyProposalManagerProvider", "begin");
+            trace.TraceEvent("begin");
             return new CodyProposalManager();
         }
     }

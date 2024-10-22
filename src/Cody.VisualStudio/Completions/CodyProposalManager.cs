@@ -1,4 +1,5 @@
 using Cody.Core.Logging;
+using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
 using System;
@@ -11,12 +12,14 @@ namespace Cody.VisualStudio.Completions
 {
     public class CodyProposalManager : ProposalManagerBase
     {
+        private static TraceLogger trace = new TraceLogger(nameof(CodyProposalManager));
+
         public override bool TryGetIsProposalPosition(VirtualSnapshotPoint caret, ProposalScenario scenario, char triggerCharacter, ref bool value)
         {
             switch(scenario)
             {
                 case ProposalScenario.TypeChar:
-                    SimpleLog.Info("CodyProposalManager", "TypeChar");
+                    trace.TraceEvent("TypeCharScenario");
                     if (char.IsWhiteSpace(triggerCharacter) && caret.Position.Position >= 2)
                     {
                         char c = caret.Position.Snapshot[caret.Position.Position - 2];
@@ -25,16 +28,16 @@ namespace Cody.VisualStudio.Completions
                     else value = true;
                     break;
                 case ProposalScenario.Return:
-                    SimpleLog.Info("CodyProposalManager", "Return");
+                    trace.TraceEvent("ReturnScenario");
                     if (caret.Position.GetContainingLine().End == caret.Position) value = true;
                     break;
                 default:
-                    SimpleLog.Info("CodyProposalManager", "defalut");
+                    trace.TraceEvent("OtherScenario");
                     value = true;
                     break;
             }
 
-            SimpleLog.Info("CodyProposalManager", $"show proposal: {value}");
+            trace.TraceEvent("ShowProposal", value);
             return value;
         }
     }

@@ -1,4 +1,5 @@
 using Cody.Core.Logging;
+using Cody.Core.Trace;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
@@ -21,6 +22,8 @@ namespace Cody.VisualStudio.Completions
     [ContentType("any")]
     public class CodyProposalSourceProvider : ProposalSourceProviderBase
     {
+        private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSourceProvider));
+
         private readonly ITextDocumentFactoryService textDocumentFactoryService;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
 
@@ -35,7 +38,7 @@ namespace Cody.VisualStudio.Completions
 
         public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
         {
-            SimpleLog.Info("CodyProposalSourceProvider", "begin");
+            trace.TraceEvent("begin");
             IWpfTextView wpfTextView = view as IWpfTextView;
             if (wpfTextView != null && view.Roles.Contains("DOCUMENT") && view.Roles.Contains("EDITABLE"))
             {
@@ -43,7 +46,7 @@ namespace Cody.VisualStudio.Completions
                 var vsTextView = editorAdaptersFactoryService.GetViewAdapter(view);
                 if (document != null && vsTextView != null)
                 {
-                    SimpleLog.Info("CodyProposalSourceProvider", $"CodyProposalSource for '{document.FilePath}'");
+                    trace.TraceEvent("CreateProposalSource", "Created for '{0}'", document.FilePath);
                     return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, vsTextView));
                 }
             }

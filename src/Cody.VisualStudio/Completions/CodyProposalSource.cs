@@ -2,6 +2,7 @@ using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
 using Cody.Core.Logging;
+using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -16,6 +17,8 @@ namespace Cody.VisualStudio.Completions
 {
     public class CodyProposalSource : ProposalSourceBase
     {
+        private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSource));
+
         IAgentService agentService;
 
         private ITextDocument textDocument;
@@ -35,11 +38,11 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
-            SimpleLog.Info("CodyProposalSource", "begin");
+            trace.TraceEvent("begin");
             agentService = CodyPackage.AgentServiceInstance;
             if (agentService == null)
             {
-                SimpleLog.Warning("CodyProposalSource", "Agent service not jet ready");
+                trace.TraceMessage("Agent service not jet ready");
                 return null;
             }
 
@@ -57,7 +60,10 @@ namespace Cody.VisualStudio.Completions
                 };
 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText();
-                SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{caretline}:{caretCol} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
+                
+                trace.TraceEvent("RequestingAutocomplite", autocomplete);
+                trace.TraceEvent("BeforeRequest", new { caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem });
+                //SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{caretline}:{caretCol} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
 
                 var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancel);
                 cancellationTokenSource.CancelAfter(4000); //timeout for Autocomplete
@@ -65,12 +71,13 @@ namespace Cody.VisualStudio.Completions
 
                 var autocompleteResult = await agentService.Autocomplete(autocomplete, cancellationTokenSource.Token);
 
-                if (autocompleteResult.Items.Length == 0) SimpleLog.Info("CodyProposalSource", $"no autocoplite to show");
+                if (autocompleteResult.Items.Length == 0) trace.TraceEvent("NoAutocompliteResults");
                 else
                 {
                     foreach (var item in autocompleteResult.Items)
                     {
-                        SimpleLog.Info("CodyProposalSource", $"autocomplite: {item.Range.Start.Line}:{item.Range.Start.Character}-{item.Range.End.Line}:{item.Range.End.Character} '{item.InsertText}'");
+                        trace.TraceEvent("AutocompliteResult", item);
+                        //SimpleLog.Info("CodyProposalSource", $"autocomplite: {item.Range.Start.Line}:{item.Range.Start.Character}-{item.Range.End.Line}:{item.Range.End.Character} '{item.InsertText}'");
                     }
                 }
 
@@ -108,11 +115,12 @@ namespace Cody.VisualStudio.Completions
             }
             catch (OperationCanceledException)
             {
-                SimpleLog.Warning("CodyProposalSource", "canceled");
+                //SimpleLog.Warning("CodyProposalSource", "canceled");
+                trace.TraceEvent("AutocompliteCanceled");
             }
             catch (Exception ex)
             {
-                SimpleLog.Error("CodyProposalSource", ex.ToString());
+                trace.TraceException(ex);
             }
 
             return null;

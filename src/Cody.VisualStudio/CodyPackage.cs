@@ -39,6 +39,7 @@ using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using System.Net;
 using Cody.VisualStudio.Completions;
+using Cody.Core.Trace;
 
 namespace Cody.VisualStudio
 {
@@ -105,8 +106,8 @@ namespace Cody.VisualStudio
             try
             {
                 InitializeErrorHandling();
-                SimpleLog.SetLogFile(@"c:\tmp\cody.log");
-                SimpleLog.Info("CodyPackage", "Starting extension");
+                //SimpleLog.SetLogFile(@"c:\tmp\cody.log");
+                //SimpleLog.Info("CodyPackage", "Starting extension");
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -125,6 +126,10 @@ namespace Cody.VisualStudio
 
         private void InitializeServices()
         {
+            TraceManager.Listeners.Add(new LogioTraceListener("localhost", 6689));
+            TraceManager.Listeners.Add(new FileTraceListener(@"c:\tmp\cody.log"));
+            TraceManager.Enabled = true;
+
             var loggerFactory = new LoggerFactory();
             AgentLogger = loggerFactory.Create(WindowPaneLogger.CodyAgent);
             AgentNotificationsLogger = loggerFactory.Create(WindowPaneLogger.CodyNotifications);
