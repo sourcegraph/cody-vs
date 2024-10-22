@@ -34,7 +34,7 @@ namespace Cody.Core.Trace
         {
             var eventName = string.IsNullOrEmpty(traceEvent.EventName) ? "<none>" : traceEvent.EventName;
             var input = $"{traceEvent.LoggerName}|{eventName}";
-            if(!inputs.Contains(input))
+            if (!inputs.Contains(input))
             {
                 var newInputMsg = $"+input|{input}\0";
                 var newInputBytes = Encoding.UTF8.GetBytes(newInputMsg);
