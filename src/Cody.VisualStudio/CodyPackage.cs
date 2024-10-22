@@ -278,7 +278,7 @@ namespace Cody.VisualStudio
             {
                 var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
-                var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT");
+                var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT", EnvironmentVariableTarget.User);
                 var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
                 if (devPort != null)
