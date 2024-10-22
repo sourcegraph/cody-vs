@@ -32,12 +32,12 @@ namespace Cody.Core.Trace
             var eventName = string.IsNullOrEmpty(traceEvent.EventName) ? "<none>" : traceEvent.EventName;
             sb.AppendFormat("{0:yyyy-MM-dd HH:mm:ss.fff} [{1,2}] {2}.{3}: ", traceEvent.Timestamp, traceEvent.ThreadId, traceEvent.LoggerName, eventName);
 
-            if(!string.IsNullOrEmpty(traceEvent.Message))
+            if (!string.IsNullOrEmpty(traceEvent.Message))
             {
                 sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
             }
 
-            if(traceEvent.Data != null)
+            if (traceEvent.Data != null)
             {
                 var output = JsonConvert.SerializeObject(traceEvent.Data);
                 sb.Append(output);
