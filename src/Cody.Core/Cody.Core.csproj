@@ -91,6 +91,12 @@
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
+    <Compile Include="Trace\FileTraceListener.cs" />
+    <Compile Include="Trace\LogioTraceListener.cs" />
+    <Compile Include="Trace\TraceEvent.cs" />
+    <Compile Include="Trace\TraceListener.cs" />
+    <Compile Include="Trace\TraceLogger.cs" />
+    <Compile Include="Trace\TraceManager.cs" />
     <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\WebViewsManager.cs" />

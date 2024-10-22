@@ -10,12 +10,14 @@ using Cody.Core.DocumentSync;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Text.Editor;
 using Cody.Core.Logging;
-using Microsoft.VisualStudio.Threading;
+using Cody.Core.Trace;
 
 namespace Cody.VisualStudio.Services
 {
     public class DocumentsSyncService : IVsRunningDocTableEvents
     {
+        private static readonly TraceLogger trace = new TraceLogger(nameof(DocumentsSyncService));
+
         private RunningDocumentTable rdt;
         private uint rdtCookie = 0;
 
@@ -180,9 +182,11 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining)
         {
+            trace.TraceEvent("OnBeforeLastDocumentUnlock");
             if (dwReadLocksRemaining == 0 && dwEditLocksRemaining == 0)
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                trace.TraceEvent("OnClosed", path);
                 documentActions.OnClosed(path);
             }
             return VSConstants.S_OK;
@@ -191,6 +195,7 @@ namespace Cody.VisualStudio.Services
         int IVsRunningDocTableEvents.OnAfterSave(uint docCookie)
         {
             var path = rdt.GetDocumentInfo(docCookie).Moniker;
+            trace.TraceEvent("OnAfterSave", path);
             documentActions.OnSaved(path);
             return VSConstants.S_OK;
         }
@@ -199,13 +204,16 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow, IVsWindowFrame pFrame)
         {
+            trace.TraceEvent("OnBeforeDocumentWindowShow");
             if (lastShowDocCookie != docCookie)
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                trace.TraceEvent("OnDocumentShow", path);
                 var textView = GetTextView(pFrame);
 
                 if (fFirstShow == 1)
                 {
+                    trace.TraceEvent("OnFirstShowDocument", path);
                     var content = rdt.GetRunningDocumentContents(docCookie);
 
                     var docRange = GetDocumentSelection(textView);
@@ -244,6 +252,7 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame)
         {
+            trace.TraceEvent("OnAfterDocumentWindowHide");
             if (activeDocument != null)
             {
                 activeDocument.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
@@ -256,6 +265,8 @@ namespace Cody.VisualStudio.Services
 
         private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
         {
+            trace.TraceEvent("OnTextChanged");
+
             try
             {
                 var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
@@ -273,6 +284,8 @@ namespace Cody.VisualStudio.Services
 
         private void OnSelectionChanged(object sender, EventArgs e)
         {
+            trace.TraceEvent("OnSelectionChanged");
+
             try
             {
                 var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
