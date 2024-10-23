@@ -32,7 +32,7 @@ namespace Cody.Core.Tests
         }
 
         [Test]
-        public void CustomConfiguration_JSON_Data_Should_Be_Serializable()
+        public void Simple_JSON_Data_Should_Be_Serializable()
         {
             // given
             var entry1 = "'cody.autocomplete.enabled'";
@@ -55,6 +55,35 @@ namespace Cody.Core.Tests
             Assert.That(config[entry1Key], Is.EqualTo(entry1Value));
             Assert.That(config[entry2Key], Is.EqualTo(entry2Value));
         }
+
+        [Test]
+        public void Complex_JSON_Data_Should_Be_Serializable()
+        {
+            // given
+            var key1 = "cody.autocomplete.enabled";
+            var key2 = "cody.customHeaders";
+            var key3 = "cody.customHeaders";
+            var configurationJson = $@"{{
+                        	""{key1}"": true,
+	                        ""{key2}"": {{
+		                        ""Accept-Encoding"": ""identity""
+	                        }},
+	                        ""{key3}"": [
+		                        "".json"",
+		                        ""test.ts""
+	                        ],
+                          }}";
+            _userSettingsServiceMock.Setup(m => m.CustomConfiguration).Returns(configurationJson);
+
+            // when
+            var config = _sut.GetCustomConfiguration();
+
+            // then
+            Assert.That(config, Contains.Key(key1));
+            Assert.That(config, Contains.Key(key2));
+            Assert.That(config, Contains.Key(key3));
+        }
+
 
         [Test]
         public void CustomConfiguration_Malformed_JSON_Should_Return_Null()
