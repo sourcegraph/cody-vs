@@ -97,12 +97,12 @@ We use [Cake](https://cakebuild.net/) as our build automation system. The build 
 
 Execute these commands from the directory containing the `build.cake` file:
 
-| Command                        | Description                                                  |
-| ------------------------------ | ------------------------------------------------------------ |
+| Command                        | Description                                                             |
+| ------------------------------ | ----------------------------------------------------------------------- |
 | `dotnet cake`                  | Download and build agent, download required node files, build extension |
-| `dotnet cake --target Build`   | Same as above                                                |
-| `dotnet cake --target Tests`   | Run tests from Cody.VisualStudio.Tests                       |
-| `dotnet cake --target Publish` | Build extension and publish it to the marketplace            |
+| `dotnet cake --target Build`   | Same as above                                                           |
+| `dotnet cake --target Tests`   | Run tests from Cody.VisualStudio.Tests                                  |
+| `dotnet cake --target Publish` | Build extension and publish it to the marketplace                       |
 
 ## Access Token
 
@@ -172,3 +172,5 @@ The experimental instance in debug mode may keep using the previous version of t
 - [Developer Docs for Agent](https://sourcegraph.com/github.com/sourcegraph/cody@main/-/blob/agent/README.md)
 - [Visual Studio Extensibility](https://learn.microsoft.com/en-us/visualstudio/extensibility/?view=vs-2022)
 - [Publish an Extension](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-publishing-a-visual-studio-extension?view=vs-2022)
+- [dotPeek](https://www.jetbrains.com/decompiler/download/#section=web-installer)
+  - Use dotPeek to decompile the Visual Studio extension to view the source code.
