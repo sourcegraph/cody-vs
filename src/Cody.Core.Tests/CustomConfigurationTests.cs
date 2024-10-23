@@ -52,8 +52,10 @@ namespace Cody.Core.Tests
             // then
             var entry1Key = entry1.Replace(@"'", string.Empty);
             var entry2Key = entry2.Replace(@"'", string.Empty);
-            Assert.That(config[entry1Key], Is.EqualTo(entry1Value));
-            Assert.That(config[entry2Key], Is.EqualTo(entry2Value));
+
+            Assert.That(config, Contains.Key(entry1Key).WithValue(entry1Value));
+            Assert.That(config, Contains.Key(entry2Key).WithValue(entry2Value));
+
         }
 
         [Test]
