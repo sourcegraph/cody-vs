@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Cody.Core")]
+[assembly: AssemblyTitle("Cody.Core.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("Cody.Core")]
+[assembly: AssemblyProduct("Cody.Core.Tests")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9ff2cc40-78e9-46c8-b2ef-30a1f1be82f2")]
+[assembly: Guid("9b46b477-e57a-4f19-a240-56d5d3c7ee8f")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -30,4 +30,3 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: InternalsVisibleTo("Cody.Core.Tests")]
