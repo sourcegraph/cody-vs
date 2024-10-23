@@ -1,15 +1,12 @@
-using Cody.Core.Logging;
+using Cody.Core.Agent.Protocol;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Proposals;
+using Microsoft.VisualStudio.Language.Suggestions;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,10 +27,32 @@ namespace Cody.VisualStudio.Completions
         [ImportingConstructor]
         public CodyProposalSourceProvider(
             ITextDocumentFactoryService textDocumentFactoryService,
-            IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
+            IVsEditorAdaptersFactoryService editorAdaptersFactoryService,
+            SuggestionServiceBase suggestionServiceBase)
         {
             this.textDocumentFactoryService = textDocumentFactoryService;
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
+
+            suggestionServiceBase.ProposalDisplayed += OnProposalDisplayed;
+            suggestionServiceBase.SuggestionAccepted += OnSuggestionAccepted;
+        }
+
+        private void OnProposalDisplayed(object sender, ProposalDisplayedEventArgs e)
+        {
+            if (CodyPackage.AgentServiceInstance != null && e.ProviderName == nameof(CodyProposalSourceProvider))
+            {
+                var completionItem = new CompletionItemParams() { CompletionID = e.OriginalProposal.ProposalId };
+                CodyPackage.AgentServiceInstance.CompletionSuggested(completionItem);
+            }
+        }
+
+        private void OnSuggestionAccepted(object sender, SuggestionAcceptedEventArgs e)
+        {
+            if (CodyPackage.AgentServiceInstance != null && e.ProviderName == nameof(CodyProposalSourceProvider))
+            {
+                var completionItem = new CompletionItemParams() { CompletionID = e.OriginalProposal.ProposalId };
+                CodyPackage.AgentServiceInstance.CompletionAccepted(completionItem);
+            }
         }
 
         public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
