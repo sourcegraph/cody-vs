@@ -67,7 +67,7 @@ jobs:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         run: |
           cd src
-          dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed -l:trx
+          dotnet test .\Cody.Core.Tests\bin\Debug\Cody.Core.Tests.dll .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed -l:trx
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/windows@v2

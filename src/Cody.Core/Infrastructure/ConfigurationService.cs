@@ -79,7 +79,7 @@ namespace Cody.Core.Infrastructure
             return config;
         }
 
-        private Dictionary<string, object> GetCustomConfiguration()
+        internal Dictionary<string, object> GetCustomConfiguration()
         {
             var customConfiguration = _userSettingsService.CustomConfiguration;
             try
