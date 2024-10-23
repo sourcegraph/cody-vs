@@ -15,6 +15,7 @@ namespace Cody.VisualStudio.Completions
     [Export(typeof(ProposalSourceProviderBase))]
     [Name(nameof(CodyProposalSourceProvider))]
     [Order(Before = "InlineCSharpProposalSourceProvider")]
+    [Order(Before = "IntelliCodeCSharpProposalSource")]
     [Order(Before = "Highest Priority")]
     [ContentType("any")]
     public class CodyProposalSourceProvider : ProposalSourceProviderBase
@@ -23,6 +24,9 @@ namespace Cody.VisualStudio.Completions
 
         private readonly ITextDocumentFactoryService textDocumentFactoryService;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
+
+        public const string ProposalIdPrefix = "cody";
+
 
         [ImportingConstructor]
         public CodyProposalSourceProvider(
@@ -37,27 +41,39 @@ namespace Cody.VisualStudio.Completions
             suggestionServiceBase.SuggestionAccepted += OnSuggestionAccepted;
         }
 
+        private bool IsReadyAndIsCodyProposal(string providerName, string proposalId)
+        {
+            // e.ProviderName always return 'IntelliCodeLineCompletions' which is a VS bug
+            return CodyPackage.AgentServiceInstance != null &&
+                (providerName == "IntelliCodeLineCompletions" || providerName == nameof(CodyProposalSourceProvider)) &&
+                proposalId.StartsWith(ProposalIdPrefix);
+        }
+
         private void OnProposalDisplayed(object sender, ProposalDisplayedEventArgs e)
         {
-            if (CodyPackage.AgentServiceInstance != null && e.ProviderName == nameof(CodyProposalSourceProvider))
+            if (IsReadyAndIsCodyProposal(e.ProviderName, e.OriginalProposal.ProposalId))
             {
-                var completionItem = new CompletionItemParams() { CompletionID = e.OriginalProposal.ProposalId };
+                var completionId = e.OriginalProposal.ProposalId.Substring(ProposalIdPrefix.Length);
+                var completionItem = new CompletionItemParams() { CompletionID = completionId };
+                trace.TraceEvent("ProposalDisplayed", completionId);
                 CodyPackage.AgentServiceInstance.CompletionSuggested(completionItem);
             }
         }
 
         private void OnSuggestionAccepted(object sender, SuggestionAcceptedEventArgs e)
         {
-            if (CodyPackage.AgentServiceInstance != null && e.ProviderName == nameof(CodyProposalSourceProvider))
+            if (IsReadyAndIsCodyProposal(e.ProviderName, e.OriginalProposal.ProposalId))
             {
-                var completionItem = new CompletionItemParams() { CompletionID = e.OriginalProposal.ProposalId };
+                var completionId = e.OriginalProposal.ProposalId.Substring(ProposalIdPrefix.Length);
+                var completionItem = new CompletionItemParams() { CompletionID = completionId };
+                trace.TraceEvent("SuggestionAccepted", completionId);
                 CodyPackage.AgentServiceInstance.CompletionAccepted(completionItem);
             }
         }
 
         public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
         {
-            trace.TraceEvent("begin");
+            trace.TraceEvent("Enter");
             IWpfTextView wpfTextView = view as IWpfTextView;
             if (wpfTextView != null && view.Roles.Contains("DOCUMENT") && view.Roles.Contains("EDITABLE"))
             {

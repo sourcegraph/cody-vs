@@ -1,7 +1,6 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
-using Cody.Core.Logging;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
@@ -9,7 +8,6 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,7 +36,7 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
-            trace.TraceEvent("begin");
+            trace.TraceEvent("Enter");
             agentService = CodyPackage.AgentServiceInstance;
             if (agentService == null)
             {
@@ -60,7 +58,7 @@ namespace Cody.VisualStudio.Completions
                 };
 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText();
-                
+
                 trace.TraceEvent("RequestingAutocomplite", autocomplete);
                 trace.TraceEvent("BeforeRequest", new { caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem });
                 //SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{caretline}:{caretCol} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
@@ -104,7 +102,8 @@ namespace Cody.VisualStudio.Completions
                             new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
                         };
 
-                        var proposal = Proposal.TryCreateProposal(null, edits, caret, proposalId: item.Id, flags: ProposalFlags.SingleTabToAccept);
+                        var proposal = Proposal.TryCreateProposal(null, edits, caret,
+                            proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept);
 
                         if (proposal != null) proposalList.Add(proposal);
                     }
