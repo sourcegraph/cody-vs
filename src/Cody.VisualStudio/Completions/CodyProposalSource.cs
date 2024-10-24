@@ -22,7 +22,7 @@ namespace Cody.VisualStudio.Completions
         private ITextDocument textDocument;
         private IVsTextView vsTextView;
 
-        private static uint session = 0;
+        private static uint sessionCounter = 0;
 
         public CodyProposalSource(ITextDocument textDocument, IVsTextView vsTextView)
         {
@@ -37,7 +37,7 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
-            session++;
+            var session = sessionCounter++;
             var stopwatch = new Stopwatch();
 
             try
@@ -66,7 +66,7 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("AutocompliteRequest", autocompleteRequest);
 
                 var autocompleteTask = agentService.Autocomplete(autocompleteRequest, CancellationToken.None);
-                var cancelationTask = Task.Delay(5000, cancel);
+                var cancelationTask = Task.Delay(10000, cancel);
                 stopwatch.Start();
                 var resultTask = await Task.WhenAny(autocompleteTask, cancelationTask);
                 stopwatch.Stop();
