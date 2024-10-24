@@ -1,11 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
+using System;
+using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Client
 {
@@ -49,7 +49,7 @@ namespace Cody.VisualStudio.Client
             jsonMessageFormatter.JsonSerializer.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
             var handler = new HeaderDelimitedMessageHandler(connector.SendingStream, connector.ReceivingStream, jsonMessageFormatter);
 
-            jsonRpc = new JsonRpc(handler);
+            jsonRpc = new TraceJsonRpc(handler);
             jsonRpc.Disconnected += OnDisconnected;
 
             foreach (var target in options.CallbackHandlers)

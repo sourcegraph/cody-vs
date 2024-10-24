@@ -50,6 +50,7 @@
     <Compile Include="Client\AgentClientOptions.cs" />
     <Compile Include="Client\AgentJsonMessageFormatter.cs" />
     <Compile Include="Client\AgentProcessConnector.cs" />
+    <Compile Include="Client\TraceJsonRpc.cs" />
     <Compile Include="Client\IAgentConnector.cs" />
     <Compile Include="Client\NameTransformer.cs" />
     <Compile Include="Client\RemoteAgentConnector.cs" />

@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,12 +17,12 @@ namespace Cody.VisualStudio.Completions
     public class CodyProposalSource : ProposalSourceBase
     {
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSource));
-
         IAgentService agentService;
 
         private ITextDocument textDocument;
         private IVsTextView vsTextView;
-        private static CancellationTokenSource prevCancellationTokenSource;
+
+        private static uint session = 0;
 
         public CodyProposalSource(ITextDocument textDocument, IVsTextView vsTextView)
         {
@@ -36,21 +37,23 @@ namespace Cody.VisualStudio.Completions
             char triggeringCharacter,
             CancellationToken cancel)
         {
-            trace.TraceEvent("Enter");
-            agentService = CodyPackage.AgentServiceInstance;
-            if (agentService == null)
-            {
-                trace.TraceMessage("Agent service not jet ready");
-                return null;
-            }
+            session++;
+            var stopwatch = new Stopwatch();
 
             try
             {
-                prevCancellationTokenSource?.Cancel();
+                trace.TraceEvent("Begin", "session: {0}", session);
+
+                agentService = CodyPackage.AgentServiceInstance;
+                if (agentService == null)
+                {
+                    trace.TraceMessage("Agent service not jet ready");
+                    return null;
+                }
 
                 vsTextView.GetLineAndColumn(caret.Position.Position, out int caretline, out int caretCol);
 
-                var autocomplete = new AutocompleteParams
+                var autocompleteRequest = new AutocompleteParams
                 {
                     Uri = textDocument.FilePath.ToUri(),
                     Position = new Position { Line = caretline, Character = caretCol + caret.VirtualSpaces },
@@ -59,30 +62,49 @@ namespace Cody.VisualStudio.Completions
 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText();
 
-                trace.TraceEvent("RequestingAutocomplite", autocomplete);
-                trace.TraceEvent("BeforeRequest", new { caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem });
-                //SimpleLog.Info("CodyProposalSource", $"Before autocomplete call vs:{caret.VirtualSpaces} poslc:{caretline}:{caretCol} si:'{completionState?.SelectedItem}' ats:{completionState?.ApplicableToSpan} text:'{lineText}'");
+                trace.TraceEvent("BeforeRequest", new { session, caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem });
+                trace.TraceEvent("AutocompliteRequest", autocompleteRequest);
 
-                var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancel);
-                cancellationTokenSource.CancelAfter(4000); //timeout for Autocomplete
-                prevCancellationTokenSource = cancellationTokenSource;
+                var autocompleteTask = agentService.Autocomplete(autocompleteRequest, CancellationToken.None);
+                var cancelationTask = Task.Delay(5000, cancel);
+                stopwatch.Start();
+                var resultTask = await Task.WhenAny(autocompleteTask, cancelationTask);
+                stopwatch.Stop();
+                if (resultTask == cancelationTask)
+                {
+                    if (cancel.IsCancellationRequested)
+                        trace.TraceEvent("AutocompliteCanceled", "session: {0}", session);
+                    else
+                        trace.TraceEvent("AutocompliteTimeout", "session: {0}", session);
 
-                var autocompleteResult = await agentService.Autocomplete(autocomplete, cancellationTokenSource.Token);
+                    return null;
+                }
 
-                if (autocompleteResult.Items.Length == 0) trace.TraceEvent("NoAutocompliteResults");
+                var autocomplete = await autocompleteTask;
+
+                trace.TraceEvent("CallDuration", "session: {0}, duration: {1}ms", session, stopwatch.ElapsedMilliseconds);
+
+                if (autocomplete.Items.Length == 0)
+                {
+                    trace.TraceEvent("NoAutocompliteResults", "session: {0}", session);
+                }
                 else
                 {
-                    foreach (var item in autocompleteResult.Items)
+                    foreach (var item in autocomplete.Items)
                     {
                         trace.TraceEvent("AutocompliteResult", item);
-                        //SimpleLog.Info("CodyProposalSource", $"autocomplite: {item.Range.Start.Line}:{item.Range.Start.Character}-{item.Range.End.Line}:{item.Range.End.Character} '{item.InsertText}'");
                     }
                 }
 
+                var newPosition = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
+                vsTextView.GetLineAndColumn(newPosition, out int newCaretLine, out int newCaretCol);
+                var newText = newPosition.GetContainingLine().GetText();
+                trace.TraceEvent("AfterResponse", "session: {0}, newCaret: {1}:{2} lineText:'{3}'", session, newCaretLine, newCaretCol, newText);
+
                 var proposalList = new List<ProposalBase>();
-                if (autocompleteResult != null && autocompleteResult.Items.Any())
+                if (autocomplete.Items.Any())
                 {
-                    foreach (var item in autocompleteResult.Items)
+                    foreach (var item in autocomplete.Items)
                     {
 
                         //var range = item.Range;
@@ -94,32 +116,30 @@ namespace Cody.VisualStudio.Completions
                         //var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
                         var completionText = item.InsertText;
-                        int insertionStart = caret.IsInVirtualSpace ? completionText.TakeWhile(char.IsWhiteSpace).Count() : 0;
-                        completionText = completionText.Substring(insertionStart);
 
                         var edits = new List<ProposedEdit>(1)
                         {
                             new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
                         };
 
-                        var proposal = Proposal.TryCreateProposal(null, edits, caret,
+                        var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                             proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept);
 
                         if (proposal != null) proposalList.Add(proposal);
+                        else trace.TraceEvent("ProposalSkipped", "session: {0}", session);
                     }
 
                     var collection = new CodyProposalCollection(proposalList);
                     return collection;
                 }
             }
-            catch (OperationCanceledException)
-            {
-                //SimpleLog.Warning("CodyProposalSource", "canceled");
-                trace.TraceEvent("AutocompliteCanceled");
-            }
             catch (Exception ex)
             {
                 trace.TraceException(ex);
+            }
+            finally
+            {
+                trace.TraceEvent("End", "session: {0}", session);
             }
 
             return null;
