@@ -124,9 +124,8 @@ namespace Cody.VisualStudio
 
         private void InitializeServices()
         {
-            TraceManager.Listeners.Add(new LogioTraceListener("localhost", 6689));
-            TraceManager.Listeners.Add(new FileTraceListener(@"c:\tmp\cody.log"));
-            TraceManager.Enabled = true;
+            //TraceManager.Listeners.Add(new FileTraceListener(@"c:\tmp\cody.log"));
+            //TraceManager.Enabled = true;
 
             var loggerFactory = new LoggerFactory();
             AgentLogger = loggerFactory.Create(WindowPaneLogger.CodyAgent);

@@ -10,7 +10,7 @@ namespace Cody.Core.Trace
     {
         public TraceLogger(string name)
         {
-            if(string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             Name = name;
         }
 

@@ -101,7 +101,6 @@
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
-    <Compile Include="Logging\SimpleLog.cs" />
     <Compile Include="Trace\FileTraceListener.cs" />
     <Compile Include="Trace\LogioTraceListener.cs" />
     <Compile Include="Trace\TraceEvent.cs" />

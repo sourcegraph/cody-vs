@@ -11,7 +11,7 @@ namespace Cody.Core.DocumentSync
 {
     public class DocumentSyncCallback : IDocumentSyncActions
     {
-        private static TraceLogger trace = new TraceLogger(nameof(DocumentSyncCallback));
+        private static readonly TraceLogger trace = new TraceLogger(nameof(DocumentSyncCallback));
 
         private ILog logger;
         private IAgentService agentService;
@@ -24,7 +24,7 @@ namespace Cody.Core.DocumentSync
 
         public void OnChanged(string fullPath, DocumentRange visibleRange, DocumentRange selection, IEnumerable<DocumentChange> changes)
         {
-            logger.Debug($"Sending didChange() for '{fullPath}', s:{selection}, v:{visibleRange}, c:{string.Join("", changes)}");
+            trace.TraceEvent("DidChange", "ch: '{0}', sel:{1}, vr:{2}, path:{3}", string.Join("", changes), selection, visibleRange, fullPath);
 
             Range vRange = null;
             if (visibleRange != null)
@@ -85,7 +85,7 @@ namespace Cody.Core.DocumentSync
 
         public void OnClosed(string fullPath)
         {
-            logger.Debug($"Sending DidClose() for '{fullPath}'");
+            trace.TraceEvent("DidClose", "{0}", fullPath);
 
             var docState = new ProtocolTextDocument
             {
@@ -98,14 +98,14 @@ namespace Cody.Core.DocumentSync
 
         public void OnFocus(string fullPath)
         {
-            logger.Debug($"Sending DidFocus() for '{fullPath}'");
-            agentService.DidFocus(new CodyFilePath { Uri = fullPath.ToUri() });
+            trace.TraceEvent("DidFocus", "{0}", fullPath);
+            agentService.DidFocus(new CodyFilePath { Uri = ToUri(fullPath) });
 
         }
 
         public void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection)
         {
-            logger.Debug($"Sending DidOpen() for '{fullPath}', s:{selection}, v:{visibleRange}");
+            trace.TraceEvent("DidOpen", "sel:{0}, vr:{1}, path:{2}", selection, visibleRange, fullPath);
 
             Range vRange = null;
             if (visibleRange != null)
@@ -150,9 +150,8 @@ namespace Cody.Core.DocumentSync
 
         public void OnSaved(string fullPath)
         {
-            logger.Debug($"Sending DidSave() for '{fullPath}'");
-
-            agentService.DidSave(new CodyFilePath { Uri = fullPath.ToUri() });
+            trace.TraceEvent("DidSave", "{0}", fullPath);
+            agentService.DidSave(new CodyFilePath { Uri = ToUri(fullPath) });
         }
     }
 }

@@ -46,7 +46,6 @@ namespace Cody.Core.Trace
                     }
                 }
 
-                
             }
         }
 
