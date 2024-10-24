@@ -46,9 +46,12 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task OpenSolution(string path)
         {
+
+            _logger.WriteLine("Opening solution '{path}' ...");
             Dte.Solution.Open(path);
 
             await Task.Delay(TimeSpan.FromSeconds(5));
+            _logger.WriteLine("Delay after solution open stopped.");
         }
 
         protected void CloseSolution() => Dte.Solution.Close();

@@ -162,8 +162,14 @@ namespace Cody.VisualStudio.Tests
         {
             var tagsList = new List<ContextTag>();
 
+            WriteLog("Searching for Chat ...");
             var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
-            if (chatBox == null) throw new Exception("ChatBox is null. Probably not authenticated.");
+            if (chatBox == null)
+            {
+                WriteLog("Chat NOT found.");
+                throw new Exception("ChatBox is null. Probably not authenticated.");
+            }
+            WriteLog("Chat found.");
 
             var list = await chatBox.QuerySelectorAllAsync("span[data-lexical-decorator='true']");
             foreach (var item in list)
