@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Failed Tests Screenshots
-          path: src\Cody.VisualStudio.Tests\bin\Debug\Screenshots\**\*.png
+          path: src\Cody.VisualStudio.Tests\bin\Debug\Screenshots\*.png
           retention-days: 20
 
       - name: Publish Test Results
