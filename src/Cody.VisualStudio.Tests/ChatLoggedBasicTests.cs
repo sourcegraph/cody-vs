@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EnvDTE;
@@ -12,6 +11,24 @@ namespace Cody.VisualStudio.Tests
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
+        }
+
+        [VsFact(Version = VsVersion.VS2022)]
+        public void Test()
+        {
+            throw new Exception("test");
+        }
+
+        [VsFact(Version = VsVersion.VS2022)]
+        public async void TestAsyncVoid()
+        {
+            throw new Exception("async test1");
+        }
+
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task TestAsync()
+        {
+            throw new Exception("async test1");
         }
 
         [VsFact(Version = VsVersion.VS2022)]
