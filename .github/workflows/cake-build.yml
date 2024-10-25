@@ -31,7 +31,7 @@ jobs:
       - name: Change Screen Resolution
         shell: pwsh
         run: |
-           Install-PackageProvider -Name NuGet -Force
+           Install-PackageProvider NuGet -Force
            Install-Module -Name DisplaySettings -Force
            Set-DisplayResolution -Width 1920 -Height 1080 -Force
 
