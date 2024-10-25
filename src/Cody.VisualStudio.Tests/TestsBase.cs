@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             var date = DateTime.Now.ToString("yyyy-MM-dd hh.mm.ss");
 
             var directory = "Screenshots";
-            var directoryPath = Path.GetFullPath(Path.Combine(directory));
+            var directoryPath = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, directory));
             var path = Path.Combine(directoryPath, $"{date} {safeName}.png");
 
             WriteLog($"Saving screenshots to:{directoryPath}");
