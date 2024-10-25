@@ -74,9 +74,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Failed Tests Screenshots
-          path: .\Cody.VisualStudio.Tests\bin\Debug\Screenshots
+          path: src/Cody.VisualStudio.Tests/bin/Debug/Screenshots
           retention-days: 20
-        run: cd src
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
