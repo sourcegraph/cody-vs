@@ -70,10 +70,10 @@ jobs:
           dotnet test .\Cody.Core.Tests\bin\Debug\Cody.Core.Tests.dll .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed -l:trx
 
       - name: Upload screenshots for failed tests
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Failed Tests Screenshots
-          path: src\Cody.VisualStudio.Tests\bin\Debug\Screenshots\*.png
+          path: src\Cody.VisualStudio.Tests\bin\Debug\Screenshots\
           retention-days: 20
 
       - name: Publish Test Results
