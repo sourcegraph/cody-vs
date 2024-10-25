@@ -56,7 +56,7 @@ namespace Cody.VisualStudio.Completions
                 var autocompleteRequest = new AutocompleteParams
                 {
                     Uri = textDocument.FilePath.ToUri(),
-                    Position = new Position { Line = caretline, Character = caretCol + caret.VirtualSpaces },
+                    Position = new Position { Line = caretline, Character = caretCol },
                     TriggerKind = scenario == ProposalScenario.ExplicitInvocation ? TriggerKind.Invoke : TriggerKind.Automatic
                 };
 
@@ -65,8 +65,9 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("BeforeRequest", new { session, caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem });
                 trace.TraceEvent("AutocompliteRequest", autocompleteRequest);
 
-                var autocompleteTask = agentService.Autocomplete(autocompleteRequest, CancellationToken.None);
-                var cancelationTask = Task.Delay(10000, cancel);
+                var autocompleteCancel = new CancellationTokenSource();
+                var autocompleteTask = agentService.Autocomplete(autocompleteRequest, autocompleteCancel.Token);
+                var cancelationTask = Task.Delay(8000, cancel);
                 stopwatch.Start();
                 var resultTask = await Task.WhenAny(autocompleteTask, cancelationTask);
                 stopwatch.Stop();
@@ -77,6 +78,7 @@ namespace Cody.VisualStudio.Completions
                     else
                         trace.TraceEvent("AutocompliteTimeout", "session: {0}", session);
 
+                    autocompleteCancel.Cancel();
                     return null;
                 }
 
@@ -115,14 +117,22 @@ namespace Cody.VisualStudio.Completions
                         //var endPos = ToPosition(caret.Position.Snapshot, range.End.Line, range.End.Character);
                         //var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
+                        var insertAt = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
+
                         var completionText = item.InsertText;
+                        if (caret.IsInVirtualSpace)
+                        {
+                            var toSkip = Math.Min(caret.VirtualSpaces, completionText.TakeWhile(char.IsWhiteSpace).Count());
+                            completionText = completionText.Substring(toSkip);
+                        }
 
                         var edits = new List<ProposedEdit>(1)
                         {
-                            new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
+                            new ProposedEdit(new SnapshotSpan(insertAt, 0), completionText)
                         };
 
-                        var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
+                        var virtualSnapshotPoint = caret.TranslateTo(insertAt.Snapshot);
+                        var proposal = Proposal.TryCreateProposal("Cody", edits, virtualSnapshotPoint,
                             proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept);
 
                         if (proposal != null) proposalList.Add(proposal);
@@ -130,6 +140,8 @@ namespace Cody.VisualStudio.Completions
                     }
 
                     var collection = new CodyProposalCollection(proposalList);
+                    if (cancel.IsCancellationRequested) trace.TraceEvent("AutocompliteCanceled2", "session: {0}", session);
+
                     return collection;
                 }
             }

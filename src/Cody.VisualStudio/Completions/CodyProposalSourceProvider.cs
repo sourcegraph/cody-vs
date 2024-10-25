@@ -37,7 +37,9 @@ namespace Cody.VisualStudio.Completions
             this.textDocumentFactoryService = textDocumentFactoryService;
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
 
+            //suggestionServiceBase.ProposalRejected += OnProposalRejected;
             suggestionServiceBase.ProposalDisplayed += OnProposalDisplayed;
+            suggestionServiceBase.SuggestionDismissed += OnSuggestionDismissed;
             suggestionServiceBase.SuggestionAccepted += OnSuggestionAccepted;
         }
 
@@ -47,6 +49,11 @@ namespace Cody.VisualStudio.Completions
             return CodyPackage.AgentServiceInstance != null &&
                 (providerName == "IntelliCodeLineCompletions" || providerName == nameof(CodyProposalSourceProvider)) &&
                 proposalId.StartsWith(ProposalIdPrefix);
+        }
+
+        private void OnSuggestionDismissed(object sender, SuggestionDismissedEventArgs e)
+        {
+            trace.TraceEvent("SuggestionDismissed", "reason: {0}", e.Reason);
         }
 
         private void OnProposalDisplayed(object sender, ProposalDisplayedEventArgs e)

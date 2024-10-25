@@ -1,18 +1,16 @@
+using Cody.Core.DocumentSync;
+using Cody.Core.Logging;
+using Cody.Core.Trace;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cody.Core.DocumentSync;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Text.Editor;
-using Cody.Core.Logging;
-using Microsoft.VisualStudio.Threading;
-using Cody.Core.Trace;
-using Cody.VisualStudio.Completions;
 
 namespace Cody.VisualStudio.Services
 {
