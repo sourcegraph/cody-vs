@@ -1,34 +1,15 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using EnvDTE;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatLoggedBasicTests : PlaywrightTestsBase
+    public class ChatLoggedBasicTests : PlaywrightTestsBase, IDisposable
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
-        }
-
-        [VsFact(Version = VsVersion.VS2022)]
-        public void Test()
-        {
-            throw new Exception("test");
-        }
-
-        [VsFact(Version = VsVersion.VS2022)]
-        public async void TestAsyncVoid()
-        {
-            throw new Exception("async test1");
-        }
-
-        [VsFact(Version = VsVersion.VS2022)]
-        public async Task TestAsync()
-        {
-            throw new Exception("async test1");
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -95,6 +76,13 @@ namespace Cody.VisualStudio.Tests
             var chatHistoryEntries = await GetTodayChatHistory();
 
             Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
+
+        }
+
+        public void Dispose()
+        {
+            var testName = GetTestName();
+            TakeScreenShot(testName);
 
         }
     }
