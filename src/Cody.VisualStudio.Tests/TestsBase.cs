@@ -60,9 +60,11 @@ namespace Cody.VisualStudio.Tests
             var directoryPath = Path.GetFullPath(Path.Combine(directory));
             var path = Path.Combine(directoryPath, $"{date} {safeName}.png");
 
+            WriteLog($"Saving screenshots to:{directoryPath}");
             Directory.CreateDirectory(directoryPath);
 
             ScreenshotUtil.CaptureWindow(Process.GetCurrentProcess().MainWindowHandle, path);
+            WriteLog($"Screenshot saved to:{path}");
         }
 
         private IVsUIShell _uiShell;
