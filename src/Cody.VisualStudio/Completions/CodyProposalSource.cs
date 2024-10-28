@@ -117,7 +117,7 @@ namespace Cody.VisualStudio.Completions
                         //var endPos = ToPosition(caret.Position.Snapshot, range.End.Line, range.End.Character);
                         //var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
 
-                        var insertAt = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
+                        //var insertAt = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
 
                         var completionText = item.InsertText;
                         if (caret.IsInVirtualSpace)
@@ -128,11 +128,11 @@ namespace Cody.VisualStudio.Completions
 
                         var edits = new List<ProposedEdit>(1)
                         {
-                            new ProposedEdit(new SnapshotSpan(insertAt, 0), completionText)
+                            new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
                         };
 
-                        var virtualSnapshotPoint = caret.TranslateTo(insertAt.Snapshot);
-                        var proposal = Proposal.TryCreateProposal("Cody", edits, virtualSnapshotPoint,
+                        //var virtualSnapshotPoint = caret.TranslateTo(insertAt.Snapshot);
+                        var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                             proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept);
 
                         if (proposal != null) proposalList.Add(proposal);
