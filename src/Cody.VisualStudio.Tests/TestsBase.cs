@@ -51,7 +51,7 @@ namespace Cody.VisualStudio.Tests
             return testName;
         }
 
-        protected void TakeScreenShot(string name)
+        protected void TakeScreenshot(string name)
         {
             var safeName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
             var date = DateTime.Now.ToString("yyyy-MM-dd hh.mm.ss");

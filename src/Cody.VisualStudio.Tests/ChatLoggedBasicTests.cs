@@ -82,8 +82,7 @@ namespace Cody.VisualStudio.Tests
         public void Dispose()
         {
             var testName = GetTestName();
-            TakeScreenShot(testName);
-
+            TakeScreenshot(testName);
         }
     }
 }

@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatNotLoggedStateTests : PlaywrightTestsBase
+    public class ChatNotLoggedStateTests : PlaywrightTestsBase, IDisposable
     {
         public ChatNotLoggedStateTests(ITestOutputHelper output) : base(output)
         {
@@ -42,6 +42,12 @@ namespace Cody.VisualStudio.Tests
 
             // then
             Assert.Equal(text, textContents.First());
+        }
+
+        public void Dispose()
+        {
+            var testName = GetTestName();
+            TakeScreenshot(testName);
         }
     }
 }
