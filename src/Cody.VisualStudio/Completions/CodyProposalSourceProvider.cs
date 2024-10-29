@@ -46,7 +46,7 @@ namespace Cody.VisualStudio.Completions
         private bool IsReadyAndIsCodyProposal(string providerName, string proposalId)
         {
             // e.ProviderName always return 'IntelliCodeLineCompletions' which is a VS bug
-            return CodyPackage.AgentServiceInstance != null &&
+            return CodyPackage.AgentService != null &&
                 (providerName == "IntelliCodeLineCompletions" || providerName == nameof(CodyProposalSourceProvider)) &&
                 proposalId.StartsWith(ProposalIdPrefix);
         }
@@ -63,7 +63,7 @@ namespace Cody.VisualStudio.Completions
                 var completionId = e.OriginalProposal.ProposalId.Substring(ProposalIdPrefix.Length);
                 var completionItem = new CompletionItemParams() { CompletionID = completionId };
                 trace.TraceEvent("ProposalDisplayed", completionId);
-                CodyPackage.AgentServiceInstance.CompletionSuggested(completionItem);
+                CodyPackage.AgentService.CompletionSuggested(completionItem);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Cody.VisualStudio.Completions
                 var completionId = e.OriginalProposal.ProposalId.Substring(ProposalIdPrefix.Length);
                 var completionItem = new CompletionItemParams() { CompletionID = completionId };
                 trace.TraceEvent("SuggestionAccepted", completionId);
-                CodyPackage.AgentServiceInstance.CompletionAccepted(completionItem);
+                CodyPackage.AgentService.CompletionAccepted(completionItem);
             }
         }
 

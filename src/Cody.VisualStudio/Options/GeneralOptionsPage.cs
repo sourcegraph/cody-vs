@@ -1,6 +1,3 @@
-using System;
-using System.ComponentModel;
-using System.Windows;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.UI.Controls.Options;
@@ -8,6 +5,9 @@ using Cody.UI.ViewModels;
 using Cody.VisualStudio.Inf;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.ComponentModel;
+using System.Windows;
 
 namespace Cody.VisualStudio.Options
 {
@@ -27,7 +27,7 @@ namespace Cody.VisualStudio.Options
             if (_codyPackage != null)
             {
                 _logger = _codyPackage.Logger;
-                _settingsService = _codyPackage.UserSettingsService;
+                _settingsService = CodyPackage.UserSettingsService;
 
                 _logger.Debug("Initialized.");
             }
@@ -61,10 +61,12 @@ namespace Cody.VisualStudio.Options
             var codyConfig = _settingsService.CodySettings;
             var sourcegraphUrl = _settingsService.ServerEndpoint;
             var acceptNonTrustedCert = _settingsService.AcceptNonTrustedCert;
+            var automaticallyTriggerCompletions = _settingsService.AutomaticallyTriggerCompletions;
 
             _generalOptionsViewModel.CodyConfigurations = codyConfig;
             _generalOptionsViewModel.SourcegraphUrl = sourcegraphUrl;
             _generalOptionsViewModel.AcceptNonTrustedCert = acceptNonTrustedCert;
+            _generalOptionsViewModel.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
 
             _logger.Debug($"Is canceled:{e.Cancel}");
 
@@ -77,10 +79,12 @@ namespace Cody.VisualStudio.Options
             var codyConfig = _generalOptionsViewModel.CodyConfigurations;
             var sourcegraphUrl = _generalOptionsViewModel.SourcegraphUrl;
             var acceptNonTrustedCert = _generalOptionsViewModel.AcceptNonTrustedCert;
+            var automaticallyTriggerCompletions = (_generalOptionsViewModel.AutomaticallyTriggerCompletions);
 
             _settingsService.CodySettings = codyConfig;
             _settingsService.ServerEndpoint = sourcegraphUrl;
             _settingsService.AcceptNonTrustedCert = acceptNonTrustedCert;
+            _settingsService.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
         }
 
         protected override void OnDeactivate(CancelEventArgs e)
@@ -102,6 +106,7 @@ namespace Cody.VisualStudio.Options
             _settingsService.CodySettings = string.Empty;
             _settingsService.ServerEndpoint = string.Empty;
             _settingsService.AcceptNonTrustedCert = false;
+            _settingsService.AutomaticallyTriggerCompletions = true;
 
             base.ResetSettings();
         }

@@ -17,8 +17,8 @@ namespace Cody.VisualStudio.Completions
     public class CodyProposalSource : ProposalSourceBase
     {
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSource));
-        IAgentService agentService;
 
+        private IAgentService agentService;
         private ITextDocument textDocument;
         private IVsTextView vsTextView;
 
@@ -44,10 +44,17 @@ namespace Cody.VisualStudio.Completions
             {
                 trace.TraceEvent("Begin", "session: {0}", session);
 
-                agentService = CodyPackage.AgentServiceInstance;
+                agentService = CodyPackage.AgentService;
                 if (agentService == null)
                 {
                     trace.TraceMessage("Agent service not jet ready");
+                    return null;
+                }
+
+                if (CodyPackage.UserSettingsService != null &&
+                    !CodyPackage.UserSettingsService.AutomaticallyTriggerCompletions && scenario != ProposalScenario.ExplicitInvocation)
+                {
+                    trace.TraceMessage("Automatic triggering autocomplete disabled");
                     return null;
                 }
 

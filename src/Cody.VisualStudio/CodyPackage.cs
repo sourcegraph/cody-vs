@@ -6,24 +6,30 @@ using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
+using Cody.Core.Trace;
 using Cody.Core.Workspace;
 using Cody.UI.Controls;
+using Cody.UI.ViewModels;
 using Cody.UI.Views;
 using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Options;
 using Cody.VisualStudio.Services;
+using EnvDTE;
+using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.TaskStatusCenter;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -31,15 +37,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Cody.UI.ViewModels;
-using EnvDTE;
-using EnvDTE80;
-using Task = System.Threading.Tasks.Task;
-using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
-using System.Net;
-using Cody.VisualStudio.Completions;
-using Cody.Core.Trace;
+using Task = System.Threading.Tasks.Task;
 
 namespace Cody.VisualStudio
 {
@@ -75,10 +74,10 @@ namespace Cody.VisualStudio
         public ILog AgentLogger;
         public ILog AgentNotificationsLogger;
 
+        public static IAgentService AgentService;
+        public static IUserSettingsService UserSettingsService;
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
-        public IAgentService AgentService;
-        public IUserSettingsService UserSettingsService;
         public IStatusbarService StatusbarService;
         public IThemeService ThemeService;
         public ISolutionService SolutionService;
@@ -97,8 +96,6 @@ namespace Cody.VisualStudio
         public IFileService FileService;
         public IVsUIShell VsUIShell;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
-
-        public static IAgentService AgentServiceInstance;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -392,7 +389,6 @@ namespace Cody.VisualStudio
 
                         var clientConfig = GetClientInfo();
                         AgentService = await AgentClient.Initialize(clientConfig);
-                        AgentServiceInstance = AgentService;
 
                         WebViewsManager.SetAgentService(AgentService);
                         NotificationHandlers.SetAgentClient(AgentService);

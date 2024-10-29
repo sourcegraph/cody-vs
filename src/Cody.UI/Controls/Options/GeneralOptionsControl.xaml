@@ -17,6 +17,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -52,10 +53,19 @@
                     Content="Accept non-trusted certificates (requires restart)"
                  />
 
+                <CheckBox
+                    Name="AutomaticallyTriggerCompletionsCheckBox"
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="0 5 0 0"
+                    IsChecked="{Binding AutomaticallyTriggerCompletions, Mode=TwoWay}"
+                    Content="Automatically trigger completions"
+                 />
+
                 <!--Get Help-->
                 <Button 
                     Margin="0 5 0 0"
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Grid.Column="1"
                     Height="25"
                     Width="100"

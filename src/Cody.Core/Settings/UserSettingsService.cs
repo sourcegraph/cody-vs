@@ -111,5 +111,15 @@ namespace Cody.Core.Settings
             }
             set => Set(nameof(AcceptNonTrustedCert), value.ToString());
         }
+
+        public bool AutomaticallyTriggerCompletions
+        {
+            get
+            {
+                var value = GetOrDefault(nameof(AutomaticallyTriggerCompletions), true.ToString());
+                return bool.Parse(value);
+            }
+            set => Set(nameof(AutomaticallyTriggerCompletions), value.ToString());
+        }
     }
 }
