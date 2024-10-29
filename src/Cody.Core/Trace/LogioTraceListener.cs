@@ -1,10 +1,7 @@
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Trace
 {
@@ -34,7 +31,7 @@ namespace Cody.Core.Trace
         {
             var eventName = string.IsNullOrEmpty(traceEvent.EventName) ? "<none>" : traceEvent.EventName;
             var input = $"{traceEvent.LoggerName}|{eventName}";
-            if(!inputs.Contains(input))
+            if (!inputs.Contains(input))
             {
                 var newInputMsg = $"+input|{input}\0";
                 var newInputBytes = Encoding.UTF8.GetBytes(newInputMsg);
@@ -49,7 +46,8 @@ namespace Cody.Core.Trace
             if (!string.IsNullOrEmpty(traceEvent.Message))
             {
                 sb.Append(" ");
-                sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
+                if (traceEvent.MessageArgs != null) sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
+                else sb.Append(traceEvent.Message);
             }
 
             if (traceEvent.Data != null)
