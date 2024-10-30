@@ -127,7 +127,11 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
 
-        protected async Task ShowHistoryTab() => await Page.GetByTestId("tab-history").ClickAsync();
+        protected async Task ShowHistoryTab()
+        {
+            await Page.GetByTestId("tab-history").ClickAsync();
+            await Task.Delay(500);
+        }
 
         protected async Task ShowPromptsTab() => await Page.GetByTestId("tab-prompts").ClickAsync();
 
