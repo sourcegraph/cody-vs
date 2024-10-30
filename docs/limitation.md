@@ -1,6 +1,6 @@
 # Known Limitations
 
-The extension is currently in preview:
+The extension is currently in experimental mode and has several limitations. The following list outlines the known limitations in the current version of the extension:
 
 - You might encounter bugs or unexpected behavior
 - Features and user interface are subject to change

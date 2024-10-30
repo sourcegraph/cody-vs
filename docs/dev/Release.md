@@ -11,10 +11,10 @@ Follow these steps to publish a new release to the [Visual Studio Marketplace](h
 
 1. **Coordinate with Marketing**: Contact the Marketing team in the Cody Slack channel approximately 2 days before the release to ensure a blog post is prepared.
 2. **Update Extension Package Version**: Increment the version in [source.extension.vsixmanifest](../../src/Cody.VisualStudio/source.extension.vsixmanifest) and [CHANGELOG.md](../../CHANGELOG.md).
-3. **Commit the Version Changes**: Commit the version increment with a message with `git commit -m VS Code: Release vX.Y.Z`
+3. **Commit the Version Changes**: Commit the version increment with a message with `git commit -m Release vX.Y.Z`
 4. **Create Pull Request**: Open a PR with the updated version.
 5. **Tag the Release**: After the PR is merged (stable release only), create a git tag: `git tag vX.Y.Z`
-6. **Push the Tag**: Push the tag to the remote repository to trigger the [Release Preview workflow](https://github.com/sourcegraph/cody-vs/actions/workflows/release-preview.yml): `git push --tags`
+6. **Push the Tag**: Push the tag to the remote repository to trigger the [Release workflow](https://github.com/sourcegraph/cody-vs/actions/workflows/release-preview.yml): `git push --tags`
 7. **Monitor Publication**: Once the workflow run is complete:
    - The new version of the extension will be published to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
    - A release will be created on GitHub with the release notes.
