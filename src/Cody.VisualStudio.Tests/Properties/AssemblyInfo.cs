@@ -33,4 +33,4 @@ using Xunit;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: TestFramework("Xunit.VsTestFramework", "VsixTesting.Xunit")]
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true, MaxParallelThreads = 1)]
-[assembly:VsTestSettings(TakeScreenshotOnFailure = true)]
+[assembly: VsTestSettings(TakeScreenshotOnFailure = true)]
