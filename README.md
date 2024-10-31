@@ -1,8 +1,6 @@
 # Cody for Visual Studio
 
-🚧 [Cody for Visual Studio](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) is currently in private preview.
-
-**It is intended for testing purposes only and may not be suitable for production use.**
+Install [Cody for Visual Studio (Experimental)](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
 
 ## AI that uses your codebase as context
 
@@ -24,7 +22,7 @@ For example, you can ask Cody:
 ## Choose Your LLM
 
 Cody offers a variety of large language models (LLMs) to power your chat experience.
-Cody Pro users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from Claude 3.5 Sonnet,Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo, Google Gemini 1.5 Pro, Gemini 1.5 Flash, and Mixtral, while Cody Free users have access to the latest base models from Anthropic, OpenAI, Google, and Mixtral.
+Cody Pro users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo, Google Gemini 1.5 Pro, Gemini 1.5 Flash, and Mixtral, while Cody Free users have access to the latest base models from Anthropic, OpenAI, Google, and Mixtral.
 Local models are also available through Ollama to both Cody Free and Cody Pro users. Simply download the model and run it in Ollama to use it in Cody chat.
 
 Administrators for Sourcegraph Enterprise instances can choose between Claude and GPT models to set for their teams as well.
@@ -36,12 +34,6 @@ This extension works for all Cody plans, including Cody Free, Cody Pro, and Cody
 You can find detailed information about Cody's available plans [on our website](https://sourcegraph.com/pricing?utm_source=marketplace.visualstudio.com&utm_medium=referral).
 
 ### Feedback
-
-As the extension is currently in preview, here are what to expect:
-
-- You might encounter bugs or unexpected behavior
-- Features and user interface are subject to change
-- The extension has limited functionality compared to the VS Code extension
 
 We appreciate your feedback as we work to improve Cody for Visual Studio. Please report any issues or suggestions through our official channels:
 

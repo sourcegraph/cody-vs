@@ -1,6 +1,6 @@
 # Testing Cody for Visual Studio
 
-**NOTE:** Cody for Visual Studio is currently in Preview and may have limited functionality compared to the VS Code version.
+**NOTE:** Cody for Visual Studio is currently experimental and may have limited functionality compared to the VS Code version.
 
 This test plan outlines the comprehensive testing procedures for Cody in Visual Studio.
 
@@ -14,24 +14,24 @@ Before beginning the test plan, ensure you have:
   - Supported versions: Community, Professional, and Enterprise
 - [ ] A codebase with a Visual Studio solution file
   - To create a new solution project, follow the instructions in the [Create a solution documentation](https://learn.microsoft.com/en-us/visualstudio/get-started/tutorial-projects-solutions?view=vs-2022#create-a-solution)
-- [ ] Preview version of [Cody for Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) installed
+- [ ] Latest version of [Cody for Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) installed
 
 **IMPORTANT:** Cody requires an open solution in Visual Studio to provide context-aware responses. Ensure you have a solution project opened before testing Cody features.
 
-## Installing Cody for Visual Studio (Preview)
+## Installing Cody for Visual Studio (Experimental)
 
-To install the preview version of Cody for Visual Studio:
+To install Cody for Visual Studio from GitHub Release Page:
 
 1. Visit the [GitHub Releases Page](https://github.com/sourcegraph/cody-vs/releases)
 2. Download `Cody.VisualStudio.vsix` from the latest release's **Assets** section
 3. Close `Visual Studio`
 4. Double-click the downloaded file to install the extension
 
-As this is a preview version, you may encounter bugs or limitations. Please report any issues on the [GitHub repository](https://github.com/sourcegraph/cody-vs/issues).
+Please report any issues on the [GitHub repository](https://github.com/sourcegraph/cody-vs/issues).
 
 ### Public Release Version
 
-Once generally available, the extension will be on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
+The extension is also available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
 
 1. Open Visual Studio.
 2. Go to `Extensions` > `Manage Extensions`.
