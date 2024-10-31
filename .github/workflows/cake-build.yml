@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [piotr/uitests-ci-improvements]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
