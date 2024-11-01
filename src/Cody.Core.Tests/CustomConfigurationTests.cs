@@ -64,7 +64,7 @@ namespace Cody.Core.Tests
             // given
             var key1 = "cody.autocomplete.enabled";
             var key2 = "cody.customHeaders";
-            var key3 = "cody.customHeaders";
+            var key3 = "cody.excludeFiles";
             var configurationJson = $@"{{
                         	""{key1}"": true,
 	                        ""{key2}"": {{

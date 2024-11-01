@@ -127,7 +127,11 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
 
-        protected async Task ShowHistoryTab() => await Page.GetByTestId("tab-history").ClickAsync();
+        protected async Task ShowHistoryTab()
+        {
+            await Page.GetByTestId("tab-history").ClickAsync();
+            await Task.Delay(500);
+        }
 
         protected async Task ShowPromptsTab() => await Page.GetByTestId("tab-prompts").ClickAsync();
 
@@ -162,8 +166,14 @@ namespace Cody.VisualStudio.Tests
         {
             var tagsList = new List<ContextTag>();
 
+            WriteLog("Searching for Chat ...");
             var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
-            if (chatBox == null) throw new Exception("ChatBox is null. Probably not authenticated.");
+            if (chatBox == null)
+            {
+                WriteLog("Chat NOT found.");
+                throw new Exception("ChatBox is null. Probably not authenticated.");
+            }
+            WriteLog("Chat found.");
 
             var list = await chatBox.QuerySelectorAllAsync("span[data-lexical-decorator='true']");
             foreach (var item in list)

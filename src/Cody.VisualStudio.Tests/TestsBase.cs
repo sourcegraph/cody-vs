@@ -1,14 +1,17 @@
 using System;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using Cody.Core.Logging;
-using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
+using System.Diagnostics;
 using Thread = System.Threading.Thread;
 
 namespace Cody.VisualStudio.Tests
@@ -38,17 +41,46 @@ namespace Cody.VisualStudio.Tests
             }
         }
 
+        protected string GetTestName()
+        {
+            var test = (ITest)_logger.GetType()
+                .GetField("test", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(_logger);
+
+            var testName = test?.DisplayName;
+            return testName;
+        }
+
+        protected void TakeScreenshot(string name)
+        {
+            var safeName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
+            var date = DateTime.Now.ToString("yyyy-MM-dd hh.mm.ss");
+
+            var directory = "Screenshots";
+            var directoryPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), directory));
+            var path = Path.Combine(directoryPath, $"{date} {safeName}.png");
+
+            WriteLog($"Saving screenshots to:{directoryPath}");
+            Directory.CreateDirectory(directoryPath);
+
+            ScreenshotUtil.CaptureWindow(Process.GetCurrentProcess().MainWindowHandle, path);
+            WriteLog($"Screenshot saved to:{path}");
+        }
+
         private IVsUIShell _uiShell;
         protected IVsUIShell UIShell => _uiShell ?? (_uiShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell)));
 
         private DTE2 _dte;
-        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(DTE)));
+        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(EnvDTE.DTE)));
 
         protected async Task OpenSolution(string path)
         {
+
+            WriteLog($"Opening solution '{path}' ...");
             Dte.Solution.Open(path);
 
             await Task.Delay(TimeSpan.FromSeconds(5));
+            WriteLog("Delay after solution open stopped.");
         }
 
         protected void CloseSolution() => Dte.Solution.Close();

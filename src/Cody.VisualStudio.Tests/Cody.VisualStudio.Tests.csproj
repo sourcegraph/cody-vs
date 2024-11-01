@@ -37,6 +37,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
@@ -52,6 +53,7 @@
     </Compile>
     <Compile Include="ChatNotLoggedStateTests.cs" />
     <Compile Include="ChatLoggedBasicTests.cs" />
+    <Compile Include="ScreenshotUtil.cs" />
     <Compile Include="PlaywrightTestsBase.cs" />
     <Compile Include="PlaywrightInitializationTests.cs" />
     <Compile Include="CodyPackageTests.cs" />
