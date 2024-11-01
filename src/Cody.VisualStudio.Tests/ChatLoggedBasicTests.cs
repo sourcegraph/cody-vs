@@ -65,18 +65,28 @@ namespace Cody.VisualStudio.Tests
         {
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";
+            string[] chatHistoryEntries = { };
+            try
+            {
+                await WaitForPlaywrightAsync();
 
-            await WaitForPlaywrightAsync();
+                await EnterChatTextAndSend(prompt);
+                await CloseCodyChatToolWindow();
 
-            await EnterChatTextAndSend(prompt);
-            await CloseCodyChatToolWindow();
-
-            await OpenCodyChatToolWindow();
-            await ShowHistoryTab();
-            var chatHistoryEntries = await GetTodayChatHistory();
-
-            Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
-
+                await OpenCodyChatToolWindow();
+                await ShowHistoryTab();
+                chatHistoryEntries = await GetTodayChatHistory();
+            }
+            catch (Exception ex)
+            {
+                // for debugging
+                WriteLog($"{GetTestName()} failed.");
+            }
+            finally
+            {
+                Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
+            }
+            
         }
 
         public void Dispose()
