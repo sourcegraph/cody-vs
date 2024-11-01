@@ -70,6 +70,13 @@ namespace Cody.VisualStudio.Tests
             {
                 await WaitForPlaywrightAsync();
 
+                TakeScreenshot($"{GetTestName()}_1");
+
+                await CloseCodyChatToolWindow();
+                await OpenCodyChatToolWindow();
+
+                TakeScreenshot($"{GetTestName()}_11");
+
                 await EnterChatTextAndSend(prompt);
                 await CloseCodyChatToolWindow();
 
