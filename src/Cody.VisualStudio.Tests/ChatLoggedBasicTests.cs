@@ -1,14 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EnvDTE;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatLoggedBasicTests : PlaywrightTestsBase
+    public class ChatLoggedBasicTests : PlaywrightTestsBase, IDisposable
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
@@ -79,6 +77,12 @@ namespace Cody.VisualStudio.Tests
 
             Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
 
+        }
+
+        public void Dispose()
+        {
+            var testName = GetTestName();
+            TakeScreenshot(testName);
         }
     }
 }
