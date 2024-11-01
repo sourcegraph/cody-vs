@@ -14,6 +14,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Security
 
+## [0.1.2]
+
+### Added
+
+- VS Code version 1.40.1.
+
 ## [0.1.1]
 
 ### Fixed
