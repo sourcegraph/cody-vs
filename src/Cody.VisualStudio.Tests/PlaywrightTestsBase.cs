@@ -49,6 +49,8 @@ namespace Cody.VisualStudio.Tests
                 await WaitForChat();
                 WriteLog("Chat initialized and loaded.");
 
+                await ShowHistoryTab();
+
                 TakeScreenshot($"{GetTestName()}_BeforeClosingChat");
                 await CloseCodyChatToolWindow();
                 TakeScreenshot($"{GetTestName()}_AfterClosingChat");
