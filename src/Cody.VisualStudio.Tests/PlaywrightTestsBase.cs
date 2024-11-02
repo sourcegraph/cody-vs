@@ -49,6 +49,12 @@ namespace Cody.VisualStudio.Tests
                 await WaitForChat();
                 WriteLog("Chat initialized and loaded.");
 
+                TakeScreenshot($"{GetTestName()}_BeforeClosingChat");
+                await CloseCodyChatToolWindow();
+                TakeScreenshot($"{GetTestName()}_AfterClosingChat");
+                await OpenCodyChatToolWindow();
+                TakeScreenshot($"{GetTestName()}_AfterOpeningChat");
+
                 var accessToken = Environment.GetEnvironmentVariable("Access_Token_UI_Tests");
                 if (accessToken != null)
                 {
