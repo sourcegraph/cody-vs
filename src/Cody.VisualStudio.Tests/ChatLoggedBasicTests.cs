@@ -82,6 +82,9 @@ namespace Cody.VisualStudio.Tests
 
                 await OpenCodyChatToolWindow();
                 await ShowHistoryTab();
+
+                TakeScreenshot($"{GetTestName()}_ShowHistoryChat");
+
                 chatHistoryEntries = await GetTodayChatHistory();
             }
             catch (Exception ex)
