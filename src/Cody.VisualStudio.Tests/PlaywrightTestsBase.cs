@@ -147,11 +147,12 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task EnterChatTextAndSend(string prompt)
         {
-            var entryArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
+            var entryArea = Page.Locator("span[data-lexical-text='true']");
 
             TakeScreenshot($"{GetTestName()}_2");
 
-            await entryArea.PressSequentiallyAsync(prompt);
+            await entryArea.FillAsync(prompt);
+            //await entryArea.PressSequentiallyAsync(prompt);
 
             TakeScreenshot($"{GetTestName()}_3");
 
