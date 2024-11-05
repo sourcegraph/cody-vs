@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
 using Xunit;
@@ -37,8 +34,8 @@ namespace Cody.VisualStudio.Tests
             var buttonText = "Sign In with GitHub";
 
             // then
-            await AssertTestIsPresent(sectionText);
-            await AssertTestIsPresent(buttonText);
+            await AssertTextIsPresent(sectionText);
+            await AssertTextIsPresent(buttonText);
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -50,21 +47,23 @@ namespace Cody.VisualStudio.Tests
             var tokenButtonText = " Sign In with Access Token";
 
             // then
-            await AssertTestIsPresent(sectionText);
-            await AssertTestIsPresent(browserButtonText);
-            await AssertTestIsPresent(tokenButtonText);
+            await AssertTextIsPresent(sectionText);
+            await AssertTextIsPresent(browserButtonText);
+            await AssertTextIsPresent(tokenButtonText);
         }
 
-        private async Task AssertTestIsPresent(string text)
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Logins_With_GitLab_Google_Are_Present()
         {
             // given
-
-            var getStarted = Page.GetByText(text);
-            var textContents = await getStarted.AllTextContentsAsync();
+            var gitlabButtonText = "Sign In with GitLab";
+            var googleButtonText = "Sign In with Google";
 
             // then
-            Assert.Equal(text, textContents.First());
+            await AssertTextIsPresent(gitlabButtonText);
+            await AssertTextIsPresent(googleButtonText);
         }
+
 
         public async void Dispose()
         {

@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [piotr/e2e-login-page]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
