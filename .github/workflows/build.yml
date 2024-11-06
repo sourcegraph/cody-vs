@@ -1,0 +1,80 @@
+name: Build and test extension
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# concurrency prevents multiple instances of the workflow from running at the same time,
+# using `cancel-in-progress` to cancel any existing runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: 16gb_16_core_large_window_runner
+    # do we want to run this on forks?
+    if: github.repository_owner == 'sourcegraph'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        
+      - name: Cache nuget
+        uses: actions/cache@v4
+        with:
+          path: $HOME/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-nuget-
+        
+      - name: Cache agent
+        id: cache-agent
+        uses: actions/cache@v4
+        with:
+          path: src/Cody.VisualStudio/Agent
+          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version') }}  
+        
+      - name: Build agent if needed
+        if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
+        shell: pwsh
+        run: ./agent/runBuildAgent.ps1
+        
+      - name: Build Extension (Debug)
+        run: msbuild src/Cody.sln -t:Build -verbosity:minimal -property:Configuration=Debug
+        
+      #Running tests  
+
+      - name: Change Screen Resolution
+        shell: pwsh
+        run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
+
+      - name: Prepare Visual Studio
+        run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
+        
+      - name: Run tests
+        uses: microsoft-approved-actions/vstest@master
+        with:
+          testAssembly: *.Tests.dll
+          searchFolder: ./src/
+        
+      - name: Upload screenshots for UI tests
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: UI Tests Screenshots
+          path: src/Cody.VisualStudio.Tests/bin/Debug/Screenshots
+          retention-days: 20
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        if: always()
+        with:
+          files: |
+            src\TestResults/**/*.xml
+            src\TestResults/**/*.trx
+            src\TestResults/**/*.json
