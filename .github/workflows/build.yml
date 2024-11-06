@@ -48,6 +48,12 @@ jobs:
       - name: Build Extension (Debug)
         run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=Debug
         
+      - name: Upload Cody.VisualStudio.vsix artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cody.VisualStudio.vsix
+          path: src/Cody.VisualStudio/bin/Debug/Cody.VisualStudio.vsix
+        
       #Running tests  
 
       - name: Change Screen Resolution
@@ -62,8 +68,10 @@ jobs:
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         with:
-          testAssembly: '*.Tests.dll'
           searchFolder: ./src/
+          testAssembly: |
+            **/*.Tests.dll
+            !./**/obj/**
         
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
