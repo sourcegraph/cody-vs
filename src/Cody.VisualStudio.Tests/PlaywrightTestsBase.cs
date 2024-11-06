@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
@@ -123,6 +125,17 @@ namespace Cody.VisualStudio.Tests
         {
             CodyPackage.UserSettingsService.AccessToken = accessToken;
             await Task.Delay(TimeSpan.FromMilliseconds(2000)); // wait for the Chat to response
+        }
+
+        protected async Task AssertTextIsPresent(string text)
+        {
+            // given
+
+            var getStarted = Page.GetByText(text);
+            var textContents = await getStarted.AllTextContentsAsync();
+
+            // then
+            Assert.Equal(text, textContents.First());
         }
 
         protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
