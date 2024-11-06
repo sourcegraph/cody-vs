@@ -46,7 +46,7 @@ jobs:
         run: ./agent/runBuildAgent.ps1
         
       - name: Build Extension (Debug)
-        run: msbuild src/Cody.sln -t:Build -verbosity:minimal -property:Configuration=Debug
+        run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=Debug
         
       #Running tests  
 
