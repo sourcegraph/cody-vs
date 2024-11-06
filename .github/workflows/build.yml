@@ -52,7 +52,7 @@ jobs:
         run: |
             dotnet nuget locals all --list
             echo ${{ github.workspace }}
-            dir $HOME/nuget/packages
+            dir $HOME/.nuget/packages
         
       - name: Upload Cody.VisualStudio.vsix artifact
         uses: actions/upload-artifact@v4
