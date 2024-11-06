@@ -64,19 +64,12 @@ jobs:
         run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
         
       - name: Run tests
-        env:
-          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-        run: dotnet test .\Cody.Core.Tests\bin\Debug\Cody.Core.Tests.dll .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed -l:trx
-      
-      - name: Run tests
-        uses: microsoft/vstest-action@v1.0.0
+        uses: EasyDesk/action-dotnet-test@v1.3.0
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         with:
-          searchFolder: ./src/
-          testAssembly: |
-            **/*.Tests.dll
-            !./**/obj/**
+          path: ./src
+          build-configuration: Debug
         
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
