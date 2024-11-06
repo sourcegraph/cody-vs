@@ -2,9 +2,10 @@ name: Build and test extension
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: [tg/github-actions]
+#    branches: [main]
+#  pull_request:
+#    branches: [main]
   workflow_dispatch:
 
 # concurrency prevents multiple instances of the workflow from running at the same time,
@@ -61,7 +62,7 @@ jobs:
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         with:
-          testAssembly: *.Tests.dll
+          testAssembly: '*.Tests.dll'
           searchFolder: ./src/
         
       - name: Upload screenshots for UI tests
