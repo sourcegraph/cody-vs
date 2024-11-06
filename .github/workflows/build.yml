@@ -26,6 +26,9 @@ jobs:
       - name: Add msbuild
         uses: microsoft/setup-msbuild@v2
         
+      - name: Where nuget stores packages
+        run: dir $HOME/.nuget/packages
+        
       - name: Cache nuget
         uses: actions/cache@v4
         with:
@@ -49,10 +52,7 @@ jobs:
         run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=Debug
         
       - name: Where nuget stores packages
-        run: |
-            dotnet nuget locals all --list
-            echo ${{ github.workspace }}
-            dir $HOME/.nuget/packages
+        run: dir $HOME/.nuget/packages
         
       - name: Upload Cody.VisualStudio.vsix artifact
         uses: actions/upload-artifact@v4
@@ -90,3 +90,6 @@ jobs:
             src\TestResults/**/*.xml
             src\TestResults/**/*.trx
             src\TestResults/**/*.json
+            
+      - name: Where nuget stores packages
+        run: dir $HOME/.nuget/packages
