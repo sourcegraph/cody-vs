@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add msbuild to PATH
+      - name: Add msbuild
         uses: microsoft/setup-msbuild@v2
         
       - name: Cache nuget
@@ -58,6 +58,8 @@ jobs:
         
       - name: Run tests
         uses: microsoft-approved-actions/vstest@master
+        env:
+          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         with:
           testAssembly: *.Tests.dll
           searchFolder: ./src/
