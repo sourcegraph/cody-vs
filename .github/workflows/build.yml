@@ -58,7 +58,7 @@ jobs:
         run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
         
       - name: Run tests
-        uses: microsoft-approved-actions/vstest@master
+        uses: microsoft/vstest@master
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         with:
