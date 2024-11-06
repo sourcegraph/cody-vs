@@ -48,6 +48,12 @@ jobs:
       - name: Build Extension (Debug)
         run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=Debug
         
+      - name: Where nuget stores packages
+        run: |
+            dotnet nuget locals all --list
+            echo $HOME
+            dir ./src/packages
+        
       - name: Upload Cody.VisualStudio.vsix artifact
         uses: actions/upload-artifact@v4
         with:
@@ -64,12 +70,9 @@ jobs:
         run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
         
       - name: Run tests
-        uses: EasyDesk/action-dotnet-test@v1.3.0
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-        with:
-          path: ./src
-          build-configuration: Debug
+        run: dotnet test src/Cody.sln --no-build --configuration Debug --verbosity detailed --logger trx
         
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
