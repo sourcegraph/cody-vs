@@ -91,6 +91,5 @@ namespace Cody.VisualStudio.Tests
                 }
             });
         }
-        }
     }
 }
