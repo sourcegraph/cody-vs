@@ -69,24 +69,28 @@ namespace Cody.VisualStudio.Tests
         }
 
 
-        public async void Dispose()
+        public void Dispose()
         {
-            try
+            _context.Factory.Run(async () =>
             {
-                var testName = GetTestName();
-                TakeScreenshot(testName);
-
-                if (_accessToken != null)
+                try
                 {
-                    WriteLog("Reverting the access token ...");
-                    await SetAccessToken(_accessToken); // make it valid
-                    WriteLog("The access token reverted.");
+                    var testName = GetTestName();
+                    TakeScreenshot(testName);
+
+                    if (_accessToken != null)
+                    {
+                        WriteLog("Reverting the access token ...");
+                        await SetAccessToken(_accessToken); // make it valid
+                        WriteLog("The access token reverted.");
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                WriteLog($"Dispose() for {GetTestName()} failed.");
-            }
+                catch (Exception ex)
+                {
+                    WriteLog($"Dispose() for {GetTestName()} failed.");
+                }
+            });
+        }
         }
     }
 }
