@@ -21,9 +21,13 @@ namespace Cody.VisualStudio.Tests
                 _accessToken = await GetAccessToken();
 
                 if (_accessToken != null)
+                {
+                    WriteLog("Making access token invalid ...");
                     await SetAccessToken("INVALID");
-            });
 
+                    WriteLog("Invalid token set.");
+                }
+            });
         }
 
         [VsFact(Version = VsVersion.VS2022)]
