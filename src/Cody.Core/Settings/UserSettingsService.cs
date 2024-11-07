@@ -91,8 +91,6 @@ namespace Cody.Core.Settings
                 {
                     _secretStorage.AccessToken = value;
                     AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
-
-                    _logger.Debug("A new access token was set.");
                 }
             }
         }
