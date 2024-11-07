@@ -47,7 +47,7 @@ jobs:
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
         
-      - name: Build Extension (Debug)
+      - name: Build extension (Debug)
         run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=Debug
         
       - name: Upload Cody.VisualStudio.vsix artifact
@@ -68,7 +68,7 @@ jobs:
       - name: Run tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-        run: dotnet test src/Cody.sln --no-build --configuration Debug --verbosity normal --logger trx
+        run: dotnet vstest src/*Tests/bin/Debug/*.Tests.dll --logger:trx
         
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
@@ -82,7 +82,4 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         if: always()
         with:
-          files: |
-            src\TestResults/**/*.xml
-            src\TestResults/**/*.trx
-            src\TestResults/**/*.json
+          files: TestResults/**/*.trx
