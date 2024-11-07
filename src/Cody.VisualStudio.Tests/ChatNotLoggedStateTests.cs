@@ -77,7 +77,11 @@ namespace Cody.VisualStudio.Tests
                 TakeScreenshot(testName);
 
                 if (_accessToken != null)
+                {
+                    WriteLog("Reverting the access token ...");
                     await SetAccessToken(_accessToken); // make it valid
+                    WriteLog("The access token reverted.");
+                }
             }
             catch (Exception ex)
             {
