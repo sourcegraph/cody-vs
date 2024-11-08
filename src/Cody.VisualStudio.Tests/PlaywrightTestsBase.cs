@@ -126,7 +126,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog("Preparing to set access token ...");
 
             CodyPackage.UserSettingsService.AccessToken = accessToken;
-            //await Task.Delay(TimeSpan.FromSeconds(5)); // wait for the Chat to response
+            await Task.Delay(TimeSpan.FromSeconds(1)); // wait for the Chat to response
 
             WriteLog("Access token set successfully");
         }
