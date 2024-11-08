@@ -46,9 +46,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Cody.VisualStudio\Properties\AssemblyVersion.cs">
-      <Link>Properties\AssemblyVersion.cs</Link>
-    </Compile>
     <Compile Include="Agent\AgentCallAttribute.cs" />
     <Compile Include="Agent\AgentCallbackAttribute.cs" />
     <Compile Include="Agent\IAgentProxy.cs" />
