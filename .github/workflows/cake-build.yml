@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [piotr/flaky-ChatNotLoggedStateTests]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
