@@ -34,7 +34,7 @@ namespace Cody.VisualStudio.Tests
                 await AssertTextIsPresent(sectionText);
                 await AssertTextIsPresent(buttonText);
             });
-            
+
         }
 
         [VsFact(Version = VsVersion.VS2022)]
