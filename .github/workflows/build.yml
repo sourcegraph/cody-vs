@@ -21,6 +21,7 @@ jobs:
     if: github.repository_owner == 'sourcegraph'
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      Configuration: Debug
 
     steps:
       - uses: actions/checkout@v4
@@ -47,14 +48,14 @@ jobs:
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
         
-      - name: Build extension (Debug)
-        run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=Debug
+      - name: Build extension (${{ env.Configuration }})
+        run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=${{ env.Configuration }}
         
       - name: Upload Cody.VisualStudio.vsix artifact
         uses: actions/upload-artifact@v4
         with:
           name: Cody.VisualStudio.vsix
-          path: src/Cody.VisualStudio/bin/Debug/Cody.VisualStudio.vsix
+          path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
         
       #Running tests  
 
@@ -68,14 +69,14 @@ jobs:
       - name: Run tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-        run: dotnet vstest src/*Tests/bin/Debug/*.Tests.dll --logger:trx
+        run: dotnet vstest src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx
         
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: UI Tests Screenshots
-          path: src/Cody.VisualStudio.Tests/bin/Debug/Screenshots
+          path: src/Cody.VisualStudio.Tests/bin/${{ env.Configuration }}/Screenshots
           retention-days: 20
 
       - name: Publish Test Results
