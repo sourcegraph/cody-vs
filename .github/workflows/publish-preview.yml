@@ -52,7 +52,7 @@ jobs:
         run: ./agent/runBuildAgent.ps1
         
       - name: Set version on AssemblyInfo.cs files
-        uses: dannevesdantas/set-version-assemblyinfo-win@v1.0.0
+        uses: dannevesdantas/set-version-assemblyinfo@v.1.0.0
         with:
           version: ${{ steps.version.outputs.full_without_prefix }}
           path: src/
