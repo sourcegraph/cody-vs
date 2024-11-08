@@ -32,6 +32,7 @@ namespace Cody.VisualStudio.Tests
             await NotLoggedState(async () =>
             {
                 await AssertTextIsPresent(sectionText);
+                throw new Exception("Testing exception!!!");
                 await AssertTextIsPresent(buttonText);
             });
             
