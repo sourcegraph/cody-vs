@@ -1,10 +1,9 @@
-name: Build and test extension
+name: Publish preview
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    tags:
+      - preview-v*.*.*
 
 # concurrency prevents multiple instances of the workflow from running at the same time,
 # using `cancel-in-progress` to cancel any existing runs.
@@ -19,10 +18,16 @@ jobs:
     if: github.repository_owner == 'sourcegraph'
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      Configuration: Debug
+      Configuration: Release
 
     steps:
       - uses: actions/checkout@v4
+    
+      - name: Extract version from tag
+        uses: nowsprinting/check-version-format-action@v4.0.3
+        id: version
+        with:
+          prefix: preview-v
 
       - name: Add msbuild
         uses: microsoft/setup-msbuild@v2
@@ -45,6 +50,18 @@ jobs:
         if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
+        
+      - name: Set version on AssemblyInfo.cs files
+        uses: dannevesdantas/set-version-assemblyinfo-win@v1.0.0
+        with:
+          version: ${{ steps.version.outputs.full_without_prefix }}
+          path: src/
+          
+      - name: Set version for .vsixmanifest file
+        uses: cezarypiatek/VsixVersionAction@1.2
+        with:
+          version: ${{ steps.version.outputs.full_without_prefix }}
+          vsix-manifest-file: src\Cody.VisualStudio\source.extension.vsixmanifest
         
       - name: Build extension (${{ env.Configuration }})
         run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=${{ env.Configuration }}
@@ -82,3 +99,19 @@ jobs:
         if: always()
         with:
           files: TestResults/**/*.trx
+          
+      #Publish
+          
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          tag: ${{ steps.version.outputs.full }}
+          name: Cody for Visual Studio ${{ steps.version.outputs.full_without_prefix }}
+          prerelease: true
+          artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
+          artifactContentType: application/zip
+          
+      - name: Publish to https://www.vsixgallery.com/
+        uses: timheuer/openvsixpublish@v1
+        with:
+          vsix-file: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix

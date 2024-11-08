@@ -3,7 +3,7 @@ name: Nightly Build
 on:
   schedule:
     - cron: "0 2 * * *" # Runs at 2 AM UTC every day
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,63 +13,82 @@ jobs:
   build:
     runs-on: 16gb_16_core_large_window_runner
     if: github.repository_owner == 'sourcegraph'
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      Configuration: Debug
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.3
+      - name: Add msbuild
+        uses: microsoft/setup-msbuild@v2
+        
+      - name: Cache nuget
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-nuget-
+          
+      - name: Find the latest tag in Cody repository
+      - uses: oprypin/find-latest-tag@v1.1.2
+        id: cody
+        with:
+          repository: sourcegraph/cody
+          prefix: vscode-
+          
+      - name: Hash tag name
+        uses: pplanel/hash-calculator-action@v1.3.2
+        id: cody-hash
+        with:
+          input: ${{ steps.cody.outputs.tag }}
+          
+      - name: Cache agent
+        id: cache-agent
+        uses: actions/cache@v4
+        with:
+          path: src/Cody.VisualStudio/Agent
+          key: ${{ runner.os }}-agent-${{ steps.cody-hash.outputs.digest }}  
+        
+      - name: Build agent if needed (tag ${{ steps.cody.outputs.tag }})
+        if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
+        shell: pwsh
+        run: ./agent/buildAgent.ps1 -version ${{ steps.cody.outputs.tag }}
+        
+      - name: Build extension (${{ env.Configuration }})
+        run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=${{ env.Configuration }}
+        
+      - name: Upload Cody.VisualStudio.vsix artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cody.VisualStudio.vsix
+          path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
+          retention-days: 20
+        
+      #Running tests  
 
       - name: Change Screen Resolution
         shell: pwsh
         run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
 
-      - name: ⚙️ Prepare Visual Studio
+      - name: Prepare Visual Studio
         run: '&"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe" /RootSuffix Exp /ResetSettings General.vssettings'
-
-      - name: Install Cake.Tool
-        run: dotnet tool install --global Cake.Tool
-
-      - name: Restore NuGet packages
-        run: nuget restore src\Cody.Core\Cody.Core.csproj -PackagesDirectory src\packages
-
-      - name: Common Build Setup
-        run: |
-          cd src
-          dotnet tool restore
-          corepack enable
-
-      - name: Build Cody Agent (main branch)
-        run: |
-          cd src
-          corepack install --global pnpm@8.6.7
-          dotnet cake --target=BuildCodyAgent --cody-branch=main
-
-      - name: Build Extension (Debug)
-        run: |
-          cd src
-          dotnet cake --target=BuildDebug
-
-      - name: Tests
+        
+      - name: Run tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-        run: |
-          cd src
-          dotnet test .\Cody.VisualStudio.Tests\bin\Debug\Cody.VisualStudio.Tests.dll -v detailed -l:trx
-
+        run: dotnet vstest src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx
+        
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: UI Tests Screenshots
-          path: src/Cody.VisualStudio.Tests/bin/Debug/Screenshots
-          retention-days: 5
+          path: src/Cody.VisualStudio.Tests/bin/${{ env.Configuration }}/Screenshots
+          retention-days: 20
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         if: always()
         with:
-          files: |
-            src\TestResults/**/*.xml
-            src\TestResults/**/*.trx
-            src\TestResults/**/*.json
+          files: TestResults/**/*.trx
