@@ -18,15 +18,6 @@ namespace Cody.VisualStudio.Tests
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
-                _accessToken = await GetAccessToken();
-
-                if (_accessToken != null)
-                {
-                    WriteLog("Making access token invalid ...");
-                    await SetAccessToken("INVALID");
-
-                    WriteLog("Invalid token set.");
-                }
             });
         }
 
@@ -38,8 +29,12 @@ namespace Cody.VisualStudio.Tests
             var buttonText = "Sign In with GitHub";
 
             // then
-            await AssertTextIsPresent(sectionText);
-            await AssertTextIsPresent(buttonText);
+            await NotLoggedState(async () =>
+            {
+                await AssertTextIsPresent(sectionText);
+                await AssertTextIsPresent(buttonText);
+            });
+            
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -68,28 +63,70 @@ namespace Cody.VisualStudio.Tests
             await AssertTextIsPresent(googleButtonText);
         }
 
+        private async Task NotLoggedState(Func<Task> action)
+        {
+            try
+            {
+                await UseInvalidToken();
+                await action();
+            }
+            //catch (Exception ex)
+            //{
+            //    WriteLog(ex.Message);
+            //    throw;
+            //}
+            finally
+            {
+                await RevertToken();
+            }
+        }
+
+        private async Task UseInvalidToken()
+        {
+            _accessToken = await GetAccessToken();
+            if (_accessToken != null)
+            {
+                WriteLog("Making access token invalid ...");
+                await SetAccessToken("INVALID");
+
+                WriteLog("Invalid token set.");
+            }
+        }
+
+        private async Task RevertToken()
+        {
+            var testName = GetTestName();
+            TakeScreenshot(testName);
+
+            if (_accessToken != null)
+            {
+                WriteLog("Reverting the access token ...");
+                await SetAccessToken(_accessToken); // make it valid
+                WriteLog("The access token reverted.");
+            }
+        }
 
         public void Dispose()
         {
-            _context.Factory.Run(async () =>
-            {
-                try
-                {
-                    var testName = GetTestName();
-                    TakeScreenshot(testName);
+            //_context.Factory.Run(async () =>
+            //{
+            //    try
+            //    {
+            //        var testName = GetTestName();
+            //        TakeScreenshot(testName);
 
-                    if (_accessToken != null)
-                    {
-                        WriteLog("Reverting the access token ...");
-                        await SetAccessToken(_accessToken); // make it valid
-                        WriteLog("The access token reverted.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    WriteLog($"Dispose() for {GetTestName()} failed.");
-                }
-            });
+            //        if (_accessToken != null)
+            //        {
+            //            WriteLog("Reverting the access token ...");
+            //            await SetAccessToken(_accessToken); // make it valid
+            //            WriteLog("The access token reverted.");
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        WriteLog($"Dispose() for {GetTestName()} failed.");
+            //    }
+            //});
         }
     }
 }
