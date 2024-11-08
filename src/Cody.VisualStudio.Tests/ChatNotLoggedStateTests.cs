@@ -46,9 +46,12 @@ namespace Cody.VisualStudio.Tests
             var tokenButtonText = " Sign In with Access Token";
 
             // then
-            await AssertTextIsPresent(sectionText);
-            await AssertTextIsPresent(browserButtonText);
-            await AssertTextIsPresent(tokenButtonText);
+            await NotLoggedState(async () =>
+            {
+                await AssertTextIsPresent(sectionText);
+                await AssertTextIsPresent(browserButtonText);
+                await AssertTextIsPresent(tokenButtonText);
+            });
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -59,8 +62,11 @@ namespace Cody.VisualStudio.Tests
             var googleButtonText = "Sign In with Google";
 
             // then
-            await AssertTextIsPresent(gitlabButtonText);
-            await AssertTextIsPresent(googleButtonText);
+            await NotLoggedState(async () =>
+            {
+                await AssertTextIsPresent(gitlabButtonText);
+                await AssertTextIsPresent(googleButtonText);
+            });
         }
 
         private async Task NotLoggedState(Func<Task> action)
