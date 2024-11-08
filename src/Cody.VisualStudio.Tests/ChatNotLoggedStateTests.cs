@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Shell;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatNotLoggedStateTests : PlaywrightTestsBase, IDisposable
+    public class ChatNotLoggedStateTests : PlaywrightTestsBase
     {
         private readonly JoinableTaskContext _context = ThreadHelper.JoinableTaskContext;
 
@@ -29,10 +29,9 @@ namespace Cody.VisualStudio.Tests
             var buttonText = "Sign In with GitHub";
 
             // then
-            await NotLoggedState(async () =>
+            await NotInLoggedState(async () =>
             {
                 await AssertTextIsPresent(sectionText);
-                throw new Exception("Testing exception!!!");
                 await AssertTextIsPresent(buttonText);
             });
             
@@ -47,7 +46,7 @@ namespace Cody.VisualStudio.Tests
             var tokenButtonText = " Sign In with Access Token";
 
             // then
-            await NotLoggedState(async () =>
+            await NotInLoggedState(async () =>
             {
                 await AssertTextIsPresent(sectionText);
                 await AssertTextIsPresent(browserButtonText);
@@ -63,25 +62,20 @@ namespace Cody.VisualStudio.Tests
             var googleButtonText = "Sign In with Google";
 
             // then
-            await NotLoggedState(async () =>
+            await NotInLoggedState(async () =>
             {
                 await AssertTextIsPresent(gitlabButtonText);
                 await AssertTextIsPresent(googleButtonText);
             });
         }
 
-        private async Task NotLoggedState(Func<Task> action)
+        private async Task NotInLoggedState(Func<Task> action)
         {
             try
             {
                 await UseInvalidToken();
                 await action();
             }
-            //catch (Exception ex)
-            //{
-            //    WriteLog(ex.Message);
-            //    throw;
-            //}
             finally
             {
                 await RevertToken();
@@ -111,29 +105,6 @@ namespace Cody.VisualStudio.Tests
                 await SetAccessToken(_accessToken); // make it valid
                 WriteLog("The access token reverted.");
             }
-        }
-
-        public void Dispose()
-        {
-            //_context.Factory.Run(async () =>
-            //{
-            //    try
-            //    {
-            //        var testName = GetTestName();
-            //        TakeScreenshot(testName);
-
-            //        if (_accessToken != null)
-            //        {
-            //            WriteLog("Reverting the access token ...");
-            //            await SetAccessToken(_accessToken); // make it valid
-            //            WriteLog("The access token reverted.");
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        WriteLog($"Dispose() for {GetTestName()} failed.");
-            //    }
-            //});
         }
     }
 }
