@@ -21,9 +21,9 @@ runs:
   steps:
     - name: Cache PrivateGalleryCreator
       uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/PrivateGalleryCreator
-          key: ${{ runner.os }}-PrivateGalleryCreator-1.0.64
+      with:
+        path: ${{ github.workspace }}/PrivateGalleryCreator
+        key: ${{ runner.os }}-PrivateGalleryCreator-1.0.64
   
     - name: Generate gallery feed
       shell: pwsh
