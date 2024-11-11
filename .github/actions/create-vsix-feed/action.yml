@@ -16,12 +16,11 @@ inputs:
     description: 'Custom gallery name'
     required: false
     default: 'VSIX gallery'
-outputs:
 runs:
   using: "composite"
   steps:
-    - name: Cache nuget
-        uses: actions/cache@v4
+    - name: Cache PrivateGalleryCreator
+      uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/PrivateGalleryCreator
           key: ${{ runner.os }}-PrivateGalleryCreator-1.0.64
