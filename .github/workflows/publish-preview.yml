@@ -16,7 +16,7 @@ jobs:
     runs-on: 16gb_16_core_large_window_runner
     # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
       checks: write
