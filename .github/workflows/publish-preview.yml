@@ -113,7 +113,7 @@ jobs:
           artifactContentType: application/zip
           
       - name: Create custom VSIX feed
-        uses: ./.github/actions/create-vsix-feed
+        uses: ./.github/actions/create-vsix-feed #custom action
         with:
           vsix-directory: src/Cody.VisualStudio/bin/${{ env.Configuration }}
           feed-file-dir: feed/
