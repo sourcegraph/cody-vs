@@ -31,7 +31,7 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
           
       - name: Find the latest tag in Cody repository
-      - uses: oprypin/find-latest-tag@v1.1.2
+        uses: oprypin/find-latest-tag@v1.1.2
         id: cody
         with:
           repository: sourcegraph/cody
