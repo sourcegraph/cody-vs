@@ -4,8 +4,8 @@ inputs:
   vsix-directory:
     description: 'Directory where all VSIX files to include in gallery are located'
     required: true
-  feed-file-dir:
-    description: 'Output directory where feed file and assets will be created'
+  feed-file:
+    description: 'Path to output feed file and assets'
     required: false
     default: './feed.xml'
   source-path:
@@ -42,4 +42,4 @@ runs:
 
         $prm = '--input="${{ inputs.vsix-directory }}" --output="${{ inputs.feed-file-dir }}" --source="${{ inputs.source-path }}" --name="${{ inputs.gallery-name }}" --terminate'
 
-        & $exePath $prm
+        Start-Process -FilePath $exePath -ArgumentList $prm -Wait -NoNewWindow

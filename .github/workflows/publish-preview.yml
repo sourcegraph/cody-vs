@@ -116,7 +116,7 @@ jobs:
         uses: ./.github/actions/create-vsix-feed
         with:
           vsix-directory: src/Cody.VisualStudio/bin/${{ env.Configuration }}
-          feed-file-dir: feed/
+          feed-file: feed/feed.xml
           source-path: https://github.com/sourcegraph/cody-vs/releases/download/${{ steps.version.outputs.full }}/
           gallery-name: "Sourcegraph preview gallery"
           
