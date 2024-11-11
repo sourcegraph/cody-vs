@@ -19,6 +19,8 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      checks: write
+      pull-requests: write
     # do we want to run this on forks?
     if: github.repository_owner == 'sourcegraph'
     env:
