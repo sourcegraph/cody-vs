@@ -40,6 +40,6 @@ runs:
             Remove-Item $zipFile
         }
 
-        $prm = '--input="${{ inputs.vsix-directory }}" --output="${{ inputs.feed-file-dir }}" --source="${{ inputs.source-path }}" --name="${{ inputs.gallery-name }}" --terminate'
+        $prm = '--input="${{ inputs.vsix-directory }}" --output="${{ inputs.feed-file }}" --source="${{ inputs.source-path }}" --name="${{ inputs.gallery-name }}" --terminate'
 
         Start-Process -FilePath $exePath -ArgumentList $prm -Wait -NoNewWindow
