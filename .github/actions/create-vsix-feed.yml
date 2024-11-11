@@ -1,0 +1,38 @@
+name: 'VSIX gallery feed creator'
+description: 'Create VSIX private gallery ATOM feed'
+inputs:
+  vsix-directory:
+    description: 'Directory where all VSIX files to include in gallery are located'
+    required: true
+  feed-file-dir:
+    description: 'Output directory where feed file and assets will be created'
+    required: false
+    default: './feed.xml'
+  source-path:
+    description: 'Download source path used in the feed file'
+    required: false
+    default: '.'
+  gallery-name:
+    description: 'Custom gallery name'
+    required: false
+    default: 'VSIX gallery'
+outputs:
+runs:
+  using: "composite"
+  steps:
+    - name: Generate gallery feed
+      shell: pwsh
+      run: |
+        $downloadUrl = "https://github.com/madskristensen/PrivateGalleryCreator/releases/download/1.0.64/PrivateGalleryCreator.zip"
+        $creatorFolder = Join-Path $env:GITHUB_WORKSPACE "PrivateGalleryCreator"
+        $zipFile = Join-Path $creatorFolder "PrivateGalleryCreator.zip"
+        $exePath = Join-Path $creatorFolder "PrivateGalleryCreator.exe"
+
+        md -Force $creatorFolder | Out-Null
+        Invoke-WebRequest $downloadUrl -OutFile $zipFile
+        Expand-Archive $zipFile -DestinationPath $creatorFolder
+        Remove-Item $zipFile
+
+        $prm = '--input="${{ inputs.vsix-directory }}" --output="${{ inputs.feed-file-dir }}" --source="${{ inputs.source-path }}" --name="${{ inputs.gallery-name }}" --terminate'
+
+        & $exePath $prm

@@ -18,7 +18,7 @@ jobs:
     if: github.repository_owner == 'sourcegraph'
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      Configuration: Debug
+      Configuration: Release
 
     steps:
       - uses: actions/checkout@v4
@@ -84,6 +84,7 @@ jobs:
       - name: Run tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
+          WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: '--remote-debugging-port=9222'
         run: dotnet vstest src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx
         
       - name: Upload screenshots for UI tests
@@ -111,7 +112,18 @@ jobs:
           artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
           artifactContentType: application/zip
           
-      - name: Publish to https://www.vsixgallery.com/
-        uses: timheuer/openvsixpublish@v1
+      - name: Create custom VSIX feed
+        uses: ./.github/actions/create-vsix-feed
         with:
-          vsix-file: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
+          vsix-directory: src/Cody.VisualStudio/bin/${{ env.Configuration }}
+          feed-file-dir: feed/
+          source-path: https://github.com/sourcegraph/cody-vs/releases/download/${{ steps.version.outputs.full }}/
+          gallery-name: "Sourcegraph preview gallery"
+          
+      - name: Upload feed files as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: feed/
+
+      - name: Deploy feed to GitHub Pages
+        uses: actions/deploy-pages@v4
