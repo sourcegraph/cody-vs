@@ -18,13 +18,17 @@ namespace Cody.VisualStudio.Tests
 {
     public abstract class TestsBase : ITestLogger
     {
-        private readonly ITestOutputHelper _logger;
+        private ITestOutputHelper _logger;
 
         protected static CodyPackage CodyPackage;
 
         protected TestsBase(ITestOutputHelper output)
         {
             _logger = output;
+
+            var logger = (Logger)CodyPackage?.Logger;
+            if (logger != null)
+                logger.WithTestLogger(this);
 
             WriteLog("[TestBase] Initialized.");
         }

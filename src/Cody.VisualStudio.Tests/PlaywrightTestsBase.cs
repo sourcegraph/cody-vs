@@ -123,8 +123,12 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task SetAccessToken(string accessToken)
         {
+            WriteLog("Preparing to set access token ...");
+
             CodyPackage.UserSettingsService.AccessToken = accessToken;
-            await Task.Delay(TimeSpan.FromMilliseconds(2000)); // wait for the Chat to response
+            await Task.Delay(TimeSpan.FromSeconds(2)); // wait for the Chat to response
+
+            WriteLog("Access token set successfully");
         }
 
         protected async Task AssertTextIsPresent(string text)

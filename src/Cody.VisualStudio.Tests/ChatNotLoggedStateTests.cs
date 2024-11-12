@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Shell;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class ChatNotLoggedStateTests : PlaywrightTestsBase, IDisposable
+    public class ChatNotLoggedStateTests : PlaywrightTestsBase
     {
         private readonly JoinableTaskContext _context = ThreadHelper.JoinableTaskContext;
 
@@ -18,12 +18,7 @@ namespace Cody.VisualStudio.Tests
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
-                _accessToken = await GetAccessToken();
-
-                if (_accessToken != null)
-                    await SetAccessToken("INVALID");
             });
-
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -34,8 +29,12 @@ namespace Cody.VisualStudio.Tests
             var buttonText = "Sign In with GitHub";
 
             // then
-            await AssertTextIsPresent(sectionText);
-            await AssertTextIsPresent(buttonText);
+            await NotInLoggedState(async () =>
+            {
+                await AssertTextIsPresent(sectionText);
+                await AssertTextIsPresent(buttonText);
+            });
+
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -47,9 +46,12 @@ namespace Cody.VisualStudio.Tests
             var tokenButtonText = " Sign In with Access Token";
 
             // then
-            await AssertTextIsPresent(sectionText);
-            await AssertTextIsPresent(browserButtonText);
-            await AssertTextIsPresent(tokenButtonText);
+            await NotInLoggedState(async () =>
+            {
+                await AssertTextIsPresent(sectionText);
+                await AssertTextIsPresent(browserButtonText);
+                await AssertTextIsPresent(tokenButtonText);
+            });
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -60,24 +62,48 @@ namespace Cody.VisualStudio.Tests
             var googleButtonText = "Sign In with Google";
 
             // then
-            await AssertTextIsPresent(gitlabButtonText);
-            await AssertTextIsPresent(googleButtonText);
+            await NotInLoggedState(async () =>
+            {
+                await AssertTextIsPresent(gitlabButtonText);
+                await AssertTextIsPresent(googleButtonText);
+            });
         }
 
-
-        public async void Dispose()
+        private async Task NotInLoggedState(Func<Task> action)
         {
             try
             {
-                var testName = GetTestName();
-                TakeScreenshot(testName);
-
-                if (_accessToken != null)
-                    await SetAccessToken(_accessToken); // make it valid
+                await UseInvalidToken();
+                await action();
             }
-            catch (Exception ex)
+            finally
             {
-                WriteLog($"Dispose() for {GetTestName()} failed.");
+                await RevertToken();
+            }
+        }
+
+        private async Task UseInvalidToken()
+        {
+            _accessToken = await GetAccessToken();
+            if (_accessToken != null)
+            {
+                WriteLog("Making access token invalid ...");
+                await SetAccessToken("INVALID");
+
+                WriteLog("Invalid token set.");
+            }
+        }
+
+        private async Task RevertToken()
+        {
+            var testName = GetTestName();
+            TakeScreenshot(testName);
+
+            if (_accessToken != null)
+            {
+                WriteLog("Reverting the access token ...");
+                await SetAccessToken(_accessToken); // make it valid
+                WriteLog("The access token reverted.");
             }
         }
     }
