@@ -1,4 +1,3 @@
-
 # Releases
 
 Version number format follows [Semantic Versioning](https://semver.org/) of <major>.<minor>.<patch>.
@@ -24,10 +23,7 @@ Follow these steps to publish a new release to the [Visual Studio Marketplace](h
 Include the following checklist in the PR description when creating a new release.
 
 ```markdown
-Release Checklist:
-    - [ ] Update version number
-    - [ ] Update [CHANGELOG.md](./CHANGELOG.md)
-    - [ ] Link to PR for the release blog post (if any)
+Release Checklist: - [ ] Update version number - [ ] Update [CHANGELOG.md](./CHANGELOG.md) - [ ] Link to PR for the release blog post (if any)
 ```
 
 Note: Ensure all checklist items are completed before merging the release PR.
@@ -46,6 +42,14 @@ To publish a **patch** release:
 6. Follow the steps for a stable release starting from step 2 to publish the patch release.
 
 IMPORTANT: You do not need to merge the patch branch back into `main` as it is a temporary branch. However, you will need to update the version number in the `main` branch after the patch release is published.
+
+## Rollback
+
+In case of a critical issue with the latest release, a rollback may be necessary. The new release should be published as soon as possible to replace the faulty release.
+
+However, rolling back a release is not a straightforward process. It requires a new release with a fix for the issue and a new version number, while the main Cody repository tag should be updated to the previous version.
+
+The rest of the release process remains the same as for a patch release.
 
 ## Nightly build
 
