@@ -114,7 +114,6 @@ jobs:
           name: Cody for Visual Studio ${{ steps.version.outputs.full_without_prefix }}
           prerelease: true
           artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
-          artifactContentType: application/zip
           
       - name: Create custom VSIX feed
         uses: ./.github/actions/create-vsix-feed
