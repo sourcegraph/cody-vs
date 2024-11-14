@@ -89,7 +89,7 @@ jobs:
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
           WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: '--remote-debugging-port=9222'
-        run: dotnet vstest src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx
+        run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
         
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
