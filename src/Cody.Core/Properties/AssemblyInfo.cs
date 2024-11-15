@@ -29,5 +29,9 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.*")]
+
+[assembly: AssemblyCopyright("Copyright © 2024-present Sourcegraph Inc.")]
+[assembly: AssemblyCompany("Sourcegraph Inc.")]
+
 [assembly: InternalsVisibleTo("Cody.Core.Tests")]

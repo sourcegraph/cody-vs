@@ -1,10 +1,13 @@
-name: Nightly Build
+name: Build and test extension
 
 on:
-  schedule:
-    - cron: "0 2 * * *" # Runs at 2 AM UTC every day
-  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
+# concurrency prevents multiple instances of the workflow from running at the same time,
+# using `cancel-in-progress` to cancel any existing runs.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -12,6 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: 16gb_16_core_large_window_runner
+    # do we want to run this on forks?
     if: github.repository_owner == 'sourcegraph'
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
@@ -29,31 +33,18 @@ jobs:
           path: ${{ github.workspace }}/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ github.sha }}
           restore-keys: ${{ runner.os }}-nuget-
-          
-      - name: Find the latest tag in Cody repository
-        uses: oprypin/find-latest-tag@v1.1.2
-        id: cody
-        with:
-          repository: sourcegraph/cody
-          prefix: vscode-
-          
-      - name: Hash tag name
-        uses: pplanel/hash-calculator-action@v1.3.2
-        id: cody-hash
-        with:
-          input: ${{ steps.cody.outputs.tag }}
-          
+        
       - name: Cache agent
         id: cache-agent
         uses: actions/cache@v4
         with:
           path: src/Cody.VisualStudio/Agent
-          key: ${{ runner.os }}-agent-${{ steps.cody-hash.outputs.digest }}  
+          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version') }}  
         
-      - name: Build agent if needed (tag ${{ steps.cody.outputs.tag }})
+      - name: Build agent if needed
         if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
         shell: pwsh
-        run: ./agent/buildAgent.ps1 -version ${{ steps.cody.outputs.tag }}
+        run: ./agent/runBuildAgent.ps1
         
       - name: Build extension (${{ env.Configuration }})
         run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=${{ env.Configuration }}
@@ -63,7 +54,6 @@ jobs:
         with:
           name: Cody.VisualStudio.vsix
           path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
-          retention-days: 20
         
       #Running tests  
 

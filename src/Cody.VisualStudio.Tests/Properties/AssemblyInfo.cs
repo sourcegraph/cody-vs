@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -30,7 +29,8 @@ using Xunit;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.*")]
+
 [assembly: TestFramework("Xunit.VsTestFramework", "VsixTesting.Xunit")]
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true, MaxParallelThreads = 1)]
 [assembly: VsTestSettings(TakeScreenshotOnFailure = true)]

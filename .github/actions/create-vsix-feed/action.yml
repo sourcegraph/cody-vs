@@ -1,0 +1,30 @@
+name: 'VSIX gallery feed creator'
+description: 'Create VSIX private gallery ATOM feed'
+inputs:
+  vsix-directory:
+    description: 'Directory where all VSIX files to include in gallery are located'
+    required: true
+  feed-file:
+    description: 'Path to output feed file and assets'
+    required: false
+    default: './feed.xml'
+  source-path:
+    description: 'Download source path used in the feed file'
+    required: false
+    default: '.'
+  gallery-name:
+    description: 'Custom gallery name'
+    required: false
+    default: 'VSIX gallery'
+runs:
+  using: "composite"
+  steps:
+    - name: Cache PrivateGalleryCreator
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/PrivateGalleryCreator
+        key: ${{ runner.os }}-PrivateGalleryCreator-1.0.64
+  
+    - name: Generate gallery feed
+      shell: pwsh
+      run: ${{github.action_path}}/privateGalleryCreator.ps1 -vsixDirectory "${{ inputs.vsix-directory }}" -feedFile "${{ inputs.feed-file }}" -sourcePath "${{ inputs.source-path }}" -galleryName "${{ inputs.gallery-name }}"

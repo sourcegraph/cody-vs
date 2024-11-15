@@ -1,0 +1,135 @@
+name: Publish preview
+
+on:
+  push:
+    tags:
+      - preview-v*.*.*
+
+# concurrency prevents multiple instances of the workflow from running at the same time,
+# using `cancel-in-progress` to cancel any existing runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: 16gb_16_core_large_window_runner
+    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      checks: write
+      pull-requests: write
+    # do we want to run this on forks?
+    if: github.repository_owner == 'sourcegraph'
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      Configuration: Release
+
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Extract version from tag
+        uses: nowsprinting/check-version-format-action@v4.0.3
+        id: version
+        with:
+          prefix: preview-v
+
+      - name: Add msbuild
+        uses: microsoft/setup-msbuild@v2
+        
+      - name: Cache nuget
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-nuget-
+        
+      - name: Cache agent
+        id: cache-agent
+        uses: actions/cache@v4
+        with:
+          path: src/Cody.VisualStudio/Agent
+          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version') }}  
+        
+      - name: Build agent if needed
+        if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
+        shell: pwsh
+        run: ./agent/runBuildAgent.ps1
+        
+      - name: Set version on AssemblyInfo.cs files
+        uses: dannevesdantas/set-version-assemblyinfo@v.1.0.0
+        with:
+          version: ${{ steps.version.outputs.full_without_prefix }}
+          path: src/
+          
+      - name: Set version for .vsixmanifest file
+        uses: cezarypiatek/VsixVersionAction@1.2
+        with:
+          version: ${{ steps.version.outputs.full_without_prefix }}
+          vsix-manifest-file: src\Cody.VisualStudio\source.extension.vsixmanifest
+        
+      - name: Build extension (${{ env.Configuration }})
+        run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=${{ env.Configuration }}
+        
+      - name: Upload Cody.VisualStudio.vsix artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cody.VisualStudio.vsix
+          path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
+        
+      #Running tests  
+
+      - name: Change Screen Resolution
+        shell: pwsh
+        run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
+        
+      - name: Run tests
+        env:
+          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
+          WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: '--remote-debugging-port=9222'
+        run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
+        
+      - name: Upload screenshots for UI tests
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: UI Tests Screenshots
+          path: src/Cody.VisualStudio.Tests/bin/${{ env.Configuration }}/Screenshots
+          retention-days: 10
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        if: always()
+        with:
+          files: TestResults/**/*.trx
+          
+      #Publish
+          
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          tag: ${{ steps.version.outputs.full }}
+          name: Cody for Visual Studio ${{ steps.version.outputs.full_without_prefix }}
+          prerelease: true
+          artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
+          
+      - name: Create custom VSIX feed
+        uses: ./.github/actions/create-vsix-feed
+        with:
+          vsix-directory: src/Cody.VisualStudio/bin/${{ env.Configuration }}
+          feed-file: feed/feed.xml
+          source-path: https://github.com/sourcegraph/cody-vs/releases/download/${{ steps.version.outputs.full }}/
+          gallery-name: "Sourcegraph preview gallery"
+          
+      - name: Upload feed files as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: vsix-gallery-feed
+          path: feed/
+
+      - name: Deploy feed to GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: vsix-gallery-feed
