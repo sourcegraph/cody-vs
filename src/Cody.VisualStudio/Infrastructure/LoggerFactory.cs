@@ -47,9 +47,8 @@ namespace Cody.VisualStudio.Inf
                 _versionService.AddBuildMetadata(build, isDebug);
 
                 var version = _versionService.Full;
-                var buildDate = _versionService.BuildDate;
                 var debugOrRelease = _versionService.IsDebug ? "Debug" : "Release";
-                logger.Info($"Version: {version} {debugOrRelease} build (compiled: {buildDate:G})");
+                logger.Info($"Version: {version} {debugOrRelease} build");
             }
             else
             {

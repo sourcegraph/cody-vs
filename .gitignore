@@ -2,8 +2,8 @@
 src/Cody.VisualStudio/Agent/
 src/Tools/Addins/
 src/tools
-node-binaries/
-cody-dist/
+agent/node/
+agent/cody/
 
 
 
