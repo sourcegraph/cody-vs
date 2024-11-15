@@ -1,8 +1,8 @@
 param(
-	$vsix-directory,
-	$feed-file,
-	$source-path,
-	$gallery-name
+	$vsixDirectory,
+	$feedFile,
+	$sourcePath,
+	$galleryName
 )
 
 $downloadUrl = "https://github.com/madskristensen/PrivateGalleryCreator/releases/download/1.0.64/PrivateGalleryCreator.zip"
@@ -17,6 +17,6 @@ if (!(Test-Path -Path $exePath -PathType Leaf)) {
 	Remove-Item $zipFile
 }
 
-$prm = '--input="$vsix-directory" --output="$feed-file" --source="$source-path" --name="$gallery-name" --terminate'
+$prm = '--input="$vsixDirectory" --output="$feedFile" --source="$sourcePath" --name="$galleryName" --terminate'
 
 Start-Process -FilePath $exePath -ArgumentList $prm -Wait -NoNewWindow

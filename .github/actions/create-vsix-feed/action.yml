@@ -27,4 +27,4 @@ runs:
   
     - name: Generate gallery feed
       shell: pwsh
-      run: ${{github.action_path}}/privateGalleryCreator.ps1 -vsix-directory "${{ inputs.vsix-directory }}" -feed-file "${{ inputs.feed-file }}" -source-path "${{ inputs.source-path }}" -gallery-name "${{ inputs.gallery-name }}"
+      run: ${{github.action_path}}/privateGalleryCreator.ps1 -vsixDirectory "${{ inputs.vsix-directory }}" -feedFile "${{ inputs.feed-file }}" -sourcePath "${{ inputs.source-path }}" -galleryName "${{ inputs.gallery-name }}"
