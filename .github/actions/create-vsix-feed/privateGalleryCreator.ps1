@@ -17,6 +17,6 @@ if (!(Test-Path -Path $exePath -PathType Leaf)) {
 	Remove-Item $zipFile
 }
 
-$prm = '--input="$vsixDirectory" --output="$feedFile" --source="$sourcePath" --name="$galleryName" --terminate'
+$prm = "--input=""$vsixDirectory"" --output=""$feedFile"" --source=""$sourcePath"" --name=""$galleryName"" --terminate"
 
 Start-Process -FilePath $exePath -ArgumentList $prm -Wait -NoNewWindow
