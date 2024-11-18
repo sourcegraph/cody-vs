@@ -2,7 +2,7 @@ name: Build and test extension
 
 on:
   push:
-    branches: [main]
+    branches: [main/uitests-ci-improvements-v3]
   pull_request:
     branches: [main]
 
