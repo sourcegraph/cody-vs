@@ -3,6 +3,11 @@ param(
     $previewInfix
 )
 
+if($publishType -ne "Preview" -and $publishType -ne "Release") {
+    Write-Host "::error::Publish type can only be 'Preview' or 'Release'"
+    exit 1
+}
+
 $isPreview = $publishType -eq "Preview"
 
 $pattern = "(?<Product>\w+)-v(?<Major>\d+)\.(?<Minor>\d+)\.(?<Patch>\w+)"
