@@ -51,8 +51,8 @@ do {
 	else { break }
 } while($true)
 
-"next-version=$nextVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-"next-version-tag=$nextVersionTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+"next-version=$nextVersion" >> $env:GITHUB_OUTPUT
+"next-version-tag=$nextVersionTag" >> $env:GITHUB_OUTPUT
 
 Write-Host "Next version: $nextVersion"
 Write-Host "Next version tag name: $nextVersionTag"

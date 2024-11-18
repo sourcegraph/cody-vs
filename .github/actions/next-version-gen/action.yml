@@ -11,11 +11,13 @@ inputs:
 outputs:
   next-version:
     description: 'Next version number'
+    value: ${{ steps.version.outputs.next-version }}
   next-version-tag:
     description: 'Name of the tag used to mark version in git'
+    value: ${{ steps.version.outputs.next-version-tag }}
 runs:
   using: "composite"
   steps:  
-    - name: Generate version
+    - id: version
       shell: pwsh
       run: ${{github.action_path}}/generateVersion.ps1 -publishType "${{ inputs.publish-type }}" -previewInfix "${{ inputs.preview-infix }}"
