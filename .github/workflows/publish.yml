@@ -112,11 +112,16 @@ jobs:
           files: TestResults/**/*.trx
           
       #Publish
-
       - name: Create git tag
-        run: |
-          git tag -a "${{ steps.version.outputs.next-version-tag }}"
-          git push origin "${{ steps.version.outputs.next-version-tag }}"
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ steps.version.outputs.next-version-tag }}",
+              sha: context.sha
+            })
           
       - name: Create GitHub release
         uses: ncipollo/release-action@v1.14.0
