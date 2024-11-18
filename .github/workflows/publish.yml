@@ -1,6 +1,8 @@
 name: Publish
 
 on:
+  push:
+    branches: [tg/worflow-for-release]
   workflow_dispatch:
     inputs:
       publish:
