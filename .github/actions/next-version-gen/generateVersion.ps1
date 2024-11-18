@@ -56,3 +56,5 @@ do {
 
 Write-Host "Next version: $nextVersion"
 Write-Host "Next version tag name: $nextVersionTag"
+
+exit 0
