@@ -36,6 +36,7 @@ jobs:
         with:
           repository: sourcegraph/cody
           prefix: vscode-
+          sort-tags: false
           
       - name: Hash tag name
         uses: pplanel/hash-calculator-action@v1.3.2
