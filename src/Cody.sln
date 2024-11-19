@@ -24,8 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\.github\workflows\build.yml = ..\.github\workflows\build.yml
 		..\.github\workflows\code-style.yml = ..\.github\workflows\code-style.yml
 		..\.github\workflows\nightly.yml = ..\.github\workflows\nightly.yml
-		..\.github\workflows\publish-preview.yml = ..\.github\workflows\publish-preview.yml
-		..\.github\workflows\publish-release.yml = ..\.github\workflows\publish-release.yml
+		..\.github\workflows\publish.yml = ..\.github\workflows\publish.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cody.Core.Tests", "Cody.Core.Tests\Cody.Core.Tests.csproj", "{9B46B477-E57A-4F19-A240-56D5D3C7EE8F}"
