@@ -36,7 +36,7 @@ jobs:
         with:
           repository: sourcegraph/cody
           regex: 'vscode(-insiders)?-v\d+\.\d+\.\d+'
-          sort-tags: false
+          sort-tags: true
           
       - name: Hash tag name
         uses: pplanel/hash-calculator-action@v1.3.2
