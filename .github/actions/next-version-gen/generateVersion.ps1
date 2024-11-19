@@ -34,7 +34,13 @@ if($minorVer % 2 -eq 1) {
 }
 
 if($isPreview) {
-	$newMinorVer = $minorVer - 1
+    if($minorVer -eq 0) {
+        $newMinorVer = 999
+        $majorVer = $majorVer - 1
+    } else {
+        $newMinorVer = $minorVer - 1
+    }
+
 	$infix = $previewInfix
 } else {
 	$newMinorVer = $minorVer
