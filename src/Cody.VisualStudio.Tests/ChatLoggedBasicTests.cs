@@ -60,7 +60,7 @@ namespace Cody.VisualStudio.Tests
             Assert.True(isOpen);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
             var num = new Random().Next();
@@ -69,9 +69,9 @@ namespace Cody.VisualStudio.Tests
             await WaitForPlaywrightAsync();
 
             await EnterChatTextAndSend(prompt);
-            await CloseCodyChatToolWindow();
+            //await CloseCodyChatToolWindow();
 
-            await OpenCodyChatToolWindow();
+            //await OpenCodyChatToolWindow();
             await ShowHistoryTab();
             var chatHistoryEntries = await GetTodayChatHistory();
 

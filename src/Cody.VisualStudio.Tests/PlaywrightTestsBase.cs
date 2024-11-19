@@ -158,15 +158,31 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task EnterChatTextAndSend(string prompt)
         {
-            var entryArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
+            var entryArea = Page.Locator("span[data-lexical-text='true']");
 
-            await entryArea.PressSequentiallyAsync(prompt);
+            TakeScreenshot($"{GetTestName()}_2");
+
+            await entryArea.FillAsync(prompt);
+            //await entryArea.PressSequentiallyAsync(prompt);
+
+            TakeScreenshot($"{GetTestName()}_3");
+
             await entryArea.PressAsync("Enter");
+
+            TakeScreenshot($"{GetTestName()}_4");
 
             var button = await Page.WaitForSelectorAsync("menu button[type=submit][title=Stop]");
 
-            while (await button.GetAttributeAsync("title") == "Stop") await Task.Delay(500);
+            TakeScreenshot($"{GetTestName()}_5");
+
+            while (await button.GetAttributeAsync("title") == "Stop")
+            {
+                TakeScreenshot($"{GetTestName()}_6");
+                await Task.Delay(500);
+            }
             await Task.Delay(500);
+
+            TakeScreenshot($"{GetTestName()}_7");
         }
 
         protected async Task<string[]> GetTodayChatHistory()
