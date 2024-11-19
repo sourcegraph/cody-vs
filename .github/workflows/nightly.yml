@@ -35,7 +35,7 @@ jobs:
         id: cody
         with:
           repository: sourcegraph/cody
-          prefix: vscode-
+          regex: 'vscode(-insiders)?-v\d+\.\d+\.\d+'
           sort-tags: false
           
       - name: Hash tag name
