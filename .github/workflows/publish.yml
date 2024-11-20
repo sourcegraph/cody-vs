@@ -1,9 +1,15 @@
-name: Publish release
+name: Publish
 
 on:
-  push:
-    tags:
-      - release-v*.*.*
+  workflow_dispatch:
+    inputs:
+      publish:
+        type: choice
+        description: Publish type
+        default: Preview
+        options:
+          - Preview
+          - Release
 
 # concurrency prevents multiple instances of the workflow from running at the same time,
 # using `cancel-in-progress` to cancel any existing runs.
@@ -14,6 +20,13 @@ concurrency:
 jobs:
   build:
     runs-on: 16gb_16_core_large_window_runner
+    # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      checks: write
+      pull-requests: write
     # do we want to run this on forks?
     if: github.repository_owner == 'sourcegraph'
     env:
@@ -22,12 +35,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-    
-      - name: Extract version from tag
-        uses: nowsprinting/check-version-format-action@v4.0.3
+
+      - name: Generate version
+        uses: ./.github/actions/next-version-gen
         id: version
         with:
-          prefix: release-v
+          publish-type: ${{ github.event.inputs.publish }}
 
       - name: Add msbuild
         uses: microsoft/setup-msbuild@v2
@@ -54,13 +67,13 @@ jobs:
       - name: Set version on AssemblyInfo.cs files
         uses: dannevesdantas/set-version-assemblyinfo@v.1.0.0
         with:
-          version: ${{ steps.version.outputs.full_without_prefix }}
+          version: ${{ steps.version.outputs.next-version }}
           path: src/
           
       - name: Set version for .vsixmanifest file
         uses: cezarypiatek/VsixVersionAction@1.2
         with:
-          version: ${{ steps.version.outputs.full_without_prefix }}
+          version: ${{ steps.version.outputs.next-version }}
           vsix-manifest-file: src\Cody.VisualStudio\source.extension.vsixmanifest
         
       - name: Build extension (${{ env.Configuration }})
@@ -90,7 +103,7 @@ jobs:
         with:
           name: UI Tests Screenshots
           path: src/Cody.VisualStudio.Tests/bin/${{ env.Configuration }}/Screenshots
-          retention-days: 20
+          retention-days: 10
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
@@ -99,16 +112,49 @@ jobs:
           files: TestResults/**/*.trx
           
       #Publish
+      - name: Create git tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ steps.version.outputs.next-version-tag }}",
+              sha: context.sha
+            })
           
       - name: Create GitHub release
         uses: ncipollo/release-action@v1.14.0
         with:
-          tag: ${{ steps.version.outputs.full }}
-          name: Cody for Visual Studio ${{ steps.version.outputs.full_without_prefix }}
-          prerelease: false
+          tag: ${{ steps.version.outputs.next-version-tag }}
+          name: Cody for Visual Studio ${{ steps.version.outputs.next-version }}
+          prerelease: true
           artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
           
+      - name: Create custom VSIX feed
+        if: ${{ github.event.inputs.publish == 'Preview' }}
+        uses: ./.github/actions/create-vsix-feed
+        with:
+          vsix-directory: src/Cody.VisualStudio/bin/${{ env.Configuration }}
+          feed-file: feed/feed.xml
+          source-path: https://github.com/sourcegraph/cody-vs/releases/download/${{ steps.version.outputs.next-version-tag }}/
+          gallery-name: "Sourcegraph preview gallery"
+          
+      - name: Upload feed files as artifact
+        if: ${{ github.event.inputs.publish == 'Preview' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: vsix-gallery-feed
+          path: feed/
+
+      - name: Deploy feed to GitHub Pages
+        if: ${{ github.event.inputs.publish == 'Preview' }}
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: vsix-gallery-feed
+
       - name: Publish to Visual Studio Marketplace
+        if: ${{ github.event.inputs.publish == 'Release' }}
         uses: cezarypiatek/VsixPublisherAction@1.1
         with:
           extension-file: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix

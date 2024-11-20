@@ -1,0 +1,23 @@
+name: 'Next version generator'
+description: 'Generate next version number'
+inputs:
+  publish-type:
+    description: 'Preview or Release'
+    required: true
+  preview-infix:
+    description: 'Infix used when creating a tag for the preview version'
+    default: '-insiders'
+    required: false
+outputs:
+  next-version:
+    description: 'Next version number'
+    value: ${{ steps.version.outputs.next-version }}
+  next-version-tag:
+    description: 'Name of the tag used to mark version in git'
+    value: ${{ steps.version.outputs.next-version-tag }}
+runs:
+  using: "composite"
+  steps:  
+    - id: version
+      shell: pwsh
+      run: ${{github.action_path}}/generateVersion.ps1 -publishType "${{ inputs.publish-type }}" -previewInfix "${{ inputs.preview-infix }}"
