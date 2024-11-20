@@ -159,6 +159,7 @@ namespace Cody.VisualStudio.Tests
         protected async Task EnterChatTextAndSend(string prompt)
         {
             var entryArea = Page.Locator("span[data-lexical-text='true']");
+            var enterArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
 
             TakeScreenshot($"{GetTestName()}_2");
 
@@ -167,7 +168,8 @@ namespace Cody.VisualStudio.Tests
 
             TakeScreenshot($"{GetTestName()}_3");
 
-            await entryArea.PressAsync("Enter");
+            await enterArea.PressAsync("Enter");
+            //await entryArea.PressAsync("Enter");
 
             TakeScreenshot($"{GetTestName()}_4");
 
@@ -175,9 +177,11 @@ namespace Cody.VisualStudio.Tests
 
             TakeScreenshot($"{GetTestName()}_5");
 
-            while (await button.GetAttributeAsync("title") == "Stop")
+            var isStopVisible = false; 
+            while (!isStopVisible)
             {
                 TakeScreenshot($"{GetTestName()}_6");
+                isStopVisible = await Page.Locator("vscode-button").First.IsVisibleAsync();
                 await Task.Delay(500);
             }
             await Task.Delay(500);
