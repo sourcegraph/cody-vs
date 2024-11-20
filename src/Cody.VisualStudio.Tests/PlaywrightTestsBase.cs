@@ -142,7 +142,11 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(text, textContents.First());
         }
 
-        protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
+        protected async Task ShowChatTab()
+        {
+            await Page.GetByTestId("tab-chat").ClickAsync();
+            await Task.Delay(500);
+        }
 
         protected async Task ShowHistoryTab()
         {
