@@ -148,6 +148,12 @@ namespace Cody.VisualStudio.Tests
             await Task.Delay(500);
         }
 
+        protected async Task NewChat()
+        {
+            await Page.GetByText("New Chat").ClickAsync();
+            await Task.Delay(500);
+        }
+
         protected async Task ShowHistoryTab()
         {
             await Page.GetByTestId("tab-history").ClickAsync();

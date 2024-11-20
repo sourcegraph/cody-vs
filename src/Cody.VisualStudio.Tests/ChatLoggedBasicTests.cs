@@ -31,6 +31,8 @@ namespace Cody.VisualStudio.Tests
         {
             // given
             await WaitForPlaywrightAsync();
+            await NewChat();
+
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
