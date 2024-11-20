@@ -186,6 +186,7 @@ namespace Cody.VisualStudio.Tests
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()
         {
             var tagsList = new List<ContextTag>();
+            await ShowChatTab();
 
             WriteLog("Searching for Chat ...");
             var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
