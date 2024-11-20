@@ -35,7 +35,8 @@ jobs:
         id: cody
         with:
           repository: sourcegraph/cody
-          prefix: vscode-
+          regex: 'vscode(-insiders)?-v\d+\.\d+\.\d+'
+          sort-tags: true
           
       - name: Hash tag name
         uses: pplanel/hash-calculator-action@v1.3.2
