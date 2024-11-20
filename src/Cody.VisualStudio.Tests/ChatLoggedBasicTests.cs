@@ -69,14 +69,11 @@ namespace Cody.VisualStudio.Tests
             await WaitForPlaywrightAsync();
 
             await EnterChatTextAndSend(prompt);
-            //await CloseCodyChatToolWindow();
 
-            //await OpenCodyChatToolWindow();
             await ShowHistoryTab();
             var chatHistoryEntries = await GetTodayChatHistory();
 
             Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
-
         }
 
         public void Dispose()
