@@ -48,7 +48,6 @@ if($isPreview) {
 }
 
 $nextPathVer = 0
-git -C $env:GITHUB_WORKSPACE fetch --tags 2> Out-Null
 
 do {
 	$nextVersion = "$majorVer.$newMinorVer.$nextPathVer"
