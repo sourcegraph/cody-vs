@@ -54,7 +54,7 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ github.sha }}
           restore-keys: ${{ runner.os }}-nuget-
         
-      - name: Cache agent
+      - name: Cache agent (${{ steps.version.outputs.agent-version }})
         id: cache-agent
         uses: actions/cache@v4
         with:

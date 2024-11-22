@@ -15,6 +15,9 @@ outputs:
   next-version-tag:
     description: 'Name of the tag used to mark version in git'
     value: ${{ steps.version.outputs.next-version-tag }}
+  agent-version:
+    description: 'Ref of agent version'
+    value: ${{ steps.version.outputs.agent-version }}
 runs:
   using: "composite"
   steps:  
