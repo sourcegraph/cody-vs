@@ -66,13 +66,13 @@ jobs:
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
         
-      - name: Set version on AssemblyInfo.cs files
+      - name: Set version on AssemblyInfo.cs files (${{ steps.version.outputs.next-version }})
         uses: dannevesdantas/set-version-assemblyinfo@v.1.0.0
         with:
           version: ${{ steps.version.outputs.next-version }}
           path: src/
           
-      - name: Set version for .vsixmanifest file
+      - name: Set version for .vsixmanifest file (${{ steps.version.outputs.next-version }})
         uses: cezarypiatek/VsixVersionAction@1.2
         with:
           version: ${{ steps.version.outputs.next-version }}
@@ -114,7 +114,7 @@ jobs:
           files: TestResults/**/*.trx
           
       #Publish
-      - name: Create git tag
+      - name: Create git tag (${{ steps.version.outputs.next-version-tag }})
         uses: actions/github-script@v6
         with:
           script: |
@@ -130,7 +130,8 @@ jobs:
         with:
           tag: ${{ steps.version.outputs.next-version-tag }}
           name: Cody for Visual Studio ${{ steps.version.outputs.next-version }}
-          prerelease: true
+          omitBody: true
+          prerelease: ${{ github.event.inputs.publish == 'Preview' }}  
           artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
           
       - name: Create custom VSIX feed
