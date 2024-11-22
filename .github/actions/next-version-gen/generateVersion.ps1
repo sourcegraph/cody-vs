@@ -58,8 +58,11 @@ do {
 	else { break }
 } while($true)
 
+$agentVersion = Get-Content "agent\agent.version"
+
 "next-version=$nextVersion" >> $env:GITHUB_OUTPUT
 "next-version-tag=$nextVersionTag" >> $env:GITHUB_OUTPUT
+"agent-version=$agentVersion" >> $env:GITHUB_OUTPUT
 
 Write-Host "Next version: $nextVersion"
 Write-Host "Next version tag name: $nextVersionTag"
