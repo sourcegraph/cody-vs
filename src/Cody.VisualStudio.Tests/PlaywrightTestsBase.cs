@@ -189,6 +189,8 @@ namespace Cody.VisualStudio.Tests
             }
             await Task.Delay(500);
 
+            await DismissStartWindow();
+
             TakeScreenshot($"{GetTestName()}_3");
         }
 
