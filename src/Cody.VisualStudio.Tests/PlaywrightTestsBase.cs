@@ -156,8 +156,13 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ShowHistoryTab()
         {
+
+            TakeScreenshot($"{GetTestName()}_4");
+
             await Page.GetByTestId("tab-history").ClickAsync();
             await Task.Delay(500);
+
+            TakeScreenshot($"{GetTestName()}_5");
         }
 
         protected async Task ShowPromptsTab() => await Page.GetByTestId("tab-prompts").ClickAsync();
@@ -174,6 +179,8 @@ namespace Cody.VisualStudio.Tests
             await entryArea.FillAsync(prompt);
             await enterArea.PressAsync("Enter");
 
+            TakeScreenshot($"{GetTestName()}_2");
+
             var isStopVisible = false; 
             while (!isStopVisible)
             {
@@ -181,13 +188,17 @@ namespace Cody.VisualStudio.Tests
                 await Task.Delay(500);
             }
             await Task.Delay(500);
+
+            TakeScreenshot($"{GetTestName()}_3");
         }
 
         protected async Task<string[]> GetTodayChatHistory()
         {
+            TakeScreenshot($"{GetTestName()}_6");
+
             var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
 
-            TakeScreenshot($"{GetTestName()}_1");
+            TakeScreenshot($"{GetTestName()}_7");
 
             return (await todaySection.QuerySelectorAllAsync("button span"))
                 .Select(async x => await x.TextContentAsync())

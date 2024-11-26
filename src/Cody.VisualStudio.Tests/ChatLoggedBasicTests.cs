@@ -69,6 +69,7 @@ namespace Cody.VisualStudio.Tests
             var prompt = $"How to create const with value {num}?";
 
             await WaitForPlaywrightAsync();
+            TakeScreenshot($"{GetTestName()}_1");
 
             await EnterChatTextAndSend(prompt);
 
