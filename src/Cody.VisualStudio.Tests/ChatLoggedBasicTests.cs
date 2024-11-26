@@ -49,6 +49,28 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
+        public async Task Active_File_Match_Current_Chat_Context()
+        {
+            // given
+            await WaitForPlaywrightAsync();
+            await NewChat();
+
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
+
+            // when
+            const int startLine = 2; const int endLine = 3;
+            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Program.cs"), startLine, endLine);
+            var tags = await GetChatContextTags();
+
+            // then
+            var firstTagName = tags.First().Name;
+            var secondTag = tags.ElementAt(1);
+            Assert.Equal("Program.cs", firstTagName);
+            Assert.Equal(startLine, secondTag.StartLine);
+            Assert.Equal(endLine, secondTag.EndLine);
+        }
+
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
             await WaitForPlaywrightAsync();
