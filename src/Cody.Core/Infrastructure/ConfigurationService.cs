@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Generic;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Cody.Core.Infrastructure
 {
@@ -31,8 +31,8 @@ namespace Cody.Core.Infrastructure
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
-                Version = _versionService.Full,
-                IdeVersion = _vsVersionService.Version.ToString(),
+                Version = _versionService.CodyVersion,
+                IdeVersion = _vsVersionService.DisplayVersion,
                 WorkspaceRootUri = _solutionService.GetSolutionDirectory(),
                 Capabilities = new ClientCapabilities
                 {

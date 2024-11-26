@@ -1,34 +1,36 @@
-using System;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Cody.Core.Inf
 {
     public class VersionService : IVersionService
     {
-        private readonly Version _version;
+        private string GetAgentDirectory() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
-        public VersionService()
+        public string CodyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        public string AgentVersion
         {
-            _version = Assembly.GetExecutingAssembly().GetName().Version;
-            BuildDate = new DateTime(2000, 01, 01).AddDays(_version.Build).AddSeconds(_version.Revision * 2);
-
-            var splitted = Full.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            Major = $"{splitted[0]}.{splitted[1]}";
+            get
+            {
+                var agentVersionFile = Path.Combine(GetAgentDirectory(), "agent.version");
+                if (File.Exists(agentVersionFile)) return File.ReadAllText(agentVersionFile);
+                else return null;
+            }
         }
 
-        public void AddBuildMetadata(string build, bool isDebug)
+        public string NodeVersion
         {
-            IsDebug = isDebug;
-            Build = build;
+            get
+            {
+                var nodeFileName = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "node-win-arm64.exe" : "node-win-x64.exe";
+                var nodeVersionFile = Path.Combine(GetAgentDirectory(), nodeFileName);
+                var versionInfo = FileVersionInfo.GetVersionInfo(nodeVersionFile);
+                if (versionInfo != null) return versionInfo.ProductVersion;
+                else return null;
+            }
         }
-
-        public string Full => $"{_version}-{Build}";
-
-        public string Build { get; private set; }
-        public bool IsDebug { get; private set; }
-
-        public string Major { get; }
-
-        public DateTime BuildDate { get; }
     }
 }

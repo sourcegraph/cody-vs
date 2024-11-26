@@ -7,6 +7,7 @@ param(
 
 $codyDir = Join-Path $agentDir "\cody"
 $nodeDir = Join-Path $agentDir "\node"
+$versionFile = Join-Path $agentDir "\agent.version"
 
 $codyAgentDir = Join-Path $codyDir "\agent"
 $codyAgentDistDir = Join-Path $codyAgentDir "\dist"
@@ -22,6 +23,7 @@ $exclude = @(
     "src",
     "scripts",
     "*.map",
+	"noxide.linux*.node"
     "tree-sitter-bash.wasm",
 	"tree-sitter-dart.wasm",
 	"tree-sitter-elisp.wasm",
@@ -116,5 +118,5 @@ Write-Host "Coping artifacts to $outputDir directory"
 Copy-Item "$codyAgentDistDir\*" -Destination $outputDir -Recurse -Exclude $exclude
 Copy-Item $nodeBinFile -Destination $outputDir
 Copy-Item $nodeArmBinFile -Destination $outputDir
-
+Copy-Item $versionFile -Destination $outputDir
 

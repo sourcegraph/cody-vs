@@ -1,4 +1,3 @@
-using Cody.Core.Inf;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -9,8 +8,6 @@ namespace Cody.VisualStudio.Inf
 {
     public class LoggerFactory
     {
-        private IVersionService _versionService;
-
         public ILog Create(string outputName = null)
         {
             if (outputName == null) outputName = WindowPaneLogger.DefaultCody;
@@ -36,19 +33,6 @@ namespace Cody.VisualStudio.Inf
                     .Build();
 
                 logger.Debug("Logger created.");
-
-                var isDebug = false;
-#if DEBUG
-                isDebug = true;
-#endif
-                var build = "VS2022";
-
-                _versionService = new VersionService();
-                _versionService.AddBuildMetadata(build, isDebug);
-
-                var version = _versionService.Full;
-                var debugOrRelease = _versionService.IsDebug ? "Debug" : "Release";
-                logger.Info($"Version: {version} {debugOrRelease} build");
             }
             else
             {
@@ -59,12 +43,6 @@ namespace Cody.VisualStudio.Inf
             }
 
             return logger;
-        }
-
-        public IVersionService GetVersionService()
-        {
-            return _versionService;
-
         }
     }
 }
