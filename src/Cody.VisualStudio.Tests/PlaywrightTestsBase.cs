@@ -187,6 +187,8 @@ namespace Cody.VisualStudio.Tests
         {
             var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
 
+            TakeScreenshot($"{GetTestName()}_1");
+
             return (await todaySection.QuerySelectorAllAsync("button span"))
                 .Select(async x => await x.TextContentAsync())
                 .Select(x => x.Result)
