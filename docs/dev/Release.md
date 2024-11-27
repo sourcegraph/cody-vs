@@ -1,7 +1,21 @@
 
 # Releases
 
-Version number format follows [Semantic Versioning](https://semver.org/) of <major>.<minor>.<patch>.
+Version number format: MAJOR.MINOR.PATH. Version numbering is automatic and uses the branch naming convention. For more details read [versioning.md](./versioning.md)
+- preview version has an odd MINOR number
+- release version has an even MINOR number
+
+## Preview release
+
+Follow these steps to publish a new preview to the [Private feed](https://sourcegraph.github.io/cody-vs/feed.xml).
+
+1. **Create release branch**: Branch name must follow convention `vs-vMAJOR.MINOR.x` where MINOR must be even number `git checkout -b vs-vMAJOR.MINOR.x`. NOTE: Although the MINOR number will be even in the branch name the preview version of the extension will have an odd number (MINOR -1) 
+2. **Start publication**: Go to https://github.com/sourcegraph/cody-vs/actions/workflows/publish.yml and run workflow manually using following parameters: 
+    - Use workflow from: release branch
+    - Publish type: Preview
+4. **Monitor Publication**: Once the workflow run is complete:
+   - The new version of the extension will be published to the [Private feed](https://sourcegraph.github.io/cody-vs/feed.xml).
+   - A pre-release will be created on GitHub.
 
 ## Stable release
 
@@ -10,27 +24,14 @@ NOTE: All releases are currently published automatically via GitHub Actions as P
 Follow these steps to publish a new release to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
 
 1. **Coordinate with Marketing**: Contact the Marketing team in the Cody Slack channel approximately 2 days before the release to ensure a blog post is prepared.
-2. **Update Extension Package Version**: Increment the version in [source.extension.vsixmanifest](../../src/Cody.VisualStudio/source.extension.vsixmanifest) and [CHANGELOG.md](../../CHANGELOG.md).
-3. **Commit the Version Changes**: Commit the version increment with a message with `git commit -m Release vX.Y.Z`
-4. **Create Pull Request**: Open a PR with the updated version.
-5. **Tag the Release**: After the PR is merged (stable release only), create a git tag: `git tag vX.Y.Z`
-6. **Push the Tag**: Push the tag to the remote repository to trigger the [Release workflow](https://github.com/sourcegraph/cody-vs/actions/workflows/release-preview.yml): `git push --tags`
-7. **Monitor Publication**: Once the workflow run is complete:
+2. **Create release branch**: Branch name must follow convention `vs-vMAJOR.MINOR.x` where MINOR must be even number `git checkout -b vs-vMAJOR.MINOR.x`. Consider that the branch may already exist and be used to publish a preview version. In this case, you don't need to create a new branch just use an existing one.
+3. **Update changelog file** Add changes to [CHANGELOG.md](../../CHANGELOG.md). Commit and push changes to the release branch
+3. **Start publication**: Go to https://github.com/sourcegraph/cody-vs/actions/workflows/publish.yml and run workflow manually using following parameters: 
+    - Use workflow from: release branch
+    - Publish type: Release
+4. **Monitor Publication**: Once the workflow run is complete:
    - The new version of the extension will be published to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
-   - A release will be created on GitHub with the release notes.
-
-### Release checklist
-
-Include the following checklist in the PR description when creating a new release.
-
-```markdown
-Release Checklist:
-    - [ ] Update version number
-    - [ ] Update [CHANGELOG.md](./CHANGELOG.md)
-    - [ ] Link to PR for the release blog post (if any)
-```
-
-Note: Ensure all checklist items are completed before merging the release PR.
+   - A release will be created on GitHub.
 
 ## Patch release
 
@@ -38,27 +39,10 @@ A patch release is necessary when a critical bug is discovered in the latest sta
 
 To publish a **patch** release:
 
-1. Ensure all the changes for the patch are already committed to the `main` branch.
-2. Check out the `main` branch and update the tags: `git fetch --tags`
-3. Create a new branch for the patch release based on the tag of the latest release: `git checkout -b v<patch> v<latest>`
-4. Replace <latest> with the latest stable release version, and <patch> should be the latest version incremented by 1: `git checkout -b v1.2.4 v1.2.3`
-5. Cherry-pick the commits for the patch release into the patch branch: `git cherry-pick <commit-hash>`
-6. Follow the steps for a stable release starting from step 2 to publish the patch release.
+1. Ensure all the changes for the patch are already committed to the latest release branch.
+2. **Start publication**: Go to https://github.com/sourcegraph/cody-vs/actions/workflows/publish.yml and run workflow manually using following parameters: 
+    - Use workflow from: release banch
+    - Publish type: Release
 
-IMPORTANT: You do not need to merge the patch branch back into `main` as it is a temporary branch. However, you will need to update the version number in the `main` branch after the patch release is published.
 
-## Nightly build
 
-Nightly build is currently not supported.
-
-## Running a release build locally
-
-It can be helpful to build and run the packaged extension locally to replicate a typical user flow.
-
-To do this:
-
-1. Set the target branch / commit in build.cake.
-2. Run `cd src; dotnet cake`.
-3. Open the [src/Cody.sln](src/Cody.sln) file in Visual Studio.
-4. Right click on the [Cody.Visual Studio](src/Cody.VisualStudio/) project and select `Rebuild Project`.
-5. Once the project is built, it will create a `Cody.VisualStudio.vsix` file in the `src/Cody.VisualStudio/bin/Debug` folder, which you can double-click to install the extension.
