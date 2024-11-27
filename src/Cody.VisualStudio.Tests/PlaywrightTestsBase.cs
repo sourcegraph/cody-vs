@@ -150,7 +150,6 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task NewChat()
         {
-            //await Page.GetByText("New Chat").ClickAsync();
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions {Name = "New Chat"}).ClickAsync();
 
             await Task.Delay(500);
@@ -191,7 +190,7 @@ namespace Cody.VisualStudio.Tests
             }
             await Task.Delay(500);
 
-            //await DismissStartWindow();
+            await DismissStartWindow();
 
             TakeScreenshot($"{GetTestName()}_3");
         }
