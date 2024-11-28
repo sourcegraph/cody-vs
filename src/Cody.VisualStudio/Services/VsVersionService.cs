@@ -8,6 +8,14 @@ namespace Cody.VisualStudio.Services
 {
     public class VsVersionService : IVsVersionService
     {
+
+        public VsVersionService()
+        {
+            SemanticVersion = GetAppIdStringProperty(VSAPropID.ProductSemanticVersion);
+            DisplayVersion = GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
+            EditionName = GetAppIdStringProperty(VSAPropID.EditionName);
+        }
+
         [Guid("1EAA526A-0898-11d3-B868-00C04F79F802")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         [ComImport]
@@ -56,10 +64,10 @@ namespace Cody.VisualStudio.Services
             return value as string;
         }
 
-        public string SemanticVersion => GetAppIdStringProperty(VSAPropID.ProductSemanticVersion);
+        public string SemanticVersion { get; private set; }
 
-        public string DisplayVersion => GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
+        public string DisplayVersion { get; private set; }
 
-        public string EditionName => GetAppIdStringProperty(VSAPropID.EditionName);
+        public string EditionName { get; private set; }
     }
 }
