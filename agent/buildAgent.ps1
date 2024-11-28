@@ -23,7 +23,8 @@ $exclude = @(
     "src",
     "scripts",
     "*.map",
-	"noxide.linux*.node"
+	"noxide.linux*.node",
+	"noxide.darwin*.node",
     "tree-sitter-bash.wasm",
 	"tree-sitter-dart.wasm",
 	"tree-sitter-elisp.wasm",
