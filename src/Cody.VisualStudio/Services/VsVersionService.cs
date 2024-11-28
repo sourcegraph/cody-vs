@@ -3,11 +3,31 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Services
 {
     public class VsVersionService : IVsVersionService
     {
+        private readonly ILog _logger;
+
+        public VsVersionService(ILog logger)
+        {
+            _logger = logger;
+
+            SemanticVersion = GetAppIdStringProperty(VSAPropID.ProductSemanticVersion);
+            DisplayVersion = GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
+            EditionName = GetAppIdStringProperty(VSAPropID.EditionName);
+        }
+
+
+        public string SemanticVersion { get; }
+
+        public string DisplayVersion { get; }
+
+        public string EditionName { get; }
+
+
         [Guid("1EAA526A-0898-11d3-B868-00C04F79F802")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         [ComImport]
@@ -51,15 +71,18 @@ namespace Cody.VisualStudio.Services
 
         private string GetAppIdStringProperty(VSAPropID propertyId)
         {
-            var vsAppId = ServiceProvider.GlobalProvider.GetService(typeof(SVsAppId)) as IVsAppId;
-            vsAppId.GetProperty((int)propertyId, out object value);
-            return value as string;
+            try
+            {
+                var vsAppId = ServiceProvider.GlobalProvider.GetService(typeof(IVsAppId)) as IVsAppId;
+                vsAppId.GetProperty((int)propertyId, out object value);
+                return value as string;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Cannot get VS version from IVsAppId.", ex);
+            }
+
+            return null;
         }
-
-        public string SemanticVersion => GetAppIdStringProperty(VSAPropID.ProductSemanticVersion);
-
-        public string DisplayVersion => GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
-
-        public string EditionName => GetAppIdStringProperty(VSAPropID.EditionName);
     }
 }
