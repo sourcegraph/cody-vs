@@ -31,9 +31,10 @@ To get started quickly, follow these steps:
 
 #### Visual Studio
 
-NOTE: You must build the agent before debugging for the first time.
+> [!NOTE]
+> You must build the agent before debugging for the first time.
 
-1. Run `dotnet cake` inside the `src` directory to build the agent.
+1. Run `runBuildAgent.ps1` inside the `agent` directory to build the agent.
 2. In your Cody project, click `Debug` > `Start Debugging` (or press `F5`) to start the debugger
 3. In the new window created by the debugger, open an existing project or create a new project
 4. Now you can start setting breakpoints and debugging Cody!
@@ -69,40 +70,10 @@ This project uses different runtimes for various components:
 ### Agent
 
 - **Runtime**: Node.js
-- **Usage**: Used for build and run processes only
+- **Usage**: Used for build and run agent only
 - **Note**: Not required for `Visual Studio` functionality
 
-### Build Scripts
-
-- **Runtime**: .NET 8
-- **Platform**: Cross-platform
-- **Usage**: Exclusively used by Cake build automation system
-
-Please ensure you have the appropriate runtimes installed for the components you intend to work with.
-
-## Cake Build Automation
-
-We use [Cake](https://cakebuild.net/) as our build automation system. The build script can be found in the `build.cake` file. Our building and publishing process includes the following steps:
-
-1. Downloading the agent repository
-2. Selecting the commit for building the agent
-3. Building the agent
-4. Copying agent files to the VS extension folder
-5. Downloading node binary files (x64 and arm64 versions)
-6. Copying node files to the VS extension folder
-7. Building the VS extension using MSBuild
-8. Publishing to the marketplace
-
-## Build Commands
-
-Execute these commands from the directory containing the `build.cake` file:
-
-| Command                        | Description                                                             |
-| ------------------------------ | ----------------------------------------------------------------------- |
-| `dotnet cake`                  | Download and build agent, download required node files, build extension |
-| `dotnet cake --target Build`   | Same as above                                                           |
-| `dotnet cake --target Tests`   | Run tests from Cody.VisualStudio.Tests                                  |
-| `dotnet cake --target Publish` | Build extension and publish it to the marketplace                       |
+Please ensure you have the appropriate runtimes installed for the components you intend to work with.                  |
 
 ## Access Token
 
@@ -121,8 +92,9 @@ To display your token:
 ```bash
 echo $env:SourcegraphCodyToken
 ```
-
-**Note:** After setting an environment variable, you may need to restart `Visual Studio` and any open command prompts for the changes to take effect.
+> [!NOTE]
+> After setting an environment variable, you may need to restart `Visual Studio` and any open 
+> command prompts for the changes to take effect.
 
 The token from the environment variable always overrides the value from the user settings and is never saved in the user settings.
 
@@ -135,7 +107,9 @@ To debug the agent:
 3. Click "Open dedicated DevTools for Node"
 4. Wait for DevTools to detect the new debugging session
 
-**Note:** Starting to debug the extension in Visual Studio will automatically start the agent with appropriate arguments.
+> [!NOTE]
+> Starting to debug the extension in Visual Studio will automatically start the agent with 
+> appropriate arguments.
 
 Additional debugging options:
 
@@ -144,7 +118,7 @@ Additional debugging options:
 
 ## Release Process
 
-See the [Releases](./docs/dev/Release.md) page for details on how to release a new version of the Cody extension.
+See the [Releases](./docs/dev/release.md) page for details on how to release a new version of the Cody extension. To understand the issues of release and versioning, refer to [versioning](./docs/dev/versioning.md)
 
 ## Troubleshoting
 
