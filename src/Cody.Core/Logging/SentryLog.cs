@@ -1,5 +1,7 @@
 using Sentry;
 using System;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace Cody.Core.Logging
 {
