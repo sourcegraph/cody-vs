@@ -1,4 +1,5 @@
 using Cody.Core.Inf;
+using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -41,13 +42,11 @@ namespace Cody.VisualStudio.Inf
 #if DEBUG
                 isDebug = true;
 #endif
-                var build = "VS2022";
 
-                _versionService = new VersionService();
-                _versionService.AddBuildMetadata(build, isDebug);
+                _versionService = new VersionService(logger);
 
                 var version = _versionService.Full;
-                var debugOrRelease = _versionService.IsDebug ? "Debug" : "Release";
+                var debugOrRelease = isDebug ? $"Debug (compiled: {_versionService.GetDebugBuildDate()})" : "Release";
                 logger.Info($"Version: {version} {debugOrRelease} build");
             }
             else
@@ -64,7 +63,6 @@ namespace Cody.VisualStudio.Inf
         public IVersionService GetVersionService()
         {
             return _versionService;
-
         }
     }
 }
