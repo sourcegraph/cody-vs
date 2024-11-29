@@ -1,11 +1,11 @@
 using Cody.Core.Agent.Protocol;
-using Cody.Core.Workspace;
+using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
+using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
-using Cody.Core.Infrastructure;
 
 namespace Cody.Core.Agent
 {

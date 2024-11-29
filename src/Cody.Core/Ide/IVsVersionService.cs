@@ -1,9 +1,12 @@
-using System;
-
 namespace Cody.Core.Ide
 {
     public interface IVsVersionService
     {
-        Version Version { get; }
+        string SemanticVersion { get; }
+
+        string DisplayVersion { get; }
+
+        string EditionName { get; }
     }
 }
+
