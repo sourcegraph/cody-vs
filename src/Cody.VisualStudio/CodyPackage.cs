@@ -14,6 +14,8 @@ using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Options;
 using Cody.VisualStudio.Services;
+using EnvDTE;
+using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
@@ -29,7 +31,6 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,7 +47,7 @@ namespace Cody.VisualStudio
     [ProvideOptionPage(typeof(GeneralOptionsPage), "Cody", "General", 0, 0, true)]
     [ProvideToolWindow(typeof(CodyToolWindow), Style = VsDockStyle.Tabbed, Window = VsConstants.VsWindowKindSolutionExplorer)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
-    public sealed class CodyPackage : AsyncPackage
+    public sealed partial class CodyPackage : AsyncPackage
     {
 
         public const string PackageGuidString = "9b8925e1-803e-43d9-8f43-c4a4f35b4325";
@@ -244,15 +245,6 @@ namespace Cody.VisualStudio
             }
         }
 
-
-        private void InitializeErrorHandling()
-        {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            Application.Current.DispatcherUnhandledException += CurrentOnDispatcherUnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
-        }
-
-
         private void PrepareAgentConfiguration()
         {
             try
@@ -415,62 +407,5 @@ namespace Cody.VisualStudio
             }
         }
 
-
-        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Logger.Error($"Unhandled domain exception:{e.ExceptionObject}");
-            Logger.Error($"Unhandled domain exception, is terminating:{e.IsTerminating}");
-
-            var exception = e.ExceptionObject as Exception;
-            Logger.Error("Unhandled domain exception occurred.", exception);
-
-        }
-
-        private void CurrentOnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-        {
-            var exception = e.Exception;
-            Logger.Error("Unhandled exception occurred on the UI thread.", exception);
-
-            if (!System.Diagnostics.Debugger.IsAttached)
-                e.Handled = true;
-        }
-
-        private void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
-        {
-            try
-            {
-                if (!System.Diagnostics.Debugger.IsAttached)
-                    e.SetObserved();
-
-                var thirdPartyException = e.Exception;
-                var exceptionDetails = new StringBuilder();
-                if (thirdPartyException != null)
-                {
-                    exceptionDetails.AppendLine(thirdPartyException.Message);
-                    exceptionDetails.AppendLine(thirdPartyException.StackTrace);
-
-                    if (thirdPartyException.InnerExceptions.Any())
-                    {
-                        foreach (var inner in thirdPartyException.InnerExceptions)
-                        {
-                            exceptionDetails.AppendLine(inner.Message);
-                            exceptionDetails.AppendLine(inner.StackTrace);
-                        }
-                    }
-
-                    if (!exceptionDetails.ToString().Contains("Cody")) return;
-                }
-
-                Logger.Error("Unhandled exception occurred on the non-UI thread.", e.Exception);
-                foreach (var ex in e.Exception.InnerExceptions)
-                {
-                    Logger.Error("Inner exception", ex);
-                }
-            }
-            catch
-            {
-                // catching everything because if not VS will freeze/crash on the exception
-            }
-        }
     }
 }

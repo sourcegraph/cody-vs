@@ -87,7 +87,9 @@
     <Compile Include="Infrastructure\IConfigurationService.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
+    <Compile Include="Logging\ISentryLog.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
+    <Compile Include="Logging\SentryLog.cs" />
     <Compile Include="Trace\FileTraceListener.cs" />
     <Compile Include="Trace\LogioTraceListener.cs" />
     <Compile Include="Trace\TraceEvent.cs" />
@@ -114,6 +116,9 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Sentry">
+      <Version>4.13.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />
