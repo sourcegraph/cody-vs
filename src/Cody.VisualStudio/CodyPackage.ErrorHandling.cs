@@ -1,8 +1,6 @@
-using Sentry;
+using Cody.Core.Logging;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,28 +16,10 @@ namespace Cody.VisualStudio
             Application.Current.DispatcherUnhandledException += CurrentOnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
 
-            InitializeSentry();
+            SentryLog.Initialize();
         }
 
-        private void InitializeSentry()
-        {
-#if !DEBUG
-            if (!Debugger.IsAttached)
-            {
-                var version = Assembly.GetExecutingAssembly().GetName().Version;
-                string env = "dev";
-                if (version.Minor != 0) env = version.Minor % 2 != 0 ? "preview" : "production";
 
-                SentrySdk.Init(options =>
-                {
-                    options.Dsn = "https://d129345ba8e1848a01435eb2596ca899@o19358.ingest.us.sentry.io/4508375896752129";
-                    options.IsGlobalModeEnabled = true;
-                    options.Environment = env;
-                    options.Release = "cody-vs@" + version.ToString();
-                });
-            }
-#endif
-        }
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

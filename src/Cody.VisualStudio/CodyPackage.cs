@@ -23,7 +23,6 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TaskStatusCenter;
-using Sentry;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -113,7 +112,6 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger?.Error("Cody Package initialization failed.", ex);
-                SentrySdk.CaptureException(ex);
             }
         }
 
@@ -259,7 +257,6 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger.Error("Cannot toggle Tool Window.", ex);
-                SentrySdk.CaptureException(ex);
             }
         }
 
@@ -294,7 +291,6 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger.Error("Failed.", ex);
-                SentrySdk.CaptureException(ex);
             }
         }
 
@@ -339,7 +335,6 @@ namespace Cody.VisualStudio
                     catch (Exception ex)
                     {
                         Logger.Error("Agent initialization failed.", ex);
-                        SentrySdk.CaptureException(ex);
                     }
 
                 });

@@ -19,6 +19,7 @@ namespace Cody.VisualStudio.Inf
 
             Logger logger;
             WindowPaneLogger paneLogger = null;
+            SentryLog sentryLog = new SentryLog();
 
             try
             {
@@ -33,6 +34,7 @@ namespace Cody.VisualStudio.Inf
             {
                 logger = new Logger()
                     .WithOutputPane(paneLogger)
+                    .WithSentryForErrors(sentryLog)
                     .Build();
 
                 logger.Debug("Logger created.");
