@@ -130,10 +130,14 @@ namespace Cody.VisualStudio.Services
 
             // Generate the CSS variables for the fonts.
             var editorFont = GetEditorFont();
+            _logger.Debug($"Detected editor font:{editorFont.FontName} size:{editorFont.Size}");
+
             sb.AppendLine($"rootStyle.setProperty('--visualstudio-editor-font-family', '{editorFont.FontName}');");
             sb.AppendLine($"rootStyle.setProperty('--visualstudio-editor-font-size', '{editorFont.Size}pt');");
 
             var uiFont = GetUIFont();
+            _logger.Debug($"Detected UI font:{uiFont.FontName} size:{uiFont.Size}");
+
             sb.AppendLine($"rootStyle.setProperty('--visualstudio-ui-font-family', '{uiFont.FontName}');");
             sb.AppendLine($"rootStyle.setProperty('--visualstudio-ui-font-size', '{uiFont.Size}pt');");
 

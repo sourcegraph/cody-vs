@@ -142,7 +142,18 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(text, textContents.First());
         }
 
-        protected async Task ShowChatTab() => await Page.GetByTestId("tab-chat").ClickAsync();
+        protected async Task ShowChatTab()
+        {
+            await Page.GetByTestId("tab-chat").ClickAsync();
+            await Task.Delay(500);
+        }
+
+        protected async Task NewChat()
+        {
+            await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions {Name = "New Chat"}).ClickAsync();
+
+            await Task.Delay(500);
+        }
 
         protected async Task ShowHistoryTab()
         {
@@ -158,15 +169,21 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task EnterChatTextAndSend(string prompt)
         {
-            var entryArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
+            var entryArea = Page.Locator("span[data-lexical-text='true']");
+            var enterArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
 
-            await entryArea.PressSequentiallyAsync(prompt);
-            await entryArea.PressAsync("Enter");
+            await entryArea.FillAsync(prompt);
+            await enterArea.PressAsync("Enter");
 
-            var button = await Page.WaitForSelectorAsync("menu button[type=submit][title=Stop]");
-
-            while (await button.GetAttributeAsync("title") == "Stop") await Task.Delay(500);
+            var isStopVisible = false; 
+            while (!isStopVisible)
+            {
+                isStopVisible = await Page.Locator("vscode-button").First.IsVisibleAsync();
+                await Task.Delay(500);
+            }
             await Task.Delay(500);
+
+            await DismissStartWindow();
         }
 
         protected async Task<string[]> GetTodayChatHistory()
@@ -182,6 +199,7 @@ namespace Cody.VisualStudio.Tests
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()
         {
             var tagsList = new List<ContextTag>();
+            await ShowChatTab();
 
             WriteLog("Searching for Chat ...");
             var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
