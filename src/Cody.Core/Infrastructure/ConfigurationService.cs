@@ -31,7 +31,7 @@ namespace Cody.Core.Infrastructure
             var clientInfo = new ClientInfo
             {
                 Name = "VisualStudio",
-                Version = _versionService.CodyVersion,
+                Version = _versionService.Full.ToString(),
                 IdeVersion = _vsVersionService.DisplayVersion,
                 WorkspaceRootUri = _solutionService.GetSolutionDirectory(),
                 Capabilities = new ClientCapabilities

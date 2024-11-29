@@ -1,9 +1,12 @@
+using System;
+
 namespace Cody.Core.Inf
 {
     public interface IVersionService
     {
-        string CodyVersion { get; }
-        string AgentVersion { get; }
-        string NodeVersion { get; }
+        string Full { get; }
+        string Agent { get; }
+        string Node { get; }
+        DateTime GetDebugBuildDate();
     }
 }

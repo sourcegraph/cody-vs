@@ -91,7 +91,6 @@ namespace Cody.VisualStudio
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
                 InitializeServices();
-                LogVersions();
                 await InitOleMenu();
 
                 InitializeAgent();
@@ -115,8 +114,8 @@ namespace Cody.VisualStudio
 
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution, Logger);
-            VersionService = new VersionService();
-            VsVersionService = new VsVersionService();
+            VersionService = loggerFactory.GetVersionService();
+            VsVersionService = new VsVersionService(Logger);
 
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage);
@@ -145,15 +144,8 @@ namespace Cody.VisualStudio
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
             VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
-        }
 
-        private void LogVersions()
-        {
-            Logger.Info($"Architecture: {RuntimeInformation.ProcessArchitecture}");
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
-            Logger.Info($"Cody version: {VersionService.CodyVersion}");
-            Logger.Info($"Agent version: {VersionService.AgentVersion}");
-            Logger.Info($"Node version: {VersionService.NodeVersion}");
         }
 
         private void HandleOnOptionsPageShowRequest(object sender, EventArgs e)

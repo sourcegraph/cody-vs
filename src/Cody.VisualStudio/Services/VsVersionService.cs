@@ -74,6 +74,13 @@ namespace Cody.VisualStudio.Services
             try
             {
                 var vsAppId = ServiceProvider.GlobalProvider.GetService(typeof(IVsAppId)) as IVsAppId;
+
+                if (vsAppId == null)
+                {
+                    _logger.Error($"Cannot get {nameof(IVsAppId)}");
+                    return null;
+                }
+
                 vsAppId.GetProperty((int)propertyId, out object value);
                 return value as string;
             }
