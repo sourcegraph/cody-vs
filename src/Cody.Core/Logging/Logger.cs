@@ -8,6 +8,7 @@ namespace Cody.Core.Logging
     public class Logger : ILog
     {
         private IOutputWindowPane _outputWindowPane;
+        private ISentryLog _sentryLog;
         private ITestLogger _testLogger;
 
         public Logger()
@@ -61,6 +62,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Error(customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Error(message, callerName);
+            _sentryLog?.Error(message);
             _testLogger?.WriteLog(message, "ERROR", callerName);
         }
 
@@ -82,12 +84,19 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Error(originalException, customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Error(outputMessage, callerName);
+            _sentryLog?.Error(ex);
             _testLogger?.WriteLog(message, "ERROR", callerName);
         }
 
         public Logger WithOutputPane(IOutputWindowPane outputWindowPane)
         {
             _outputWindowPane = outputWindowPane;
+            return this;
+        }
+
+        public Logger WithSentryForErrors(ISentryLog sentryLog)
+        {
+            _sentryLog = sentryLog;
             return this;
         }
 
