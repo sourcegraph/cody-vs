@@ -2,7 +2,7 @@ name: Build and test extension
 
 on:
   push:
-    branches: [main]
+    branches: [piotr/dismiss-start-window-v2]
   pull_request:
     branches: [main]
 
