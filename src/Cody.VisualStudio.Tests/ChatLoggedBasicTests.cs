@@ -1,3 +1,5 @@
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,17 +10,23 @@ namespace Cody.VisualStudio.Tests
 {
     public class ChatLoggedBasicTests : PlaywrightTestsBase, IDisposable
     {
+        private readonly JoinableTaskContext _context = ThreadHelper.JoinableTaskContext;
+
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
             var testName = $"{GetTestName()}_start";
             TakeScreenshot(testName);
+
+            _context.Factory.Run(async () =>
+            {
+                await WaitForPlaywrightAsync();
+            });
         }
 
         [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
-            await WaitForPlaywrightAsync();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
@@ -32,7 +40,6 @@ namespace Cody.VisualStudio.Tests
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
-            await WaitForPlaywrightAsync();
             await NewChat();
 
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
@@ -54,7 +61,6 @@ namespace Cody.VisualStudio.Tests
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
-            await WaitForPlaywrightAsync();
             await NewChat();
 
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
@@ -75,8 +81,6 @@ namespace Cody.VisualStudio.Tests
         [VsFact(Version = VsVersion.VS2022)]
         public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
-            await WaitForPlaywrightAsync();
-
             await CloseCodyChatToolWindow();
             var isOpen = IsCodyChatToolWindowOpen();
             Assert.False(isOpen);
@@ -91,8 +95,6 @@ namespace Cody.VisualStudio.Tests
         {
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";
-
-            await WaitForPlaywrightAsync();
 
             await EnterChatTextAndSend(prompt);
 
