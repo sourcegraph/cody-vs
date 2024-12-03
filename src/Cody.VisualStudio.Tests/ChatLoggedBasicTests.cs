@@ -10,6 +10,8 @@ namespace Cody.VisualStudio.Tests
     {
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
+            var testName = $"{GetTestName()}_start";
+            TakeScreenshot(testName);
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -102,7 +104,7 @@ namespace Cody.VisualStudio.Tests
 
         public void Dispose()
         {
-            var testName = GetTestName();
+            var testName = $"{GetTestName()}_end";
             TakeScreenshot(testName);
         }
     }
