@@ -109,7 +109,7 @@ namespace Cody.VisualStudio.Tests
                     {
                         WriteLog($"Found `{startWindow.GetType()}` window.");
                         startWindow.Hide();
-                        WriteLog($"`{startWindow.GetType()}` is hidden.");
+                        WriteLog($"`{startWindow.GetType()}` has been hidden.");
                     }
                 }
                 catch (Exception ex)
