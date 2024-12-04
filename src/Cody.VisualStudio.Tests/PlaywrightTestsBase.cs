@@ -105,7 +105,12 @@ namespace Cody.VisualStudio.Tests
                     }
 
                     var startWindow = GetQuickStartWindow();
-                    if (startWindow != null) startWindow.Hide();
+                    if (startWindow != null)
+                    {
+                        WriteLog($"Found `{startWindow.GetType()}` window.");
+                        startWindow.Hide();
+                        WriteLog($"`{startWindow.GetType()}` is hidden.");
+                    }
                 }
                 catch (Exception ex)
                 {
