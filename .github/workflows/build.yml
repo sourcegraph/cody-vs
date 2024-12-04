@@ -2,7 +2,7 @@ name: Build and test extension
 
 on:
   push:
-    branches: [main]
+    branches: [piotr/agent-cache-fix]
   pull_request:
     branches: [main]
 
@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: src/Cody.VisualStudio/Agent
-          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version') }}  
+          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version', 'agent/buildAgent.ps1', 'agent/runBuildAgent.ps1') }}  
         
       - name: Build agent if needed
         if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
