@@ -4,12 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
 using Xunit;
 using Xunit.Abstractions;
+using Window = EnvDTE.Window;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -93,11 +96,20 @@ namespace Cody.VisualStudio.Tests
                 {
                     var dte = (DTE2)Package.GetGlobalService(typeof(DTE));
                     var mainWindow = dte.MainWindow;
+
                     if (!mainWindow.Visible) // Options -> General -> On Startup open: Start Window
                     {
                         WriteLog("Main IDE Window NOT visible! Bringing it to the front ...");
                         mainWindow.Visible = true;
                         WriteLog("Main IDE Window is now VISIBLE.");
+                    }
+
+                    var startWindow = GetQuickStartWindow();
+                    if (startWindow != null)
+                    {
+                        WriteLog($"Found `{startWindow.GetType()}` window.");
+                        startWindow.Hide();
+                        WriteLog($"`{startWindow.GetType()}` has been hidden.");
                     }
                 }
                 catch (Exception ex)
@@ -110,6 +122,14 @@ namespace Cody.VisualStudio.Tests
 
                 return Task.CompletedTask;
             });
+        }
+
+        private System.Windows.Window GetQuickStartWindow()
+        {
+            return PresentationSource.CurrentSources.OfType<HwndSource>()
+                .Select(h => h.RootVisual)
+                .OfType<System.Windows.Window>()
+                .SingleOrDefault(w => w.GetType().Name == "QuickStartWindow");
         }
 
         protected async Task<string> GetAccessToken()
