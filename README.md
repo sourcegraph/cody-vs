@@ -1,6 +1,6 @@
 # Cody for Visual Studio
 
-Install [Cody for Visual Studio (Experimental)](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
+[Cody for Visual Studio](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs) is currently Experimental. [See the docs for more information](https://sourcegraph.com/docs/cody/clients/install-visual-studio#installing-cody-in-visual-studio).
 
 ## AI that uses your codebase as context
 
