@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
 
 namespace Cody.VisualStudio.Completions
 {
