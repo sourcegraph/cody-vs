@@ -3,7 +3,9 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
@@ -11,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -21,13 +24,44 @@ namespace Cody.VisualStudio.Completions
         private IAgentService agentService;
         private ITextDocument textDocument;
         private IVsTextView vsTextView;
-
+        private readonly ITextView view;
         private static uint sessionCounter = 0;
 
-        public CodyProposalSource(ITextDocument textDocument, IVsTextView vsTextView)
+        private ITextSnapshot trackedSnapshot;
+
+        public CodyProposalSource(ITextDocument textDocument, IVsTextView vsTextView, ITextView view)
         {
             this.textDocument = textDocument;
             this.vsTextView = vsTextView;
+            this.view = view;
+
+            var currentSnapshot = textDocument.TextBuffer.CurrentSnapshot;
+            textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
+        }
+
+        private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
+        {
+            trackedSnapshot = e.After;
+        }
+
+        internal static bool AllowPrediction(VirtualSnapshotPoint caret, CompletionState completionState, ProposalScenario scenario)
+        {
+            return scenario != ProposalScenario.CaretMove && //scenario != ProposalScenario.Completion && scenario != ProposalScenario.DivergedProposal &&
+                (completionState == null || !completionState.IsSnippet && !completionState.IsSuggestion && !completionState.IsPreprocessorDirective);
+        }
+
+        private void UpdateCaretAndCompletion(ref VirtualSnapshotPoint caret, ref CompletionState completionState)
+        {
+            if (trackedSnapshot == null || trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
+            {
+                trace.TraceEvent("TrackinSnapshotFailed");
+            }
+
+            caret = caret.TranslateTo(trackedSnapshot);
+            if (completionState != null)
+            {
+                completionState = completionState.TranslateTo(trackedSnapshot);
+            }
         }
 
         public override async Task<ProposalCollectionBase> RequestProposalsAsync(
@@ -43,6 +77,15 @@ namespace Cody.VisualStudio.Completions
             try
             {
                 trace.TraceEvent("Begin", "session: {0}", session);
+                trace.TraceEvent("Scenario", "session: {0}, scenario {1}", session, scenario);
+
+                if (!AllowPrediction(caret, completionState, scenario))
+                {
+                    trace.TraceEvent("SkipScenario", "Skip scenario {0}", scenario);
+                    return null;
+                }
+
+                UpdateCaretAndCompletion(ref caret, ref completionState);
 
                 agentService = CodyPackage.AgentService;
                 if (agentService == null)
@@ -69,7 +112,7 @@ namespace Cody.VisualStudio.Completions
 
                 var lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText();
 
-                trace.TraceEvent("BeforeRequest", new { session, caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem });
+                trace.TraceEvent("BeforeRequest", new { session, caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem, completionState?.IsSoftSelection, applicableToSpan = completionState?.ApplicableToSpan.ToString(), completionState?.IsSuggestion, completionState?.IsSnippet });
                 trace.TraceEvent("AutocompliteRequest", autocompleteRequest);
 
                 var autocompleteCancel = new CancellationTokenSource();
@@ -95,7 +138,7 @@ namespace Cody.VisualStudio.Completions
 
                 if (autocomplete.Items.Length == 0)
                 {
-                    trace.TraceEvent("NoAutocompliteResults", "session: {0}", session);
+                    trace.TraceEvent("AutocompliteResult", "session: {0}, No results", session);
                 }
                 else
                 {
@@ -115,31 +158,15 @@ namespace Cody.VisualStudio.Completions
                 {
                     foreach (var item in autocomplete.Items)
                     {
-
-                        //var range = item.Range;
-                        ////vsTextView.GetNearestPosition(range.Start.Line, range.Start.Character, out int startPos, out _);
-                        //var startPos = ToPosition(caret.Position.Snapshot, range.Start.Line, range.Start.Character);
-                        //var start = new SnapshotPoint(caret.Position.Snapshot, startPos);
-                        ////vsTextView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
-                        //var endPos = ToPosition(caret.Position.Snapshot, range.End.Line, range.End.Character);
-                        //var end = new SnapshotPoint(caret.Position.Snapshot, endPos);
-
-                        //var insertAt = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
-
-                        var completionText = item.InsertText;
-                        if (caret.IsInVirtualSpace)
-                        {
-                            var toSkip = Math.Min(caret.VirtualSpaces, completionText.TakeWhile(char.IsWhiteSpace).Count());
-                            completionText = completionText.Substring(toSkip);
-                        }
+                        var completionText = AdjustCompletionText(caret, completionState, item.InsertText, session);
 
                         var edits = new List<ProposedEdit>(1)
                         {
                             new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
                         };
 
-                        //var virtualSnapshotPoint = caret.TranslateTo(insertAt.Snapshot);
                         var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
+                            completionState: completionState,
                             proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept);
 
                         if (proposal != null) proposalList.Add(proposal);
@@ -162,6 +189,27 @@ namespace Cody.VisualStudio.Completions
             }
 
             return null;
+        }
+
+        private string AdjustCompletionText(VirtualSnapshotPoint caret, CompletionState completionState, string completionText, uint session)
+        {
+            if (caret.IsInVirtualSpace)
+            {
+                var toSkip = Math.Min(caret.VirtualSpaces, completionText.TakeWhile(char.IsWhiteSpace).Count());
+                completionText = completionText.Substring(toSkip);
+                trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
+            }
+
+            if (completionState == null || completionText == null) return completionText;
+            var enteredText = completionState.ApplicableToSpan.GetText();
+            var common = completionState.SelectedItem.TrimPrefix(enteredText, StringComparison.Ordinal);
+
+            if (completionText.StartsWith(common)) return completionText.Substring(common.Length);
+            else
+            {
+                trace.TraceEvent("ProposalSkipped", "session: {0}, IntellisenceMistmatch", session);
+                return string.Empty;
+            }
         }
 
         private Position ToLineColPosition(SnapshotPoint point)

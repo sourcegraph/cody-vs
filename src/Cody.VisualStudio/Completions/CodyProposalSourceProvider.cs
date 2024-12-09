@@ -6,7 +6,9 @@ using Microsoft.VisualStudio.Language.Suggestions;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +17,7 @@ namespace Cody.VisualStudio.Completions
     [Export(typeof(ProposalSourceProviderBase))]
     [Name(nameof(CodyProposalSourceProvider))]
     [Order(Before = "InlineCSharpProposalSourceProvider")]
-    [Order(Before = "IntelliCodeCSharpProposalSource")]
+    //[Order(Before = "IntelliCodeCSharpProposalSource")]
     [Order(Before = "Highest Priority")]
     [ContentType("any")]
     public class CodyProposalSourceProvider : ProposalSourceProviderBase
@@ -27,6 +29,7 @@ namespace Cody.VisualStudio.Completions
 
         public const string ProposalIdPrefix = "cody";
 
+        //[ImportMany] public IEnumerable<ProposalSourceProviderBase> Input { get; set; }
 
         [ImportingConstructor]
         public CodyProposalSourceProvider(
@@ -80,6 +83,12 @@ namespace Cody.VisualStudio.Completions
 
         public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
         {
+            //var list = Input.ToArray();
+            //foreach (var zm in Input)
+            //{
+            //    var pom = zm.GetType().Assembly.Location;
+            //}
+
             trace.TraceEvent("Enter");
             IWpfTextView wpfTextView = view as IWpfTextView;
             if (wpfTextView != null && view.Roles.Contains("DOCUMENT") && view.Roles.Contains("EDITABLE"))
@@ -89,7 +98,7 @@ namespace Cody.VisualStudio.Completions
                 if (document != null && vsTextView != null)
                 {
                     trace.TraceEvent("CreateProposalSource", "Created for '{0}'", document.FilePath);
-                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, vsTextView));
+                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, vsTextView, view));
                 }
             }
 

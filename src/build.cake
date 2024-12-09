@@ -47,7 +47,7 @@ var nodeBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.1
 var nodeArmBinaryUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/node-win-arm64.exe";
 
 // The latest tag of the stable release from the cody repository https://github.com/sourcegraph/cody/tags
-var codyStableReleaseTag = "vscode-v1.34.3";
+var codyStableReleaseTag = "vscode-v1.46.0";
 
 var marketplaceToken = EnvironmentVariable("CODY_VS_MARKETPLACE_RELEASE_TOKEN");
 
