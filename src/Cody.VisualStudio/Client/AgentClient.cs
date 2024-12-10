@@ -1,11 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
+using System;
+using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Client
 {
@@ -90,7 +90,7 @@ namespace Cody.VisualStudio.Client
 
         private void OnErrorReceived(object sender, string error)
         {
-            agentLog.Error(error);
+            agentLog.Debug(error);
         }
 
         private IAgentConnector CreateConnector()
