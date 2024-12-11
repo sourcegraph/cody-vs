@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Language.Suggestions;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -20,12 +21,13 @@ namespace Cody.VisualStudio.Completions
     //[Order(Before = "IntelliCodeCSharpProposalSource")]
     [Order(Before = "Highest Priority")]
     [ContentType("any")]
-    public class CodyProposalSourceProvider : ProposalSourceProviderBase
+    public class CodyProposalSourceProvider : ProposalSourceProviderBase, IDisposable
     {
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSourceProvider));
 
         private readonly ITextDocumentFactoryService textDocumentFactoryService;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
+        private readonly SuggestionServiceBase suggestionServiceBase;
 
         public const string ProposalIdPrefix = "cody";
 
@@ -39,11 +41,12 @@ namespace Cody.VisualStudio.Completions
         {
             this.textDocumentFactoryService = textDocumentFactoryService;
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
+            this.suggestionServiceBase = suggestionServiceBase;
 
             //suggestionServiceBase.ProposalRejected += OnProposalRejected;
-            suggestionServiceBase.ProposalDisplayed += OnProposalDisplayed;
-            suggestionServiceBase.SuggestionDismissed += OnSuggestionDismissed;
-            suggestionServiceBase.SuggestionAccepted += OnSuggestionAccepted;
+            this.suggestionServiceBase.ProposalDisplayed += OnProposalDisplayed;
+            this.suggestionServiceBase.SuggestionDismissed += OnSuggestionDismissed;
+            this.suggestionServiceBase.SuggestionAccepted += OnSuggestionAccepted;
         }
 
         private bool IsReadyAndIsCodyProposal(string providerName, string proposalId)
@@ -103,6 +106,13 @@ namespace Cody.VisualStudio.Completions
             }
 
             return null;
+        }
+
+        public void Dispose()
+        {
+            suggestionServiceBase.ProposalDisplayed -= OnProposalDisplayed;
+            suggestionServiceBase.SuggestionDismissed -= OnSuggestionDismissed;
+            suggestionServiceBase.SuggestionAccepted -= OnSuggestionAccepted;
         }
     }
 }

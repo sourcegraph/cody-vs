@@ -34,7 +34,6 @@ namespace Cody.VisualStudio.Completions
             this.textDocument = textDocument;
             this.vsTextView = vsTextView;
             this.view = view;
-
             var currentSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
         }
@@ -82,8 +81,34 @@ namespace Cody.VisualStudio.Completions
                     TriggerKind = scenario == ProposalScenario.ExplicitInvocation ? TriggerKind.Invoke : TriggerKind.Automatic
                 };
 
-                var lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText();
-                trace.TraceEvent("BeforeRequest", new { session, caret = $"{caretline}:{caretCol}", lineText, virtualSpaces = caret.VirtualSpaces, selectedItem = completionState?.SelectedItem, completionState?.IsSoftSelection, applicableToSpan = completionState?.ApplicableToSpan.ToString(), completionState?.IsSuggestion, completionState?.IsSnippet });
+                //if (completionState != null)
+                //{
+                //    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.Start.Position, out int csStartLine, out int csStartCol);
+                //    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.End.Position, out int csEndLine, out int csEndCol);
+                //    autocompleteRequest.SelectedCompletionInfo = new SelectedCompletionInfo()
+                //    {
+                //        Text = completionState.SelectedItem,
+                //        Range = new Range
+                //        {
+                //            Start = new Position { Line = csStartLine, Character = csStartCol },
+                //            End = new Position { Line = csEndLine, Character = csEndCol }
+                //        }
+                //    };
+                //}
+
+                trace.TraceEvent("BeforeRequest", new
+                {
+                    session,
+                    caret.Position.Position,
+                    caret = $"{caretline}:{caretCol}",
+                    lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText(),
+                    virtualSpaces = caret.VirtualSpaces,
+                    selectedItem = completionState?.SelectedItem,
+                    completionState?.IsSoftSelection,
+                    applicableToSpan = completionState?.ApplicableToSpan.ToString(),
+                    completionState?.IsSuggestion,
+                    completionState?.IsSnippet
+                });
 
                 var autocomplete = await GetAutocompleteItems(autocompleteRequest, session, cancel);
 

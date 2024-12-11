@@ -64,6 +64,8 @@
     <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
     <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />
     <Compile Include="Agent\Protocol\CompletionItemParams.cs" />
+    <Compile Include="Agent\Protocol\GetDocumentsParams.cs" />
+    <Compile Include="Agent\Protocol\GetDocumentsResult.cs" />
     <Compile Include="Agent\Protocol\ProgressOptions.cs" />
     <Compile Include="Agent\Protocol\ProgressReportParams.cs" />
     <Compile Include="Agent\Protocol\ProgressStartParams.cs" />

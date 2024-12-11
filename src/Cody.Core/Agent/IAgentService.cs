@@ -1,8 +1,8 @@
 using Cody.Core.Agent.Protocol;
-using System.Collections.Generic;
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
@@ -73,6 +73,9 @@ namespace Cody.Core.Agent
 
         [AgentCall("autocomplete/completionAccepted")]
         void CompletionAccepted(CompletionItemParams completionItem);
+
+        [AgentCall("testing/workspaceDocuments")]
+        Task<GetDocumentsResult> GetWorkspaceDocuments(GetDocumentsParams documents);
 
         //---------------------------------------------------------
         // For notifications return type MUST be void!

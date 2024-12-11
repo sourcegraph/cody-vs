@@ -1,6 +1,7 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
+using Cody.Core.Trace;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
@@ -11,6 +12,8 @@ namespace Cody.VisualStudio.Client
 {
     public class AgentClient : IAgentProxy
     {
+        private static TraceLogger trace = new TraceLogger(nameof(AgentClient));
+
         private AgentClientOptions options;
         private ILog log;
         private ILog agentLog;
@@ -90,7 +93,8 @@ namespace Cody.VisualStudio.Client
 
         private void OnErrorReceived(object sender, string error)
         {
-            agentLog.Error(error);
+            agentLog.Debug(error);
+            trace.TraceEvent("AgentErrorOutput", error);
         }
 
         private IAgentConnector CreateConnector()
