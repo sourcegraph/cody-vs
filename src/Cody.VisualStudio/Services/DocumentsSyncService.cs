@@ -1,16 +1,16 @@
+using Cody.Core.DocumentSync;
+using Cody.Core.Logging;
+using Cody.Core.Trace;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cody.Core.DocumentSync;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Text.Editor;
-using Cody.Core.Logging;
-using Cody.Core.Trace;
 
 namespace Cody.VisualStudio.Services
 {
@@ -274,6 +274,7 @@ namespace Cody.VisualStudio.Services
                 var changes = GetContentChanges(e.Changes, activeDocument.TextView);
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
+                trace.TraceEvent("OnChanged", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
             }
             catch (Exception ex)
@@ -292,6 +293,7 @@ namespace Cody.VisualStudio.Services
                 var selection = GetDocumentSelection(activeDocument.TextView);
                 var visibleRange = GetVisibleRange(activeDocument.TextView);
 
+                trace.TraceEvent("OnChanged", "OnSelectionChanged");
                 documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
             }
             catch (Exception ex)
@@ -306,8 +308,8 @@ namespace Cody.VisualStudio.Services
 
             foreach (var change in textChanges)
             {
-                textView.GetLineAndColumn(change.NewPosition, out int startLine, out int startCol);
-                textView.GetLineAndColumn(change.NewEnd, out int endLine, out int endCol);
+                textView.GetLineAndColumn(change.OldSpan.Start, out int startLine, out int startCol);
+                textView.GetLineAndColumn(change.OldSpan.End, out int endLine, out int endCol);
 
                 var contentChange = new DocumentChange
                 {

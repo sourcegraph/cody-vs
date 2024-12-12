@@ -6,6 +6,7 @@ using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
+using Cody.Core.Trace;
 using Cody.Core.Workspace;
 using Cody.UI.Controls;
 using Cody.UI.ViewModels;
@@ -56,10 +57,10 @@ namespace Cody.VisualStudio
         public ILog AgentLogger;
         public ILog AgentNotificationsLogger;
 
+        public static IAgentService AgentService;
+        public static IUserSettingsService UserSettingsService;
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
-        public IAgentService AgentService;
-        public IUserSettingsService UserSettingsService;
         public IStatusbarService StatusbarService;
         public IThemeService ThemeService;
         public ISolutionService SolutionService;

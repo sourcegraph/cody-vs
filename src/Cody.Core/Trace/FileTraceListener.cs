@@ -34,7 +34,8 @@ namespace Cody.Core.Trace
 
             if (!string.IsNullOrEmpty(traceEvent.Message))
             {
-                sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
+                if (traceEvent.MessageArgs != null) sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
+                else sb.Append(traceEvent.Message);
             }
 
             if (traceEvent.Data != null)
