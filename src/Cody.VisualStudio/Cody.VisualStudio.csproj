@@ -99,6 +99,7 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	<Content Remove="Agent\index.js.map" Condition="'$(Configuration)' == 'Release'"/>
     <Content Include="Agent\webviews\*.*">
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
