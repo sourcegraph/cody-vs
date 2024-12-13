@@ -62,7 +62,7 @@ namespace Cody.Core.Agent
         [AgentCallback("debug/message")]
         public void Debug(string channel, string message, string level)
         {
-            _logger.Debug($"[{channel} {message}]");
+            //_logger.Debug($"[{channel} {message}]");
             trace.TraceEvent("AgentDebug", message);
         }
 

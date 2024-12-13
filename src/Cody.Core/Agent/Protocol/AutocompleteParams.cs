@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Cody.Core.Agent.Protocol
 {
@@ -17,7 +18,10 @@ namespace Cody.Core.Agent.Protocol
 
     public enum TriggerKind
     {
+        [EnumMember(Value = nameof(Automatic))] //overwrites default camelCase naming convention
         Automatic,
+
+        [EnumMember(Value = nameof(Invoke))]
         Invoke
     }
 }

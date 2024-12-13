@@ -15,8 +15,6 @@ using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Options;
 using Cody.VisualStudio.Services;
-using EnvDTE;
-using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;

@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="Client\AgentClient.cs" />
     <Compile Include="Client\AgentClientOptions.cs" />
-    <Compile Include="Client\AgentJsonMessageFormatter.cs" />
     <Compile Include="Client\AgentProcessConnector.cs" />
     <Compile Include="Client\IAgentConnector.cs" />
     <Compile Include="Client\NameTransformer.cs" />

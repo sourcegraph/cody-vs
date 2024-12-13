@@ -43,8 +43,7 @@ namespace Cody.VisualStudio.Client
 
             connector.Connect(options);
 
-            var jsonMessageFormatter = new AgentJsonMessageFormatter(agentLog);
-            jsonMessageFormatter.TraceSentMessages = options.Debug;
+            var jsonMessageFormatter = new JsonMessageFormatter();
             jsonMessageFormatter.JsonSerializer.ContractResolver = new DefaultContractResolver()
             {
                 NamingStrategy = new CamelCaseNamingStrategy()
@@ -93,7 +92,7 @@ namespace Cody.VisualStudio.Client
 
         private void OnErrorReceived(object sender, string error)
         {
-            agentLog.Debug(error);
+            //agentLog.Debug(error);
             trace.TraceEvent("AgentErrorOutput", error);
         }
 
