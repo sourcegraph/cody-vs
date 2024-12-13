@@ -1,9 +1,9 @@
-using System;
-using System.Diagnostics;
-using System.Threading;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Diagnostics;
+using System.Threading;
 
 #pragma warning disable VSTHRD010
 

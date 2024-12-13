@@ -221,7 +221,7 @@ namespace Cody.VisualStudio.Completions
 
                     var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                         completionState: completionState,
-                        proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept);
+                        proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
 
                     if (proposal != null) proposalList.Add(proposal);
                     else trace.TraceEvent("ProposalSkipped", "session: {0}", session);

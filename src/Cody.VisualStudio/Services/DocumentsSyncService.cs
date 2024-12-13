@@ -159,7 +159,17 @@ namespace Cody.VisualStudio.Services
         {
             bool swap = false;
             int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
-            if (textView != null && ThreadHelper.CheckAccess()) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
+            if (textView != null)
+            {
+                var selection = editorAdaptersFactoryService.GetWpfTextView(textView)?.Selection;
+                if (selection != null)
+                {
+                    var span = selection.StreamSelectionSpan;
+                    textView.GetLineAndColumn(span.Start.Position.Position, out startLine, out startCol);
+                    textView.GetLineAndColumn(span.End.Position.Position, out endLine, out endCol);
+                }
+                else if (ThreadHelper.CheckAccess()) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
+            }
 
             if (startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
 
