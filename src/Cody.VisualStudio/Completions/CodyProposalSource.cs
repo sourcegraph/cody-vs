@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -82,20 +81,20 @@ namespace Cody.VisualStudio.Completions
                     TriggerKind = scenario == ProposalScenario.ExplicitInvocation ? TriggerKind.Invoke : TriggerKind.Automatic
                 };
 
-                //if (completionState != null)
-                //{
-                //    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.Start.Position, out int csStartLine, out int csStartCol);
-                //    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.End.Position, out int csEndLine, out int csEndCol);
-                //    autocompleteRequest.SelectedCompletionInfo = new SelectedCompletionInfo()
-                //    {
-                //        Text = completionState.SelectedItem,
-                //        Range = new Range
-                //        {
-                //            Start = new Position { Line = csStartLine, Character = csStartCol },
-                //            End = new Position { Line = csEndLine, Character = csEndCol }
-                //        }
-                //    };
-                //}
+                if (completionState != null)
+                {
+                    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.Start.Position, out int csStartLine, out int csStartCol);
+                    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.End.Position, out int csEndLine, out int csEndCol);
+                    autocompleteRequest.SelectedCompletionInfo = new SelectedCompletionInfo()
+                    {
+                        Text = completionState.SelectedItem,
+                        Range = new Range
+                        {
+                            Start = new Position { Line = csStartLine, Character = csStartCol },
+                            End = new Position { Line = csEndLine, Character = csEndCol }
+                        }
+                    };
+                }
 
                 trace.TraceEvent("BeforeRequest", new
                 {
@@ -214,9 +213,17 @@ namespace Cody.VisualStudio.Completions
                 {
                     var completionText = AdjustCompletionText(caret, completionState, item.InsertText, session);
 
+                    int lenght = 0;
+                    if (item.Range.Start.Character != item.Range.End.Character || item.Range.Start.Line != item.Range.End.Line)
+                    {
+                        vsTextView.GetNearestPosition(item.Range.Start.Line, item.Range.Start.Character, out int startPos, out _);
+                        vsTextView.GetNearestPosition(item.Range.End.Line, item.Range.End.Character, out int endPos, out _);
+                        lenght = endPos - startPos;
+                    }
+
                     var edits = new List<ProposedEdit>(1)
                         {
-                            new ProposedEdit(new SnapshotSpan(caret.Position, 0), completionText)
+                            new ProposedEdit(new SnapshotSpan(caret.Position, lenght), completionText)
                         };
 
                     var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
