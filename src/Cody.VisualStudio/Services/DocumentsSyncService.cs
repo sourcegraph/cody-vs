@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 
 namespace Cody.VisualStudio.Services
 {
@@ -133,22 +134,27 @@ namespace Cody.VisualStudio.Services
         private DocumentRange GetVisibleRange(IVsTextView textView)
         {
             const int SB_VERT = 1;
-            int visibleRows = 0, firstVisibleRow = 0;
+            int firstVisibleLine = 0, firstVisibleCol = 0, lastVisibleLine = 0, lastVisibleCol = 0;
 
-            if (textView != null) textView.GetScrollInfo(SB_VERT, out _, out _, out visibleRows, out firstVisibleRow);
+            if (textView != null)
+            {
+                var lines = editorAdaptersFactoryService.GetWpfTextView(textView)?.TextViewLines;
+                textView.GetLineAndColumn(lines.FirstVisibleLine.Start.Position, out firstVisibleLine, out firstVisibleCol);
+                textView.GetLineAndColumn(lines.LastVisibleLine.End.Position, out lastVisibleLine, out lastVisibleCol);
+            }
             else return null;
 
             var range = new DocumentRange
             {
                 Start = new DocumentPosition
                 {
-                    Line = Math.Max(firstVisibleRow, 0),
-                    Column = 0
+                    Line = firstVisibleLine,
+                    Column = firstVisibleCol
                 },
                 End = new DocumentPosition
                 {
-                    Line = Math.Max(firstVisibleRow + visibleRows, 0),
-                    Column = 0
+                    Line = lastVisibleLine,
+                    Column = lastVisibleCol
                 }
             };
 
