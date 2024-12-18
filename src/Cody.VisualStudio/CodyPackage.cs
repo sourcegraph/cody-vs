@@ -1,5 +1,6 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -14,8 +15,6 @@ using Cody.VisualStudio.Client;
 using Cody.VisualStudio.Inf;
 using Cody.VisualStudio.Options;
 using Cody.VisualStudio.Services;
-using EnvDTE;
-using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
@@ -86,7 +85,8 @@ namespace Cody.VisualStudio
             try
             {
                 InitializeErrorHandling();
-
+                Configuration.Load(@"C:\tmp\CodyConfig.json");
+                var zm = Configuration.AgentDebug;
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
