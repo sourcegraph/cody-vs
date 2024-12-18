@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Cody.Core.Logging;
+using Cody.Core.Common;
 
 namespace Cody.UI.Controls
 {
@@ -84,18 +85,14 @@ namespace Cody.UI.Controls
             try
             {
                 Logger?.Debug("Initializing ...");
-                var codyDir = "Cody";
-#if DEBUG
-                codyDir = "Cody\\Debug";
-#endif
+                var codyDir = Configuration.IsDebug ? "Cody\\Debug" : "Cody";
+
                 var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), codyDir);
                 var options = new CoreWebView2EnvironmentOptions
                 {
-#if DEBUG
-                    AdditionalBrowserArguments =
-                        "--remote-debugging-port=9222 --disable-web-security --allow-file-access-from-files",
-                    AllowSingleSignOnUsingOSPrimaryAccount = true,
-#endif
+                    AdditionalBrowserArguments = Configuration.IsDebug ?
+                        "--remote-debugging-port=9222 --disable-web-security --allow-file-access-from-files" : null,
+                    AllowSingleSignOnUsingOSPrimaryAccount = Configuration.IsDebug,
                 };
 
                 var webView2 = await CoreWebView2Environment.CreateAsync(null, appData, options);
