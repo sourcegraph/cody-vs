@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Cody.Core.Logging;
+using Cody.Core.Common;
 
 namespace Cody.UI.Controls
 {
@@ -47,13 +48,9 @@ namespace Cody.UI.Controls
             _webview.Settings.AreBrowserAcceleratorKeysEnabled = true;
             _webview.Settings.IsGeneralAutofillEnabled = true;
             // Enable below settings only in DEBUG mode.
-            _webview.Settings.AreDefaultContextMenusEnabled = false;
-            _webview.Settings.AreDevToolsEnabled = false;
+            _webview.Settings.AreDefaultContextMenusEnabled = Configuration.IsDebug;
+            _webview.Settings.AreDevToolsEnabled = Configuration.IsDebug;
             _webview.Settings.IsStatusBarEnabled = false;
-#if DEBUG
-            _webview.Settings.AreDefaultContextMenusEnabled = true;
-            _webview.Settings.AreDevToolsEnabled = true;
-#endif
         }
 
         private void SetupEventHandlers()

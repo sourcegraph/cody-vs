@@ -1,10 +1,9 @@
+using Cody.Core.Common;
 using Cody.Core.Inf;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-
-#pragma warning disable VSTHRD010
 
 namespace Cody.VisualStudio.Inf
 {
@@ -14,50 +13,36 @@ namespace Cody.VisualStudio.Inf
 
         public ILog Create(string outputName = null)
         {
-            if (outputName == null) outputName = WindowPaneLogger.DefaultCody;
-
-            var outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-
-            Logger logger;
-            WindowPaneLogger paneLogger = null;
+            Logger logger = new Logger();
             SentryLog sentryLog = new SentryLog();
+            bool failToCreateWindowPaneLogger = false;
 
-            try
+            logger = logger.WithSentryForErrors(sentryLog);
+
+            if(!string.IsNullOrEmpty(outputName))
             {
-                paneLogger = new WindowPaneLogger(outputWindow, outputName);
+                try
+                {
+                    var outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+                    var paneLogger = new WindowPaneLogger(outputWindow, outputName);
+
+                    logger = logger.WithOutputPane(paneLogger);
+                }
+                catch
+                {
+                    failToCreateWindowPaneLogger = true;
+                }
             }
-            catch
-            {
-                // ignored
-            }
 
-            if (paneLogger != null)
-            {
-                logger = new Logger()
-                    .WithOutputPane(paneLogger)
-                    .WithSentryForErrors(sentryLog)
-                    .Build();
+            logger = logger.Build();
 
-                logger.Debug("Logger created.");
+            if(failToCreateWindowPaneLogger) logger.Error("Could not create WindowPaneLogger.");
+            else logger.Debug("Logger created.");
 
-                var isDebug = false;
-#if DEBUG
-                isDebug = true;
-#endif
-
-                _versionService = new VersionService(logger);
-
-                var version = _versionService.Full;
-                var debugOrRelease = isDebug ? $"Debug (compiled: {_versionService.GetDebugBuildDate()})" : "Release";
-                logger.Info($"Version: {version} {debugOrRelease} build");
-            }
-            else
-            {
-                logger = new Logger()
-                    .Build();
-
-                logger.Error("Could not create WindowPaneLogger.");
-            }
+            _versionService = new VersionService(logger);
+            var version = _versionService.Full;
+            var debugOrRelease = Configuration.IsDebug ? $"Debug (compiled: {_versionService.GetDebugBuildDate()})" : "Release";
+            logger.Info($"Version: {version} {debugOrRelease} build");
 
             return logger;
         }

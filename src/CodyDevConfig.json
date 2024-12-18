@@ -1,0 +1,18 @@
+{
+	"AgentDebug": true,
+	"AgentVerboseDebug": true,
+	"AllowNodeDebug": true,
+	
+	//"AgentDirectory": "C:/dev/cody/agent/dist",
+	
+	//"RemoteAgentPort": 3113,
+	
+	"Trace": true,
+	"TraceFile": "C:/tmp/cody.log",
+	
+	//"TraceLogioHostname": "localhost",
+	//"TraceLogioPort": 6689,
+	
+	"ShowCodyAgentOutput": true,
+	"ShowCodyNotificationsOutput": true
+}

@@ -10,11 +10,11 @@ namespace Cody.Core.Common
 
         public static bool AgentVerboseDebug => Get(false);
 
+        public static bool AllowNodeDebug => Get(false);
+
         public static string AgentDirectory => Get((string)null);
 
-        public static bool ConnectToRemoteAgent => Get(false);
-
-        public static int RemoteAgentPort => Get(-1);
+        public static int? RemoteAgentPort => Get((int?)null);
 
         public static bool Trace => Get(false);
 
@@ -22,7 +22,7 @@ namespace Cody.Core.Common
 
         public static string TraceLogioHostname => Get((string)null);
 
-        public static int TraceLogioPort => Get(-1);
+        public static int? TraceLogioPort => Get((int?)null);
 
         public static bool ShowCodyAgentOutput => Get(false);
 

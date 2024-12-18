@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Common
 {
@@ -20,8 +18,8 @@ namespace Cody.Core.Common
                 try
                 {
                     var json = File.ReadAllText(path);
-                    config = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
-                    AddFromDictionary(config);
+                    var configuration = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+                    AddFromDictionary(configuration);
                 }
                 catch { }
             }

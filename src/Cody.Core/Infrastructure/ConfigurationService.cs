@@ -1,4 +1,5 @@
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
 using Cody.Core.Logging;
@@ -71,8 +72,8 @@ namespace Cody.Core.Infrastructure
                 Proxy = null,
                 AccessToken = _userSettingsService.AccessToken,
                 AutocompleteAdvancedProvider = null,
-                Debug = true,
-                VerboseDebug = true,
+                Debug = Configuration.AgentDebug,
+                VerboseDebug = Configuration.AgentVerboseDebug,
                 CustomConfiguration = GetCustomConfiguration()
             };
 
