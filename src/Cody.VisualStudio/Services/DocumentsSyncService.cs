@@ -11,7 +11,6 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Documents;
 
 namespace Cody.VisualStudio.Services
 {
@@ -131,66 +130,55 @@ namespace Cody.VisualStudio.Services
             return results;
         }
 
-        private DocumentRange GetVisibleRange(IVsTextView textView)
+        private DocumentRange GetVisibleRange(IVsTextView textView, ITextSnapshot snapshot = null)
         {
-            const int SB_VERT = 1;
-            int firstVisibleLine = 0, firstVisibleCol = 0, lastVisibleLine = 0, lastVisibleCol = 0;
+            DocumentPosition firstVisiblePosition = null, lastVisiblePosition = null;
 
             if (textView != null)
             {
-                var lines = editorAdaptersFactoryService.GetWpfTextView(textView)?.TextViewLines;
-                textView.GetLineAndColumn(lines.FirstVisibleLine.Start.Position, out firstVisibleLine, out firstVisibleCol);
-                textView.GetLineAndColumn(lines.LastVisibleLine.End.Position, out lastVisibleLine, out lastVisibleCol);
+                var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                snapshot = snapshot ?? wpfTextView.TextSnapshot;
+                var lines = wpfTextView.TextViewLines;
+
+                firstVisiblePosition = ToDocumentPosition(snapshot, lines.FirstVisibleLine.Start.Position);
+                lastVisiblePosition = ToDocumentPosition(snapshot, lines.LastVisibleLine.End.Position);
             }
             else return null;
 
             var range = new DocumentRange
             {
-                Start = new DocumentPosition
-                {
-                    Line = firstVisibleLine,
-                    Column = firstVisibleCol
-                },
-                End = new DocumentPosition
-                {
-                    Line = lastVisibleLine,
-                    Column = lastVisibleCol
-                }
+                Start = firstVisiblePosition,
+                End = lastVisiblePosition
             };
 
             return range;
         }
 
-        private DocumentRange GetDocumentSelection(IVsTextView textView)
+        private DocumentRange GetDocumentSelection(IVsTextView textView, ITextSnapshot snapshot = null)
         {
             bool swap = false;
-            int startLine = 0, startCol = 0, endLine = 0, endCol = 0;
+            DocumentPosition start = null, end = null;
             if (textView != null)
             {
-                var selection = editorAdaptersFactoryService.GetWpfTextView(textView)?.Selection;
-                if (selection != null)
+                var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                if (wpfTextView != null)
                 {
-                    var span = selection.StreamSelectionSpan;
-                    textView.GetLineAndColumn(span.Start.Position.Position, out startLine, out startCol);
-                    textView.GetLineAndColumn(span.End.Position.Position, out endLine, out endCol);
-                }
-                else if (ThreadHelper.CheckAccess()) textView.GetSelection(out startLine, out startCol, out endLine, out endCol);
-            }
+                    snapshot = snapshot ?? wpfTextView.TextSnapshot;
+                    var selection = wpfTextView.Selection;
 
-            if (startLine > endLine || (startLine == endLine && startCol > endCol)) swap = true;
+                    start = ToDocumentPosition(snapshot, selection.StreamSelectionSpan.Start.Position);
+                    end = ToDocumentPosition(snapshot, selection.StreamSelectionSpan.End.Position);
+                }
+                else return null;
+            }
+            else return null;
+
+            if(start.Line > end.Line || (start.Line == end.Line && start.Column > end.Column)) swap = true;
 
             return new DocumentRange
             {
-                Start = new DocumentPosition
-                {
-                    Line = swap ? endLine : startLine,
-                    Column = swap ? endCol : startCol,
-                },
-                End = new DocumentPosition
-                {
-                    Line = swap ? startLine : endLine,
-                    Column = swap ? startCol : endCol,
-                }
+                Start = swap ? end : start,
+                End = swap ? start : end
             };
         }
 
@@ -286,9 +274,9 @@ namespace Cody.VisualStudio.Services
             try
             {
                 var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-                var selection = GetDocumentSelection(activeDocument.TextView);
-                var changes = GetContentChanges(e.Changes, activeDocument.TextView);
-                var visibleRange = GetVisibleRange(activeDocument.TextView);
+                var selection = GetDocumentSelection(activeDocument.TextView, e.Before);
+                var changes = GetContentChanges(e.Changes, e.Before);
+                var visibleRange = GetVisibleRange(activeDocument.TextView, e.Before);
 
                 trace.TraceEvent("OnChanged", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
@@ -318,14 +306,14 @@ namespace Cody.VisualStudio.Services
             }
         }
 
-        private IEnumerable<DocumentChange> GetContentChanges(INormalizedTextChangeCollection textChanges, IVsTextView textView)
+        private IEnumerable<DocumentChange> GetContentChanges(INormalizedTextChangeCollection textChanges, ITextSnapshot beforeSnapshot)
         {
             var results = new List<DocumentChange>();
-
+            
             foreach (var change in textChanges)
             {
-                textView.GetLineAndColumn(change.OldSpan.Start, out int startLine, out int startCol);
-                textView.GetLineAndColumn(change.OldSpan.End, out int endLine, out int endCol);
+                var start = ToDocumentPosition(beforeSnapshot, change.OldPosition);
+                var end = ToDocumentPosition(beforeSnapshot,change.OldEnd);
 
                 var contentChange = new DocumentChange
                 {
@@ -334,13 +322,13 @@ namespace Cody.VisualStudio.Services
                     {
                         Start = new DocumentPosition
                         {
-                            Line = startLine,
-                            Column = startCol
+                            Line = start.Line,
+                            Column = start.Column
                         },
                         End = new DocumentPosition
                         {
-                            Line = endLine,
-                            Column = endCol
+                            Line = end.Line,
+                            Column = end.Column
                         }
                     }
                 };
@@ -349,6 +337,13 @@ namespace Cody.VisualStudio.Services
             }
 
             return results;
+        }
+
+        private DocumentPosition ToDocumentPosition(ITextSnapshot snapshot, int position)
+        {
+            var line = snapshot.GetLineFromPosition(position);
+            int col = position - line.Start.Position;
+            return new DocumentPosition { Line = line.LineNumber, Column = col };
         }
 
         public class ActiveDocument

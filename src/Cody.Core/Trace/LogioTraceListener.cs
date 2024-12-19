@@ -49,7 +49,7 @@ namespace Cody.Core.Trace
             if (!string.IsNullOrEmpty(traceEvent.Message))
             {
                 sb.Append(" ");
-                if (traceEvent.MessageArgs != null) sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
+                if (traceEvent.MessageArgs != null && traceEvent.MessageArgs.Any()) sb.AppendFormat(traceEvent.Message, traceEvent.MessageArgs);
                 else sb.Append(traceEvent.Message);
             }
 

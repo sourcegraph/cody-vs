@@ -73,25 +73,25 @@ namespace Cody.VisualStudio.Completions
 
                 UpdateCaretAndCompletion(ref caret, ref completionState);
 
-                vsTextView.GetLineAndColumn(caret.Position.Position, out int caretline, out int caretCol);
+                var caretPosition = ToLineColPosition(caret.Position);
                 var autocompleteRequest = new AutocompleteParams
                 {
                     Uri = textDocument.FilePath.ToUri(),
-                    Position = new Position { Line = caretline, Character = caretCol },
+                    Position = caretPosition,
                     TriggerKind = scenario == ProposalScenario.ExplicitInvocation ? TriggerKind.Invoke : TriggerKind.Automatic
                 };
 
                 if (completionState != null)
                 {
-                    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.Start.Position, out int csStartLine, out int csStartCol);
-                    vsTextView.GetLineAndColumn(completionState.ApplicableToSpan.End.Position, out int csEndLine, out int csEndCol);
+                    var completionStart = ToLineColPosition(completionState.ApplicableToSpan.Start);
+                    var completionEnd = ToLineColPosition(completionState.ApplicableToSpan.End);
                     autocompleteRequest.SelectedCompletionInfo = new SelectedCompletionInfo()
                     {
                         Text = completionState.SelectedItem,
                         Range = new Range
                         {
-                            Start = new Position { Line = csStartLine, Character = csStartCol },
-                            End = new Position { Line = csEndLine, Character = csEndCol }
+                            Start = completionStart,
+                            End = completionEnd
                         }
                     };
                 }
@@ -100,8 +100,8 @@ namespace Cody.VisualStudio.Completions
                 {
                     session,
                     caret.Position.Position,
-                    caret = $"{caretline}:{caretCol}",
-                    lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretline).GetText(),
+                    caret = $"{caretPosition.Line}:{caretPosition.Character}",
+                    lineText = caret.Position.Snapshot.GetLineFromLineNumber(caretPosition.Line).GetText(),
                     virtualSpaces = caret.VirtualSpaces,
                     selectedItem = completionState?.SelectedItem,
                     completionState?.IsSoftSelection,
@@ -216,8 +216,9 @@ namespace Cody.VisualStudio.Completions
                     int lenght = 0;
                     if (item.Range.Start.Character != item.Range.End.Character || item.Range.Start.Line != item.Range.End.Line)
                     {
-                        vsTextView.GetNearestPosition(item.Range.Start.Line, item.Range.Start.Character, out int startPos, out _);
-                        vsTextView.GetNearestPosition(item.Range.End.Line, item.Range.End.Character, out int endPos, out _);
+                        var startPos = ToPosition(caret.Position.Snapshot, item.Range.Start.Line, item.Range.Start.Character);
+                        var endPos = ToPosition(caret.Position.Snapshot, item.Range.End.Line, item.Range.End.Character);
+
                         lenght = endPos - startPos;
                     }
 
@@ -262,6 +263,19 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("ProposalSkipped", "session: {0}, IntellisenceMistmatch", session);
                 return string.Empty;
             }
+        }
+
+        private Position ToLineColPosition(SnapshotPoint point)
+        {
+            var containgLine = point.GetContainingLine();
+            int col = point.Position - containgLine.Start.Position;
+            return new Position { Line = containgLine.LineNumber, Character = col };
+        }
+
+        private int ToPosition(ITextSnapshot textSnapshot, int line, int col)
+        {
+            var containgLine = textSnapshot.GetLineFromLineNumber(line);
+            return containgLine.Start.Position + col;
         }
 
     }
