@@ -2,6 +2,7 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
+using Cody.Core.Trace;
 using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,6 +12,8 @@ namespace Cody.Core.Agent
 {
     public class NotificationHandlers : INotificationHandler
     {
+        private static TraceLogger trace = new TraceLogger(nameof(NotificationHandlers));
+
         private readonly WebviewMessageHandler _messageFilter;
         private readonly IUserSettingsService _settingsService;
         private readonly IFileService _fileService;
@@ -57,9 +60,10 @@ namespace Cody.Core.Agent
         }
 
         [AgentCallback("debug/message")]
-        public void Debug(string channel, string message)
+        public void Debug(string channel, string message, string level)
         {
-            _logger.Debug($"[{channel} {message}]");
+            //_logger.Debug($"[{channel} {message}]");
+            trace.TraceEvent("AgentDebug", message);
         }
 
         [AgentCallback("webview/registerWebview")]
