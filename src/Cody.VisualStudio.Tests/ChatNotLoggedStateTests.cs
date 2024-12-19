@@ -25,8 +25,8 @@ namespace Cody.VisualStudio.Tests
         public async Task Cody_Free_Cody_Pro_Section_Is_Present()
         {
             // given
-            var sectionText = "Cody Free or Cody Pro";
-            var buttonText = "Sign In with GitHub";
+            var sectionText = "Free or Pro";
+            var buttonText = "Continue with GitHub";
 
             // then
             await NotInLoggedState(async () =>
@@ -41,16 +41,14 @@ namespace Cody.VisualStudio.Tests
         public async Task Cody_Enterprise_Section_Is_Present()
         {
             // given
-            var sectionText = "Cody Enterprise";
-            var browserButtonText = " Sign In with Browser";
-            var tokenButtonText = " Sign In with Access Token";
+            var sectionText = "Enterprise";
+            var browserButtonText = "Continue with a URL";
 
             // then
             await NotInLoggedState(async () =>
             {
                 await AssertTextIsPresent(sectionText);
                 await AssertTextIsPresent(browserButtonText);
-                await AssertTextIsPresent(tokenButtonText);
             });
         }
 
@@ -58,8 +56,8 @@ namespace Cody.VisualStudio.Tests
         public async Task Logins_With_GitLab_Google_Are_Present()
         {
             // given
-            var gitlabButtonText = "Sign In with GitLab";
-            var googleButtonText = "Sign In with Google";
+            var gitlabButtonText = "Continue with GitLab";
+            var googleButtonText = "Continue with Google";
 
             // then
             await NotInLoggedState(async () =>
