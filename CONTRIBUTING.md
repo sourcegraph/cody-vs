@@ -48,8 +48,23 @@ To get started quickly, follow these steps:
 5. Open the `cody` repository in VS Code
 6. After you have set the breakpoints, open the debug panel from selecting `View > Run`
 7. In the drop down menu next to `RUN AND DEBUG`, select `Launch Agent port 3113` to start the debugger for Agent
-8. To enable `Visual Studio` listening to the `Agent` running on Port 3113, set CODY_VS_DEV_PORT with `setx CODY_VS_DEV_PORT 3113`
+8. To enable `Visual Studio` listening to the `Agent` running on Port 3113, open `src/CodyDevConfig.json` and set `RemoteAgentPort` property to `3113`
 9. After the `Agent` is built and launched, start the debugger on the `Visual Studio` side following the steps above
+
+### Developer configuration file
+The Cody for Visual Studio project includes a configuration file that allows developers to customize  behavior of the extension during development. Features such as tracing, agents verbose logs, debug mode can be activated using this configuration. File is located in the root directory of the solution and is named `CodyDevConfig.json`. During release process the file is removed from extension build which disables all developer settings. 
+The developer configuration can be applied even for the production version of the extension. To do this you must add `CODY_VS_DEV_CONFIG` environment variable containing the path to the configuration file. The configuration file contains the following properties:
+- `AgentDebug`: enables debug messages from agent,
+- `AgentVerboseDebug`: enables detailed debug messages from agent,
+- `AllowNodeDebug`: starts node instance with debug mode,
+- `AgentDirectory`: starts agent from the specified directory containing agent files,
+- `RemoteAgentPort`: attach extension to the agent running on the specified port,
+- `Trace`: enables trace messages from the extension,
+- `TraceFile`: saves trace messages to the specified file,
+- `TraceLogioHostname`: sets Logio hostname,
+- `TraceLogioPort`: sets Logio port,
+- `ShowCodyAgentOutput`: shows agent output in the additional output window,
+- `ShowCodyNotificationsOutput`: shows agents notifications in the additional output window
 
 ### Running VS Integration Tests + Playwright
 
@@ -73,7 +88,7 @@ This project uses different runtimes for various components:
 - **Usage**: Used for build and run agent only
 - **Note**: Not required for `Visual Studio` functionality
 
-Please ensure you have the appropriate runtimes installed for the components you intend to work with.                  |
+Please ensure you have the appropriate runtimes installed for the components you intend to work with.
 
 ## Access Token
 

@@ -1,11 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Cody.Core.Common;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
-
-#pragma warning disable VSTHRD010
 
 namespace Cody.VisualStudio.Inf
 {
@@ -65,10 +64,8 @@ namespace Cody.VisualStudio.Inf
         {
             Log(message, "Error", callerName);
 
-#if DEBUG
-            if (_pane != null && _name == DefaultCody)
+            if (Configuration.IsDebug && _pane != null && _name == DefaultCody)
                 _pane.Activate();
-#endif
         }
 
         private static int? _processId;

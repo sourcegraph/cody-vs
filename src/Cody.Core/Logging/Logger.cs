@@ -1,3 +1,4 @@
+using Cody.Core.Common;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -27,24 +28,26 @@ namespace Cody.Core.Logging
 
         public void Debug(string message, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = null)
         {
-#if DEBUG
-            var callerTypeName = Path.GetFileNameWithoutExtension(callerFilePath);
-            callerName = $"{callerTypeName}.{callerName}";
-            var customMessage = FormatCallerName(message, callerName);
+            if (Configuration.IsDebug)
+            {
+                var callerTypeName = Path.GetFileNameWithoutExtension(callerFilePath);
+                callerName = $"{callerTypeName}.{callerName}";
+                var customMessage = FormatCallerName(message, callerName);
 
-            // TODO: _fileLogger.Debug(customMessage);
-            DebugWrite(customMessage);
-            _outputWindowPane?.Debug(message, callerName);
-            _testLogger?.WriteLog(message, "DEBUG", callerName);
-#endif
+                // TODO: _fileLogger.Debug(customMessage);
+                DebugWrite(customMessage);
+                _outputWindowPane?.Debug(message, callerName);
+                _testLogger?.WriteLog(message, "DEBUG", callerName);
+            }
         }
 
         public void Debug(string message, Exception ex, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = null)
         {
-#if DEBUG
-            Debug(message, callerName, callerFilePath);
-            Error(message, ex, callerName);
-#endif
+            if (Configuration.IsDebug)
+            {
+                Debug(message, callerName, callerFilePath);
+                Error(message, ex, callerName);
+            }
         }
 
         public void Warn(string message, [CallerMemberName] string callerName = "")
