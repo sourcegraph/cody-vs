@@ -32,6 +32,7 @@ namespace Cody.Core.Logging
                     options.IsGlobalModeEnabled = true;
                     options.Environment = env;
                     options.Release = "cody-vs@" + version.ToString();
+                    options.AddExceptionFilter(new SentryExceptionFilter());
                 });
             }
         }

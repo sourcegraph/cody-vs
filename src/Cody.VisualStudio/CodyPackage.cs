@@ -23,6 +23,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TaskStatusCenter;
+using Sentry;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -293,6 +294,15 @@ namespace Cody.VisualStudio
                 StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
 
                 Logger.Info("Authenticated.");
+
+                SentrySdk.ConfigureScope(scope =>
+                {
+                    scope.User = new SentryUser
+                    {
+                        Email = e.AuthStatus.PrimaryEmail,
+                        Username = e.AuthStatus.Username,
+                    };
+                });
             }
             else
             {
