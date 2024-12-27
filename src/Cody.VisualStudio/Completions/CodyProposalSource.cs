@@ -237,6 +237,11 @@ namespace Cody.VisualStudio.Completions
 
             }
 
+            if(CodyPackage.TestingSupportService != null && proposalList.Any())
+            {
+                CodyPackage.TestingSupportService.LastDisplayedAutocompleteSuggestion = proposalList.First().Edits.First().ReplacementText;
+            }
+
             var collection = new CodyProposalCollection(proposalList);
             return collection;
         }

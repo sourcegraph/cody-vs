@@ -78,6 +78,7 @@
     </Compile>
     <Compile Include="Services\ProgressService.cs" />
     <Compile Include="Services\SolutionService.cs" />
+    <Compile Include="Services\TestingSupportService.cs" />
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />

@@ -75,6 +75,7 @@ namespace Cody.VisualStudio
         public NotificationHandlers NotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
+        public static TestingSupportService TestingSupportService;
         public IFileService FileService;
         public IVsUIShell VsUIShell;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
@@ -129,6 +130,8 @@ namespace Cody.VisualStudio
             FileService = new FileService(this, Logger);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
+            TestingSupportService = new TestingSupportService(statusCenterService);
+
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
