@@ -23,18 +23,16 @@ namespace Cody.VisualStudio.Completions
 
         private IAgentService agentService;
         private ITextDocument textDocument;
-        private IVsTextView vsTextView;
         private readonly ITextView view;
         private static uint sessionCounter = 0;
 
         private ITextSnapshot trackedSnapshot;
 
-        public CodyProposalSource(ITextDocument textDocument, IVsTextView vsTextView, ITextView view)
+        public CodyProposalSource(ITextDocument textDocument, ITextView view)
         {
             this.textDocument = textDocument;
-            this.vsTextView = vsTextView;
             this.view = view;
-            var currentSnapshot = textDocument.TextBuffer.CurrentSnapshot;
+            trackedSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
         }
 
@@ -116,9 +114,8 @@ namespace Cody.VisualStudio.Completions
                 else foreach (var item in autocomplete.Items) trace.TraceEvent("AutocompliteResult", item);
 
                 var newPosition = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
-                vsTextView.GetLineAndColumn(newPosition, out int newCaretLine, out int newCaretCol);
                 var newText = newPosition.GetContainingLine().GetText();
-                trace.TraceEvent("AfterResponse", "session: {0}, newCaret: {1}:{2} lineText:'{3}'", session, newCaretLine, newCaretCol, newText);
+                trace.TraceEvent("AfterResponse", "session: {0}, newCaret: {1} lineText:'{2}'", session, newPosition.Position, newText);
 
                 var collection = CreateProposals(autocomplete, caret, completionState, session);
                 if (cancel.IsCancellationRequested) trace.TraceEvent("AutocompliteCanceled2", "session: {0}", session);

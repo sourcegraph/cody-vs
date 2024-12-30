@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
@@ -97,11 +96,10 @@ namespace Cody.VisualStudio.Completions
             if (wpfTextView != null && view.Roles.Contains("DOCUMENT") && view.Roles.Contains("EDITABLE"))
             {
                 textDocumentFactoryService.TryGetTextDocument(view.TextDataModel.DocumentBuffer, out var document);
-                var vsTextView = editorAdaptersFactoryService.GetViewAdapter(view);
-                if (document != null && vsTextView != null)
+                if (document != null)
                 {
                     trace.TraceEvent("CreateProposalSource", "Created for '{0}'", document.FilePath);
-                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, vsTextView, view));
+                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, view));
                 }
             }
 

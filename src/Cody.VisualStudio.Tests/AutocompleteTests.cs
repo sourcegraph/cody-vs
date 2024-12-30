@@ -48,7 +48,7 @@ namespace Cody.VisualStudio.Tests
             Dte.ActiveDocument.Close(vsSaveChanges.vsSaveChangesNo);
         }
 
-        (int Line, int Column)? FindPositionAfterText(string document, string textToFind)
+        private (int Line, int Column)? FindPositionAfterText(string document, string textToFind)
         {
             var lines = document.Split(new[] { "\r\n" }, StringSplitOptions.None);
             var line = Array.FindIndex(lines, x => x.StartsWith(textToFind));
