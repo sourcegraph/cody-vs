@@ -70,6 +70,14 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("ProposalDisplayed", completionId);
                 CodyPackage.AgentService.CompletionSuggested(completionItem);
             }
+
+            if(CodyPackage.TestingSupportService != null)
+            {
+                CodyPackage.TestingSupportService.SetAutocompleteSuggestion(
+                    e.OriginalProposal.ProposalId,
+                    e.OriginalProposal.ProposalId.StartsWith(ProposalIdPrefix),
+                    e.OriginalProposal.Edits.First().ReplacementText);
+            }
         }
 
         private void OnSuggestionAccepted(object sender, SuggestionAcceptedEventArgs e)
