@@ -15,11 +15,11 @@ namespace Cody.VisualStudio.Tests
         public AutocompleteTests(ITestOutputHelper output) : base(output) { }
 
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, ReuseInstance = false)]
         public async Task Autocomplete_Is_Working()
         {
             await GetPackageAsync();
-
+            await WaitForChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
             await WaitForAsync(() => CodyPackage.TestingSupportService.InProgressBackgroundTasksCount == 0);
@@ -52,7 +52,7 @@ namespace Cody.VisualStudio.Tests
         public async Task Explicit_Invocation_Is_Working()
         {
             await GetPackageAsync();
-
+            await WaitForChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
             await WaitForAsync(() => CodyPackage.TestingSupportService.InProgressBackgroundTasksCount == 0);
