@@ -49,7 +49,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutocompleteTests.cs" />
     <Compile Include="ChatNotLoggedStateTests.cs" />
     <Compile Include="ChatLoggedBasicTests.cs" />
     <Compile Include="ScreenshotUtil.cs" />
