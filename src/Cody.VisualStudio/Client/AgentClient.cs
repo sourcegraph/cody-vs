@@ -76,7 +76,10 @@ namespace Cody.VisualStudio.Client
 
         private void OnDisconnected(object sender, JsonRpcDisconnectedEventArgs e)
         {
-            log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
+            if(e.Exception != null)
+                log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
+            else
+                log.Info($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
         }
 
         private void CreateAgentService()

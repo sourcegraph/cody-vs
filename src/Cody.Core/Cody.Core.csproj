@@ -91,7 +91,6 @@
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ISentryLog.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
-    <Compile Include="Logging\SentryExceptionFilter.cs" />
     <Compile Include="Logging\SentryLog.cs" />
     <Compile Include="Trace\FileTraceListener.cs" />
     <Compile Include="Trace\LogioTraceListener.cs" />
