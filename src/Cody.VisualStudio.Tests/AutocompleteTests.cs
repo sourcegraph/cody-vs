@@ -2,8 +2,6 @@ using Cody.VisualStudio.Services;
 using EnvDTE;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WindowsInput;
 using WindowsInput.Native;
@@ -21,7 +19,7 @@ namespace Cody.VisualStudio.Tests
         public async Task Autocomplete_Is_Working()
         {
             await GetPackageAsync();
-            await WaitForChat();
+
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
             await WaitForAsync(() => CodyPackage.TestingSupportService.InProgressBackgroundTasksCount == 0);
@@ -54,7 +52,7 @@ namespace Cody.VisualStudio.Tests
         public async Task Explicit_Invocation_Is_Working()
         {
             await GetPackageAsync();
-            await WaitForChat();
+
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
             await WaitForAsync(() => CodyPackage.TestingSupportService.InProgressBackgroundTasksCount == 0);
