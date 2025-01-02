@@ -1,5 +1,6 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -22,6 +23,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Connected.CredentialStorage;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TaskStatusCenter;
+using Sentry;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -31,9 +33,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Task = System.Threading.Tasks.Task;
 
@@ -86,11 +86,12 @@ namespace Cody.VisualStudio
             try
             {
                 InitializeErrorHandling();
+                Configuration.AddFromJsonFile("CodyDevConfig.json");
+                Configuration.AddFromEnviromentVariableJsonFile("CODY_VS_DEV_CONFIG");
 
-                // When initialized asynchronously, the current thread may be a background thread at this point.
-                // Do any initialization that requires the UI thread after switching to the UI thread.
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
+                InitializeTrace();
                 InitializeServices();
                 await InitOleMenu();
 
@@ -105,13 +106,10 @@ namespace Cody.VisualStudio
 
         private void InitializeServices()
         {
-            TraceManager.Listeners.Add(new FileTraceListener(@"c:\tmp\cody.log"));
-            TraceManager.Enabled = true;
-
             var loggerFactory = new LoggerFactory();
-            AgentLogger = loggerFactory.Create(WindowPaneLogger.CodyAgent);
-            AgentNotificationsLogger = loggerFactory.Create(WindowPaneLogger.CodyNotifications);
-            Logger = loggerFactory.Create();
+            AgentLogger = loggerFactory.Create(Configuration.ShowCodyAgentOutput ? WindowPaneLogger.CodyAgent : null);
+            AgentNotificationsLogger = loggerFactory.Create(Configuration.ShowCodyNotificationsOutput ? WindowPaneLogger.CodyNotifications : null);
+            Logger = loggerFactory.Create(WindowPaneLogger.DefaultCody);
 
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution, Logger);
@@ -149,6 +147,20 @@ namespace Cody.VisualStudio
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
+        }
+
+        private static void InitializeTrace()
+        {
+            if (Configuration.Trace)
+            {
+                if (!string.IsNullOrEmpty(Configuration.TraceFile))
+                    TraceManager.Listeners.Add(new FileTraceListener(Configuration.TraceFile));
+
+                if (!string.IsNullOrEmpty(Configuration.TraceLogioHostname) && Configuration.TraceLogioPort.HasValue)
+                    TraceManager.Listeners.Add(new LogioTraceListener(Configuration.TraceLogioHostname, Configuration.TraceLogioPort.Value));
+
+                TraceManager.Enabled = true;
+            }
         }
 
         private void HandleOnOptionsPageShowRequest(object sender, EventArgs e)
@@ -251,23 +263,20 @@ namespace Cody.VisualStudio
         {
             try
             {
-                var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
+                var agentDir = Configuration.AgentDirectory ?? Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
 
-                var devPort = Environment.GetEnvironmentVariable("CODY_VS_DEV_PORT", EnvironmentVariableTarget.User);
-                var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
-
-                if (devPort != null)
-                    Logger.Debug($"Connecting to the agent using port:{devPort}");
+                if (Configuration.RemoteAgentPort.HasValue)
+                    Logger.Debug($"Connecting to the agent using port:{Configuration.RemoteAgentPort}");
 
                 var options = new AgentClientOptions
                 {
                     CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
-                    ConnectToRemoteAgent = devPort != null,
-                    RemoteAgentPort = portNumber,
+                    ConnectToRemoteAgent = Configuration.RemoteAgentPort.HasValue,
+                    RemoteAgentPort = Configuration.RemoteAgentPort ?? 0,
                     AcceptNonTrustedCertificates = UserSettingsService.AcceptNonTrustedCert,
-                    Debug = true
+                    Debug = Configuration.AllowNodeDebug
                 };
 
                 AgentClient = new AgentClient(options, Logger, AgentLogger);
@@ -288,6 +297,15 @@ namespace Cody.VisualStudio
                 StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
 
                 Logger.Info("Authenticated.");
+
+                SentrySdk.ConfigureScope(scope =>
+                {
+                    scope.User = new SentryUser
+                    {
+                        Email = e.AuthStatus.PrimaryEmail,
+                        Username = e.AuthStatus.Username,
+                    };
+                });
             }
             else
             {

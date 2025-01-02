@@ -22,7 +22,6 @@ $nodeArmUrl = "https://github.com/sourcegraph/node-binaries/raw/main/v20.12.2/no
 $exclude = @(
     "src",
     "scripts",
-    "*.map",
 	"noxide.linux*.node",
 	"noxide.darwin*.node",
     "tree-sitter-bash.wasm",

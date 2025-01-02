@@ -1,3 +1,4 @@
+using Cody.Core.Common;
 using Sentry;
 using System;
 using System.Diagnostics;
@@ -19,8 +20,7 @@ namespace Cody.Core.Logging
 
         public static void Initialize()
         {
-#if !DEBUG
-            if (!Debugger.IsAttached)
+            if (!Configuration.IsDebug && !Debugger.IsAttached)
             {
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 string env = "dev";
@@ -32,9 +32,9 @@ namespace Cody.Core.Logging
                     options.IsGlobalModeEnabled = true;
                     options.Environment = env;
                     options.Release = "cody-vs@" + version.ToString();
+                    options.AddExceptionFilter(new SentryExceptionFilter());
                 });
             }
-#endif
         }
     }
 }

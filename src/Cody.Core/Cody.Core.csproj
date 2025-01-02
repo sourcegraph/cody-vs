@@ -92,6 +92,8 @@
     <Compile Include="Agent\SetHtmlEvent.cs" />
     <Compile Include="Agent\WebviewMessageHandler.cs" />
     <Compile Include="Common\StringExtensions.cs" />
+    <Compile Include="Common\Configuration.cs" />
+    <Compile Include="Common\Configuration.Setup.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Infrastructure\ConfigurationService.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ISentryLog.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
+    <Compile Include="Logging\SentryExceptionFilter.cs" />
     <Compile Include="Logging\SentryLog.cs" />
     <Compile Include="Trace\FileTraceListener.cs" />
     <Compile Include="Trace\LogioTraceListener.cs" />
