@@ -77,7 +77,7 @@ namespace Cody.VisualStudio.Tests
             finally
             {
                 await RevertToken();
-                await Task.Delay(500);
+                await Task.Delay(1000);
             }
         }
 
