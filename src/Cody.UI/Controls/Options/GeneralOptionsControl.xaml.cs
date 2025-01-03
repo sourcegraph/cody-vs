@@ -16,7 +16,6 @@ namespace Cody.UI.Controls.Options
         {
             // TextBox binding doesn't work when Visual Studio closes Options window
             // This is a workaround to get bindings updated. The second solution is to use NotifyPropertyChange for every TextBox in the Xaml, but current solution is a little more "clean" - everything is clearly visible in a one place.
-            SourcegraphUrlTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
             CustomConfigurationTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
         }
     }

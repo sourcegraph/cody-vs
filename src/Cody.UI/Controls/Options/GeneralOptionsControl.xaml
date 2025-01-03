@@ -24,22 +24,6 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!--Sourcegraph URL-->
-                <Label
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Content="Sourcegraph URL"
-                />
-
-                <TextBox
-                    Name="SourcegraphUrlTextBox"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Width="400"
-                    Height="20"
-                    Text="{Binding SourcegraphUrl, Mode=TwoWay}"
-                    ToolTip="Enter the URL of the Sourcegraph instance. For example, https://sourcegraph.example.com"
-                />
 
                 <!--Custom Cody Configuration-->
                 <StackPanel
@@ -90,7 +74,7 @@
 
 
 
-                
+
             </Grid>
         </GroupBox>
     </Grid>
