@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\.github\workflows\release-preview.yml = ..\.github\workflows\release-preview.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cody.VisualStudio.Completions", "Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj", "{B8BF8006-4347-40B9-8038-BC06472CECBA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +86,14 @@ Global
 		{53B1165F-1A99-4524-B5BB-8A4985C4D161}.Release|Any CPU.Build.0 = Release|Any CPU
 		{53B1165F-1A99-4524-B5BB-8A4985C4D161}.Release|x86.ActiveCfg = Release|Any CPU
 		{53B1165F-1A99-4524-B5BB-8A4985C4D161}.Release|x86.Build.0 = Release|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Debug|x86.Build.0 = Debug|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Release|x86.ActiveCfg = Release|Any CPU
+		{B8BF8006-4347-40B9-8038-BC06472CECBA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
