@@ -40,6 +40,7 @@ namespace Cody.Core.Logging
                     {
                         if (se.Exception?.Source?.StartsWith(CodyAssemblyPrefix) ?? false) return se;
                         if (se.Exception?.InnerException?.Source?.StartsWith(CodyAssemblyPrefix) ?? false) return se;
+                        if (se.Message != null) return se;
                         if (se.SentryExceptions == null) return se;
 
                         foreach(var ex in se.SentryExceptions)
