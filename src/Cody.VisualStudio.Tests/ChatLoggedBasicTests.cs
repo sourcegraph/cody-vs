@@ -29,6 +29,7 @@ namespace Cody.VisualStudio.Tests
             // given
             CloseSolution();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
+            await Task.Delay(2000);
 
             // when
             var tags = await GetChatContextTags();
