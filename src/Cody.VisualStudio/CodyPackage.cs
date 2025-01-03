@@ -96,6 +96,7 @@ namespace Cody.VisualStudio
 
                 InitializeAgent();
 
+                ReportSentryVsVersion();
             }
             catch (Exception ex)
             {
@@ -144,6 +145,15 @@ namespace Cody.VisualStudio
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
+        }
+
+        private void ReportSentryVsVersion()
+        {
+            SentrySdk.ConfigureScope(scope =>
+            {
+                scope.SetTag("vs", VsVersionService.DisplayVersion);
+                SentrySdk.CaptureMessage("Initialized");
+            });
         }
 
         private static void InitializeTrace()
