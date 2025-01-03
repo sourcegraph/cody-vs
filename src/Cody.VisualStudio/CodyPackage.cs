@@ -128,7 +128,7 @@ namespace Cody.VisualStudio
             FileService = new FileService(this, Logger);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
-            TestingSupportService = new TestingSupportService(statusCenterService);
+            TestingSupportService = null; // new TestingSupportService(statusCenterService);
 
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
