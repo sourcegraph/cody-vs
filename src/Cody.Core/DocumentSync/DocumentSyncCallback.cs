@@ -106,7 +106,6 @@ namespace Cody.Core.DocumentSync
         {
             trace.TraceEvent("DidFocus", "{0}", fullPath);
             agentService.DidFocus(new CodyFilePath { Uri = ToUri(fullPath) });
-
         }
 
         public void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection)
