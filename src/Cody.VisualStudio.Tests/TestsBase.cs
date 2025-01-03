@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
 using System.Diagnostics;
 using Thread = System.Threading.Thread;
+using Microsoft.VisualStudio.Shell.Events;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -79,12 +80,15 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task OpenSolution(string path)
         {
+            var tcs = new TaskCompletionSource<bool>();
+            EventHandler handler = (sender, e) => tcs.TrySetResult(true);
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += handler;
 
             WriteLog($"Opening solution '{path}' ...");
             Dte.Solution.Open(path);
 
-            await Task.Delay(TimeSpan.FromSeconds(5));
-            WriteLog("Delay after solution open stopped.");
+            await tcs.Task;
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= handler;
         }
 
         protected void CloseSolution() => Dte.Solution.Close();
@@ -160,13 +164,13 @@ namespace Cody.VisualStudio.Tests
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
-                WriteLog("Chat not loaded ...");
+                WriteLog("Waiting ...");
 
                 var nowTime = DateTime.Now;
                 var currentSpan = nowTime - startTime;
                 if (currentSpan >= timeout)
                 {
-                    var message = $"Chat timeout! It's loading for more than {currentSpan.TotalSeconds} s.";
+                    var message = $"Timeout! It's waiting for more than {currentSpan.TotalSeconds} s.";
                     WriteLog(message);
                     throw new Exception(message);
                 }

@@ -1,6 +1,7 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
+using Cody.Core.Trace;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
@@ -11,6 +12,8 @@ namespace Cody.VisualStudio.Client
 {
     public class AgentClient : IAgentProxy
     {
+        private static TraceLogger trace = new TraceLogger(nameof(AgentClient));
+
         private AgentClientOptions options;
         private ILog log;
         private ILog agentLog;
@@ -40,8 +43,7 @@ namespace Cody.VisualStudio.Client
 
             connector.Connect(options);
 
-            var jsonMessageFormatter = new AgentJsonMessageFormatter(agentLog);
-            jsonMessageFormatter.TraceSentMessages = options.Debug;
+            var jsonMessageFormatter = new JsonMessageFormatter();
             jsonMessageFormatter.JsonSerializer.ContractResolver = new DefaultContractResolver()
             {
                 NamingStrategy = new CamelCaseNamingStrategy()
@@ -49,7 +51,7 @@ namespace Cody.VisualStudio.Client
             jsonMessageFormatter.JsonSerializer.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
             var handler = new HeaderDelimitedMessageHandler(connector.SendingStream, connector.ReceivingStream, jsonMessageFormatter);
 
-            jsonRpc = new JsonRpc(handler);
+            jsonRpc = new TraceJsonRpc(handler);
             jsonRpc.Disconnected += OnDisconnected;
 
             foreach (var target in options.CallbackHandlers)
@@ -93,7 +95,8 @@ namespace Cody.VisualStudio.Client
 
         private void OnErrorReceived(object sender, string error)
         {
-            agentLog.Debug(error);
+            //agentLog.Debug(error);
+            trace.TraceEvent("AgentErrorOutput", error);
         }
 
         private IAgentConnector CreateConnector()

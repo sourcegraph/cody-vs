@@ -10,6 +10,7 @@ namespace Cody.Core.Settings
         string ServerEndpoint { get; set; }
         string CustomConfiguration { get; set; }
         bool AcceptNonTrustedCert { get; set; }
+        bool AutomaticallyTriggerCompletions { get; set; }
 
 
         event EventHandler AuthorizationDetailsChanged;
