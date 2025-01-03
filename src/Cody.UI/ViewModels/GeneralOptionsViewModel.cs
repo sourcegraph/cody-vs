@@ -52,19 +52,6 @@ namespace Cody.UI.ViewModels
             }
         }
 
-        private string _sourcegraphUrl;
-        public string SourcegraphUrl
-        {
-            get => _sourcegraphUrl;
-            set
-            {
-                if (SetProperty(ref _sourcegraphUrl, value))
-                {
-                    _logger.Debug($"Sourcegraph Url set:{SourcegraphUrl}");
-                }
-            }
-        }
-
         private bool _acceptNonTrustedCert;
         public bool AcceptNonTrustedCert
         {

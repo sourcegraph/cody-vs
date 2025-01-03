@@ -58,11 +58,9 @@ namespace Cody.VisualStudio.Options
             _logger.Debug($"Settings page activated.");
 
             var customConfiguration = _settingsService.CustomConfiguration;
-            var sourcegraphUrl = _settingsService.ServerEndpoint;
             var acceptNonTrustedCert = _settingsService.AcceptNonTrustedCert;
             var automaticallyTriggerCompletions = _settingsService.AutomaticallyTriggerCompletions;
 
-            _generalOptionsViewModel.SourcegraphUrl = sourcegraphUrl;
             _generalOptionsViewModel.AcceptNonTrustedCert = acceptNonTrustedCert;
             _generalOptionsViewModel.CustomConfiguration = customConfiguration;
             _generalOptionsViewModel.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
@@ -77,12 +75,10 @@ namespace Cody.VisualStudio.Options
             _logger.Debug($"{args.ApplyBehavior}");
 
             var customConfiguration = _generalOptionsViewModel.CustomConfiguration;
-            var sourcegraphUrl = _generalOptionsViewModel.SourcegraphUrl;
             var acceptNonTrustedCert = _generalOptionsViewModel.AcceptNonTrustedCert;
             var automaticallyTriggerCompletions = _generalOptionsViewModel.AutomaticallyTriggerCompletions;
 
             _settingsService.CustomConfiguration = customConfiguration;
-            _settingsService.ServerEndpoint = sourcegraphUrl;
             _settingsService.AcceptNonTrustedCert = acceptNonTrustedCert;
             _settingsService.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
         }
@@ -104,7 +100,6 @@ namespace Cody.VisualStudio.Options
         public override void ResetSettings()
         {
             _settingsService.CustomConfiguration = string.Empty;
-            _settingsService.ServerEndpoint = string.Empty;
             _settingsService.AcceptNonTrustedCert = false;
             _settingsService.AutomaticallyTriggerCompletions = true;
 
