@@ -27,6 +27,7 @@ namespace Cody.VisualStudio.Tests
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
+            CloseSolution();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
