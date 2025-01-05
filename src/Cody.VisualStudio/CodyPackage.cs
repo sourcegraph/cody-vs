@@ -38,7 +38,6 @@ using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.TaskStatusCenter;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using System.Net;
-using Cody.VisualStudio.Completions;
 
 namespace Cody.VisualStudio
 {
@@ -105,7 +104,8 @@ namespace Cody.VisualStudio
             try
             {
                 InitializeErrorHandling();
-                //SimpleLog.SetLogFile(@"c:\tmp\cody.log");
+                var loggingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                SimpleLog.SetLogFile(Path.Combine(loggingPath, "completions.log"));
                 SimpleLog.Info("CodyPackage", "Starting extension");
                 // When initialized asynchronously, the current thread may be a background thread at this point.
                 // Do any initialization that requires the UI thread after switching to the UI thread.

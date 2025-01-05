@@ -46,11 +46,22 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Completions\CodyProposalCollection.cs" />
+    <Compile Include="Completions\CodyProposalManager.cs" />
+    <Compile Include="Completions\CodyProposalManagerProvider.cs" />
+    <Compile Include="Completions\CodyProposalSource.cs" />
+    <Compile Include="Completions\CodyProposalSourceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Interop">
+      <Version>17.0.0-previews-4-31709-430</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Language">
       <Version>17.7.188</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.SDK">
+      <Version>17.0.0-previews-4-31709-430</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading">
       <Version>17.7.30</Version>
@@ -58,6 +69,16 @@
     <PackageReference Include="StreamJsonRpc">
       <Version>2.16.36</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
+      <Project>{9FF2CC40-78E9-46C8-B2EF-30A1F1BE82F2}</Project>
+      <Name>Cody.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cody.VisualStudio\Cody.VisualStudio.csproj">
+      <Project>{3bb34f98-f069-4a38-bc4d-cf407d59b863}</Project>
+      <Name>Cody.VisualStudio</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

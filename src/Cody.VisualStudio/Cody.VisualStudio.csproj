@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
@@ -54,11 +54,6 @@
     <Compile Include="Client\NameTransformer.cs" />
     <Compile Include="Client\RemoteAgentConnector.cs" />
     <Compile Include="CodyToolWindow.cs" />
-    <Compile Include="Completions\CodyProposalCollection.cs" />
-    <Compile Include="Completions\CodyProposalManager.cs" />
-    <Compile Include="Completions\CodyProposalManagerProvider.cs" />
-    <Compile Include="Completions\CodyProposalSource.cs" />
-    <Compile Include="Completions\CodyProposalSourceProvider.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
     <Compile Include="Infrastructure\WindowPaneLogger.cs" />
     <Compile Include="Infrastructure\VsConstants.cs" />
@@ -120,9 +115,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Language">
-      <Version>17.7.188</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.0-previews-4-31709-430" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.6.2164">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -135,7 +127,42 @@
     </VSCTCompile>
     <Content Include="Resources\CodyToolWindowCommand.png" />
   </ItemGroup>
-  <ItemGroup>
+
+  <!--Completions dll-->
+
+
+  <Target Name="Completions" BeforeTargets="GetVsixSourceItems">
+      <MSBuild Projects="..\Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj"
+               Properties="Configuration=$(Configuration)"
+               Targets="Build" />
+  </Target>
+
+    <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
+      <ItemGroup>
+          <VSIXSourceItem Include="..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll">
+              <VSIXSubPath>.</VSIXSubPath>
+          </VSIXSourceItem>
+      </ItemGroup>
+  </Target>
+
+
+    <!--<ItemGroup>
+      <Content Include="..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll">
+          <Link>Cody.VisualStudio.Completions.dll</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <IncludeInVSIX>true</IncludeInVSIX>
+      </Content>
+  </ItemGroup>-->
+
+  <!--<Target Name="Completions" BeforeTargets="Compile">
+      <MSBuild Projects="..\Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj"
+               Properties="Configuration=$(Configuration)"
+               Targets="Build" />
+  </Target>-->
+
+  <!--Completions dll end -->
+
+    <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
       <Project>{9FF2CC40-78E9-46C8-B2EF-30A1F1BE82F2}</Project>
       <Name>Cody.Core</Name>
