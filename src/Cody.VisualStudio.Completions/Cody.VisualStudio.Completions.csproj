@@ -54,20 +54,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Interop">
-      <Version>17.0.0-previews-4-31709-430</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Language">
-      <Version>17.7.188</Version>
+      <Version>17.11.260</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK">
       <Version>17.0.0-previews-4-31709-430</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading">
-      <Version>17.7.30</Version>
-    </PackageReference>
-    <PackageReference Include="StreamJsonRpc">
-      <Version>2.16.36</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
