@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -163,6 +162,7 @@ namespace Cody.VisualStudio.Completions
             if (trackedSnapshot == null || trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
             {
                 trace.TraceEvent("TrackinSnapshotFailed");
+                return;
             }
 
             caret = caret.TranslateTo(trackedSnapshot);

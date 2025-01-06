@@ -134,9 +134,10 @@ namespace Cody.VisualStudio.Services
         {
             DocumentPosition firstVisiblePosition = null, lastVisiblePosition = null;
 
-            if (textView != null)
+            if (textView != null && ThreadHelper.CheckAccess())
             {
                 var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                if (wpfTextView == null) return null;
                 snapshot = snapshot ?? wpfTextView.TextSnapshot;
                 var lines = wpfTextView.TextViewLines;
 
@@ -158,7 +159,7 @@ namespace Cody.VisualStudio.Services
         {
             bool swap = false;
             DocumentPosition start = null, end = null;
-            if (textView != null)
+            if (textView != null && ThreadHelper.CheckAccess())
             {
                 var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
                 if (wpfTextView != null)

@@ -81,8 +81,6 @@ namespace Cody.Core.DocumentSync
             };
 
             agentService.DidChange(docState);
-            //var result = agentService.GetWorkspaceDocuments(new GetDocumentsParams { Uris = new[] { fullPath.ToUri() } }).Result;
-            //trace.TraceEvent("AfterDidChange", result.Documents.First().Content);
         }
 
         public void OnClosed(string fullPath)
