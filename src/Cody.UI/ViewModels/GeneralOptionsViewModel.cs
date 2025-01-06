@@ -1,7 +1,7 @@
-using System;
-using System.Diagnostics;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
+using System;
+using System.Diagnostics;
 
 namespace Cody.UI.ViewModels
 {
@@ -61,6 +61,19 @@ namespace Cody.UI.ViewModels
                 if (SetProperty(ref _acceptNonTrustedCert, value))
                 {
                     _logger.Debug($"AcceptNonTrustedCert set:{AcceptNonTrustedCert}");
+                }
+            }
+        }
+
+        private bool _automaticallyTriggerCompletions;
+        public bool AutomaticallyTriggerCompletions
+        {
+            get => _automaticallyTriggerCompletions;
+            set
+            {
+                if (SetProperty(ref _automaticallyTriggerCompletions, value))
+                {
+                    _logger.Debug($"AutomaticallyTriggerCompletions set:{value}");
                 }
             }
         }

@@ -1,6 +1,3 @@
-using System;
-using System.ComponentModel;
-using System.Windows;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.UI.Controls.Options;
@@ -8,6 +5,9 @@ using Cody.UI.ViewModels;
 using Cody.VisualStudio.Inf;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.ComponentModel;
+using System.Windows;
 
 namespace Cody.VisualStudio.Options
 {
@@ -27,7 +27,7 @@ namespace Cody.VisualStudio.Options
             if (_codyPackage != null)
             {
                 _logger = _codyPackage.Logger;
-                _settingsService = _codyPackage.UserSettingsService;
+                _settingsService = CodyPackage.UserSettingsService;
 
                 _logger.Debug("Initialized.");
             }
@@ -59,9 +59,12 @@ namespace Cody.VisualStudio.Options
 
             var customConfiguration = _settingsService.CustomConfiguration;
             var acceptNonTrustedCert = _settingsService.AcceptNonTrustedCert;
+            var automaticallyTriggerCompletions = _settingsService.AutomaticallyTriggerCompletions;
 
             _generalOptionsViewModel.AcceptNonTrustedCert = acceptNonTrustedCert;
             _generalOptionsViewModel.CustomConfiguration = customConfiguration;
+            _generalOptionsViewModel.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
+
 
             _logger.Debug($"Is canceled:{e.Cancel}");
 
@@ -73,9 +76,11 @@ namespace Cody.VisualStudio.Options
 
             var customConfiguration = _generalOptionsViewModel.CustomConfiguration;
             var acceptNonTrustedCert = _generalOptionsViewModel.AcceptNonTrustedCert;
+            var automaticallyTriggerCompletions = _generalOptionsViewModel.AutomaticallyTriggerCompletions;
 
             _settingsService.CustomConfiguration = customConfiguration;
             _settingsService.AcceptNonTrustedCert = acceptNonTrustedCert;
+            _settingsService.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
         }
 
         protected override void OnDeactivate(CancelEventArgs e)
@@ -96,6 +101,7 @@ namespace Cody.VisualStudio.Options
         {
             _settingsService.CustomConfiguration = string.Empty;
             _settingsService.AcceptNonTrustedCert = false;
+            _settingsService.AutomaticallyTriggerCompletions = true;
 
             base.ResetSettings();
         }
