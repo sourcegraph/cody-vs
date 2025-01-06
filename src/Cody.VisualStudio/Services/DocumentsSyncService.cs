@@ -137,6 +137,7 @@ namespace Cody.VisualStudio.Services
             if (textView != null && ThreadHelper.CheckAccess())
             {
                 var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                if (wpfTextView == null) return null;
                 snapshot = snapshot ?? wpfTextView.TextSnapshot;
                 var lines = wpfTextView.TextViewLines;
 

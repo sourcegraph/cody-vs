@@ -25,7 +25,6 @@ namespace Cody.VisualStudio.Completions
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSourceProvider));
 
         private readonly ITextDocumentFactoryService textDocumentFactoryService;
-        private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
         private readonly SuggestionServiceBase suggestionServiceBase;
 
         public const string ProposalIdPrefix = "cody";
@@ -35,11 +34,9 @@ namespace Cody.VisualStudio.Completions
         [ImportingConstructor]
         public CodyProposalSourceProvider(
             ITextDocumentFactoryService textDocumentFactoryService,
-            IVsEditorAdaptersFactoryService editorAdaptersFactoryService,
             SuggestionServiceBase suggestionServiceBase)
         {
             this.textDocumentFactoryService = textDocumentFactoryService;
-            this.editorAdaptersFactoryService = editorAdaptersFactoryService;
             this.suggestionServiceBase = suggestionServiceBase;
 
             //suggestionServiceBase.ProposalRejected += OnProposalRejected;
@@ -93,12 +90,6 @@ namespace Cody.VisualStudio.Completions
 
         public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
         {
-            //var list = Input.ToArray();
-            //foreach (var zm in Input)
-            //{
-            //    var pom = zm.GetType().Assembly.Location;
-            //}
-
             trace.TraceEvent("Enter");
             IWpfTextView wpfTextView = view as IWpfTextView;
             if (wpfTextView != null && view.Roles.Contains("DOCUMENT") && view.Roles.Contains("EDITABLE"))

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CustomConfigurationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringExtensionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
