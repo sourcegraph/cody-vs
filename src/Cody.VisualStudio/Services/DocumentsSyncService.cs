@@ -60,9 +60,9 @@ namespace Cody.VisualStudio.Services
                         var content = rdt.GetRunningDocumentContents(docCookie);
                         var textView = GetTextView(frame);
                         var visibleRange = GetVisibleRange(textView);
-                        var docRange = GetDocumentSelection(textView);
+                        var selection = GetDocumentSelection(textView);
 
-                        documentActions.OnOpened(path, content, visibleRange, docRange);
+                        documentActions.OnOpened(path, content, visibleRange, selection);
                     }
                     catch (Exception ex)
                     {

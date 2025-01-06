@@ -124,12 +124,10 @@ namespace Cody.Core.DocumentSync
                 };
             }
 
-            var docState = new ProtocolTextDocument
+            Range selRange = null;
+            if(selection != null)
             {
-                Uri = fullPath.ToUri(),
-                Content = content.ConvertLineBreaks("\n"),
-                VisibleRange = vRange,
-                Selection = new Range
+                selRange = new Range
                 {
                     Start = new Position
                     {
@@ -141,7 +139,15 @@ namespace Cody.Core.DocumentSync
                         Line = selection.End.Line,
                         Character = selection.End.Column
                     }
-                }
+                };
+            }
+
+            var docState = new ProtocolTextDocument
+            {
+                Uri = fullPath.ToUri(),
+                Content = content.ConvertLineBreaks("\n"),
+                VisibleRange = vRange,
+                Selection = selRange
             };
 
             agentService.DidOpen(docState);
