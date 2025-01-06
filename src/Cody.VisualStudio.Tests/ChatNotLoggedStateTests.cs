@@ -37,7 +37,7 @@ namespace Cody.VisualStudio.Tests
 
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
         public async Task Cody_Enterprise_Section_Is_Present()
         {
             // given

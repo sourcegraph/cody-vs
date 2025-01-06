@@ -104,47 +104,60 @@ namespace Cody.Core.DocumentSync
 
         public void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection)
         {
-            trace.TraceEvent("DidOpen", "sel:{0}, vr:{1}, path:{2}", selection, visibleRange, fullPath);
-
-            Range vRange = null;
-            if (visibleRange != null)
+            try
             {
-                vRange = new Range
-                {
-                    Start = new Position
-                    {
-                        Line = visibleRange.Start.Line,
-                        Character = visibleRange.Start.Column
-                    },
-                    End = new Position
-                    {
-                        Line = visibleRange.End.Line,
-                        Character = visibleRange.End.Column
-                    }
-                };
-            }
+                trace.TraceEvent("DidOpen", "sel:{0}, vr:{1}, path:{2}", selection, visibleRange, fullPath);
 
-            var docState = new ProtocolTextDocument
-            {
-                Uri = fullPath.ToUri(),
-                Content = content.ConvertLineBreaks("\n"),
-                VisibleRange = vRange,
-                Selection = new Range
+                Range vRange = null;
+                if (visibleRange != null)
                 {
-                    Start = new Position
+                    vRange = new Range
                     {
-                        Line = selection.Start.Line,
-                        Character = selection.Start.Column
-                    },
-                    End = new Position
-                    {
-                        Line = selection.End.Line,
-                        Character = selection.End.Column
-                    }
+                        Start = new Position
+                        {
+                            Line = visibleRange.Start.Line,
+                            Character = visibleRange.Start.Column
+                        },
+                        End = new Position
+                        {
+                            Line = visibleRange.End.Line,
+                            Character = visibleRange.End.Column
+                        }
+                    };
                 }
-            };
 
-            agentService.DidOpen(docState);
+                Range selRange = null;
+                if (selection != null)
+                {
+                    selRange = new Range
+                    {
+                        Start = new Position
+                        {
+                            Line = selection.Start.Line,
+                            Character = selection.Start.Column
+                        },
+                        End = new Position
+                        {
+                            Line = selection.End.Line,
+                            Character = selection.End.Column
+                        }
+                    };
+                }
+
+                var docState = new ProtocolTextDocument
+                {
+                    Uri = fullPath.ToUri(),
+                    Content = content.ConvertLineBreaks("\n"),
+                    VisibleRange = vRange,
+                    Selection = selRange
+                };
+
+                agentService.DidOpen(docState);
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Exception in OnOpened()", ex);
+            }
         }
 
         public void OnSaved(string fullPath)
