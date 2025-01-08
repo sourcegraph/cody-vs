@@ -30,7 +30,6 @@ namespace Cody.VisualStudio.Tests
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
-            await ShowChatTab();
             var tags = await GetChatContextTags();
 
             // then
