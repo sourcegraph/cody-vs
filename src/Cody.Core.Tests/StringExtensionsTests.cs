@@ -17,6 +17,7 @@ namespace Cody.Core.Tests
         [TestCase(@"c:\path\to\file", "file:///c%3A/path/to/file")]
         [TestCase(@"c:/path/to/file", "file:///c%3A/path/to/file")]
         [TestCase(@"c:/file.txt", "file:///c%3A/file.txt")]
+        [TestCase(@"file.txt", "file:///file.txt")]
         public void Can_Convert_Path_To_Valid_Uri(string path, string expectedPath)
         {
             var result = StringExtensions.ToUri(path);
