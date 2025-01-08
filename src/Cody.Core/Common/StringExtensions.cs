@@ -11,7 +11,7 @@ namespace Cody.Core.Common
     {
         public static string ToUri(this string path)
         {
-            var uri = new Uri(path).AbsoluteUri;
+            var uri = new Uri("file:///" + path).AbsoluteUri;
             return Regex.Replace(uri, "(file:///)(\\D+)(:)", m => m.Groups[1].Value + m.Groups[2].Value.ToLower() + "%3A");
         }
 
