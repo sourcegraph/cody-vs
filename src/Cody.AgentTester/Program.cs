@@ -79,6 +79,7 @@ namespace Cody.AgentTester
                     WebviewMessages = "string-encoded",
                     GlobalState = "stateless",
                     Secrets = "stateless",
+                    Shell = Capability.Enabled,
                 },
                 ExtensionConfiguration = new ExtensionConfiguration
                 {
