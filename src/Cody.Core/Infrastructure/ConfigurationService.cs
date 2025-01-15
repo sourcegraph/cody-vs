@@ -43,6 +43,7 @@ namespace Cody.Core.Infrastructure
                     EditWorkspace = Capability.None,
                     ProgressBars = Capability.Enabled,
                     CodeLenses = Capability.None,
+                    Shell = Capability.Enabled,
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.None,

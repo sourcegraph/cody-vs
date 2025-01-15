@@ -9,6 +9,7 @@ namespace Cody.Core.Agent.Protocol
         public Capability? Edit { get; set; }
         public Capability? EditWorkspace { get; set; }
         public Capability? UntitledDocuments { get; set; }
+        public Capability? Shell { get; set; }
         public Capability? ShowDocument { get; set; }
         public Capability? CodeLenses { get; set; }
         public ShowWindowMessageCapability? ShowWindowMessage { get; set; }
