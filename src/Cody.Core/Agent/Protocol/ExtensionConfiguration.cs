@@ -1,12 +1,15 @@
+using System;
 using System.Collections.Generic;
 
 namespace Cody.Core.Agent.Protocol
 {
     public class ExtensionConfiguration
     {
-        public string ServerEndpoint { get; set; }
+        [Obsolete("Setting the property is obsolete. The agent supports changing it using UI, and use secret storage.")]
+        public string ServerEndpoint { get; set; } 
         public string Proxy { get; set; }
-        public string AccessToken { get; set; }
+        [Obsolete("Setting the property is obsolete. The agent supports changing it using UI, and use secret storage.")]
+        public string AccessToken { get; set; } 
 
         public string AnonymousUserID { get; set; }
 

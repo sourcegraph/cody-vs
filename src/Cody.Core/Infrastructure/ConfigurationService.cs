@@ -68,9 +68,7 @@ namespace Cody.Core.Infrastructure
             var config = new ExtensionConfiguration
             {
                 AnonymousUserID = _userSettingsService.AnonymousUserID,
-                ServerEndpoint = _userSettingsService.ServerEndpoint,
                 Proxy = null,
-                AccessToken = _userSettingsService.AccessToken,
                 AutocompleteAdvancedProvider = null,
                 Debug = Configuration.AgentDebug,
                 VerboseDebug = Configuration.AgentVerboseDebug,

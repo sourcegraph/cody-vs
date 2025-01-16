@@ -7,12 +7,9 @@ namespace Cody.Core.Settings
         string AnonymousUserID { get; set; }
 
         string AccessToken { get; set; }
-        string ServerEndpoint { get; set; }
+        string DefaultServerEndpoint { get; }
         string CustomConfiguration { get; set; }
         bool AcceptNonTrustedCert { get; set; }
         bool AutomaticallyTriggerCompletions { get; set; }
-
-
-        event EventHandler AuthorizationDetailsChanged;
     }
 }
