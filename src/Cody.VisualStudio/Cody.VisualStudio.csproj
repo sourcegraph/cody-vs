@@ -55,11 +55,6 @@
     <Compile Include="Client\TraceJsonRpc.cs" />
     <Compile Include="CodyPackage.ErrorHandling.cs" />
     <Compile Include="CodyToolWindow.cs" />
-    <Compile Include="Completions\CodyProposalCollection.cs" />
-    <Compile Include="Completions\CodyProposalManager.cs" />
-    <Compile Include="Completions\CodyProposalManagerProvider.cs" />
-    <Compile Include="Completions\CodyProposalSource.cs" />
-    <Compile Include="Completions\CodyProposalSourceProvider.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
     <Compile Include="Infrastructure\WindowPaneLogger.cs" />
     <Compile Include="Infrastructure\VsConstants.cs" />
@@ -139,6 +134,23 @@
     </VSCTCompile>
     <Content Include="Resources\CodyToolWindowCommand.png" />
   </ItemGroup>
+
+  <!--Completions dll-->
+  <Target Name="Completions" BeforeTargets="GetVsixSourceItems">
+      <MSBuild Projects="..\Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj"
+               Properties="Configuration=$(Configuration)"
+               Targets="Build" />
+  </Target>
+
+  <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
+      <ItemGroup>
+          <VSIXSourceItem Include="..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll">
+              <VSIXSubPath>.</VSIXSubPath>
+          </VSIXSourceItem>
+      </ItemGroup>
+  </Target>
+  <!--Completions dll end -->
+
   <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
       <Project>{9FF2CC40-78E9-46C8-B2EF-30A1F1BE82F2}</Project>
