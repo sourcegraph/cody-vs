@@ -75,6 +75,13 @@ namespace Cody.Core.Infrastructure
                 CustomConfiguration = GetCustomConfiguration()
             };
 
+            if (_userSettingsService.ForceAccessTokenForUITests)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                config.AccessToken = _userSettingsService.AccessToken;
+#pragma warning restore CS0618 // Type or member is obsolete
+            }
+
             return config;
         }
 

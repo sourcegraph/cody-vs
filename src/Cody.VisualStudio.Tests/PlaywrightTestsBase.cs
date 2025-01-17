@@ -58,6 +58,7 @@ namespace Cody.VisualStudio.Tests
                 if (accessToken != null)
                 {
                     WriteLog("Using Access Token.");
+                    CodyPackage.UserSettingsService.ForceAccessTokenForUITests = true;
                     CodyPackage.UserSettingsService.AccessToken = accessToken;
                 }
 

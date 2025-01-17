@@ -113,7 +113,11 @@ namespace Cody.VisualStudio.Services
             }
             set
             {
+                var oldAccessToken = AccessToken;
                 Set(AccessTokenKey, value);
+
+                if (oldAccessToken != value)
+                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
             }
         }
     }

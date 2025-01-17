@@ -11,5 +11,6 @@ namespace Cody.Core.Settings
         string CustomConfiguration { get; set; }
         bool AcceptNonTrustedCert { get; set; }
         bool AutomaticallyTriggerCompletions { get; set; }
+        bool ForceAccessTokenForUITests { get; set; }
     }
 }

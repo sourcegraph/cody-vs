@@ -72,6 +72,9 @@ namespace Cody.Core.Settings
             }
             set
             {
+                if (!ForceAccessTokenForUITests)
+                    throw new Exception("Setting access token explicitly only allowed when running UI tests!");
+
                 var userToken = _secretStorage.AccessToken;
                 if (!string.Equals(value, userToken, StringComparison.InvariantCulture))
                 {
@@ -105,5 +108,7 @@ namespace Cody.Core.Settings
             }
             set => Set(nameof(AutomaticallyTriggerCompletions), value.ToString());
         }
+
+        public bool ForceAccessTokenForUITests { get; set; }
     }
 }
