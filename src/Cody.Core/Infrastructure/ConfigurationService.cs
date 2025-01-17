@@ -77,7 +77,10 @@ namespace Cody.Core.Infrastructure
 
             if (_userSettingsService.ForceAccessTokenForUITests)
             {
+                _logger.Debug($"Detected {nameof(_userSettingsService.ForceAccessTokenForUITests)}");
+
 #pragma warning disable CS0618 // Type or member is obsolete
+                config.ServerEndpoint = _userSettingsService.DefaultServerEndpoint;
                 config.AccessToken = _userSettingsService.AccessToken;
 #pragma warning restore CS0618 // Type or member is obsolete
             }
