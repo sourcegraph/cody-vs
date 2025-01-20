@@ -144,9 +144,14 @@
                Targets="Build" />
   </Target>
 
+  <!--Completions dll start -->
   <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
-      <ItemGroup>
-          <VSIXSourceItem Include="..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll">
+      <PropertyGroup>
+          <CompletionsDllPath>..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll</CompletionsDllPath>
+      </PropertyGroup>
+
+      <ItemGroup Condition="Exists('$(CompletionsDllPath)')">
+          <VSIXSourceItem Include="$(CompletionsDllPath)">
               <VSIXSubPath>.</VSIXSubPath>
           </VSIXSourceItem>
       </ItemGroup>
