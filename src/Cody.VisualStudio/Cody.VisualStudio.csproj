@@ -136,21 +136,15 @@
   </ItemGroup>
 
   <!--Completions dll-->
-  <Target Name="Completions" BeforeTargets="GetVsixSourceItems">
-      <CallTarget Targets="BuildCompletions">
-          <Output TaskParameter="TargetOutputs" ItemName="CompletionsOutputs" />
-      </CallTarget>
-  </Target>
-
-  <Target Name="BuildCompletions">
+  <Target Name="Completions" BeforeTargets="GetVsixSourceItems"
+          Condition="'$(BuildingInsideVisualStudio)' == 'true'"
+          >
       <MSBuild Projects="..\Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj"
                Properties="Configuration=$(Configuration)"
-               Targets="Build"
-               BuildInParallel="false" />
+               Targets="Build" />
   </Target>
 
-
-    <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
+  <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
       <ItemGroup>
           <VSIXSourceItem Include="..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll">
               <VSIXSubPath>.</VSIXSubPath>
