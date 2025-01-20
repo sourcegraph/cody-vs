@@ -69,14 +69,22 @@ namespace Cody.Core.Infrastructure
             var config = new ExtensionConfiguration
             {
                 AnonymousUserID = _userSettingsService.AnonymousUserID,
-                ServerEndpoint = _userSettingsService.ServerEndpoint,
                 Proxy = null,
-                AccessToken = _userSettingsService.AccessToken,
                 AutocompleteAdvancedProvider = null,
                 Debug = Configuration.AgentDebug,
                 VerboseDebug = Configuration.AgentVerboseDebug,
                 CustomConfiguration = GetCustomConfiguration()
             };
+
+            if (_userSettingsService.ForceAccessTokenForUITests)
+            {
+                _logger.Debug($"Detected {nameof(_userSettingsService.ForceAccessTokenForUITests)}");
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                config.ServerEndpoint = _userSettingsService.DefaultServerEndpoint;
+                config.AccessToken = _userSettingsService.AccessToken;
+#pragma warning restore CS0618 // Type or member is obsolete
+            }
 
             return config;
         }

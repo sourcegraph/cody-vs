@@ -10,8 +10,6 @@ namespace Cody.Core.Settings
         private readonly ISecretStorageService _secretStorage;
         private readonly ILog _logger;
 
-        public event EventHandler AuthorizationDetailsChanged;
-
         public UserSettingsService(IUserSettingsProvider settingsProvider, ISecretStorageService secretStorage, ILog log)
         {
             _settingsProvider = settingsProvider;
@@ -55,19 +53,7 @@ namespace Cody.Core.Settings
             set => Set(nameof(AnonymousUserID), value);
         }
 
-        public string ServerEndpoint
-        {
-            get => GetOrDefault(nameof(ServerEndpoint), "https://sourcegraph.com/");
-            set
-            {
-                var endpoint = GetOrDefault(nameof(ServerEndpoint));
-                if (!string.Equals(value, endpoint, StringComparison.InvariantCulture))
-                {
-                    Set(nameof(ServerEndpoint), value);
-                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
+        public string DefaultServerEndpoint => "https://sourcegraph.com/";
 
         public string AccessToken
         {
@@ -86,11 +72,13 @@ namespace Cody.Core.Settings
             }
             set
             {
+                if (!ForceAccessTokenForUITests)
+                    throw new Exception("Setting access token explicitly only allowed when running UI tests!");
+
                 var userToken = _secretStorage.AccessToken;
                 if (!string.Equals(value, userToken, StringComparison.InvariantCulture))
                 {
                     _secretStorage.AccessToken = value;
-                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -120,5 +108,7 @@ namespace Cody.Core.Settings
             }
             set => Set(nameof(AutomaticallyTriggerCompletions), value.ToString());
         }
+
+        public bool ForceAccessTokenForUITests { get; set; }
     }
 }

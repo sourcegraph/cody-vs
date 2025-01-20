@@ -47,18 +47,8 @@ namespace Cody.Core.Agent
 
         private bool HandleAuthCommand(dynamic json)
         {
-            if (json.authKind == "signout")
-            {
-                _settingsService.AccessToken = string.Empty;
-            }
-            else if (json.authKind == "signin")
-            {
-                var token = json.value;
-                var endpoint = json.endpoint;
+            // login/logout handled by the agent via accessing secret storage 
 
-                _settingsService.ServerEndpoint = endpoint;
-                _settingsService.AccessToken = token;
-            }
             // Always return false to allow the request to be forwarded to the agent.
             return false;
         }

@@ -30,7 +30,7 @@ namespace Cody.AgentTester
             var portNumber = int.TryParse(devPort, out int port) ? port : 3113;
 
             var logger = new Logger();
-            var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider());
+            var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider(), logger);
             var settingsService = new UserSettingsService(new MemorySettingsProvider(), secretStorageService, logger);
             var editorService = new FileService(new FakeServiceProvider(), logger);
             var options = new AgentClientOptions

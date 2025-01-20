@@ -118,9 +118,9 @@ namespace Cody.VisualStudio
             VsVersionService = new VsVersionService(Logger);
 
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
-            SecretStorageService = new SecretStorageService(vsSecretStorage);
+            SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
-            UserSettingsService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
+            SecretStorageService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
@@ -203,7 +203,12 @@ namespace Cody.VisualStudio
         {
             try
             {
-                Logger.Debug($"Changing authorization details ...");
+                Logger.Debug($"Checking authorization status ...");
+                if (ConfigurationService == null || AgentService == null)
+                {
+                    Logger.Debug("Not changed.");
+                    return;
+                }
 
                 var config = ConfigurationService.GetConfiguration();
                 var status = await AgentService.ConfigurationChange(config);
@@ -334,7 +339,7 @@ namespace Cody.VisualStudio
                 {
                     try
                     {
-                        await TestServerConnection(UserSettingsService.ServerEndpoint);
+                        await TestServerConnection(UserSettingsService.DefaultServerEndpoint);
                         AgentClient.Start();
 
                         var clientConfig = ConfigurationService.GetClientInfo();
