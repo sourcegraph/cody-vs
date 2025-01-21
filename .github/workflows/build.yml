@@ -2,7 +2,7 @@ name: Build and test extension
 
 on:
   push:
-    branches: [piotr/autocomplete-loaded-independently-via-mef]
+    branches: [main]
   pull_request:
     branches: [main]
 
