@@ -46,8 +46,10 @@ jobs:
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
         
+
       - name: Build extension (${{ env.Configuration }})
-        run: msbuild src/Cody.sln -t:Build -restore -verbosity:minimal -property:Configuration=${{ env.Configuration }}
+        shell: pwsh
+        run: ./src/build.ps1 -configuration ${{ env.Configuration }}
         
       - name: Upload Cody.VisualStudio.vsix artifact
         uses: actions/upload-artifact@v4
