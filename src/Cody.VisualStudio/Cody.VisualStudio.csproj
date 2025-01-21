@@ -135,7 +135,10 @@
     <Content Include="Resources\CodyToolWindowCommand.png" />
   </ItemGroup>
 
-  <!--Completions dll-->
+  <!--Completions dll start -->
+
+  <!--Workaround to get Cody.VisualStudio.Completions compiled when using Visual Studio to run and debug the extension
+  Only works with Visual Studio, but unfortunately not with msbuild-->
   <Target Name="Completions" BeforeTargets="GetVsixSourceItems"
           Condition="'$(BuildingInsideVisualStudio)' == 'true'"
           >
@@ -144,7 +147,6 @@
                Targets="Build" />
   </Target>
 
-  <!--Completions dll start -->
   <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
       <PropertyGroup>
           <CompletionsDllPath>..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll</CompletionsDllPath>
