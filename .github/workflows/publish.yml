@@ -131,7 +131,7 @@ jobs:
         with:
           tag: ${{ steps.version.outputs.next-version-tag }}
           name: Cody for Visual Studio ${{ steps.version.outputs.next-version }}
-          omitBody: true
+          body: ${{ steps.version.outputs.next-version-tag }}
           prerelease: ${{ github.event.inputs.publish == 'Preview' }}  
           artifacts: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
           
