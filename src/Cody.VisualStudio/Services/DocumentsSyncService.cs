@@ -26,6 +26,7 @@ namespace Cody.VisualStudio.Services
         private readonly IDocumentSyncActions documentActions;
         private readonly ILog log;
 
+        private Dictionary<ITextBuffer, DocumentData> documents = new Dictionary<ITextBuffer, DocumentData>();
         private ActiveDocument activeDocument;
         private uint lastShowDocCookie = 0;
 
@@ -61,6 +62,13 @@ namespace Cody.VisualStudio.Services
                         var textView = GetTextView(frame);
                         var visibleRange = GetVisibleRange(textView);
                         var selection = GetDocumentSelection(textView);
+
+                        var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                        if (wpfTextView != null)
+                        {
+                            var doc = new DocumentData { Path = path, TextView = textView };
+                            documents[wpfTextView.TextBuffer] = doc;
+                        }
 
                         documentActions.OnOpened(path, content, visibleRange, selection);
                     }
@@ -191,6 +199,9 @@ namespace Cody.VisualStudio.Services
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
                 trace.TraceEvent("OnClosed", path);
+                var kv = documents.FirstOrDefault(x=> x.Value.Path == path);
+                if(kv.Key != null) documents.Remove(kv.Key);
+
                 documentActions.OnClosed(path);
             }
             return VSConstants.S_OK;
@@ -219,9 +230,16 @@ namespace Cody.VisualStudio.Services
                 {
                     trace.TraceEvent("OnFirstShowDocument", path);
                     var content = rdt.GetRunningDocumentContents(docCookie);
-
+                    
                     var docRange = GetDocumentSelection(textView);
                     var visibleRange = GetVisibleRange(textView);
+
+                    var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                    if(wpfTextView != null)
+                    {
+                        var doc = new DocumentData { Path = path, TextView = textView };
+                        documents[wpfTextView.TextBuffer] = doc;
+                    }
 
                     documentActions.OnOpened(path, content, visibleRange, docRange);
                 }
@@ -273,10 +291,26 @@ namespace Cody.VisualStudio.Services
 
             try
             {
-                var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-                var selection = GetDocumentSelection(activeDocument.TextView);
-                var changes = GetContentChanges(e.Changes, e.Before);
-                var visibleRange = GetVisibleRange(activeDocument.TextView);
+                string path;
+                DocumentRange selection, visibleRange;
+                IEnumerable<DocumentChange> changes;
+
+                if (activeDocument != null)
+                {
+                    path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
+                    selection = GetDocumentSelection(activeDocument.TextView);
+                    changes = GetContentChanges(e.Changes, e.Before);
+                    visibleRange = GetVisibleRange(activeDocument.TextView);
+                }
+                else
+                {
+                    var doc = documents[(ITextBuffer)sender];
+
+                    path = doc.Path;
+                    selection = GetDocumentSelection(doc.TextView);
+                    changes = GetContentChanges(e.Changes, e.Before);
+                    visibleRange = GetVisibleRange(doc.TextView);
+                }
 
                 trace.TraceEvent("OnChanged", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
@@ -293,9 +327,22 @@ namespace Cody.VisualStudio.Services
 
             try
             {
-                var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-                var selection = GetDocumentSelection(activeDocument.TextView);
-                var visibleRange = GetVisibleRange(activeDocument.TextView);
+                string path;
+                DocumentRange selection, visibleRange;
+                if (activeDocument != null)
+                {
+                    path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
+                    selection = GetDocumentSelection(activeDocument.TextView);
+                    visibleRange = GetVisibleRange(activeDocument.TextView);
+                }
+                else
+                {
+                    var doc = documents[(ITextBuffer)sender];
+
+                    path = doc.Path;
+                    selection = GetDocumentSelection(doc.TextView);
+                    visibleRange = GetVisibleRange(doc.TextView);
+                }
 
                 trace.TraceEvent("OnChanged", "OnSelectionChanged");
                 documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
@@ -346,6 +393,13 @@ namespace Cody.VisualStudio.Services
             var line = snapshot.GetLineFromPosition(position);
             int col = position - line.Start.Position;
             return new DocumentPosition { Line = line.LineNumber, Column = col };
+        }
+
+        public class DocumentData
+        {
+            public string Path { get; set; }
+
+            public IVsTextView TextView { get; set; }
         }
 
         public class ActiveDocument
