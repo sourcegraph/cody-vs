@@ -19,15 +19,16 @@ namespace Cody.VisualStudio.Services
         private static readonly TraceLogger trace = new TraceLogger(nameof(DocumentsSyncService));
 
         private RunningDocumentTable rdt;
-        private uint rdtCookie = 0;
+        private uint rdtCookie = 0;     
 
         private readonly IVsUIShell vsUIShell;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
         private readonly IDocumentSyncActions documentActions;
         private readonly ILog log;
 
-        private ActiveDocument activeDocument;
         private uint lastShowDocCookie = 0;
+        private HashSet<uint> openNotificationSend = new HashSet<uint>();
+        private HashSet<uint> isSubscribed = new HashSet<uint>();
 
         public DocumentsSyncService(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService, ILog log)
         {
@@ -42,36 +43,16 @@ namespace Cody.VisualStudio.Services
         {
             try
             {
-                uint activeCookie = 0;
-                IVsWindowFrame activeFrame = null;
                 foreach (var frame in GetOpenDocuments())
                 {
-                    try
-                    {
-                        frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
-                        var docCookie = (uint)(int)cookie;
-                        var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                        frame.IsOnScreen(out int onScreen);
-                        if (onScreen == 1)
-                        {
-                            activeCookie = docCookie;
-                            activeFrame = frame;
-                        }
-                        var content = rdt.GetRunningDocumentContents(docCookie);
-                        var textView = GetTextView(frame);
-                        var visibleRange = GetVisibleRange(textView);
-                        var selection = GetDocumentSelection(textView);
+                    frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
+                    var docCookie = (uint)(int)cookie;
+                    var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                    var content = rdt.GetRunningDocumentContents(docCookie);
 
-                        documentActions.OnOpened(path, content, visibleRange, selection);
-                    }
-                    catch (Exception ex)
-                    {
-                        log.Error("Can't initialize document sync", ex);
-                    }
+                    documentActions.OnOpened(path, content, null, null);
+                    openNotificationSend.Add(docCookie);
                 }
-
-                if (activeCookie != 0)
-                    ((IVsRunningDocTableEvents)this).OnBeforeDocumentWindowShow(activeCookie, 0, activeFrame);
             }
             catch (Exception ex)
             {
@@ -83,7 +64,7 @@ namespace Cody.VisualStudio.Services
             }
         }
 
-        private IVsTextView GetTextView(IVsWindowFrame windowFrame)
+        private IVsTextView GetVsTextView(IVsWindowFrame windowFrame)
         {
             windowFrame.GetProperty((int)__VSFPROPID.VSFPROPID_DocView, out var pvar);
             IVsTextView ppView = pvar as IVsTextView;
@@ -109,6 +90,8 @@ namespace Cody.VisualStudio.Services
             {
                 rdt.Unadvise(rdtCookie);
                 rdtCookie = 0;
+                isSubscribed.Clear();
+                openNotificationSend.Clear();
             }
         }
 
@@ -130,16 +113,13 @@ namespace Cody.VisualStudio.Services
             return results;
         }
 
-        private DocumentRange GetVisibleRange(IVsTextView textView)
+        private DocumentRange GetVisibleRange(ITextView textView)
         {
             DocumentPosition firstVisiblePosition = null, lastVisiblePosition = null;
 
-            if (textView != null && ThreadHelper.CheckAccess())
+            if (ThreadHelper.CheckAccess())
             {
-                var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
-                if (wpfTextView == null) return null;
-
-                var lines = wpfTextView.TextViewLines;
+                var lines = textView.TextViewLines;
 
                 firstVisiblePosition = ToDocumentPosition(lines.FirstVisibleLine.Start);
                 lastVisiblePosition = ToDocumentPosition(lines.LastVisibleLine.End);
@@ -155,21 +135,16 @@ namespace Cody.VisualStudio.Services
             return range;
         }
 
-        private DocumentRange GetDocumentSelection(IVsTextView textView)
+        private DocumentRange GetDocumentSelection(ITextView textView)
         {
             bool swap = false;
             DocumentPosition start = null, end = null;
-            if (textView != null && ThreadHelper.CheckAccess())
+            if (ThreadHelper.CheckAccess())
             {
-                var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
-                if (wpfTextView != null)
-                {
-                    var selection = wpfTextView.Selection.StreamSelectionSpan;
+                var selection = textView.Selection.StreamSelectionSpan;
 
-                    start = ToDocumentPosition(selection.Start.Position);
-                    end = ToDocumentPosition(selection.End.Position);
-                }
-                else return null;
+                start = ToDocumentPosition(selection.Start.Position);
+                end = ToDocumentPosition(selection.End.Position);
             }
             else return null;
 
@@ -182,8 +157,18 @@ namespace Cody.VisualStudio.Services
             };
         }
 
-        int IVsRunningDocTableEvents.OnAfterFirstDocumentLock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining) => VSConstants.S_OK;
+        public string GetFilePath(ITextView textView)
+        {
+            textView.TextBuffer.Properties.TryGetProperty(typeof(IVsTextBuffer), out IVsTextBuffer bufferAdapter);
+            var persistFileFormat = bufferAdapter as IPersistFileFormat;
 
+            if (persistFileFormat == null) return null;
+
+            persistFileFormat.GetCurFile(out string filePath, out _);
+            return filePath;
+        }
+
+        int IVsRunningDocTableEvents.OnAfterFirstDocumentLock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining) => VSConstants.S_OK;
         int IVsRunningDocTableEvents.OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining)
         {
             trace.TraceEvent("OnBeforeLastDocumentUnlock");
@@ -192,6 +177,9 @@ namespace Cody.VisualStudio.Services
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
                 trace.TraceEvent("OnClosed", path);
                 documentActions.OnClosed(path);
+
+                openNotificationSend.Remove(docCookie);
+                isSubscribed.Remove(docCookie);
             }
             return VSConstants.S_OK;
         }
@@ -212,41 +200,36 @@ namespace Cody.VisualStudio.Services
             if (lastShowDocCookie != docCookie)
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                trace.TraceEvent("OnDocumentShow", path);
-                var textView = GetTextView(pFrame);
+                trace.TraceEvent("OnDocumentFocus", path);           
 
-                if (fFirstShow == 1)
+                if (!isSubscribed.Contains(docCookie))
                 {
-                    trace.TraceEvent("OnFirstShowDocument", path);
-                    var content = rdt.GetRunningDocumentContents(docCookie);
+                    trace.TraceEvent("OnSubscribeDocument", path);
+                    
+                    var textView = GetVsTextView(pFrame);
+                    if (textView != null)
+                    {
+                        var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                        if (wpfTextView != null)
+                        {
+                            Subscribe(wpfTextView);
 
-                    var docRange = GetDocumentSelection(textView);
-                    var visibleRange = GetVisibleRange(textView);
+                            if (!openNotificationSend.Contains(docCookie))
+                            {
+                                var content = rdt.GetRunningDocumentContents(docCookie);
+                                var docRange = GetDocumentSelection(wpfTextView);
+                                var visibleRange = GetVisibleRange(wpfTextView);
 
-                    documentActions.OnOpened(path, content, visibleRange, docRange);
+                                documentActions.OnOpened(path, content, visibleRange, docRange);
+                                openNotificationSend.Add(docCookie);
+                            }
+
+                            isSubscribed.Add(docCookie);
+                        }
+                    }
                 }
 
                 documentActions.OnFocus(path);
-
-                if (textView != null)
-                {
-                    if (activeDocument != null)
-                    {
-                        activeDocument.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
-                        activeDocument.Selection.SelectionChanged -= OnSelectionChanged;
-                    }
-
-                    activeDocument = new ActiveDocument
-                    {
-                        DocCookie = docCookie,
-                        TextView = textView,
-                        WpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView)
-                    };
-
-                    activeDocument.TextBuffer.ChangedLowPriority += OnTextBufferChanged;
-                    activeDocument.Selection.SelectionChanged += OnSelectionChanged;
-                }
-                else activeDocument = null;
 
                 lastShowDocCookie = docCookie;
             }
@@ -254,18 +237,25 @@ namespace Cody.VisualStudio.Services
             return VSConstants.S_OK;
         }
 
-        int IVsRunningDocTableEvents.OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame)
+        private void Subscribe(IWpfTextView textView)
         {
-            trace.TraceEvent("OnAfterDocumentWindowHide");
-            if (activeDocument != null)
-            {
-                activeDocument.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
-                activeDocument.Selection.SelectionChanged -= OnSelectionChanged;
-                activeDocument = null;
-            }
-
-            return VSConstants.S_OK;
+            textView.TextBuffer.Properties.AddProperty(typeof(IWpfTextView), textView);
+            textView.Selection.SelectionChanged += OnSelectionChanged;
+            textView.TextBuffer.ChangedLowPriority += OnTextBufferChanged;
+            textView.Closed += UnsubscribeOnClosed;
         }
+
+        private void UnsubscribeOnClosed(object sender, EventArgs e)
+        {
+            var textView = (IWpfTextView)sender;
+
+            textView.TextBuffer.Properties.RemoveProperty(typeof(IWpfTextView));
+            textView.Selection.SelectionChanged -= OnSelectionChanged;
+            textView.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
+            textView.Closed -= UnsubscribeOnClosed;
+        }
+
+        int IVsRunningDocTableEvents.OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame) => VSConstants.S_OK;
 
         private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
         {
@@ -273,10 +263,13 @@ namespace Cody.VisualStudio.Services
 
             try
             {
-                var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-                var selection = GetDocumentSelection(activeDocument.TextView);
+                var textBuffer = (ITextBuffer)sender;
+                var wpfTextView = textBuffer.Properties.GetProperty<IWpfTextView>(typeof(IWpfTextView));
+
+                var path = GetFilePath(wpfTextView);
+                var selection = GetDocumentSelection(wpfTextView);
                 var changes = GetContentChanges(e.Changes, e.Before);
-                var visibleRange = GetVisibleRange(activeDocument.TextView);
+                var visibleRange = GetVisibleRange(wpfTextView);
 
                 trace.TraceEvent("OnChanged", "OnTextBufferChanged");
                 documentActions.OnChanged(path, visibleRange, selection, changes);
@@ -293,9 +286,11 @@ namespace Cody.VisualStudio.Services
 
             try
             {
-                var path = rdt.GetDocumentInfo(activeDocument.DocCookie).Moniker;
-                var selection = GetDocumentSelection(activeDocument.TextView);
-                var visibleRange = GetVisibleRange(activeDocument.TextView);
+                var textView = ((ITextSelection)sender).TextView;
+
+                var path = GetFilePath(textView);
+                var selection = GetDocumentSelection(textView);
+                var visibleRange = GetVisibleRange(textView);
 
                 trace.TraceEvent("OnChanged", "OnSelectionChanged");
                 documentActions.OnChanged(path, visibleRange, selection, Enumerable.Empty<DocumentChange>());
@@ -346,21 +341,6 @@ namespace Cody.VisualStudio.Services
             var line = snapshot.GetLineFromPosition(position);
             int col = position - line.Start.Position;
             return new DocumentPosition { Line = line.LineNumber, Column = col };
-        }
-
-        public class ActiveDocument
-        {
-
-            public IVsTextView TextView { get; set; }
-
-            public uint DocCookie { get; set; }
-
-            public IWpfTextView WpfTextView { get; set; }
-
-            public ITextBuffer TextBuffer => WpfTextView.TextBuffer;
-
-            public ITextSelection Selection => WpfTextView.Selection;
-
         }
     }
 
