@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Cody.Core.Logging
 {
@@ -11,14 +12,21 @@ namespace Cody.Core.Logging
     {
         public const string CodyAssemblyPrefix = "Cody.";
 
-        public void Error(Exception exception)
+        public void Error(string message, Exception ex, [CallerMemberName] string callerName = "")
         {
-            SentrySdk.CaptureException(exception);
+            SentrySdk.CaptureException(ex, scope =>
+            {
+                scope.SetExtra(nameof(callerName), callerName);
+                scope.SetExtra(nameof(message), message);
+            });
         }
 
-        public void Error(string message)
+        public void Error(string message, [CallerMemberName] string callerName = "")
         {
-            SentrySdk.CaptureMessage(message);
+            SentrySdk.CaptureMessage(message, scope =>
+            {
+                scope.SetExtra(nameof(callerName), callerName);
+            });
         }
 
         public static void Initialize()
