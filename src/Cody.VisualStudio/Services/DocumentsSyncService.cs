@@ -48,6 +48,7 @@ namespace Cody.VisualStudio.Services
                     frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
                     var docCookie = (uint)(int)cookie;
                     var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                    if (path == null) continue;
                     var content = rdt.GetRunningDocumentContents(docCookie);
 
                     documentActions.OnOpened(path, content, null, null);
@@ -175,6 +176,7 @@ namespace Cody.VisualStudio.Services
             if (dwReadLocksRemaining == 0 && dwEditLocksRemaining == 0)
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                if (path == null) return VSConstants.S_OK;
                 trace.TraceEvent("OnClosed", path);
                 documentActions.OnClosed(path);
 
@@ -187,6 +189,7 @@ namespace Cody.VisualStudio.Services
         int IVsRunningDocTableEvents.OnAfterSave(uint docCookie)
         {
             var path = rdt.GetDocumentInfo(docCookie).Moniker;
+            if (path == null) return VSConstants.S_OK;
             trace.TraceEvent("OnAfterSave", path);
             documentActions.OnSaved(path);
             return VSConstants.S_OK;
@@ -200,7 +203,7 @@ namespace Cody.VisualStudio.Services
             if (lastShowDocCookie != docCookie)
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                trace.TraceEvent("OnDocumentFocus", path);           
+                if (path == null) return VSConstants.S_OK;
 
                 if (!isSubscribed.Contains(docCookie))
                 {
@@ -229,6 +232,7 @@ namespace Cody.VisualStudio.Services
                     }
                 }
 
+                trace.TraceEvent("OnDocumentFocus", path);
                 documentActions.OnFocus(path);
 
                 lastShowDocCookie = docCookie;
@@ -267,6 +271,7 @@ namespace Cody.VisualStudio.Services
                 var wpfTextView = textBuffer.Properties.GetProperty<IWpfTextView>(typeof(IWpfTextView));
 
                 var path = GetFilePath(wpfTextView);
+                if (path == null) return;
                 var selection = GetDocumentSelection(wpfTextView);
                 var changes = GetContentChanges(e.Changes, e.Before);
                 var visibleRange = GetVisibleRange(wpfTextView);
@@ -289,6 +294,7 @@ namespace Cody.VisualStudio.Services
                 var textView = ((ITextSelection)sender).TextView;
 
                 var path = GetFilePath(textView);
+                if(path == null) return;
                 var selection = GetDocumentSelection(textView);
                 var visibleRange = GetVisibleRange(textView);
 
