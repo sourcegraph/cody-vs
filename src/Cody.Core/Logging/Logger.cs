@@ -65,7 +65,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Error(customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Error(message, callerName);
-            _sentryLog?.Error(customMessage);
+            _sentryLog?.Error(customMessage, callerName);
             _testLogger?.WriteLog(message, "ERROR", callerName);
         }
 
@@ -87,7 +87,7 @@ namespace Cody.Core.Logging
             // TODO: _fileLogger.Error(originalException, customMessage);
             DebugWrite(customMessage);
             _outputWindowPane?.Error(outputMessage, callerName);
-            _sentryLog?.Error(originalException);
+            _sentryLog?.Error(outputMessage, originalException, callerName);
             _testLogger?.WriteLog(message, "ERROR", callerName);
         }
 
