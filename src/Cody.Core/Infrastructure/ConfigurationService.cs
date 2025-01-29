@@ -99,6 +99,7 @@ namespace Cody.Core.Infrastructure
             }
             catch (Exception ex)
             {
+                ex.Data.Add("json", customConfiguration);
                 _logger.Error("Deserializing custom configuration failed.", ex);
             }
 
