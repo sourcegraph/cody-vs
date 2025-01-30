@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json.schemastore.org/vsix-publish",
-	"categories": ["Coding", "visual studio extensions", "documentation"],
+	"categories": ["Coding"],
 	"identity": {
 		"internalName": "cody-vs",
 		"description": "AI coding assistant that uses search and codebase context to help you write code faster!",
