@@ -23,7 +23,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
@@ -34,6 +34,8 @@ namespace Cody.VisualStudio.Tests
 
             // then
             Assert.Equal("ConsoleApp1", tags.Last().Name);
+
+            //await Task.Delay(TimeSpan.FromDays(1));
         }
 
         [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
