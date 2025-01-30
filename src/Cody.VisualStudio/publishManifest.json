@@ -16,7 +16,7 @@
 			"ollama"
 		]
 	},
-	"overview": "../../../README.md",
+	"overview": "../../README.md",
 	"priceCategory": "free",
 	"publisher": "sourcegraph",
 	"private": true,
