@@ -30,6 +30,8 @@ namespace Cody.VisualStudio.Services
         private HashSet<uint> openNotificationSend = new HashSet<uint>();
         private HashSet<uint> isSubscribed = new HashSet<uint>();
 
+        public event EventHandler Initialized;
+
         public DocumentsSyncService(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService, ILog log)
         {
             this.rdt = new RunningDocumentTable();
@@ -54,6 +56,8 @@ namespace Cody.VisualStudio.Services
                     documentActions.OnOpened(path, content, null, null);
                     openNotificationSend.Add(docCookie);
                 }
+
+                Initialized?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
