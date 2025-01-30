@@ -133,7 +133,7 @@ Additional debugging options:
 
 ## Release Process
 
-See the [Releases](./docs/dev/release.md) page for details on how to release a new version of the Cody extension. To understand the issues of release and versioning, refer to [versioning](./docs/dev/versioning.md)
+See the [Releases](./docs/dev/Release.md) page for details on how to release a new version of the Cody extension. To understand the issues of release and versioning, refer to [versioning](./docs/dev/versioning.md)
 
 ## Troubleshoting
 
