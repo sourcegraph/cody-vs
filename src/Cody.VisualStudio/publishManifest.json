@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json.schemastore.org/vsix-publish",
-	"categories": ["Coding", "visual studio extensions", "documentation"],
+	"categories": ["Coding"],
 	"identity": {
 		"internalName": "cody-vs",
 		"description": "AI coding assistant that uses search and codebase context to help you write code faster!",
@@ -16,10 +16,10 @@
 			"ollama"
 		]
 	},
-	"overview": "../../../README.md",
+	"overview": "../../README.md",
 	"priceCategory": "free",
 	"publisher": "sourcegraph",
-	"private": true,
+	"private": false,
 	"qna": true,
 	"repo": "https://github.com/sourcegraph/cody-vs.git"
 }
