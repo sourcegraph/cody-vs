@@ -41,28 +41,29 @@ namespace Cody.VisualStudio.Services
 
         public void Initialize()
         {
-            try
+            ThreadHelper.JoinableTaskFactory.Run(async delegate
             {
-                foreach (var frame in GetOpenDocuments())
-                {
-                    frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie);
-                    var docCookie = (uint)(int)cookie;
-                    var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                    if (path == null) continue;
-                    var content = rdt.GetRunningDocumentContents(docCookie);
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                    documentActions.OnOpened(path, content, null, null);
-                    openNotificationSend.Add(docCookie);
+                try
+                {
+                    foreach (var frame in GetOpenDocuments())
+                    {
+                        if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie) != VSConstants.S_OK) continue;
+                        var docCookie = (uint)(int)cookie;
+                        var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                        if (path == null) continue;
+                        var content = rdt.GetRunningDocumentContents(docCookie);
+
+                        documentActions.OnOpened(path, content, null, null);
+                        openNotificationSend.Add(docCookie);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Document sync initialization error", ex);
-            }
-            finally
-            {
-                rdtCookie = rdt.Advise(this);
-            }
+                finally
+                {
+                    rdtCookie = rdt.Advise(this);
+                }
+            });
         }
 
         private IVsTextView GetVsTextView(IVsWindowFrame windowFrame)
@@ -99,16 +100,14 @@ namespace Cody.VisualStudio.Services
         private IEnumerable<IVsWindowFrame> GetOpenDocuments()
         {
             var results = new List<IVsWindowFrame>();
+            uint fetched = 0;
+            var winFrameArray = new IVsWindowFrame[1];
 
-            vsUIShell.GetDocumentWindowEnum(out IEnumWindowFrames docEnum);
-            var winFrameArray = new IVsWindowFrame[50];
+            if (vsUIShell.GetDocumentWindowEnum(out IEnumWindowFrames docEnum) != VSConstants.S_OK) return results;
 
-            while (true)
+            while (docEnum.Next(1, winFrameArray, out fetched) == VSConstants.S_OK && fetched == 1)
             {
-                docEnum.Next((uint)winFrameArray.Length, winFrameArray, out uint fetched);
-                if (fetched == 0) break;
-
-                results.AddRange(winFrameArray.Take((int)fetched));
+                results.Add(winFrameArray[0]);
             }
 
             return results;
