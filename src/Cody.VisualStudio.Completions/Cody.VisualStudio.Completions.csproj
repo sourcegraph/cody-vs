@@ -58,7 +58,7 @@
       <Version>17.6.268</Version>
     </PackageReference>
     <PackageReference Include="StreamJsonRpc">
-      <Version>2.15.29</Version>
+      <Version>2.20.20</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
