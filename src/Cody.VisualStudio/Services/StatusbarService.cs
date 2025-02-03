@@ -13,8 +13,10 @@ namespace Cody.VisualStudio.Services
     {
         public void SetText(string text)
         {
-            ThreadHelper.JoinableTaskFactory.Run(delegate
+            ThreadHelper.JoinableTaskFactory.Run(async delegate
             {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
                 var statusBar = (IVsStatusbar)Package.GetGlobalService(typeof(SVsStatusbar));
                 int frozen;
 
