@@ -120,9 +120,19 @@ namespace Cody.VisualStudio.Services
             if (ThreadHelper.CheckAccess())
             {
                 var lines = textView.TextViewLines;
-
-                firstVisiblePosition = ToDocumentPosition(lines.FirstVisibleLine.Start);
-                lastVisiblePosition = ToDocumentPosition(lines.LastVisibleLine.End);
+                if(lines != null && lines.IsValid)
+                {
+                    try
+                    {
+                        firstVisiblePosition = ToDocumentPosition(lines.FirstVisibleLine.Start);
+                        lastVisiblePosition = ToDocumentPosition(lines.LastVisibleLine.End);
+                    }
+                    catch(ObjectDisposedException)
+                    {
+                        return null;
+                    }
+                }
+                else return null;              
             }
             else return null;
 
