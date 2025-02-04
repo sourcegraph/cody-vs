@@ -103,7 +103,7 @@ namespace Cody.UI.ViewModels
             {
                 if (columnName == nameof(CustomConfiguration))
                 {
-                    if (!IsCustomConfigurationValid()) return "Invalid custom settings. Make sure you enter the correct JSON.";
+                    if (!IsCustomConfigurationValid()) return "Invalid custom settings. Make sure you enter the correct JSON (including opening and closing brackets).";
                 }
 
                 return null;

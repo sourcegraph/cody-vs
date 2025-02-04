@@ -54,7 +54,6 @@
                     TextWrapping="Wrap"
                     AcceptsReturn="True"
                     AcceptsTab="True"
-                    ToolTip="Cody configuration JSON."
                     Name="CustomConfigurationTextBox"
                 >
                     <TextBox.Text>
