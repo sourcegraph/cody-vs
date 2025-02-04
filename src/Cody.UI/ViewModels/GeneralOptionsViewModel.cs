@@ -1,11 +1,15 @@
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace Cody.UI.ViewModels
 {
-    public class GeneralOptionsViewModel : NotifyPropertyChangedBase
+    public class GeneralOptionsViewModel : NotifyPropertyChangedBase, IDataErrorInfo
     {
         private readonly ILog _logger;
 
@@ -78,5 +82,32 @@ namespace Cody.UI.ViewModels
             }
         }
 
+        public bool IsCustomConfigurationValid()
+        {
+            try
+            {
+                JsonConvert.DeserializeObject<Dictionary<string, object>>(CustomConfiguration);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string Error => null;
+
+        public string this[string columnName]
+        {
+            get
+            {
+                if (columnName == nameof(CustomConfiguration))
+                {
+                    if (!IsCustomConfigurationValid()) return "Invalid custom settings. Make sure you enter the correct JSON.";
+                }
+
+                return null;
+            }
+        }
     }
 }

@@ -10,6 +10,17 @@
              d:DesignHeight="300"
              >
     <Grid>
+        <Grid.Resources>
+            <Style x:Key="textBoxInError" TargetType="TextBox">
+                <Style.Triggers>
+                    <Trigger Property="Validation.HasError" Value="true">
+                        <Setter Property="ToolTip"
+              Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+              Path=(Validation.Errors)[0].ErrorContent}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
         <GroupBox Header="Cody">
             <Grid Margin="3,6,3,3">
                 <Grid.RowDefinitions>
@@ -31,7 +42,7 @@
                     Grid.Row="1"
                     Grid.Column="0"
                     >
-                    <Label Content="Cody Settings (JSON)" />
+                    <Label Content="Custom settings (JSON)" />
                     <Label Content="(requires restart)" HorizontalAlignment="Center"
                            Padding="0"
                            />
@@ -43,13 +54,18 @@
                     Grid.Column="1"
                     Width="400"
                     Height="100"
-                    Text="{Binding CustomConfiguration, Mode=TwoWay}"
+                    Style="{StaticResource textBoxInError}"
                     TextWrapping="Wrap"
                     AcceptsReturn="True"
                     AcceptsTab="True"
-                    ToolTip="Your Cody configuration JSON file."
+                    ToolTip="Cody configuration JSON."
                     Name="CustomConfigurationTextBox"
-                />
+                >
+                    <TextBox.Text>
+                        <Binding Path="CustomConfiguration" Mode="TwoWay" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged">
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
 
                 <!--Accept non-trusted certificates -->
                 <CheckBox

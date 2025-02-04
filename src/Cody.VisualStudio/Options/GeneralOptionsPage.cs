@@ -72,6 +72,14 @@ namespace Cody.VisualStudio.Options
         }
         protected override void OnApply(PageApplyEventArgs args)
         {
+            if (!_generalOptionsViewModel.IsCustomConfigurationValid())
+            {
+                var message = _generalOptionsViewModel[nameof(GeneralOptionsViewModel.CustomConfiguration)];
+                VsShellUtilities.ShowMessageBox(ServiceProvider.GlobalProvider, message, "Cody", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                args.ApplyBehavior = ApplyKind.CancelNoNavigate;
+                return;
+            }
+
             _logger.Debug($"{args.ApplyBehavior}");
 
             var customConfiguration = _generalOptionsViewModel.CustomConfiguration;
@@ -92,6 +100,11 @@ namespace Cody.VisualStudio.Options
 
         protected override void OnClosed(EventArgs e)
         {
+            if (!_generalOptionsViewModel.IsCustomConfigurationValid())
+            {
+                _generalOptionsViewModel.CustomConfiguration = string.Empty;
+            }
+
             _logger.Debug($"Settings page closed.");
 
             base.OnClosed(e);
