@@ -32,27 +32,23 @@
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="128" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
 
                 <!--Custom Cody Configuration-->
-                <StackPanel
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    >
-                    <Label Content="Custom settings (JSON)" />
-                    <Label Content="(requires restart)" HorizontalAlignment="Center"
-                           Padding="0"
-                           />
-                </StackPanel>
+                <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch">
+                    <TextBlock TextWrapping="Wrap">
+                        Custom JSON settings (requires restart)
+                    </TextBlock>
+                </Label>
 
                 <TextBox
                     Margin="0 2 0 5"
                     Grid.Row="1"
                     Grid.Column="1"
-                    Width="400"
+                    HorizontalAlignment="Stretch"
                     Height="100"
                     Style="{StaticResource textBoxInError}"
                     TextWrapping="Wrap"
