@@ -11,13 +11,17 @@ namespace Cody.Core.Logging
     public class SentryLog : ISentryLog
     {
         public const string CodyAssemblyPrefix = "Cody.";
+        public const string ErrorData = "ErrorData";
 
         public void Error(string message, Exception ex, [CallerMemberName] string callerName = "")
         {
             SentrySdk.CaptureException(ex, scope =>
             {
-                scope.SetExtra(nameof(callerName), callerName);
-                scope.SetExtra(nameof(message), message);
+                scope.Contexts[ErrorData] = new
+                {
+                    Message = message,
+                    CallerName = callerName,
+                };
             });
         }
 
@@ -25,7 +29,11 @@ namespace Cody.Core.Logging
         {
             SentrySdk.CaptureMessage(message, scope =>
             {
-                scope.SetExtra(nameof(callerName), callerName);
+                scope.Contexts[ErrorData] = new
+                {
+                    Message = message,
+                    CallerName = callerName,
+                };
             });
         }
 
@@ -49,9 +57,10 @@ namespace Cody.Core.Logging
                         if (se.Exception?.Source?.StartsWith(CodyAssemblyPrefix) ?? false) return se;
                         if (se.Exception?.InnerException?.Source?.StartsWith(CodyAssemblyPrefix) ?? false) return se;
                         if (se.Message != null) return se;
+                        if (se.Contexts.ContainsKey(ErrorData)) return se;
                         if (se.SentryExceptions == null) return se;
 
-                        foreach(var ex in se.SentryExceptions)
+                        foreach (var ex in se.SentryExceptions)
                         {
                             if (ex.Module?.StartsWith(CodyAssemblyPrefix) ?? false) return se;
                             if (ex.Stacktrace != null)
