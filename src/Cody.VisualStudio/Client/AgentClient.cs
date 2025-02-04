@@ -78,10 +78,10 @@ namespace Cody.VisualStudio.Client
 
         private void OnDisconnected(object sender, JsonRpcDisconnectedEventArgs e)
         {
-            if(e.Exception != null)
+            if (e.Exception != null)
                 log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
             else
-                log.Info($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
+                log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
         }
 
         private void CreateAgentService()
@@ -139,7 +139,7 @@ namespace Cody.VisualStudio.Client
 
         private void DisconnectInternal()
         {
-            jsonRpc.Dispose();
+            if (!jsonRpc.IsDisposed) jsonRpc.Dispose();
             connector.ErrorReceived -= OnErrorReceived;
             connector.Disconnected -= OnAgentDisconnected;
             connector.Disconnect();

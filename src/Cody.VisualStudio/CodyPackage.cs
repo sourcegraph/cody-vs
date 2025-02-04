@@ -156,7 +156,6 @@ namespace Cody.VisualStudio
             {
                 scope.SetTag("vs", VsVersionService.DisplayVersion);
                 scope.SetTag("agent", VersionService.Agent);
-                SentrySdk.CaptureMessage("Initialized");
             });
         }
 
