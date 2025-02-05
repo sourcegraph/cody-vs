@@ -99,6 +99,15 @@ namespace Cody.Core.Infrastructure
             }
             catch (Exception ex)
             {
+                try
+                {
+                    //try to repair invalid json
+                    var customConfigurationTrial = "{" + customConfiguration + "}";
+                    var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfigurationTrial);
+                    return config;
+                }
+                catch { }
+
                 ex.Data.Add("json", customConfiguration);
                 _logger.Error("Deserializing custom configuration failed.", ex);
             }
