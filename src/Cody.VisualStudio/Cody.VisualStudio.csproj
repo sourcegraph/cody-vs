@@ -80,7 +80,14 @@
     <Compile Include="Utilities\FilePathHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\sourcegraph.png" />
+    <Content Include="Resources\Marketplace.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Resources\Preview.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="Marketplace\manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
