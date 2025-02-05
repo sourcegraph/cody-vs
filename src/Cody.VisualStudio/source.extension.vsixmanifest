@@ -3,11 +3,11 @@
     <Metadata>
         <Identity Id="Cody.VisualStudio" Version="0.1.4" Language="en-US" Publisher="sourcegraph" />
         <DisplayName>Cody for Visual Studio - AI Coding Assistant</DisplayName>
-        <Description xml:space="preserve">AI coding assistant that uses search and codebase context to help you write code faster!</Description>
+        <Description xml:space="preserve">Sourcegraph’s AI code assistant goes beyond individual dev productivity, helping enterprises achieve consistency and quality at scale with AI.</Description>
         <MoreInfo>https://sourcegraph.com/cody</MoreInfo>
         <GettingStartedGuide>https://sourcegraph.com/docs</GettingStartedGuide>
-        <Icon>Resources\Marketplace.png</Icon>
-        <PreviewImage>Resources\Preview.png</PreviewImage>
+        <Icon>Resources\sourcegraph.png</Icon>
+        <PreviewImage>Resources\sourcegraph.png</PreviewImage>
         <Tags>ai;openai;anthropic;assistant;chatbot;sourcegraph;cody;llm;ollama;c#;c++</Tags>
         <Preview>true</Preview>
     </Metadata>

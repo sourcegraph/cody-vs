@@ -1,10 +1,6 @@
 # Cody for Visual Studio
 
-Install [Cody for Visual Studio (Experimental)](https://marketplace.visualstudio.com/items?itemName=sourcegraph.cody-vs).
-
-## AI that uses your codebase as context
-
-[Cody](https://about.sourcegraph.com/cody?utm_source=marketplace.visualstudio.com&utm_medium=referral) is an AI coding assistant that helps you understand, write, and fix code faster. It uses advanced search to pull context from both local and remote codebases so that you can use context about APIs, symbols, and usage patterns from across your entire codebase at any scale, all from within VS Code. Plus, Cody Pro users can choose from the latest large language models—like GPT-4o and Claude 3.5 Sonnet and Claude 3 Opus—to customize Cody to their needs.
+Sourcegraph’s AI code assistant goes beyond individual dev productivity, helping you achieve consistency and quality at scale with AI. Sourcegraph accelerates the entire workflow for developers by providing them a more natural and intuitive way to work. Searching code, chatting with AI, invoking prompts, and using agents can now all be performed in one place with the best models available.
 
 ## Chat
 
@@ -19,19 +15,49 @@ For example, you can ask Cody:
 - "Add helpful debug log statements"
 - "Make this work" _(seriously, it often works—try it!)_
 
-## Choose Your LLM
+<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/cody-chat.gif" width="700" alt="Cody Chat">
 
-Cody offers a variety of large language models (LLMs) to power your chat experience.
-Cody Pro users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo, Google Gemini 1.5 Pro, Gemini 1.5 Flash, and Mixtral, while Cody Free users have access to the latest base models from Anthropic, OpenAI, Google, and Mixtral.
-Local models are also available through Ollama to both Cody Free and Cody Pro users. Simply download the model and run it in Ollama to use it in Cody chat.
+## Autocomplete
 
-Administrators for Sourcegraph Enterprise instances can choose between Claude and GPT models to set for their teams as well.
+Autocompletes single lines, or whole functions, in any programming language, configuration file, or documentation. It’s powered by the latest instant LLM models, for accuracy and performance.
+
+<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/cody-autocomplete.gif" width="700" alt="Cody autocomplete">
+
+## Prompts
+
+Streamline your development process by using prompts to understand, improve, fix, document, and generate unit tests for your code. You can also create your own prompts and save them in the Prompt Library to tailor Sourcegraph to your workflow.
+
+<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/2025/cody_prompt_library.png" width="700" alt="Prompts">
+
+## Works with your favorite IDEs
+
+Sourcegraph is available on the IDEs you use today. Get AI chat, autocomplete, and inline edit without changing your workflow.
+
+## The best context
+
+When tools focus solely on individual productivity, teams face inconsistent and poor-quality results. Sourcegraph focuses on team productivity using whole codebase context and shared prompts to ensure quality and consistency across your enterprise.
+
+<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/2025/context_providers.png" width="700" alt="context">
+
+## The best models
+
+Sourcegraph users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from multiple options including Claude 3.5 Sonnet, Gemini 1.5 Pro, and Mixtral 8x7B. Cody Pro users can also select Claude 3 Opus and GPT-4o. [See the full list of model options here](https://sourcegraph.com/docs/cody/capabilities/supported-models).
+
+<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/2025/llm-choices-2025.png" width="700" alt="LLM Choices">
+
+## Engineered for the enterprise
+
+Sourcegraph is built to support the needs of the largest enterprises, with flexible deployment and support for enterprise security and compliance.
 
 ## Usage
 
 This extension works for all Cody plans, including Cody Free, Cody Pro, and Cody Enterprise.
 
 You can find detailed information about Cody's available plans [on our website](https://sourcegraph.com/pricing?utm_source=marketplace.visualstudio.com&utm_medium=referral).
+
+## Programming Languages
+
+Cody works for any programming language because it uses LLMs trained on broad data. Cody works great with Python, Go, JavaScript, and TypeScript code.
 
 ### Feedback
 
