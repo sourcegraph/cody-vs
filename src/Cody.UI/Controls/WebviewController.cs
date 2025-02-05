@@ -1,3 +1,5 @@
+using Cody.Core.Common;
+using Cody.Core.Logging;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.IO;
@@ -5,8 +7,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Cody.Core.Logging;
-using Cody.Core.Common;
 
 namespace Cody.UI.Controls
 {
@@ -148,6 +148,7 @@ namespace Cody.UI.Controls
         {
             try
             {
+                if (_webview == null) return;
                 string updatedScript = e.ThemingScript;
                 if (updatedScript != _colorThemeScript)
                 {
