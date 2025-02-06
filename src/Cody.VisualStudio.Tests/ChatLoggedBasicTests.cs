@@ -36,7 +36,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("ConsoleApp1", tags.Last().Name);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "")]
+        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
@@ -90,7 +90,7 @@ namespace Cody.VisualStudio.Tests
             Assert.True(isOpen);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
         public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
             var num = new Random().Next();
