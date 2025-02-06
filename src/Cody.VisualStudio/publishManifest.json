@@ -1,21 +1,21 @@
 {
 	"$schema": "http://json.schemastore.org/vsix-publish",
 	"categories": ["Coding"],
-	"identity": {
-		"internalName": "cody-vs",
-		"description": "AI coding assistant that uses search and codebase context to help you write code faster!",
-		"tags": [
-			"ai",
-			"chatgpt",
-			"assistant",
-			"chatbot",
-			"cody",
-			"llm",
-			"c#",
-			"c++",
-			"ollama"
-		]
-	},
+  "identity": {
+    "internalName": "cody-vs",
+    "description": "Sourcegraph’s AI code assistant goes beyond individual dev productivity, helping enterprises achieve consistency and quality at scale with AI.",
+    "tags": [
+      "ai",
+      "chatgpt",
+      "assistant",
+      "chatbot",
+      "cody",
+      "llm",
+      "c#",
+      "c++",
+      "ollama"
+    ]
+  },
 	"overview": "../../README.md",
 	"priceCategory": "free",
 	"publisher": "sourcegraph",
