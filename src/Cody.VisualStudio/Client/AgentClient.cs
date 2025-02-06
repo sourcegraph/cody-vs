@@ -120,7 +120,8 @@ namespace Cody.VisualStudio.Client
         {
             DisconnectInternal();
             if (exitCode == 0) log.Info("The agent's connection has ended.");
-            else log.Error($"The agent connection unexpectedly ended with code {exitCode}.");
+            //to many calls to sentry
+            //else log.Error($"The agent connection unexpectedly ended with code {exitCode}.");
 
             if (options.RestartAgentOnFailure && exitCode != 0)
             {
