@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Language" Version="17.6.268" />
-    <PackageReference Include="StreamJsonRpc" Version="2.15.29" />
+    <PackageReference Include="StreamJsonRpc" Version="2.20.20" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
