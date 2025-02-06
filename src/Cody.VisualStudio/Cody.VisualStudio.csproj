@@ -81,7 +81,9 @@
     <Compile Include="Utilities\FilePathHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\sourcegraph.png" />
+    <Content Include="Resources\sourcegraph.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="..\CodyDevConfig.json">
       <Link>CodyDevConfig.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
