@@ -1,3 +1,7 @@
+using EnvDTE;
+using EnvDTE80;
+using Microsoft.Playwright;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,10 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.Playwright;
-using Microsoft.VisualStudio.Shell;
 using Xunit;
 using Xunit.Abstractions;
 using Window = EnvDTE.Window;
@@ -171,7 +171,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task NewChat()
         {
-            await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions {Name = "New Chat"}).ClickAsync();
+            await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "New Chat" }).ClickAsync();
 
             await Task.Delay(500);
         }
@@ -195,13 +195,15 @@ namespace Cody.VisualStudio.Tests
 
             await entryArea.FillAsync(prompt);
             await enterArea.PressAsync("Enter");
+            await Task.Delay(500);
 
-            var isStopVisible = false; 
-            while (!isStopVisible)
+            string state;
+            do
             {
-                isStopVisible = await Page.Locator("vscode-button").First.IsVisibleAsync();
+                state = await Page.Locator("button[type='submit']").Last.GetAttributeAsync("title");
                 await Task.Delay(500);
-            }
+            } while (state == "Stop");
+
             await Task.Delay(500);
 
             await DismissStartWindow();
