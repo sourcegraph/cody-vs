@@ -1,9 +1,9 @@
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.Threading;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.VisualStudio.Shell;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -21,7 +21,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "")]
         public async Task Cody_Free_Cody_Pro_Section_Is_Present()
         {
             // given
@@ -52,7 +52,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "")]
         public async Task Logins_With_GitLab_Google_Are_Present()
         {
             // given

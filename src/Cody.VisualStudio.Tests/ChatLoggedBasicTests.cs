@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "")]
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
