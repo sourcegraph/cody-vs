@@ -153,6 +153,7 @@ namespace Cody.UI.Controls
         {
             try
             {
+                if (_webview == null) return;
                 string updatedScript = e.ThemingScript;
                 if (updatedScript != _colorThemeScript)
                 {
