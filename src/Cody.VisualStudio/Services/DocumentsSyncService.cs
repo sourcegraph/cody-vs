@@ -69,7 +69,11 @@ namespace Cody.VisualStudio.Services
                     if (activeCookie != 0)
                     {
                         var path = rdt.GetDocumentInfo(activeCookie).Moniker;
-                        if (path != null) documentActions.OnFocus(path);
+                        if (path != null)
+                        {
+                            trace.TraceEvent("OnInitFocus");
+                            documentActions.OnFocus(path);
+                        }
                     }
                 }
                 finally
