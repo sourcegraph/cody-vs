@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Cody.VisualStudio.Services
 {
@@ -19,7 +20,7 @@ namespace Cody.VisualStudio.Services
         private static readonly TraceLogger trace = new TraceLogger(nameof(DocumentsSyncService));
 
         private RunningDocumentTable rdt;
-        private uint rdtCookie = 0;     
+        private uint rdtCookie = 0;
 
         private readonly IVsUIShell vsUIShell;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
@@ -30,7 +31,10 @@ namespace Cody.VisualStudio.Services
         private HashSet<uint> openNotificationSend = new HashSet<uint>();
         private HashSet<uint> isSubscribed = new HashSet<uint>();
 
-        public DocumentsSyncService(IVsUIShell vsUIShell, IDocumentSyncActions documentActions, IVsEditorAdaptersFactoryService editorAdaptersFactoryService, ILog log)
+        public DocumentsSyncService(IVsUIShell vsUIShell,
+            IDocumentSyncActions documentActions,
+            IVsEditorAdaptersFactoryService editorAdaptersFactoryService,
+            ILog log)
         {
             this.rdt = new RunningDocumentTable();
             this.vsUIShell = vsUIShell;
@@ -47,6 +51,7 @@ namespace Cody.VisualStudio.Services
 
                 try
                 {
+                    uint activeCookie = 0;
                     foreach (var frame in GetOpenDocuments())
                     {
                         if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie) != VSConstants.S_OK) continue;
@@ -57,6 +62,18 @@ namespace Cody.VisualStudio.Services
 
                         documentActions.OnOpened(path, content, null, null);
                         openNotificationSend.Add(docCookie);
+
+                        if (frame.IsOnScreen(out int onScreen) == VSConstants.S_OK && onScreen == 1) activeCookie = docCookie;
+                    }
+
+                    if (activeCookie != 0)
+                    {
+                        var path = rdt.GetDocumentInfo(activeCookie).Moniker;
+                        if (path != null)
+                        {
+                            trace.TraceEvent("OnInitFocus");
+                            documentActions.OnFocus(path);
+                        }
                     }
                 }
                 finally
@@ -120,19 +137,19 @@ namespace Cody.VisualStudio.Services
             if (ThreadHelper.CheckAccess())
             {
                 var lines = textView.TextViewLines;
-                if(lines != null && lines.IsValid)
+                if (lines != null && lines.IsValid)
                 {
                     try
                     {
                         firstVisiblePosition = ToDocumentPosition(lines.FirstVisibleLine.Start);
                         lastVisiblePosition = ToDocumentPosition(lines.LastVisibleLine.End);
                     }
-                    catch(ObjectDisposedException)
+                    catch (ObjectDisposedException)
                     {
                         return null;
                     }
                 }
-                else return null;              
+                else return null;
             }
             else return null;
 
@@ -158,7 +175,7 @@ namespace Cody.VisualStudio.Services
             }
             else return null;
 
-            if(start.Line > end.Line || (start.Line == end.Line && start.Column > end.Column)) swap = true;
+            if (start.Line > end.Line || (start.Line == end.Line && start.Column > end.Column)) swap = true;
 
             return new DocumentRange
             {
@@ -217,7 +234,7 @@ namespace Cody.VisualStudio.Services
                 if (!isSubscribed.Contains(docCookie))
                 {
                     trace.TraceEvent("OnSubscribeDocument", path);
-                    
+
                     var textView = GetVsTextView(pFrame);
                     if (textView != null)
                     {
@@ -303,7 +320,7 @@ namespace Cody.VisualStudio.Services
                 var textView = ((ITextSelection)sender).TextView;
 
                 var path = GetFilePath(textView);
-                if(path == null) return;
+                if (path == null) return;
                 var selection = GetDocumentSelection(textView);
                 var visibleRange = GetVisibleRange(textView);
 
@@ -319,7 +336,7 @@ namespace Cody.VisualStudio.Services
         private IEnumerable<DocumentChange> GetContentChanges(INormalizedTextChangeCollection textChanges, ITextSnapshot beforeSnapshot)
         {
             var results = new List<DocumentChange>();
-            
+
             foreach (var change in textChanges)
             {
                 var start = ToDocumentPosition(beforeSnapshot, change.OldPosition);
