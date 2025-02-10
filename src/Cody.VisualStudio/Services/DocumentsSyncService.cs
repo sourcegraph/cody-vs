@@ -59,6 +59,7 @@ namespace Cody.VisualStudio.Services
                         var path = rdt.GetDocumentInfo(docCookie).Moniker;
                         if (path == null) continue;
                         var content = rdt.GetRunningDocumentContents(docCookie);
+                        if (content == null) continue; //document that does not contain any text ex. jpeg
 
                         documentActions.OnOpened(path, content, null, null);
                         openNotificationSend.Add(docCookie);
@@ -199,7 +200,7 @@ namespace Cody.VisualStudio.Services
         int IVsRunningDocTableEvents.OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining)
         {
             trace.TraceEvent("OnBeforeLastDocumentUnlock");
-            if (dwReadLocksRemaining == 0 && dwEditLocksRemaining == 0)
+            if (dwReadLocksRemaining == 0 && dwEditLocksRemaining == 0 && openNotificationSend.Contains(docCookie))
             {
                 var path = rdt.GetDocumentInfo(docCookie).Moniker;
                 if (path == null) return VSConstants.S_OK;
@@ -214,10 +215,14 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnAfterSave(uint docCookie)
         {
-            var path = rdt.GetDocumentInfo(docCookie).Moniker;
-            if (path == null) return VSConstants.S_OK;
-            trace.TraceEvent("OnAfterSave", path);
-            documentActions.OnSaved(path);
+            if (openNotificationSend.Contains(docCookie))
+            {
+                var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                if (path == null) return VSConstants.S_OK;
+                trace.TraceEvent("OnAfterSave", path);
+                documentActions.OnSaved(path);
+            }
+
             return VSConstants.S_OK;
         }
 
@@ -235,6 +240,9 @@ namespace Cody.VisualStudio.Services
                 {
                     trace.TraceEvent("OnSubscribeDocument", path);
 
+                    var content = rdt.GetRunningDocumentContents(docCookie);
+                    if (content == null) return VSConstants.S_OK;
+
                     var textView = GetVsTextView(pFrame);
                     if (textView != null)
                     {
@@ -245,7 +253,7 @@ namespace Cody.VisualStudio.Services
 
                             if (!openNotificationSend.Contains(docCookie))
                             {
-                                var content = rdt.GetRunningDocumentContents(docCookie);
+
                                 var docRange = GetDocumentSelection(wpfTextView);
                                 var visibleRange = GetVisibleRange(wpfTextView);
 
