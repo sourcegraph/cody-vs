@@ -2,6 +2,7 @@ using Cody.Core.Common;
 using Sentry;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,7 @@ namespace Cody.Core.Logging
     {
         public const string CodyAssemblyPrefix = "Cody.";
         public const string ErrorData = "ErrorData";
+        public const int DaysToLogToSentry = 180;
 
         public void Error(string message, Exception ex, [CallerMemberName] string callerName = "")
         {
@@ -37,11 +39,41 @@ namespace Cody.Core.Logging
             });
         }
 
+        private static DateTime GetLinkerBuildTime(Assembly assembly)
+        {
+            try
+            {
+                var filePath = assembly.Location;
+                const int PeHeaderOffset = 60;
+                const int LinkerTimestampOffset = 8;
+
+                var buffer = new byte[2048];
+
+                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    stream.Read(buffer, 0, buffer.Length);
+
+                var offset = BitConverter.ToInt32(buffer, PeHeaderOffset);
+                var secondsSince1970 = BitConverter.ToInt32(buffer, offset + LinkerTimestampOffset);
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+                var linkTimeUtc = epoch.AddSeconds(secondsSince1970);
+                return linkTimeUtc;
+            }
+            catch
+            {
+                return DateTime.Now;
+            }
+        }
+
         public static void Initialize()
         {
             if (!Configuration.IsDebug && !Debugger.IsAttached)
             {
-                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                var assembly = Assembly.GetExecutingAssembly();
+                var buildDate = GetLinkerBuildTime(assembly);
+                if (Math.Abs((DateTime.UtcNow - buildDate).Days) > DaysToLogToSentry) return;
+
+                var version = assembly.GetName().Version;
                 string env = "dev";
                 if (version.Minor != 0) env = version.Minor % 2 != 0 ? "preview" : "production";
 
