@@ -54,7 +54,8 @@ namespace Cody.VisualStudio.Services
                     uint activeCookie = 0;
                     foreach (var frame in GetOpenDocuments())
                     {
-                        if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie) != VSConstants.S_OK) continue;
+                        if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie) !=
+                            VSConstants.S_OK) continue;
                         var docCookie = (uint)(int)cookie;
                         var path = rdt.GetDocumentInfo(docCookie).Moniker;
                         if (path == null) continue;
@@ -63,7 +64,8 @@ namespace Cody.VisualStudio.Services
                         documentActions.OnOpened(path, content, null, null);
                         openNotificationSend.Add(docCookie);
 
-                        if (frame.IsOnScreen(out int onScreen) == VSConstants.S_OK && onScreen == 1) activeCookie = docCookie;
+                        if (frame.IsOnScreen(out int onScreen) == VSConstants.S_OK && onScreen == 1)
+                            activeCookie = docCookie;
                     }
 
                     if (activeCookie != 0)
@@ -75,6 +77,10 @@ namespace Cody.VisualStudio.Services
                             documentActions.OnFocus(path);
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Initialization failed.", ex);
                 }
                 finally
                 {
