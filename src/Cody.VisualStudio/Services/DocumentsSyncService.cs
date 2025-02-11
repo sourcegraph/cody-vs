@@ -76,6 +76,10 @@ namespace Cody.VisualStudio.Services
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    log.Error("Initialization failed.", ex);
+                }
                 finally
                 {
                     rdtCookie = rdt.Advise(this);
