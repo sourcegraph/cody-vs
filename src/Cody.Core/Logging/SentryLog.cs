@@ -50,7 +50,9 @@ namespace Cody.Core.Logging
                 var buffer = new byte[2048];
 
                 using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
                     stream.Read(buffer, 0, buffer.Length);
+                }
 
                 var offset = BitConverter.ToInt32(buffer, PeHeaderOffset);
                 var secondsSince1970 = BitConverter.ToInt32(buffer, offset + LinkerTimestampOffset);
@@ -61,7 +63,7 @@ namespace Cody.Core.Logging
             }
             catch
             {
-                return DateTime.Now;
+                return DateTime.UtcNow;
             }
         }
 
