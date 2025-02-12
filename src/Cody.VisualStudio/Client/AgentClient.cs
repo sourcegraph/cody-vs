@@ -6,6 +6,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Client
@@ -129,6 +130,8 @@ namespace Cody.VisualStudio.Client
 
                 Start();
             }
+
+            Debug.Assert(false, $"OnAgentDisconnected exitCode: {exitCode}");
         }
 
         public void Stop()
