@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -52,6 +53,7 @@ namespace Cody.VisualStudio.Services
                 try
                 {
                     uint activeCookie = 0;
+                    AssertThatNoOpenedDocuments();
                     foreach (var frame in GetOpenDocuments())
                     {
                         if (frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocCookie, out object cookie) != VSConstants.S_OK) continue;
@@ -86,6 +88,12 @@ namespace Cody.VisualStudio.Services
                     rdtCookie = rdt.Advise(this);
                 }
             });
+        }
+
+        private void AssertThatNoOpenedDocuments()
+        {
+            Debug.Assert(openNotificationSend.Count == 0, $"{nameof(openNotificationSend)} is {openNotificationSend}, but it should be ZERO!");
+            Debug.Assert(isSubscribed.Count == 0, $"{nameof(isSubscribed)} is {isSubscribed}, but it should be ZERO!");
         }
 
         private IVsTextView GetVsTextView(IVsWindowFrame windowFrame)
