@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
@@ -68,9 +68,6 @@
     <Compile Include="Services\SecretStorageService.cs" />
     <Compile Include="Services\DocumentsSyncService.cs" />
     <Compile Include="Services\FileService.cs" />
-    <Compile Include="Services\OptionsPage.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Services\ProgressService.cs" />
     <Compile Include="Services\SolutionService.cs" />
     <Compile Include="Services\TestingSupportService.cs" />
