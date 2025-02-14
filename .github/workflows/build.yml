@@ -2,7 +2,7 @@ name: Build and test extension
 
 on:
   push:
-    branches: [main]
+    branches: [piotr/ci-open-solution-fix]
   pull_request:
     branches: [main]
 

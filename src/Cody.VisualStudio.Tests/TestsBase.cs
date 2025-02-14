@@ -81,16 +81,30 @@ namespace Cody.VisualStudio.Tests
         protected async Task OpenSolution(string path)
         {
             var tcs = new TaskCompletionSource<bool>();
-            EventHandler handler = (sender, e) => tcs.TrySetResult(true);
+            EventHandler handler =  (sender, e) =>
+            {
+                tcs.TrySetResult(true);
+                //var test = CodyPackage.DocumentsSyncService;
+                //await test.DocumentsInitialized;
+                ;
+            };
             //SolutionEvents.OnAfterBackgroundSolutionLoadComplete += handler;
-            CodyPackage.DocumentsSyncService.Initialized += handler;
+            //CodyPackage.DocumentsSyncService.Initialized += handler;
 
             WriteLog($"Opening solution '{path}' ...");
             Dte.Solution.Open(path);
 
-            await tcs.Task;
+            while (CodyPackage.DocumentsSyncService == null)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+
+            //await CodyPackage.DocumentsSyncService.DocumentsInitialized.Task;
+            await Task.Delay(TimeSpan.FromSeconds(1));
+
+            //await tcs.Task;
             //SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= handler;
-            CodyPackage.DocumentsSyncService.Initialized -= handler;
+            //CodyPackage.DocumentsSyncService.Initialized -= handler;
         }
 
         protected void CloseSolution() => Dte.Solution.Close();
