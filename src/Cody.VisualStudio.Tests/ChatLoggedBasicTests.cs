@@ -34,8 +34,6 @@ namespace Cody.VisualStudio.Tests
 
             // then
             Assert.Equal("ConsoleApp1", tags.Last().Name);
-
-            //await Task.Delay(TimeSpan.FromDays(1));
         }
 
         [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
