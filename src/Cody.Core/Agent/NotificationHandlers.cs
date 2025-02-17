@@ -5,6 +5,7 @@ using Cody.Core.Settings;
 using Cody.Core.Trace;
 using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
+using Sentry;
 using System;
 using System.Threading.Tasks;
 
@@ -64,6 +65,7 @@ namespace Cody.Core.Agent
         {
             //_logger.Debug($"[{channel} {message}]");
             trace.TraceEvent("AgentDebug", message);
+            SentrySdk.AddBreadcrumb(message, "DebugFromAgent", "debug");
         }
 
         [AgentCallback("webview/registerWebview")]
