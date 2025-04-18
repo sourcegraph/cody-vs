@@ -17,7 +17,7 @@
             </Grid.RowDefinitions>
 
 
-            <wpf:WebView2 Name="webView" Grid.Row="1" Loaded="InitWebView2"
+            <local:CodyWebView2 x:Name="webView" Grid.Row="1" Loaded="InitWebView2"
               
             />
         </Grid>
