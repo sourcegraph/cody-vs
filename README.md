@@ -15,19 +15,17 @@ For example, you can ask Cody:
 - "Add helpful debug log statements"
 - "Make this work" _(seriously, it often works—try it!)_
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/cody-chat.gif" width="700" alt="Cody Chat">
-
 ## Autocomplete
 
 Autocompletes single lines, or whole functions, in any programming language, configuration file, or documentation. It’s powered by the latest instant LLM models, for accuracy and performance.
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/cody-autocomplete.gif" width="700" alt="Cody autocomplete">
+<img src="https://storage.googleapis.com/sourcegraph-assets/vs-marketplace/autocomplete-vs-2.gif" width="700" alt="Cody autocomplete">
 
 ## Prompts
 
 Streamline your development process by using prompts to understand, improve, fix, document, and generate unit tests for your code. You can also create your own prompts and save them in the Prompt Library to tailor Sourcegraph to your workflow.
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/2025/cody_prompt_library.png" width="700" alt="Prompts">
+<img src="https://storage.googleapis.com/sourcegraph-assets/vs-marketplace/prompts-vs.jpg" width="700" alt="Prompts">
 
 ## Works with your favorite IDEs
 
@@ -37,13 +35,13 @@ Sourcegraph is available on the IDEs you use today. Get AI chat, autocomplete, a
 
 When tools focus solely on individual productivity, teams face inconsistent and poor-quality results. Sourcegraph focuses on team productivity using whole codebase context and shared prompts to ensure quality and consistency across your enterprise.
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/2025/context_providers.png" width="700" alt="context">
+<img src="https://storage.googleapis.com/sourcegraph-assets/vs-marketplace/context-vs.jpg" width="700" alt="context">
 
 ## The best models
 
-Sourcegraph users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from multiple options including Claude 3.5 Sonnet, Gemini 1.5 Pro, and Mixtral 8x7B. Cody Pro users can also select Claude 3 Opus and GPT-4o. [See the full list of model options here](https://sourcegraph.com/docs/cody/capabilities/supported-models).
+Sourcegraph users can select the LLM they want to use for chat and experiment to choose the best model for the job. Choose from multiple options including Claude, Gemini Pro, and OpenAI's GPT. [See the full list of model options here](https://sourcegraph.com/docs/cody/capabilities/supported-models).
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/vscode-marketplace/2025/llm-choices-2025.png" width="700" alt="LLM Choices">
+<img src="https://storage.googleapis.com/sourcegraph-assets/vs-marketplace/models-vs.jpg" width="700" alt="LLM Choices">
 
 ## Engineered for the enterprise
 
