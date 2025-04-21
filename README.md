@@ -19,7 +19,7 @@ For example, you can ask Cody:
 
 Autocompletes single lines, or whole functions, in any programming language, configuration file, or documentation. It’s powered by the latest instant LLM models, for accuracy and performance.
 
-<img src="https://storage.googleapis.com/sourcegraph-assets/vs-marketplace/autocomplete-vs-2.gif" width="700" alt="Cody autocomplete">
+<img src="https://storage.googleapis.com/sourcegraph-assets/vs-marketplace/autocomplete-vs-4.gif" width="650" alt="Cody autocomplete">
 
 ## Prompts
 
