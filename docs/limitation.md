@@ -10,10 +10,6 @@ This document outlines the current limitations in the editor's implementation.
 
 ## Features Not Yet Supported
 
-### Autocompletion
-
-The editor currently does not support autocompletion functionality.
-
 ### Inline Editing
 
 Inline editing capabilities are not available in the current version.

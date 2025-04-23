@@ -65,7 +65,7 @@ Use the following checklist to track your progress through the test plan:
 - Activation
   - [ ] [Authentication](#authentication)
 - Autocomplete
-  - [ ] Not available
+  - [ ] [Autocomplete](#autocomplete)
 - Chat
   - [ ] [Chat View](#chat-view)
   - [ ] [Context](#context)
@@ -88,7 +88,7 @@ Use the following checklist to track your progress through the test plan:
 
 ## Autocomplete
 
-Verify that Autocomplete is not available (expected behavior).
+Autocomplete is supported and should show suggestion as grey text when typing. Use `Tab` to accept a suggestion. Supported from Visual Studio version 17.6+ onward.
 
 ## Chat
 
