@@ -42,4 +42,4 @@ The detailed logging configuration can be turned on by adding `CODY_VS_DEV_CONFI
 
 Two additional output panes, `Cody Agent` and `Cody Notifications` will be created with more detailed logs. More information how to [configure them](https://github.com/sourcegraph/cody-vs/blob/main/CONTRIBUTING.md#developer-configuration-file)
 
-![Cody output panes](/images/Cody-output-panes.png)
+![Cody output panes](./images/Cody-output-panes.png)
