@@ -28,7 +28,7 @@ Autocomplete is supported from Visual Studio 17.6+ and includes support for the 
 5. CSS
 6. JSON
 
-#### Non-trusted certificates 
+#### Non-trusted certificates
 
 If autocomplete still doesn't work (or the Cody Chat), you could try **turning on** the option to `accept non-trusted certificates` (requires Visual Studio restart). This should help, especially in enterprise settings if you are behind a firewall.
 
@@ -36,7 +36,7 @@ If autocomplete still doesn't work (or the Cody Chat), you could try **turning o
 
 ### Detailed debugging logs
 
-The detailed logging configuration can be turned on by adding `CODY_VS_DEV_CONFIG` environment variable containing the full path to [the configuration file](https://github.com/sourcegraph/cody-vs/blob/main/src/CodyDevConfig.json) placed somewhere in the filesystem.
+The detailed logging configuration can be turned on by adding the `CODY_VS_DEV_CONFIG` environment variable containing the full path to [the configuration file](https://github.com/sourcegraph/cody-vs/blob/main/src/CodyDevConfig.json) placed somewhere in the filesystem.
 
 ![Detailed logs](./images/Detailed-logs.png)
 
