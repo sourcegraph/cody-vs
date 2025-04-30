@@ -53,6 +53,16 @@ namespace Cody.Core.Settings
             set => Set(nameof(AnonymousUserID), value);
         }
 
+        public bool LastTimeAuthorized
+        {
+            get
+            {
+                var value = GetOrDefault(nameof(LastTimeAuthorized), true.ToString()); // setting default value to true to trigger opening Cody Tool Window after first install
+                return bool.Parse(value);
+            }
+            set => Set(nameof(LastTimeAuthorized), value.ToString());
+        }
+
         public string DefaultServerEndpoint => "https://sourcegraph.com/";
 
         public string AccessToken
