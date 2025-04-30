@@ -12,5 +12,6 @@ namespace Cody.Core.Settings
         bool AcceptNonTrustedCert { get; set; }
         bool AutomaticallyTriggerCompletions { get; set; }
         bool ForceAccessTokenForUITests { get; set; }
+        bool LastTimeAuthorized { get; set; }
     }
 }

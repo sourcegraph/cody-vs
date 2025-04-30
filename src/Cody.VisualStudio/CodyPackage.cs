@@ -216,12 +216,24 @@ namespace Cody.VisualStudio
 
                 UpdateCurrentWorkspaceFolder();
 
+                if (!status.Authenticated && UserSettingsService.LastTimeAuthorized)
+                    await ShowToolWindowWhenLoggedOut();
+
+                if (status.Authenticated)
+                    UserSettingsService.LastTimeAuthorized = true;
+
                 Logger.Debug($"Auth status: Authenticated: {status.Authenticated}");
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed.", ex);
             }
+        }
+
+        private async Task ShowToolWindowWhenLoggedOut()
+        {
+            Logger.Debug($"Logout detected. Showing tool window ...");
+            await ShowToolWindowAsync();
         }
 
         private async Task InitOleMenu()
@@ -253,7 +265,7 @@ namespace Cody.VisualStudio
         {
             try
             {
-                Logger.Debug("Toggling Tool Window ...");
+                Logger.Debug("Showing Tool Window ...");
                 var window = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
                 if (window?.Frame is IVsWindowFrame windowFrame)
                 {
@@ -307,26 +319,39 @@ namespace Cody.VisualStudio
             }
         }
 
-        private void OnAgentInitialized(object sender, ServerInfo e)
+        private async void OnAgentInitialized(object sender, ServerInfo e)
         {
-            if (e.Authenticated == true)
+            try
             {
-                StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
-
-                Logger.Info("Authenticated.");
-
-                SentrySdk.ConfigureScope(scope =>
+                if (e.Authenticated == true)
                 {
-                    scope.User = new SentryUser
+                    StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
+
+                    Logger.Info("Authenticated.");
+                    UserSettingsService.LastTimeAuthorized = true;
+                    SentrySdk.ConfigureScope(scope =>
                     {
-                        Email = e.AuthStatus.PrimaryEmail,
-                        Username = e.AuthStatus.Username,
-                    };
-                });
+                        scope.User = new SentryUser
+                        {
+                            Email = e.AuthStatus.PrimaryEmail,
+                            Username = e.AuthStatus.Username,
+                        };
+                    });
+                }
+                else
+                {
+                    Logger.Warn("Authentication failed. Please check the validity of the access token.");
+                    if (UserSettingsService.LastTimeAuthorized)
+                    {
+                        // show tool window only once, when user was logged out between IDE restarts
+                        await ShowToolWindowWhenLoggedOut();
+                        UserSettingsService.LastTimeAuthorized = false;
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Logger.Warn("Authentication failed. Please check the validity of the access token.");
+                Logger.Error("Failed.", ex);
             }
         }
 
