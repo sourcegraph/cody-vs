@@ -219,8 +219,7 @@ namespace Cody.VisualStudio
                 if (!status.Authenticated && UserSettingsService.LastTimeAuthorized)
                     await ShowToolWindowWhenLoggedOut();
 
-                if (status.Authenticated)
-                    UserSettingsService.LastTimeAuthorized = true;
+                UserSettingsService.LastTimeAuthorized = status.Authenticated;
 
                 Logger.Debug($"Auth status: Authenticated: {status.Authenticated}");
             }
