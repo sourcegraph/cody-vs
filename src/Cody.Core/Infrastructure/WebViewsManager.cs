@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Cody.Core.Agent;
@@ -138,7 +139,7 @@ namespace Cody.Core.Infrastructure
 
                 var nowTime = DateTime.Now;
                 var currentSpan = nowTime - startTime;
-                if (currentSpan >= _agentInitializationTimeout)
+                if (currentSpan >= _agentInitializationTimeout && !Debugger.IsAttached)
                 {
                     var message = $"Agent initialization timeout! Waiting for more than {currentSpan.TotalSeconds} s.";
                     _logger.Error(message);

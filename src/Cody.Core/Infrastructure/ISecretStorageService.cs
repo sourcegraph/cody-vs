@@ -8,7 +8,5 @@ namespace Cody.Core.Infrastructure
         string Get(string key);
         void Delete(string key);
         string AccessToken { get; set; }
-
-        event EventHandler AuthorizationDetailsChanged;
     }
 }

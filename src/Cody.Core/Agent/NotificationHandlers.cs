@@ -27,6 +27,7 @@ namespace Cody.Core.Agent
 
         public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
 
+        public event EventHandler<ProtocolAuthStatus> AuthorizationDetailsChanged;
         public event EventHandler<string> OnRegisterWebViewRequest;
         public event EventHandler OnOptionsPageShowRequest;
         public event EventHandler OnFocusSidebarRequest;
@@ -222,6 +223,19 @@ namespace Cody.Core.Agent
         public void FocusSidebar(object param)
         {
             OnFocusSidebarRequest?.Invoke(this, EventArgs.Empty);
+        }
+
+        [AgentCallback("authStatus/didUpdate", deserializeToSingleObject: true)]
+        public void AuthStatusDidUpdate(ProtocolAuthStatus authStatus)
+        {
+            _logger.Debug($"Pending validation: {authStatus.PendingValidation}");
+
+            if (authStatus.PendingValidation)
+                return;
+
+            _logger.Debug($"Authenticated: {authStatus.Authenticated}");
+
+            AuthorizationDetailsChanged?.Invoke(this, authStatus);
         }
     }
 }
