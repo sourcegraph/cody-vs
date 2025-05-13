@@ -14,8 +14,6 @@ namespace Cody.VisualStudio.Services
         private readonly string UserName = "CodyAgent";
         private readonly string Type = "token";
 
-        public event EventHandler AuthorizationDetailsChanged;
-
         public SecretStorageService(IVsCredentialStorageService secretStorageService, ILog logger)
         {
             _secretStorageService = secretStorageService;
@@ -32,9 +30,6 @@ namespace Cody.VisualStudio.Services
                 var value = credential?.TokenValue;
                 //_logger.Debug($"Get '{key}':{value}");
 
-                if (IsEndpoint(key))
-                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
-
                 return value;
             }
             catch (Exception ex)
@@ -44,29 +39,6 @@ namespace Cody.VisualStudio.Services
 
             return null;
 
-        }
-
-        private bool IsEndpoint(string key)
-        {
-            try
-            {
-                var isUri = IsValidUri(key);
-                if (isUri)
-                {
-                    _logger.Debug($"Detected Uri:'{key}'");
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed.", ex);
-            }
-
-            return false;
-        }
-        private bool IsValidUri(string uriString)
-        {
-            return Uri.TryCreate(uriString, UriKind.Absolute, out _);
         }
 
         public void Set(string key, string value)
@@ -115,9 +87,6 @@ namespace Cody.VisualStudio.Services
             {
                 var oldAccessToken = AccessToken;
                 Set(AccessTokenKey, value);
-
-                if (oldAccessToken != value)
-                    AuthorizationDetailsChanged?.Invoke(this, EventArgs.Empty);
             }
         }
     }

@@ -120,7 +120,6 @@ namespace Cody.VisualStudio
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
-            SecretStorageService.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
@@ -134,6 +133,7 @@ namespace Cody.VisualStudio
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
+            NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
@@ -200,7 +200,7 @@ namespace Cody.VisualStudio
             }
         }
 
-        private async void AuthorizationDetailsChanged(object sender, EventArgs eventArgs)
+        private async void AuthorizationDetailsChanged(object sender, ProtocolAuthStatus status)
         {
             try
             {
@@ -210,9 +210,6 @@ namespace Cody.VisualStudio
                     Logger.Debug("Not changed.");
                     return;
                 }
-
-                var config = ConfigurationService.GetConfiguration();
-                var status = await AgentService.ConfigurationChange(config);
 
                 UpdateCurrentWorkspaceFolder();
 

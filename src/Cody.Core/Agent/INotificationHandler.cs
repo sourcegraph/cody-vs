@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Cody.Core.Agent.Protocol;
 
 namespace Cody.Core.Agent
 {
@@ -10,5 +7,6 @@ namespace Cody.Core.Agent
     {
         event EventHandler OnOptionsPageShowRequest;
         event EventHandler<string> OnRegisterWebViewRequest;
+        event EventHandler<ProtocolAuthStatus> AuthorizationDetailsChanged;
     }
 }
