@@ -4,7 +4,6 @@ using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ using System.Windows;
 using System.Windows.Interop;
 using Xunit;
 using Xunit.Abstractions;
-using Window = EnvDTE.Window;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -171,14 +169,15 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task NewChat()
         {
-            await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "New Chat" }).ClickAsync();
+            await Page.ClickAsync("[data-testid='new-chat-button']");
 
             await Task.Delay(500);
         }
 
         protected async Task ShowHistoryTab()
         {
-            await Page.GetByTestId("tab-history").ClickAsync();
+            await Page.ClickAsync("[data-testid='tab-history']");
+
             await Task.Delay(500);
         }
 
@@ -209,14 +208,14 @@ namespace Cody.VisualStudio.Tests
             await DismissStartWindow();
         }
 
-        protected async Task<string[]> GetTodayChatHistory()
+        protected async Task<bool> IsPresentInHistory(string entry)
         {
-            var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
+            var todaySection = await Page.QuerySelectorAsync($"div[data-value*='{entry}']");
 
-            return (await todaySection.QuerySelectorAllAsync("button span"))
-                .Select(async x => await x.TextContentAsync())
-                .Select(x => x.Result)
-                .ToArray();
+            if (todaySection != null)
+                return true;
+
+            return false;
         }
 
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()

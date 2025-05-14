@@ -23,7 +23,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
@@ -31,12 +31,13 @@ namespace Cody.VisualStudio.Tests
 
             // when
             var tags = await GetChatContextTags();
+            var projectName = tags.ElementAt(1).Name;
 
             // then
-            Assert.Equal("ConsoleApp1", tags.Last().Name);
+            Assert.Equal("ConsoleApp1", projectName);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
@@ -57,7 +58,38 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Active_File_Name_And_Line_Selection_Is_Changing_In_Chat_Input()
+        {
+            // given
+            await NewChat();
+
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
+
+            // when
+            const int startLine = 7; const int endLine = 13;
+            var filePath = SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs");
+            await OpenDocument(filePath, startLine, endLine);
+            var tags = await GetChatContextTags();
+
+            var nameTag = tags.First().Name;
+            var secondTag = tags.ElementAt(1);
+            Assert.Equal("Manager.cs", nameTag);
+            Assert.Equal(startLine, secondTag.StartLine);
+            Assert.Equal(endLine, secondTag.EndLine);
+
+            const int changedStartLine = 16; const int changedEndLine = 20;
+            await OpenDocument(filePath, changedStartLine, changedEndLine);
+            tags = await GetChatContextTags();
+            secondTag = tags.ElementAt(1);
+
+            // then
+            Assert.Equal(changedStartLine, secondTag.StartLine);
+            Assert.Equal(changedEndLine, secondTag.EndLine);
+
+        }
+
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
@@ -66,16 +98,12 @@ namespace Cody.VisualStudio.Tests
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
-            const int startLine = 2; const int endLine = 3;
-            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Program.cs"), startLine, endLine);
+            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Program.cs"));
             var tags = await GetChatContextTags();
 
             // then
             var firstTagName = tags.First().Name;
-            var secondTag = tags.ElementAt(1);
             Assert.Equal("Program.cs", firstTagName);
-            Assert.Equal(startLine, secondTag.StartLine);
-            Assert.Equal(endLine, secondTag.EndLine);
         }
 
         [VsFact(Version = VsVersion.VS2022)]
@@ -90,18 +118,22 @@ namespace Cody.VisualStudio.Tests
             Assert.True(isOpen);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
+            //given
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";
 
             await EnterChatTextAndSend(prompt);
 
+            // when
             await ShowHistoryTab();
-            var chatHistoryEntries = await GetTodayChatHistory();
+            var isPresentInHistory = await IsPresentInHistory(num.ToString());
 
-            Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
+            // then
+
+            Assert.True(isPresentInHistory);
         }
 
         public void Dispose()
