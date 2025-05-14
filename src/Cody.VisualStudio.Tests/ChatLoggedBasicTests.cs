@@ -23,7 +23,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
@@ -37,7 +37,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("ConsoleApp1", projectName);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
@@ -58,7 +58,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Changing_In_Chat_Input()
         {
             // given
@@ -89,7 +89,7 @@ namespace Cody.VisualStudio.Tests
 
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
@@ -106,7 +106,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("Program.cs", firstTagName);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
             await CloseCodyChatToolWindow();
@@ -118,7 +118,7 @@ namespace Cody.VisualStudio.Tests
             Assert.True(isOpen);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
             //given

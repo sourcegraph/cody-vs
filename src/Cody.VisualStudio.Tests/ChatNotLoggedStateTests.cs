@@ -21,7 +21,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Cody_Free_Cody_Pro_Section_Is_Present()
         {
             // given
