@@ -319,9 +319,9 @@ namespace Cody.VisualStudio
         {
             try
             {
-                if (e.Authenticated == true)
+                if (e.Authenticated == true && e.AuthStatus is ProtocolAuthenticatedAuthStatus status)
                 {
-                    StatusbarService.SetText($"Hello {e.AuthStatus.DisplayName}! Press Alt + L to open Cody Chat.");
+                    StatusbarService.SetText($"Hello {status.DisplayName}! Press Alt + L to open Cody Chat.");
 
                     Logger.Info("Authenticated.");
                     UserSettingsService.LastTimeAuthorized = true;
@@ -329,14 +329,19 @@ namespace Cody.VisualStudio
                     {
                         scope.User = new SentryUser
                         {
-                            Email = e.AuthStatus.PrimaryEmail,
-                            Username = e.AuthStatus.Username,
+                            Email = status.PrimaryEmail,
+                            Username = status.Username,
                         };
                     });
                 }
                 else
                 {
                     Logger.Warn("Authentication failed. Please check the validity of the access token.");
+                    if (e.AuthStatus is ProtocolUnauthenticatedAuthStatus unauth && unauth.Error != null)
+                    {
+                        Logger.Warn(unauth.Error.Message);
+                    }
+
                     if (UserSettingsService.LastTimeAuthorized)
                     {
                         // show tool window only once, when user was logged out between IDE restarts

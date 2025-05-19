@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Runtime.Serialization;
 
 
@@ -11,7 +9,6 @@ namespace Cody.Core.Agent.Protocol
     [JsonConverter(typeof(ProtocolAuthStatusConverter))]
     public abstract class ProtocolAuthStatus
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public StatusEnum Status { get; set; }
 
         public bool Authenticated { get; set; }
@@ -43,7 +40,7 @@ namespace Cody.Core.Agent.Protocol
 
         public string AvatarURL { get; set; }
 
-        public List<OrganizationsParams> Organizations { get; set; }
+        public OrganizationsParams[] Organizations { get; set; }
     }
 
     public class ProtocolUnauthenticatedAuthStatus : ProtocolAuthStatus
@@ -88,12 +85,18 @@ namespace Cody.Core.Agent.Protocol
 
     public class OrganizationsParams
     {
-        // not used
+        public string Name { get; set; }
+        public string Id { get; set; }
     }
 
     public class AuthError
     {
-        // not used
+        public string Name { get; set; }
+        public string Message { get; set; }
+        public string Stack { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public bool ShowTryAgain { get; set; }
     }
 
 
