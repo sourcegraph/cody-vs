@@ -22,8 +22,7 @@ namespace Cody.VisualStudio.Tests
                 await WaitForPlaywrightAsync();
             });
         }
-
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
         {
             // given
