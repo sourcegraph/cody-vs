@@ -82,6 +82,33 @@ namespace Cody.VisualStudio.Tests
             }
         }
 
+        protected async Task WaitForCodyFullyInitialization()
+        {
+            WriteLog("Waiting for Cody chat to be fully initialized...");
+            await WaitForAsync(async () =>
+            {
+                try
+                {
+                    var loadingElement = await Page.QuerySelectorAsync("text=Loading");
+                    if (loadingElement != null)
+                    {
+                        WriteLog("'Loading' text found, waiting for it to disappear...");
+
+                        return false;
+                    }
+
+                    WriteLog("'Loading' text not found, Cody is already initialized.");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteLog($"Error while waiting for 'Loading' text to disappear: {ex.Message}");
+                }
+
+                return true;
+            });
+        }
+
         protected async Task WaitForPlaywrightAsync()
         {
             await InitializeAsync();

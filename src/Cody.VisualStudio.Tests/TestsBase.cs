@@ -100,18 +100,18 @@ namespace Cody.VisualStudio.Tests
                 try
                 {
                     var solutionService = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
-                    if (solutionService == null) return false;
+                    if (solutionService == null) return Task.FromResult(false);
 
                     solutionService.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object isOpen);
                     solutionService.GetProperty((int)__VSPROPID4.VSPROPID_IsSolutionFullyLoaded, out object isFullyLoaded);
                     var areProjectsAccessible = Dte.Solution.Projects.Count > 0;
                     
                     WriteLog($"Solution status: Open={isOpen}, FullyLoaded={isFullyLoaded}, ProjectsAccessible={areProjectsAccessible}");
-                    return (bool)isOpen && (bool)isFullyLoaded && areProjectsAccessible;
+                    return Task.FromResult((bool)isOpen && (bool)isFullyLoaded && areProjectsAccessible);
                 }
                 catch (Exception ex) {
                     WriteLog($"Exception while checking solution status: {ex.Message}");
-                    return false;
+                    return Task.FromResult(false);
                 }
             });
             
@@ -151,7 +151,7 @@ namespace Cody.VisualStudio.Tests
 
             windowFrame.Show();
 
-            await WaitForAsync(() => CodyPackage.MainViewModel.IsChatLoaded);
+            await WaitForAsync(() => Task.FromResult(CodyPackage.MainViewModel.IsChatLoaded));
         }
 
         protected async Task CloseCodyChatToolWindow()
@@ -183,11 +183,11 @@ namespace Cody.VisualStudio.Tests
             return codyPackage;
         }
 
-        protected async Task WaitForAsync(Func<bool> condition)
+        protected async Task WaitForAsync(Func<Task<bool>> condition)
         {
             var startTime = DateTime.Now;
             var timeout = TimeSpan.FromMinutes(2);
-            while (!condition.Invoke())
+            while (!await condition())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -203,7 +203,7 @@ namespace Cody.VisualStudio.Tests
                 }
             }
 
-            if (condition.Invoke())
+            if (await condition())
             {
                 WriteLog($"Condition meet.");
             }
@@ -226,7 +226,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog("ShowToolWindowAsync called.");
 
             var viewModel = CodyPackage.MainViewModel;
-            await WaitForAsync(() => viewModel.IsChatLoaded);
+            await WaitForAsync(() => Task.FromResult(viewModel.IsChatLoaded));
 
             isChatLoaded = viewModel.IsChatLoaded;
             WriteLog($"Chat loaded:{isChatLoaded}");

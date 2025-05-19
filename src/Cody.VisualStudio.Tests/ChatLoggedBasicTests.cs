@@ -20,6 +20,7 @@ namespace Cody.VisualStudio.Tests
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
+                await WaitForCodyFullyInitialization();
             });
         }
         [VsFact(Version = VsVersion.VS2022)]
