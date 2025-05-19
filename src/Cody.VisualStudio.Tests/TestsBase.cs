@@ -80,15 +80,42 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task OpenSolution(string path)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            EventHandler handler = (sender, e) => tcs.TrySetResult(true);
-            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += handler;
-
             WriteLog($"Opening solution '{path}' ...");
+            
+            var backgroundLoadTcs = new TaskCompletionSource<bool>();
+            EventHandler backgroundLoadHandler = (sender, e) => backgroundLoadTcs.TrySetResult(true);
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += backgroundLoadHandler;
+            
             Dte.Solution.Open(path);
+            
+            // Wait for background load event
+            await backgroundLoadTcs.Task;
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= backgroundLoadHandler;
+            
+            WriteLog("Background solution load complete, performing additional verification...");
+            
+            // Wait for solution to be fully loaded by checking IsFullyLoaded property
+            // and by waiting for projects to be accessible
+            await WaitForAsync(() => {
+                try
+                {
+                    var solutionService = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+                    if (solutionService == null) return false;
 
-            await tcs.Task;
-            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= handler;
+                    solutionService.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object isOpen);
+                    solutionService.GetProperty((int)__VSPROPID4.VSPROPID_IsSolutionFullyLoaded, out object isFullyLoaded);
+                    var areProjectsAccessible = Dte.Solution.Projects.Count > 0;
+                    
+                    WriteLog($"Solution status: Open={isOpen}, FullyLoaded={isFullyLoaded}, ProjectsAccessible={areProjectsAccessible}");
+                    return (bool)isOpen && (bool)isFullyLoaded && areProjectsAccessible;
+                }
+                catch (Exception ex) {
+                    WriteLog($"Exception while checking solution status: {ex.Message}");
+                    return false;
+                }
+            });
+            
+            WriteLog("Solution fully loaded and verified.");
         }
 
         protected void CloseSolution() => Dte.Solution.Close();
