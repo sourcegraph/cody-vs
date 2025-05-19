@@ -14,7 +14,7 @@ namespace Cody.VisualStudio.Tests
 
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
-            var testName = $"{GetTestName()}_start";
+            var testName = $"{GetTestName()}_init";
             TakeScreenshot(testName);
 
             _context.Factory.Run(async () =>
@@ -22,6 +22,9 @@ namespace Cody.VisualStudio.Tests
                 await WaitForPlaywrightAsync();
                 await WaitForCodyFullyInitialization();
             });
+
+            testName = $"{GetTestName()}_start";
+            TakeScreenshot(testName);
         }
         [VsFact(Version = VsVersion.VS2022)]
         public async Task Solution_Name_Is_Added_To_Chat_Input()
