@@ -55,10 +55,14 @@
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AuthStatus.cs" />
+    <Compile Include="Agent\Protocol\AutocompleteEditItem.cs" />
     <Compile Include="Agent\Protocol\AutocompleteItem.cs" />
     <Compile Include="Agent\Protocol\AutocompleteParams.cs" />
     <Compile Include="Agent\Protocol\AutocompleteResult.cs" />
+    <Compile Include="Agent\Protocol\AutoeditChanges.cs" />
+    <Compile Include="Agent\Protocol\AutoeditImageDiff.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />
     <Compile Include="Agent\Protocol\ProtocolAuthStatus.cs" />
     <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
     <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />

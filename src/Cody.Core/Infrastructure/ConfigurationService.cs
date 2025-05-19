@@ -38,7 +38,7 @@ namespace Cody.Core.Infrastructure
                 Capabilities = new ClientCapabilities
                 {
                     Authentication = Capability.Enabled,
-                    Completions = "none",
+                    Completions = CompletionsCapability.None,
                     Edit = Capability.None,
                     EditWorkspace = Capability.None,
                     ProgressBars = Capability.Enabled,
@@ -47,16 +47,16 @@ namespace Cody.Core.Infrastructure
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.None,
-                    Webview = "native",
+                    Webview = WebviewCapability.Native,
                     WebviewNativeConfig = new WebviewCapabilities
                     {
                         View = WebviewView.Single,
                         CspSource = "'self' https://cody.vs",
                         WebviewBundleServingPrefix = "https://cody.vs",
                     },
-                    WebviewMessages = "string-encoded",
-                    GlobalState = "server-managed",
-                    Secrets = "client-managed",
+                    WebviewMessages = WebviewMessagesCapability.StringEncoded,
+                    GlobalState = GlobalStateCapability.ServerManaged,
+                    Secrets = SecretsCapability.ClientManaged,
                 },
                 ExtensionConfiguration = GetConfiguration()
             };

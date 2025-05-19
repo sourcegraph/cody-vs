@@ -7,6 +7,8 @@ namespace Cody.Core.Agent.Protocol
     {
         public AutocompleteItem[] Items { get; set; }
 
+        public AutocompleteItem[] InlineCompletionItems { get; set; }
+
         public CompletionBookkeepingEvent CompletionEvent { get; set; }
     }
 }
