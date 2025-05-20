@@ -297,5 +297,13 @@ namespace Cody.VisualStudio.Tests
         public int? StartLine { get; set; }
 
         public int? EndLine { get; set; }
+
+        public override string ToString()
+        {
+            if (StartLine.HasValue && EndLine.HasValue)
+                return $"'{Name}' {StartLine}-{EndLine}";
+
+            return $"{Name}";
+        }
     }
 }
