@@ -71,12 +71,18 @@ namespace Cody.VisualStudio.Tests
         {
             try
             {
+                MakeScreenShot("init");
+
                 await UseInvalidToken();
+                MakeScreenShot("invalid_token_set");
                 await action();
+                MakeScreenShot("action");
             }
             finally
             {
                 await RevertToken();
+
+                MakeScreenShot("token_reverted");
             }
         }
 

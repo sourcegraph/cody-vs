@@ -48,6 +48,12 @@ namespace Cody.VisualStudio.Tests
             }
         }
 
+        protected void MakeScreenShot(string postfix = null)
+        {
+            var testName = $"{GetTestName()}_{postfix}";
+            TakeScreenshot(testName);
+        }
+
         protected string GetTestName()
         {
             var test = (ITest)_logger.GetType()
