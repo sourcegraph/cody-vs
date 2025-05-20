@@ -119,7 +119,7 @@ namespace Cody.VisualStudio.Tests
             
             WriteLog("Solution fully loaded and verified.");
 
-            //await CloseAllDocuments();
+            await CloseAllDocuments();
         }
 
         protected async Task CloseAllDocuments()
@@ -129,9 +129,10 @@ namespace Cody.VisualStudio.Tests
                 WriteLog("Checking if there are opened documents to close ...");
 
                 var documents = _dte.Documents.OfType<Document>();
-                var areOpenedDocuments = documents.Any();
-                if (areOpenedDocuments) WriteLog($"Closing {documents.Count()} opened documents...");
-                foreach (var doc in documents)
+                var docs = documents as Document[] ?? documents.ToArray();
+                var areOpenedDocuments = docs.Any();
+                if (areOpenedDocuments) WriteLog($"Closing {docs.Count()} opened documents...");
+                foreach (var doc in docs)
                 {
                     try
                     {
@@ -143,12 +144,9 @@ namespace Cody.VisualStudio.Tests
                     }
                 }
 
-                if (areOpenedDocuments)
-                    WriteLog($"Documents closed.");
-                else
-                    WriteLog($"No opened documents to close.");
+                WriteLog(areOpenedDocuments ? $"Documents closed." : $"No opened documents to close.");
 
-                    await Task.Delay(TimeSpan.FromMilliseconds(500)); // allows to ublock UI thread if it's blocked by closing documents API calls
+                await Task.Delay(TimeSpan.FromMilliseconds(500)); // allows to unblock UI thread if it's blocked by closing documents API calls
             }
             catch (Exception ex)
             {
