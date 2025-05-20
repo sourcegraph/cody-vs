@@ -20,10 +20,14 @@ namespace Cody.VisualStudio.Tests
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
+
+                testName = $"{GetTestName()}_chatLoaded";
+                TakeScreenshot(testName);
+
                 await WaitForCodyFullyInitialization();
             });
 
-            testName = $"{GetTestName()}_start";
+            testName = $"{GetTestName()}_chatInitialized";
             TakeScreenshot(testName);
         }
         [VsFact(Version = VsVersion.VS2022)]
@@ -34,7 +38,7 @@ namespace Cody.VisualStudio.Tests
 
             // when
             var tags = await GetChatContextTags();
-            var projectName = tags.ElementAt(1).Name;
+            var projectName = tags.ElementAt(0).Name;
 
             // then
             Assert.Equal("ConsoleApp1", projectName);
