@@ -281,6 +281,8 @@ namespace Cody.VisualStudio.Tests
                     }
                 }
 
+                WriteLog($"Found '{tag}' tag");
+
                 tagsList.Add(tag);
             }
 
