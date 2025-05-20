@@ -11,9 +11,11 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
-using System.Diagnostics;
 using Thread = System.Threading.Thread;
-using Microsoft.VisualStudio.Shell.Events;
+using System.Linq;
+using EnvDTE;
+using Process = System.Diagnostics.Process;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -116,6 +118,42 @@ namespace Cody.VisualStudio.Tests
             });
             
             WriteLog("Solution fully loaded and verified.");
+
+            //await CloseAllDocuments();
+        }
+
+        protected async Task CloseAllDocuments()
+        {
+            try
+            {
+                WriteLog("Checking if there are opened documents to close ...");
+
+                var documents = _dte.Documents.OfType<Document>();
+                var areOpenedDocuments = documents.Any();
+                if (areOpenedDocuments) WriteLog($"Closing {documents.Count()} opened documents...");
+                foreach (var doc in documents)
+                {
+                    try
+                    {
+                        doc.Close(vsSaveChanges.vsSaveChangesYes);
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLog($"Cannot close document:{doc.FullName} exception:{ex.Message}");
+                    }
+                }
+
+                if (areOpenedDocuments)
+                    WriteLog($"Documents closed.");
+                else
+                    WriteLog($"No opened documents to close.");
+
+                    await Task.Delay(TimeSpan.FromMilliseconds(500)); // allows to ublock UI thread if it's blocked by closing documents API calls
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"Failed at closing documents - exception:{ex.Message}");
+            }
         }
 
         protected void CloseSolution() => Dte.Solution.Close();
