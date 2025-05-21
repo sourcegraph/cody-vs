@@ -82,7 +82,7 @@ namespace Cody.VisualStudio.Tests
             }
         }
 
-        protected async Task WaitForCodyFullyInitialization()
+        protected async Task WaitForChatLoadingWhenLoggedIn()
         {
             WriteLog("Waiting for Cody chat to be fully initialized...");
             await WaitForAsync(async () =>
@@ -116,7 +116,8 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForLogInState()
         {
-            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+            await Page.WaitForSelectorAsync("[data-testid='new-chat-button']");
+            await WaitForChatLoadingWhenLoggedIn();
         }
 
 
