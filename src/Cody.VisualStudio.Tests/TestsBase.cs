@@ -11,9 +11,11 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
-using System.Diagnostics;
 using Thread = System.Threading.Thread;
-using Microsoft.VisualStudio.Shell.Events;
+using System.Linq;
+using EnvDTE;
+using Process = System.Diagnostics.Process;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -44,6 +46,12 @@ namespace Cody.VisualStudio.Tests
             {
                 // ignored, because of https://github.com/xunit/xunit/issues/2146
             }
+        }
+
+        protected void MakeScreenShot(string postfix = null)
+        {
+            var testName = $"{GetTestName()}_{postfix}";
+            TakeScreenshot(testName);
         }
 
         protected string GetTestName()
@@ -80,15 +88,76 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task OpenSolution(string path)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            EventHandler handler = (sender, e) => tcs.TrySetResult(true);
-            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += handler;
-
             WriteLog($"Opening solution '{path}' ...");
+            
+            var backgroundLoadTcs = new TaskCompletionSource<bool>();
+            EventHandler backgroundLoadHandler = (sender, e) => backgroundLoadTcs.TrySetResult(true);
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += backgroundLoadHandler;
+            
             Dte.Solution.Open(path);
+            
+            // Wait for background load event
+            await backgroundLoadTcs.Task;
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= backgroundLoadHandler;
+            
+            WriteLog("Background solution load complete, performing additional verification...");
+            
+            // Wait for solution to be fully loaded by checking IsFullyLoaded property
+            // and by waiting for projects to be accessible
+            await WaitForAsync(() => {
+                try
+                {
+                    var solutionService = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+                    if (solutionService == null) return Task.FromResult(false);
 
-            await tcs.Task;
-            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= handler;
+                    solutionService.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object isOpen);
+                    solutionService.GetProperty((int)__VSPROPID4.VSPROPID_IsSolutionFullyLoaded, out object isFullyLoaded);
+                    var areProjectsAccessible = Dte.Solution.Projects.Count > 0;
+                    
+                    WriteLog($"Solution status: Open={isOpen}, FullyLoaded={isFullyLoaded}, ProjectsAccessible={areProjectsAccessible}");
+                    return Task.FromResult((bool)isOpen && (bool)isFullyLoaded && areProjectsAccessible);
+                }
+                catch (Exception ex) {
+                    WriteLog($"Exception while checking solution status: {ex.Message}");
+                    return Task.FromResult(false);
+                }
+            });
+            
+            WriteLog("Solution fully loaded and verified.");
+
+            await CloseAllDocuments();
+        }
+
+        protected async Task CloseAllDocuments()
+        {
+            try
+            {
+                WriteLog("Checking if there are opened documents to close ...");
+
+                var documents = _dte.Documents.OfType<Document>();
+                var docs = documents as Document[] ?? documents.ToArray();
+                var areOpenedDocuments = docs.Any();
+                if (areOpenedDocuments) WriteLog($"Closing {docs.Count()} opened documents...");
+                foreach (var doc in docs)
+                {
+                    try
+                    {
+                        doc.Close(vsSaveChanges.vsSaveChangesYes);
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLog($"Cannot close document:{doc.FullName} exception:{ex.Message}");
+                    }
+                }
+
+                WriteLog(areOpenedDocuments ? $"Documents closed." : $"No opened documents to close.");
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500)); // allows to unblock UI thread if it's blocked by closing documents API calls
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"Failed at closing documents - exception:{ex.Message}");
+            }
         }
 
         protected void CloseSolution() => Dte.Solution.Close();
@@ -124,7 +193,7 @@ namespace Cody.VisualStudio.Tests
 
             windowFrame.Show();
 
-            await WaitForAsync(() => CodyPackage.MainViewModel.IsChatLoaded);
+            await WaitForAsync(() => Task.FromResult(CodyPackage.MainViewModel.IsChatLoaded));
         }
 
         protected async Task CloseCodyChatToolWindow()
@@ -156,11 +225,11 @@ namespace Cody.VisualStudio.Tests
             return codyPackage;
         }
 
-        protected async Task WaitForAsync(Func<bool> condition)
+        protected async Task WaitForAsync(Func<Task<bool>> condition)
         {
             var startTime = DateTime.Now;
             var timeout = TimeSpan.FromMinutes(2);
-            while (!condition.Invoke())
+            while (!await condition())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -176,7 +245,7 @@ namespace Cody.VisualStudio.Tests
                 }
             }
 
-            if (condition.Invoke())
+            if (await condition())
             {
                 WriteLog($"Condition meet.");
             }
@@ -199,7 +268,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog("ShowToolWindowAsync called.");
 
             var viewModel = CodyPackage.MainViewModel;
-            await WaitForAsync(() => viewModel.IsChatLoaded);
+            await WaitForAsync(() => Task.FromResult(viewModel.IsChatLoaded));
 
             isChatLoaded = viewModel.IsChatLoaded;
             WriteLog($"Chat loaded:{isChatLoaded}");

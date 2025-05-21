@@ -119,6 +119,7 @@ namespace Cody.VisualStudio
 
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
+            SecretStorageService.AccessTokenRefreshed += AccessTokenRefreshed;
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
@@ -219,6 +220,28 @@ namespace Cody.VisualStudio
                 UserSettingsService.LastTimeAuthorized = status.Authenticated;
 
                 Logger.Debug($"Auth status: Authenticated: {status.Authenticated}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed.", ex);
+            }
+        }
+
+        private async void AccessTokenRefreshed(object sender, EventArgs e)
+        {
+            try
+            {
+                Logger.Debug($"Checking authorization status ...");
+                if (ConfigurationService == null || AgentService == null)
+                {
+                    Logger.Debug("Not changed.");
+                    return;
+                }
+
+                var config = ConfigurationService.GetConfiguration();
+                var status = await AgentService.ConfigurationChange(config);
+
+                Logger.Debug($"After access token refresh. Authenticated: {status.Authenticated}");
             }
             catch (Exception ex)
             {
@@ -408,7 +431,7 @@ namespace Cody.VisualStudio
                 if (DocumentsSyncService == null)
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
-                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, Logger);
+                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, UserSettingsService, Logger);
                 }
                 DocumentsSyncService.Initialize();
             }

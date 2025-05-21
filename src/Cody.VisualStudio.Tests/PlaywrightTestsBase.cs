@@ -4,7 +4,6 @@ using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ using System.Windows;
 using System.Windows.Interop;
 using Xunit;
 using Xunit.Abstractions;
-using Window = EnvDTE.Window;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -83,6 +81,45 @@ namespace Cody.VisualStudio.Tests
                 _sync.Release();
             }
         }
+
+        protected async Task WaitForChatLoadingWhenLoggedIn()
+        {
+            WriteLog("Waiting for Cody chat to be fully initialized...");
+            await WaitForAsync(async () =>
+            {
+                try
+                {
+                    var loadingElement = await Page.QuerySelectorAsync("text=Loading");
+                    if (loadingElement != null)
+                    {
+                        WriteLog("'Loading' text found, waiting for it to disappear...");
+
+                        return false;
+                    }
+
+                    WriteLog("'Loading' text not found, Cody is already initialized.");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteLog($"Error while waiting for 'Loading' text to disappear: {ex.Message}");
+                }
+
+                return true;
+            });
+        }
+
+        protected async Task WaitForLogOutState()
+        {
+            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+        }
+
+        protected async Task WaitForLogInState()
+        {
+            await Page.WaitForSelectorAsync("[data-testid='new-chat-button']");
+            await WaitForChatLoadingWhenLoggedIn();
+        }
+
 
         protected async Task WaitForPlaywrightAsync()
         {
@@ -171,14 +208,15 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task NewChat()
         {
-            await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "New Chat" }).ClickAsync();
+            await Page.ClickAsync("[data-testid='new-chat-button']");
 
             await Task.Delay(500);
         }
 
         protected async Task ShowHistoryTab()
         {
-            await Page.GetByTestId("tab-history").ClickAsync();
+            await Page.ClickAsync("[data-testid='tab-history']");
+
             await Task.Delay(500);
         }
 
@@ -209,14 +247,14 @@ namespace Cody.VisualStudio.Tests
             await DismissStartWindow();
         }
 
-        protected async Task<string[]> GetTodayChatHistory()
+        protected async Task<bool> IsPresentInHistory(string entry)
         {
-            var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
+            var todaySection = await Page.QuerySelectorAsync($"div[data-value*='{entry}']");
 
-            return (await todaySection.QuerySelectorAllAsync("button span"))
-                .Select(async x => await x.TextContentAsync())
-                .Select(x => x.Result)
-                .ToArray();
+            if (todaySection != null)
+                return true;
+
+            return false;
         }
 
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()
@@ -255,6 +293,8 @@ namespace Cody.VisualStudio.Tests
                     }
                 }
 
+                WriteLog($"Found '{tag}' tag");
+
                 tagsList.Add(tag);
             }
 
@@ -269,5 +309,13 @@ namespace Cody.VisualStudio.Tests
         public int? StartLine { get; set; }
 
         public int? EndLine { get; set; }
+
+        public override string ToString()
+        {
+            if (StartLine.HasValue && EndLine.HasValue)
+                return $"'{Name}' {StartLine}-{EndLine}";
+
+            return $"{Name}";
+        }
     }
 }
