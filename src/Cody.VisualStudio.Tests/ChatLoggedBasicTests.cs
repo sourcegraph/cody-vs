@@ -24,7 +24,7 @@ namespace Cody.VisualStudio.Tests
                 testName = $"{GetTestName()}_chatLoaded";
                 TakeScreenshot(testName);
 
-                await WaitForCodyFullyInitialization();
+                await WaitForChatLoadingWhenLoggedIn();
             });
 
             testName = $"{GetTestName()}_chatInitialized";
