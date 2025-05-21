@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Playwright;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -92,7 +93,9 @@ namespace Cody.VisualStudio.Tests
             if (_accessToken != null)
             {
                 WriteLog("Making access token invalid ...");
+
                 await SetAccessToken("INVALID");
+                await WaitForLogOutState();
 
                 WriteLog("Invalid token set.");
             }
@@ -100,13 +103,13 @@ namespace Cody.VisualStudio.Tests
 
         private async Task RevertToken()
         {
-            var testName = GetTestName();
-            TakeScreenshot(testName);
-
             if (_accessToken != null)
             {
                 WriteLog("Reverting the access token ...");
+
                 await SetAccessToken(_accessToken); // make it valid
+                await WaitForLogInState();
+
                 WriteLog("The access token reverted.");
             }
         }

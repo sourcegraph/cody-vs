@@ -109,6 +109,17 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
+        protected async Task WaitForLogOutState()
+        {
+            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+        }
+
+        protected async Task WaitForLogInState()
+        {
+            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+        }
+
+
         protected async Task WaitForPlaywrightAsync()
         {
             await InitializeAsync();
