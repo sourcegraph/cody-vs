@@ -9,9 +9,10 @@ namespace Cody.Core.Agent.Protocol
     public class AutocompleteEditItem
     {
         public string Id { get; set; }
-        public string InsertText { get; set; }
         public Range Range { get; set; }
+        public string InsertText { get; set; }
         public string OriginalText { get; set; }
+        public AutocompleteEditItemRender Render { get; set; }
     }
 
     public class AutocompleteEditItemRender

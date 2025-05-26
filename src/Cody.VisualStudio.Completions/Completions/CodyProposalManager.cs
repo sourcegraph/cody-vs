@@ -1,8 +1,8 @@
-using System;
 using Cody.Core.Logging;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
+using System;
 
 namespace Cody.VisualStudio.Completions
 {

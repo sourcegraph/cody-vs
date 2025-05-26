@@ -39,6 +39,9 @@ namespace Cody.Core.Infrastructure
                 {
                     Authentication = Capability.Enabled,
                     Completions = CompletionsCapability.None,
+                    Autoedit = Capability.Enabled,
+                    AutoeditInlineDiff = AutoeditInlineDiffCapability.None,
+                    AutoeditAsideDiff = AutoeditAsideDiffCapability.Diff,
                     Edit = Capability.None,
                     EditWorkspace = Capability.None,
                     ProgressBars = Capability.Enabled,

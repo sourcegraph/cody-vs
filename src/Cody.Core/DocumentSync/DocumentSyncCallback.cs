@@ -63,7 +63,7 @@ namespace Cody.Core.DocumentSync
                 },
                 ContentChanges = changes.Select(x => new ProtocolTextDocumentContentChangeEvent
                 {
-                    Text = x.Text.ConvertLineBreaks("\n"),
+                    Text = x.Text,
                     Range = new Range
                     {
                         Start = new Position
@@ -147,7 +147,7 @@ namespace Cody.Core.DocumentSync
                 var docState = new ProtocolTextDocument
                 {
                     Uri = fullPath.ToUri(),
-                    Content = content.ConvertLineBreaks("\n"),
+                    Content = content,
                     VisibleRange = vRange,
                     Selection = selRange
                 };

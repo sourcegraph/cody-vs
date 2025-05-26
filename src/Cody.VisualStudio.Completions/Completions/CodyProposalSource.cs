@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -109,15 +110,43 @@ namespace Cody.VisualStudio.Completions
 
                 var autocomplete = await GetAutocompleteItems(autocompleteRequest, session, cancel);
 
-                if (autocomplete == null || autocomplete.Items.Length == 0) trace.TraceEvent("AutocompliteResult", "session: {0}, No results", session);
-                else foreach (var item in autocomplete.Items) trace.TraceEvent("AutocompliteResult", item);
+                if (autocomplete == null)
+                {
+                    trace.TraceEvent("Result", "session: {0}, No results (null)", session);
+                    return null;
+                }
+                else if (autocomplete.InlineCompletionItems.Length == 0 && autocomplete.DecoratedEditItems.Length == 0)
+                {
+                    trace.TraceEvent("Result", "session: {0}, No results (empty)", session);
+                    return null;
+                }
+                else
+                {
+                    if (autocomplete.InlineCompletionItems.Any())
+                    {
+                        foreach (var item in autocomplete.InlineCompletionItems)
+                            trace.TraceEvent("AutocompliteResult", item);
+                    }
 
-                var newPosition = caret.Position.TranslateTo(textDocument.TextBuffer.CurrentSnapshot, PointTrackingMode.Positive);
-                var newText = newPosition.GetContainingLine().GetText();
-                trace.TraceEvent("AfterResponse", "session: {0}, newCaret: {1} lineText:'{2}'", session, newPosition.Position, newText);
+                    if (autocomplete.DecoratedEditItems.Any())
+                    {
+                        foreach (var item in autocomplete.DecoratedEditItems)
+                            trace.TraceEvent("AutoEditResult", new { item.InsertText, item.OriginalText });
+                    }
 
-                var collection = CreateProposals(autocomplete, caret, completionState, session);
-                if (cancel.IsCancellationRequested) trace.TraceEvent("AutocompliteCanceled2", "session: {0}", session);
+                }
+
+                CodyProposalCollection collection = null;
+                if (autocomplete.DecoratedEditItems.Any())
+                    collection = CreateAutoeditProposals(autocomplete, caret, completionState, session);
+                else if (autocomplete.InlineCompletionItems.Any())
+                    collection = CreateAutocompleteProposals(autocomplete, caret, completionState, session);
+
+                if (cancel.IsCancellationRequested)
+                {
+                    trace.TraceEvent("AutocompliteCanceled", "session: {0}", session);
+                    return null;
+                }
 
                 return collection;
             }
@@ -201,42 +230,114 @@ namespace Cody.VisualStudio.Completions
             return autocomplete;
         }
 
-        private CodyProposalCollection CreateProposals(AutocompleteResult autocomplete, VirtualSnapshotPoint caret, CompletionState completionState, uint session)
+        private CodyProposalCollection CreateAutocompleteProposals(AutocompleteResult autocomplete, VirtualSnapshotPoint caret, CompletionState completionState, uint session)
         {
             var proposalList = new List<ProposalBase>();
-            if (autocomplete != null && autocomplete.Items.Any())
+
+            foreach (var item in autocomplete.InlineCompletionItems)
             {
-                foreach (var item in autocomplete.Items)
+                var snapshot = caret.Position.Snapshot;
+                var startPos = ToPosition(snapshot, item.Range.Start.Line, item.Range.Start.Character);
+                var endPos = ToPosition(snapshot, item.Range.End.Line, item.Range.End.Character);
+
+                var (actualText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
+
+                var modText = actualText;
+                if (completionState != null)
                 {
-                    var completionText = AdjustCompletionText(caret, completionState, item.InsertText, session);
+                    var span = completionState.ApplicableToSpan;
+                    modText = EditText(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem);
+                }
 
-                    int lenght = 0;
-                    if (item.Range.Start.Character != item.Range.End.Character || item.Range.Start.Line != item.Range.End.Line)
-                    {
-                        var startPos = ToPosition(caret.Position.Snapshot, item.Range.Start.Line, item.Range.Start.Character);
-                        var endPos = ToPosition(caret.Position.Snapshot, item.Range.End.Line, item.Range.End.Character);
+                var newText = EditText(actualText, offset, startPos, endPos, item.InsertText);
 
-                        lenght = endPos - startPos;
-                    }
+                var diffs = StringDifference.FindDifferences(modText, newText);
 
+                var suggestion = diffs.FirstOrDefault();
+                if (suggestion != null && !string.IsNullOrEmpty(suggestion.AddedText))
+                {
                     var edits = new List<ProposedEdit>(1)
-                        {
-                            new ProposedEdit(new SnapshotSpan(caret.Position, lenght), completionText)
-                        };
+                    {
+                        new ProposedEdit(new SnapshotSpan(snapshot, suggestion.Position + offset, 0), suggestion.AddedText)
+                    };
 
                     var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                         completionState: completionState,
                         proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
 
                     if (proposal != null) proposalList.Add(proposal);
-                    else trace.TraceEvent("ProposalSkipped", "session: {0}", session);
+                    else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
                 }
-
+                else
+                {
+                    trace.TraceEvent("NothingNewToPropose", "session: {0}", session);
+                }
             }
 
             var collection = new CodyProposalCollection(proposalList);
             return collection;
         }
+
+        private (string text, int offset) GetLinesOfOriginalText(ITextSnapshot snapshot, int startPos, int endPos)
+        {
+            int? offset = null;
+            var text = new StringBuilder();
+            var startLine = snapshot.GetLineNumberFromPosition(startPos);
+            var endLine = snapshot.GetLineNumberFromPosition(endPos);
+
+            for (int i = startLine; i <= endLine; i++)
+            {
+                var line = snapshot.GetLineFromLineNumber(i);
+                if (!offset.HasValue) offset = line.Start.Position;
+                text.Append(line.GetTextIncludingLineBreak());
+            }
+
+            return (text.ToString(), offset.Value);
+        }
+
+        private CodyProposalCollection CreateAutoeditProposals(AutocompleteResult autocomplete, VirtualSnapshotPoint caret, CompletionState completionState, uint session)
+        {
+            var proposalList = new List<ProposalBase>();
+
+            foreach (var item in autocomplete.DecoratedEditItems)
+            {
+
+                var edits = new List<ProposedEdit>();
+                var snapshot = caret.Position.Snapshot;
+
+                var startPos = ToPosition(snapshot, item.Range.Start.Line, item.Range.Start.Character);
+                var endPos = ToPosition(snapshot, item.Range.End.Line, item.Range.End.Character);
+                var actualText = snapshot.GetText(startPos, endPos - startPos);
+                if (actualText != item.OriginalText) trace.TraceEvent("TextMismatch", new { actual = actualText, insert = item.InsertText });
+                if (completionState != null)
+                {
+                    var before = actualText;
+                    var span = completionState.ApplicableToSpan;
+                    actualText = EditText(actualText, startPos, span.Start.Position, span.End.Position, completionState.SelectedItem);
+                    trace.TraceEvent("IncludeCompletionState", new { before, after = actualText });
+                }
+
+                var diffs = StringDifference.FindDifferences(actualText, item.InsertText);
+
+                foreach (var diff in diffs)
+                {
+                    var proposedChange = new ProposedEdit(new SnapshotSpan(snapshot, startPos + diff.Position, diff.RemovedText.Length), diff.AddedText);
+                    edits.Add(proposedChange);
+                }
+
+                var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
+                    completionState: completionState,
+                    proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
+
+                if (proposal != null) proposalList.Add(proposal);
+                else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
+            }
+
+            var collection = new CodyProposalCollection(proposalList);
+            return collection;
+        }
+
+
 
         private string AdjustCompletionText(VirtualSnapshotPoint caret, CompletionState completionState, string completionText, uint session)
         {
@@ -260,6 +361,11 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("ProposalSkipped", "session: {0}, IntellisenceMistmatch", session);
                 return string.Empty;
             }
+        }
+
+        private static string EditText(string input, int offset, int startPos, int endPos, string replacementText)
+        {
+            return input.Substring(0, startPos - offset) + replacementText + input.Substring(endPos - offset);
         }
 
         private Position ToLineColPosition(SnapshotPoint point)
