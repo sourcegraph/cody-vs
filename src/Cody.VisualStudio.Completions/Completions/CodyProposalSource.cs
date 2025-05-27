@@ -249,7 +249,15 @@ namespace Cody.VisualStudio.Completions
                     modText = EditText(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem);
                 }
 
-                var newText = EditText(actualText, offset, startPos, endPos, item.InsertText);
+                var completionText = item.InsertText;
+                if (caret.IsInVirtualSpace)
+                {
+                    var toSkip = Math.Min(caret.VirtualSpaces, completionText.TakeWhile(char.IsWhiteSpace).Count());
+                    completionText = completionText.Substring(toSkip);
+                    trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
+                }
+
+                var newText = EditText(actualText, offset, startPos, endPos, completionText);
 
                 var diffs = StringDifference.FindDifferences(modText, newText);
 
