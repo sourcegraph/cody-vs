@@ -259,15 +259,11 @@ namespace Cody.VisualStudio.Completions
 
                 var newText = EditText(actualText, offset, startPos, endPos, completionText);
 
-                var diffs = StringDifference.FindDifferences(modText, newText);
+                var diffs = StringDifference2.FindDifferences(modText, newText);
 
-                var suggestion = diffs.FirstOrDefault();
-                if (suggestion != null && !string.IsNullOrEmpty(suggestion.AddedText))
+                if (diffs.Any())
                 {
-                    var edits = new List<ProposedEdit>(1)
-                    {
-                        new ProposedEdit(new SnapshotSpan(snapshot, suggestion.Position + offset, 0), suggestion.AddedText)
-                    };
+                    var edits = diffs.Select(x => new ProposedEdit(new SnapshotSpan(snapshot, x.Position + offset, x.RemovedText.Length), x.AddedText)).ToList();
 
                     var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                         completionState: completionState,
@@ -325,7 +321,7 @@ namespace Cody.VisualStudio.Completions
                     trace.TraceEvent("IncludeCompletionState", new { before, after = actualText });
                 }
 
-                var diffs = StringDifference.FindDifferences(actualText, item.InsertText);
+                var diffs = StringDifference2.FindDifferences(actualText, item.InsertText);
 
                 foreach (var diff in diffs)
                 {
