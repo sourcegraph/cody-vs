@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -250,12 +251,7 @@ namespace Cody.VisualStudio.Completions
                 }
 
                 var completionText = item.InsertText;
-                if (caret.IsInVirtualSpace)
-                {
-                    var toSkip = Math.Min(caret.VirtualSpaces, completionText.TakeWhile(char.IsWhiteSpace).Count());
-                    completionText = completionText.Substring(toSkip);
-                    trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
-                }
+                if (caret.IsInVirtualSpace) completionText = AdjustVirtualSpaces(completionText, caret.VirtualSpaces, session);
 
                 var newText = EditText(actualText, offset, startPos, endPos, completionText);
 
@@ -325,13 +321,16 @@ namespace Cody.VisualStudio.Completions
 
                 foreach (var diff in diffs)
                 {
-                    var proposedChange = new ProposedEdit(new SnapshotSpan(snapshot, startPos + diff.Position, diff.RemovedText.Length), diff.AddedText);
+                    var addedText = diff.AddedText;
+                    if (caret.IsInVirtualSpace && diff == diffs.First()) addedText = AdjustVirtualSpaces(addedText, caret.VirtualSpaces, session);
+
+                    var proposedChange = new ProposedEdit(new SnapshotSpan(snapshot, startPos + diff.Position, diff.RemovedText.Length), addedText);
                     edits.Add(proposedChange);
                 }
 
                 var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                     completionState: completionState,
-                    proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
+                    proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit | ProposalFlags.QueueProposalRequestOnCommit);
 
                 if (proposal != null) proposalList.Add(proposal);
                 else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
@@ -341,30 +340,13 @@ namespace Cody.VisualStudio.Completions
             return collection;
         }
 
-
-
-        private string AdjustCompletionText(VirtualSnapshotPoint caret, CompletionState completionState, string completionText, uint session)
+        private string AdjustVirtualSpaces(string text, int virtualSpaces, uint session)
         {
-            if (caret.IsInVirtualSpace)
-            {
-                var toSkip = Math.Min(caret.VirtualSpaces, completionText.TakeWhile(char.IsWhiteSpace).Count());
-                completionText = completionText.Substring(toSkip);
-                trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
-            }
+            var toSkip = Math.Min(virtualSpaces, text.TakeWhile(char.IsWhiteSpace).Count());
+            var result = text.Substring(toSkip);
+            trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
 
-            var newLineChars = view.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
-            completionText = completionText.ConvertLineBreaks(newLineChars);
-
-            if (completionState == null || completionText == null) return completionText;
-            var enteredText = completionState.ApplicableToSpan.GetText();
-            var common = completionState.SelectedItem.TrimPrefix(enteredText, StringComparison.Ordinal);
-
-            if (completionText.StartsWith(common)) return completionText.Substring(common.Length);
-            else
-            {
-                trace.TraceEvent("ProposalSkipped", "session: {0}, IntellisenceMistmatch", session);
-                return string.Empty;
-            }
+            return result;
         }
 
         private static string EditText(string input, int offset, int startPos, int endPos, string replacementText)
