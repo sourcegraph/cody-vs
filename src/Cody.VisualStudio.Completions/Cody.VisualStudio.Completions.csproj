@@ -49,6 +49,7 @@
     <Compile Include="Completions\Difference.cs" />
     <Compile Include="Completions\StringDifference.cs" />
     <Compile Include="Completions\StringDifference2.cs" />
+    <Compile Include="Completions\VsDifference.cs" />
     <Compile Include="LoggerFactory.cs" />
     <Compile Include="Completions\CodyProposalCollection.cs" />
     <Compile Include="Completions\CodyProposalManager.cs" />

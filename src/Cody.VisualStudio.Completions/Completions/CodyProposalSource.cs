@@ -3,18 +3,20 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
+using Cody.VisualStudio.Completions.Completions;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Differencing;
 using Microsoft.VisualStudio.Text.Editor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -25,14 +27,17 @@ namespace Cody.VisualStudio.Completions
         private IAgentService agentService;
         private ITextDocument textDocument;
         private readonly ITextView view;
+        private readonly ITextDifferencingService textDifferencingService;
         private static uint sessionCounter = 0;
 
         private ITextSnapshot trackedSnapshot;
 
-        public CodyProposalSource(ITextDocument textDocument, ITextView view)
+        public CodyProposalSource(ITextDocument textDocument, ITextView view, ITextDifferencingService textDifferencingService)
         {
             this.textDocument = textDocument;
             this.view = view;
+            this.textDifferencingService = textDifferencingService;
+
             trackedSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
         }
@@ -255,7 +260,8 @@ namespace Cody.VisualStudio.Completions
 
                 var newText = EditText(actualText, offset, startPos, endPos, completionText);
 
-                var diffs = StringDifference2.FindDifferences(modText, newText);
+                var diffsOld = StringDifference2.FindDifferences(modText, newText);
+                var diffs = VsDifference.FindDifferences(modText, newText, textDifferencingService);
 
                 if (diffs.Any())
                 {
@@ -317,7 +323,8 @@ namespace Cody.VisualStudio.Completions
                     trace.TraceEvent("IncludeCompletionState", new { before, after = actualText });
                 }
 
-                var diffs = StringDifference2.FindDifferences(actualText, item.InsertText);
+                var diffsOld = StringDifference2.FindDifferences(actualText, item.InsertText);
+                var diffs = VsDifference.FindDifferences(actualText, item.InsertText, textDifferencingService);
 
                 foreach (var diff in diffs)
                 {
@@ -330,7 +337,7 @@ namespace Cody.VisualStudio.Completions
 
                 var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                     completionState: completionState,
-                    proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit | ProposalFlags.QueueProposalRequestOnCommit);
+                    proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id, flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
 
                 if (proposal != null) proposalList.Add(proposal);
                 else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
@@ -342,8 +349,8 @@ namespace Cody.VisualStudio.Completions
 
         private string AdjustVirtualSpaces(string text, int virtualSpaces, uint session)
         {
-            var toSkip = Math.Min(virtualSpaces, text.TakeWhile(char.IsWhiteSpace).Count());
-            var result = text.Substring(toSkip);
+            string pattern = $@"^(\r?\n*)([ \t]{{0,{virtualSpaces}}})";
+            var result = Regex.Replace(text, pattern, "$1");
             trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
 
             return result;

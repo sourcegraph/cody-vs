@@ -42,7 +42,7 @@ namespace Cody.VisualStudio.Completions
                         break;
                 }
 
-
+                trace.TraceEvent("ProposalScenario", scenario.ToString());
                 trace.TraceEvent("ShowProposal", value);
                 return value;
             }
