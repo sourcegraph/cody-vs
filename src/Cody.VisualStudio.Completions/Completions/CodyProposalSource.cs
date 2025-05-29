@@ -71,7 +71,6 @@ namespace Cody.VisualStudio.Completions
 
                 if (!ShouldDoProposals(completionState, scenario, agentService, CodyPackage.UserSettingsService))
                 {
-                    trace.TraceEvent("SkipScenario", "Skip scenario {0}", scenario);
                     return null;
                 }
 
@@ -170,8 +169,7 @@ namespace Cody.VisualStudio.Completions
 
         private bool ShouldDoProposals(CompletionState completionState, ProposalScenario scenario, IAgentService agentService, IUserSettingsService userSettings)
         {
-            if (scenario == ProposalScenario.CaretMove ||
-                (completionState != null && (completionState.IsSnippet || completionState.IsSuggestion || completionState.IsPreprocessorDirective)))
+            if (completionState != null && (completionState.IsSnippet || completionState.IsSuggestion || completionState.IsPreprocessorDirective))
             {
                 trace.TraceMessage("Scenario without autocomplete");
                 return false;
@@ -349,8 +347,8 @@ namespace Cody.VisualStudio.Completions
 
         private string AdjustVirtualSpaces(string text, int virtualSpaces, uint session)
         {
-            string pattern = $@"^(\r?\n*)([ \t]{{0,{virtualSpaces}}})";
-            var result = Regex.Replace(text, pattern, "$1");
+            var toSkip = text.TakeWhile(char.IsWhiteSpace).Count();
+            var result = text.Substring(toSkip);
             trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
 
             return result;
