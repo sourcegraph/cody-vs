@@ -19,7 +19,7 @@ namespace Cody.VisualStudio.Completions
             ProposalScenario.ExplicitInvocation,
             ProposalScenario.CompletionAccepted,
             ProposalScenario.CompletedProposal,
-            ProposalScenario.DivergedProposal
+            ProposalScenario.DivergedProposal,
 
         };
 
@@ -36,16 +36,7 @@ namespace Cody.VisualStudio.Completions
             else if (scenario == ProposalScenario.CaretMove)
             {
                 var currentLine = caret.Position.GetContainingLine();
-                var properties = caret.Position.Snapshot.TextBuffer.Properties;
-                if (properties.TryGetProperty(LastCaretMoveLineKey, out int lastLine))
-                {
-                    if (currentLine.LineNumber != lastLine)
-                    {
-                        properties.Exchange(LastCaretMoveLineKey, currentLine.LineNumber);
-                        if (caret.Position != currentLine.End) value = true;
-                    }
-                }
-                else properties.AddProperty(LastCaretMoveLineKey, currentLine.LineNumber);
+                if (currentLine.End != caret.Position) value = true;
             }
 
             trace.TraceEvent("ProposalScenario", scenario.ToString());
