@@ -3,7 +3,6 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
-using Cody.VisualStudio.Completions.Completions;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -14,7 +13,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +21,7 @@ namespace Cody.VisualStudio.Completions
     public class CodyProposalSource : ProposalSourceBase
     {
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSource));
+        private static readonly StringDifferenceOptions diffOptions = new StringDifferenceOptions(StringDifferenceTypes.Word, 2, false);
 
         private IAgentService agentService;
         private ITextDocument textDocument;
@@ -147,6 +146,12 @@ namespace Cody.VisualStudio.Completions
                 else if (autocomplete.InlineCompletionItems.Any())
                     collection = CreateAutocompleteProposals(autocomplete, caret, completionState, session);
 
+                if (collection == null || collection.Proposals.Count == 0)
+                {
+                    trace.TraceEvent("NoProposalsToDisplay", "session: {0}", session);
+                    return null;
+                }
+
                 if (cancel.IsCancellationRequested)
                 {
                     trace.TraceEvent("AutocompliteCanceled", "session: {0}", session);
@@ -258,8 +263,7 @@ namespace Cody.VisualStudio.Completions
 
                 var newText = EditText(actualText, offset, startPos, endPos, completionText);
 
-                var diffsOld = StringDifference2.FindDifferences(modText, newText);
-                var diffs = VsDifference.FindDifferences(modText, newText, textDifferencingService);
+                var diffs = FindDifferences(modText, newText);
 
                 if (diffs.Any())
                 {
@@ -306,7 +310,6 @@ namespace Cody.VisualStudio.Completions
 
             foreach (var item in autocomplete.DecoratedEditItems)
             {
-
                 var edits = new List<ProposedEdit>();
                 var snapshot = caret.Position.Snapshot;
 
@@ -322,13 +325,17 @@ namespace Cody.VisualStudio.Completions
                     trace.TraceEvent("IncludeCompletionState", new { before, after = actualText });
                 }
 
-                var diffsOld = StringDifference2.FindDifferences(actualText, item.InsertText);
-                var diffs = VsDifference.FindDifferences(actualText, item.InsertText, textDifferencingService);
+                var diffs = FindDifferences(actualText, item.InsertText);
+
 
                 foreach (var diff in diffs)
                 {
+                    trace.TraceEvent("DiffItem", diff);
+                    if (diff.AddedText.All(x => char.IsWhiteSpace(x)) && diff.RemovedText.All(x => char.IsWhiteSpace(x))) continue;
+
                     var addedText = diff.AddedText;
                     if (caret.IsInVirtualSpace && diff == diffs.First()) addedText = AdjustVirtualSpaces(addedText, caret.VirtualSpaces, session);
+                    if (diff == diffs.Last()) addedText = addedText.TrimEnd();
 
                     var proposedChange = new ProposedEdit(new SnapshotSpan(snapshot, startPos + diff.Position, diff.RemovedText.Length), addedText);
                     edits.Add(proposedChange);
@@ -342,13 +349,29 @@ namespace Cody.VisualStudio.Completions
                 else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
             }
 
-            var collection = new CodyProposalCollection(proposalList);
-            return collection;
+            return new CodyProposalCollection(proposalList);
+        }
+
+        private IReadOnlyList<Difference> FindDifferences(string oldText, string newText)
+        {
+            var results = new List<Difference>();
+            var diffs = textDifferencingService.DiffStrings(oldText, newText, diffOptions);
+            foreach (var diff in diffs.Differences)
+            {
+                var spanOld = diffs.LeftDecomposition.GetSpanInOriginal(diff.Left);
+                var spanNew = diffs.RightDecomposition.GetSpanInOriginal(diff.Right);
+                var removedText = oldText.Substring(spanOld.Start, spanOld.Length);
+                var addedText = newText.Substring(spanNew.Start, spanNew.Length);
+                var result = new Difference(removedText, addedText, spanOld.Start);
+                results.Add(result);
+            }
+
+            return results;
         }
 
         private string AdjustVirtualSpaces(string text, int virtualSpaces, uint session)
         {
-            var toSkip = text.TakeWhile(char.IsWhiteSpace).Count();
+            var toSkip = Math.Min(text.TakeWhile(x => x == ' ').Count(), virtualSpaces);
             var result = text.Substring(toSkip);
             trace.TraceEvent("VirtualSpaceAdjustion", "session: {0}", session);
 

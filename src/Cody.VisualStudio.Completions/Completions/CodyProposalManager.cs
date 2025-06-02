@@ -23,8 +23,6 @@ namespace Cody.VisualStudio.Completions
 
         };
 
-        private const string LastCaretMoveLineKey = "cody_lastCaretMoveLine";
-
         public CodyProposalManager(ILog logger)
         {
             _logger = logger;
