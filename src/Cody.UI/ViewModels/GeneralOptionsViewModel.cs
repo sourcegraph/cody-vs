@@ -82,6 +82,19 @@ namespace Cody.UI.ViewModels
             }
         }
 
+        private bool _enableAutoEdit;
+        public bool EnableAutoEdit
+        {
+            get => _enableAutoEdit;
+            set
+            {
+                if (SetProperty(ref _enableAutoEdit, value))
+                {
+                    _logger.Debug($"EnableAutoEdit set:{value}");
+                }
+            }
+        }
+
         public bool IsCustomConfigurationValid()
         {
             try

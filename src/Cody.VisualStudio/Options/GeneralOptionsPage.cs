@@ -60,10 +60,12 @@ namespace Cody.VisualStudio.Options
             var customConfiguration = _settingsService.CustomConfiguration;
             var acceptNonTrustedCert = _settingsService.AcceptNonTrustedCert;
             var automaticallyTriggerCompletions = _settingsService.AutomaticallyTriggerCompletions;
+            var enableAutoEdit = _settingsService.EnableAutoEdit;
 
             _generalOptionsViewModel.AcceptNonTrustedCert = acceptNonTrustedCert;
             _generalOptionsViewModel.CustomConfiguration = customConfiguration;
             _generalOptionsViewModel.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
+            _generalOptionsViewModel.EnableAutoEdit = enableAutoEdit;
 
 
             _logger.Debug($"Is canceled:{e.Cancel}");
@@ -85,10 +87,12 @@ namespace Cody.VisualStudio.Options
             var customConfiguration = _generalOptionsViewModel.CustomConfiguration;
             var acceptNonTrustedCert = _generalOptionsViewModel.AcceptNonTrustedCert;
             var automaticallyTriggerCompletions = _generalOptionsViewModel.AutomaticallyTriggerCompletions;
+            var enableAutoEdit = _generalOptionsViewModel.EnableAutoEdit;
 
             _settingsService.CustomConfiguration = customConfiguration;
             _settingsService.AcceptNonTrustedCert = acceptNonTrustedCert;
             _settingsService.AutomaticallyTriggerCompletions = automaticallyTriggerCompletions;
+            _settingsService.EnableAutoEdit = enableAutoEdit;
         }
 
         protected override void OnDeactivate(CancelEventArgs e)
@@ -115,6 +119,7 @@ namespace Cody.VisualStudio.Options
             _settingsService.CustomConfiguration = string.Empty;
             _settingsService.AcceptNonTrustedCert = false;
             _settingsService.AutomaticallyTriggerCompletions = true;
+            _settingsService.EnableAutoEdit = true;
 
             base.ResetSettings();
         }

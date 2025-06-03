@@ -24,6 +24,7 @@ namespace Cody.VisualStudio.Completions
         private static readonly StringDifferenceOptions diffOptions = new StringDifferenceOptions(StringDifferenceTypes.Word, 2, false);
 
         private IAgentService agentService;
+        private IUserSettingsService userSettingsService;
         private ITextDocument textDocument;
         private readonly ITextView view;
         private readonly ITextDifferencingService textDifferencingService;
@@ -67,8 +68,9 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("Scenario", "session: {0}, scenario {1}", session, scenario);
 
                 agentService = CodyPackage.AgentService;
+                userSettingsService = CodyPackage.UserSettingsService;
 
-                if (!ShouldDoProposals(completionState, scenario, agentService, CodyPackage.UserSettingsService))
+                if (!ShouldDoProposals(completionState, scenario, agentService, userSettingsService))
                 {
                     return null;
                 }
@@ -141,7 +143,7 @@ namespace Cody.VisualStudio.Completions
                 }
 
                 CodyProposalCollection collection = null;
-                if (autocomplete.DecoratedEditItems.Any())
+                if (userSettingsService.EnableAutoEdit && autocomplete.DecoratedEditItems.Any())
                     collection = CreateAutoeditProposals(autocomplete, caret, completionState, session);
                 else if (autocomplete.InlineCompletionItems.Any())
                     collection = CreateAutocompleteProposals(autocomplete, caret, completionState, session);
@@ -186,7 +188,13 @@ namespace Cody.VisualStudio.Completions
                 return false;
             }
 
-            if (userSettings != null && !userSettings.AutomaticallyTriggerCompletions && scenario != ProposalScenario.ExplicitInvocation)
+            if (userSettings == null)
+            {
+                trace.TraceMessage("User settings service not jet ready");
+                return false;
+            }
+
+            if (!userSettings.AutomaticallyTriggerCompletions && scenario != ProposalScenario.ExplicitInvocation)
             {
                 trace.TraceMessage("Automatic triggering autocomplete disabled");
                 return false;
