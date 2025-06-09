@@ -19,8 +19,6 @@ namespace Cody.Core.Agent.Protocol
 
         public string AutocompleteAdvancedModel { get; set; }
 
-        public SuggestionsMode SuggestionsMode { get; set; }
-
         public bool Debug { get; set; }
 
         public bool VerboseDebug { get; set; }
@@ -40,13 +38,5 @@ namespace Cody.Core.Agent.Protocol
         {
             return $"ServerEndpoint:'{ServerEndpoint}' Proxy:'{Proxy}' AccessToken:<TOKEN> AnonymousUserID:'{AnonymousUserID}' AutocompleteAdvancedProvider:'{AutocompleteAdvancedProvider}' AutocompleteAdvancedModel:'{AutocompleteAdvancedModel}' Debug:{Debug} VerboseDebug:{VerboseDebug} Codebase:{Codebase}";
         }
-    }
-
-    public enum SuggestionsMode
-    {
-        Autocomplete,
-        [EnumMember(Value = "auto-edit")]
-        AutoEdit,
-        Off
     }
 }

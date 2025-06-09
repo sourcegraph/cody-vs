@@ -21,7 +21,7 @@ namespace Cody.VisualStudio.Completions
     public class CodyProposalSource : ProposalSourceBase
     {
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSource));
-        private static readonly StringDifferenceOptions diffOptions = new StringDifferenceOptions(StringDifferenceTypes.Word, 2, false);
+        private static readonly StringDifferenceOptions diffOptions = new StringDifferenceOptions(StringDifferenceTypes.Word, 0, true);
 
         private IAgentService agentService;
         private IUserSettingsService userSettingsService;
@@ -143,7 +143,7 @@ namespace Cody.VisualStudio.Completions
                 }
 
                 CodyProposalCollection collection = null;
-                if (userSettingsService.EnableAutoEdit && autocomplete.DecoratedEditItems.Any())
+                if (autocomplete.DecoratedEditItems.Any())
                     collection = CreateAutoeditProposals(autocomplete, caret, completionState, session);
                 else if (autocomplete.InlineCompletionItems.Any())
                     collection = CreateAutocompleteProposals(autocomplete, caret, completionState, session);

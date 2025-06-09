@@ -94,11 +94,11 @@ namespace Cody.Core.Infrastructure
 
         internal Dictionary<string, object> GetCustomConfiguration()
         {
+            Dictionary<string, object> config = null;
             var customConfiguration = _userSettingsService.CustomConfiguration;
             try
             {
-                var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfiguration);
-                return config;
+                config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfiguration);
             }
             catch (Exception ex)
             {
@@ -106,8 +106,7 @@ namespace Cody.Core.Infrastructure
                 {
                     //try to repair invalid json
                     var customConfigurationTrial = "{" + customConfiguration + "}";
-                    var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfigurationTrial);
-                    return config;
+                    config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfigurationTrial);
                 }
                 catch { }
 
@@ -115,7 +114,14 @@ namespace Cody.Core.Infrastructure
                 _logger.Error("Deserializing custom configuration failed.", ex);
             }
 
-            return null;
+            if (config == null) config = new Dictionary<string, object>();
+
+            if (_userSettingsService.EnableAutoEdit && !config.ContainsKey("cody.suggestions.mode"))
+            {
+                config["cody.suggestions.mode"] = "auto-edit";
+            }
+
+            return config;
         }
 
     }
