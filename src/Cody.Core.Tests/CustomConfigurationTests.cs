@@ -101,7 +101,7 @@ namespace Cody.Core.Tests
             var config = _sut.GetCustomConfiguration();
 
             // then
-            Assert.That(config, Is.Null);
+            Assert.That(config, Is.Empty);
         }
     }
 }
