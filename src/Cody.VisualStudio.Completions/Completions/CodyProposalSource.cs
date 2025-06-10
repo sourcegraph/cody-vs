@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -263,13 +264,13 @@ namespace Cody.VisualStudio.Completions
                 if (completionState != null)
                 {
                     var span = completionState.ApplicableToSpan;
-                    modText = EditText(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem);
+                    modText = ReplaceRange(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem);
                 }
 
                 var completionText = item.InsertText;
                 if (caret.IsInVirtualSpace) completionText = AdjustVirtualSpaces(completionText, caret.VirtualSpaces, session);
 
-                var newText = EditText(actualText, offset, startPos, endPos, completionText);
+                var newText = ReplaceRange(actualText, offset, startPos, endPos, completionText);
 
                 var diffs = FindDifferences(modText, newText);
 
@@ -321,15 +322,20 @@ namespace Cody.VisualStudio.Completions
                 var edits = new List<ProposedEdit>();
                 var snapshot = caret.Position.Snapshot;
 
-                var startPos = ToPosition(snapshot, item.Range.Start.Line, item.Range.Start.Character);
-                var endPos = ToPosition(snapshot, item.Range.End.Line, item.Range.End.Character);
-                var actualText = snapshot.GetText(startPos, endPos - startPos);
-                if (actualText != item.OriginalText) trace.TraceEvent("TextMismatch", new { actual = actualText, insert = item.InsertText });
+                var range = FindRange(snapshot, item.Range.Start.Line, item.OriginalText);
+                if (range == null)
+                {
+                    trace.TraceEvent("TextMismatch");
+                    return null;
+                }
+
+                var actualText = snapshot.GetText(range.Start, range.End - range.Start);
+
                 if (completionState != null)
                 {
                     var before = actualText;
                     var span = completionState.ApplicableToSpan;
-                    actualText = EditText(actualText, startPos, span.Start.Position, span.End.Position, completionState.SelectedItem);
+                    actualText = ReplaceRange(actualText, range.Start, span.Start.Position, span.End.Position, completionState.SelectedItem);
                     trace.TraceEvent("IncludeCompletionState", new { before, after = actualText });
                 }
 
@@ -345,7 +351,7 @@ namespace Cody.VisualStudio.Completions
                     if (caret.IsInVirtualSpace && diff == diffs.First()) addedText = AdjustVirtualSpaces(addedText, caret.VirtualSpaces, session);
                     if (diff == diffs.Last()) addedText = addedText.TrimEnd();
 
-                    var proposedChange = new ProposedEdit(new SnapshotSpan(snapshot, startPos + diff.Position, diff.RemovedText.Length), addedText);
+                    var proposedChange = new ProposedEdit(new SnapshotSpan(snapshot, range.Start + diff.Position, diff.RemovedText.Length), addedText);
                     edits.Add(proposedChange);
                 }
 
@@ -358,6 +364,30 @@ namespace Cody.VisualStudio.Completions
             }
 
             return new CodyProposalCollection(proposalList);
+        }
+
+        private TextRange FindRange(ITextSnapshot snapshot, int startLine, string originalText)
+        {
+            var lineCount = CountLines(originalText);
+            int? offset = null;
+            var textBlock = new StringBuilder();
+            for (int lineNum = startLine; lineNum < startLine + lineCount; lineNum++)
+            {
+                var line = snapshot.GetLineFromLineNumber(lineNum);
+                if (line == null) break;
+                if (!offset.HasValue) offset = line.Start.Position;
+                textBlock.Append(line.GetTextIncludingLineBreak());
+            }
+
+            var block = textBlock.ToString();
+            var index = block.IndexOf(originalText);
+            if (index >= 0) return new TextRange
+            {
+                Start = offset.Value + index,
+                End = offset.Value + index + originalText.Length
+            };
+
+            return null;
         }
 
         private IReadOnlyList<Difference> FindDifferences(string oldText, string newText)
@@ -386,9 +416,20 @@ namespace Cody.VisualStudio.Completions
             return result;
         }
 
-        private static string EditText(string input, int offset, int startPos, int endPos, string replacementText)
+        private static string ReplaceRange(string input, int offset, int startRange, int endRange, string replacementText)
         {
-            return input.Substring(0, startPos - offset) + replacementText + input.Substring(endPos - offset);
+            return input.Substring(0, startRange - offset) + replacementText + input.Substring(endRange - offset);
+        }
+
+        private static int CountLines(string text)
+        {
+            int count = 0;
+            using (var reader = new StringReader(text))
+            {
+                while (reader.ReadLine() != null) count++;
+            }
+
+            return count;
         }
 
         private Position ToLineColPosition(SnapshotPoint point)
@@ -402,6 +443,12 @@ namespace Cody.VisualStudio.Completions
         {
             var containgLine = textSnapshot.GetLineFromLineNumber(line);
             return containgLine.Start.Position + col;
+        }
+
+        public class TextRange
+        {
+            public int Start { get; set; }
+            public int End { get; set; }
         }
 
     }

@@ -17,3 +17,5 @@ public class Difference
         return $"At position {Position}: Removed '{RemovedText}', Added '{AddedText}'";
     }
 }
+
+
