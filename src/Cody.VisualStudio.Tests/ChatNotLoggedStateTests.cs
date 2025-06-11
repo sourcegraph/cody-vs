@@ -53,7 +53,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Logins_With_GitLab_Google_Are_Present()
         {
             // given
