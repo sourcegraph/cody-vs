@@ -160,6 +160,12 @@ namespace Cody.Core.DocumentSync
             }
         }
 
+        public void OnRename(string oldFullPath, string newFullPath)
+        {
+            trace.TraceEvent("DidRename", "{0} -> {1}", oldFullPath, newFullPath);
+            agentService.DidRename(new CodyFileRename { OldUri = oldFullPath.ToUri(), NewUri = newFullPath.ToUri() });
+        }
+
         public void OnSaved(string fullPath)
         {
             trace.TraceEvent("DidSave", "{0}", fullPath);

@@ -59,6 +59,7 @@
     <Compile Include="Agent\Protocol\AutocompleteParams.cs" />
     <Compile Include="Agent\Protocol\AutocompleteResult.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\CodyFileRename.cs" />
     <Compile Include="Agent\Protocol\ProtocolAuthStatus.cs" />
     <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
     <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />
