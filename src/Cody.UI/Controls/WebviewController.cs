@@ -33,7 +33,6 @@ namespace Cody.UI.Controls
             await ApplyVsCodeApiScript();
             SetupEventHandlers();
             ConfigureWebView();
-            SetupResourceHandling();
 
             return webView;
         }
@@ -59,39 +58,10 @@ namespace Cody.UI.Controls
             _webview.WebMessageReceived += HandleWebViewMessage;
         }
 
-        private void SetupResourceHandling()
-        {
-            string AppOrigin = "https://cody.vs";
-            _webview.AddWebResourceRequestedFilter($"{AppOrigin}*", CoreWebView2WebResourceContext.All);
-            _webview.WebResourceRequested += HandleWebResourceRequest;
-        }
-
-        private void HandleWebResourceRequest(object sender, CoreWebView2WebResourceRequestedEventArgs e)
-        {
-            var agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent");
-            var uri = new Uri(e.Request.Uri);
-            var filePath = Path.Combine(agentDir, uri.AbsolutePath.TrimStart('/')).Replace("\\", "/");
-
-            if (System.IO.File.Exists(filePath))
-            {
-                var response = System.IO.File.ReadAllBytes(filePath);
-                var contentType = GetContentType(filePath);
-                e.Response = _webview.Environment.CreateWebResourceResponse(
-                    new MemoryStream(response), 200, "OK", contentType);
-            }
-        }
-
         private void SetupVirtualHostMapping()
         {
             string agentDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Agent", "webviews");
             _webview.SetVirtualHostNameToFolderMapping("cody.vs", agentDir, CoreWebView2HostResourceAccessKind.Allow);
-        }
-
-        private string GetContentType(string filePath)
-        {
-            if (filePath.EndsWith(".js")) return "Content-Type: text/javascript";
-            if (filePath.EndsWith(".css")) return "Content-Type: text/css";
-            return "Content-Type: text/html";
         }
 
         private async void CoreWebView2OnDOMContentLoaded(object sender, CoreWebView2DOMContentLoadedEventArgs e)
