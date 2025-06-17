@@ -423,10 +423,32 @@ namespace Cody.VisualStudio.Completions
 
         private static int CountLines(string text)
         {
-            int count = 0;
-            using (var reader = new StringReader(text))
+            if (string.IsNullOrEmpty(text))
+                return 0;
+
+            int count = 1;
+            int index = 0;
+
+            while (index < text.Length)
             {
-                while (reader.ReadLine() != null) count++;
+                char current = text[index];
+
+                if (current == '\n')
+                {
+                    count++;
+                    index++;
+                }
+                else if (current == '\r')
+                {
+                    count++;
+                    // Handle Windows line ending (\r\n) - skip the \n if it follows \r
+                    if (index + 1 < text.Length && text[index + 1] == '\n') index += 2;
+                    else index++;
+                }
+                else
+                {
+                    index++;
+                }
             }
 
             return count;

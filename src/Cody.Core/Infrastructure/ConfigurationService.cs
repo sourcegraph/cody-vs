@@ -18,6 +18,8 @@ namespace Cody.Core.Infrastructure
         private readonly IUserSettingsService _userSettingsService;
         private readonly ILog _logger;
 
+        public const string CodySuggestionsMode = "cody.suggestions.mode";
+
         public ConfigurationService(IVersionService versionService, IVsVersionService vsVersionService, ISolutionService solutionService, IUserSettingsService userSettingsService, ILog logger)
         {
             _versionService = versionService;
@@ -116,9 +118,9 @@ namespace Cody.Core.Infrastructure
 
             if (config == null) config = new Dictionary<string, object>();
 
-            if (_userSettingsService.EnableAutoEdit && !config.ContainsKey("cody.suggestions.mode"))
+            if (_userSettingsService.EnableAutoEdit && !config.ContainsKey(CodySuggestionsMode))
             {
-                config["cody.suggestions.mode"] = "auto-edit";
+                config[CodySuggestionsMode] = "auto-edit";
             }
 
             return config;
