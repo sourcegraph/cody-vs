@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Playwright;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,7 +22,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Cody_Free_Cody_Pro_Section_Is_Present()
         {
             // given
@@ -37,7 +38,7 @@ namespace Cody.VisualStudio.Tests
 
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Cody_Enterprise_Section_Is_Present()
         {
             // given
@@ -52,7 +53,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Logins_With_GitLab_Google_Are_Present()
         {
             // given
@@ -71,12 +72,18 @@ namespace Cody.VisualStudio.Tests
         {
             try
             {
+                MakeScreenShot("init");
+
                 await UseInvalidToken();
+                MakeScreenShot("invalid_token_set");
                 await action();
+                MakeScreenShot("action");
             }
             finally
             {
                 await RevertToken();
+
+                MakeScreenShot("token_reverted");
             }
         }
 
@@ -86,7 +93,9 @@ namespace Cody.VisualStudio.Tests
             if (_accessToken != null)
             {
                 WriteLog("Making access token invalid ...");
+
                 await SetAccessToken("INVALID");
+                await WaitForLogOutState();
 
                 WriteLog("Invalid token set.");
             }
@@ -94,13 +103,13 @@ namespace Cody.VisualStudio.Tests
 
         private async Task RevertToken()
         {
-            var testName = GetTestName();
-            TakeScreenshot(testName);
-
             if (_accessToken != null)
             {
                 WriteLog("Reverting the access token ...");
+
                 await SetAccessToken(_accessToken); // make it valid
+                await WaitForLogInState();
+
                 WriteLog("The access token reverted.");
             }
         }
