@@ -1,8 +1,9 @@
-using System;
 using Cody.Core.Logging;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Text;
+using System;
+using System.Linq;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -11,6 +12,17 @@ namespace Cody.VisualStudio.Completions
         private readonly ILog _logger;
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalManager));
 
+        private readonly ProposalScenario[] acceptedScenarios = new ProposalScenario[]
+        {
+            ProposalScenario.TypeChar,
+            ProposalScenario.Return,
+            ProposalScenario.ExplicitInvocation,
+            ProposalScenario.CompletionAccepted,
+            ProposalScenario.CompletedProposal,
+            ProposalScenario.DivergedProposal,
+
+        };
+
         public CodyProposalManager(ILog logger)
         {
             _logger = logger;
@@ -18,40 +30,16 @@ namespace Cody.VisualStudio.Completions
 
         public override bool TryGetIsProposalPosition(VirtualSnapshotPoint caret, ProposalScenario scenario, char triggerCharacter, ref bool value)
         {
-            try
+            if (acceptedScenarios.Contains(scenario)) value = true;
+            else if (scenario == ProposalScenario.CaretMove)
             {
-                switch (scenario)
-                {
-                    case ProposalScenario.TypeChar:
-                        trace.TraceEvent("TypeCharScenario");
-                        if (char.IsWhiteSpace(triggerCharacter) && caret.Position.Position >= 2)
-                        {
-                            char c = caret.Position.Snapshot[caret.Position.Position - 2];
-                            if (!char.IsWhiteSpace(c)) value = true;
-                        }
-                        else value = true;
-
-                        break;
-                    case ProposalScenario.Return:
-                        trace.TraceEvent("ReturnScenario");
-                        if (caret.Position.GetContainingLine().End == caret.Position) value = true;
-                        break;
-                    default:
-                        trace.TraceEvent("OtherScenario");
-                        value = true;
-                        break;
-                }
-
-
-                trace.TraceEvent("ShowProposal", value);
-                return value;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Failed.", ex);
+                var currentLine = caret.Position.GetContainingLine();
+                if (currentLine.End != caret.Position) value = true;
             }
 
-            value = false;
+            trace.TraceEvent("ProposalScenario", scenario.ToString());
+            trace.TraceEvent("ShowProposal", value);
+
             return value;
         }
     }

@@ -69,16 +69,16 @@ namespace Cody.AgentTester
                     ShowDocument = Capability.None,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.Enabled,
-                    Webview = "native",
+                    Webview = WebviewCapability.Native,
                     WebviewNativeConfig = new WebviewCapabilities
                     {
                         View = WebviewView.Single,
                         CspSource = "'self' https://cody.vs",
                         WebviewBundleServingPrefix = "https://cody.vs",
                     },
-                    WebviewMessages = "string-encoded",
-                    GlobalState = "stateless",
-                    Secrets = "stateless",
+                    WebviewMessages = WebviewMessagesCapability.StringEncoded,
+                    GlobalState = GlobalStateCapability.Stateless,
+                    Secrets = SecretsCapability.Stateless,
                     Shell = Capability.Enabled,
                 },
                 ExtensionConfiguration = new ExtensionConfiguration

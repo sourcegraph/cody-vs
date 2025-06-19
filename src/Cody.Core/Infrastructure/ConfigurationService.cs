@@ -18,6 +18,8 @@ namespace Cody.Core.Infrastructure
         private readonly IUserSettingsService _userSettingsService;
         private readonly ILog _logger;
 
+        public const string CodySuggestionsMode = "cody.suggestions.mode";
+
         public ConfigurationService(IVersionService versionService, IVsVersionService vsVersionService, ISolutionService solutionService, IUserSettingsService userSettingsService, ILog logger)
         {
             _versionService = versionService;
@@ -38,7 +40,10 @@ namespace Cody.Core.Infrastructure
                 Capabilities = new ClientCapabilities
                 {
                     Authentication = Capability.Enabled,
-                    Completions = "none",
+                    Completions = CompletionsCapability.None,
+                    Autoedit = Capability.Enabled,
+                    AutoeditInlineDiff = AutoeditInlineDiffCapability.None,
+                    AutoeditAsideDiff = AutoeditAsideDiffCapability.Diff,
                     Edit = Capability.None,
                     EditWorkspace = Capability.None,
                     ProgressBars = Capability.Enabled,
@@ -47,16 +52,16 @@ namespace Cody.Core.Infrastructure
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
                     UntitledDocuments = Capability.None,
-                    Webview = "native",
+                    Webview = WebviewCapability.Native,
                     WebviewNativeConfig = new WebviewCapabilities
                     {
                         View = WebviewView.Single,
                         CspSource = "'self' https://cody.vs",
                         WebviewBundleServingPrefix = "https://cody.vs",
                     },
-                    WebviewMessages = "string-encoded",
-                    GlobalState = "server-managed",
-                    Secrets = "client-managed",
+                    WebviewMessages = WebviewMessagesCapability.StringEncoded,
+                    GlobalState = GlobalStateCapability.ServerManaged,
+                    Secrets = SecretsCapability.ClientManaged,
                 },
                 ExtensionConfiguration = GetConfiguration()
             };
@@ -91,11 +96,11 @@ namespace Cody.Core.Infrastructure
 
         internal Dictionary<string, object> GetCustomConfiguration()
         {
+            Dictionary<string, object> config = null;
             var customConfiguration = _userSettingsService.CustomConfiguration;
             try
             {
-                var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfiguration);
-                return config;
+                config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfiguration);
             }
             catch (Exception ex)
             {
@@ -103,8 +108,7 @@ namespace Cody.Core.Infrastructure
                 {
                     //try to repair invalid json
                     var customConfigurationTrial = "{" + customConfiguration + "}";
-                    var config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfigurationTrial);
-                    return config;
+                    config = JsonConvert.DeserializeObject<Dictionary<string, object>>(customConfigurationTrial);
                 }
                 catch { }
 
@@ -112,7 +116,14 @@ namespace Cody.Core.Infrastructure
                 _logger.Error("Deserializing custom configuration failed.", ex);
             }
 
-            return null;
+            if (config == null) config = new Dictionary<string, object>();
+
+            if (_userSettingsService.EnableAutoEdit && !config.ContainsKey(CodySuggestionsMode))
+            {
+                config[CodySuggestionsMode] = "auto-edit";
+            }
+
+            return config;
         }
 
     }

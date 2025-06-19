@@ -54,11 +54,14 @@
     <Compile Include="Agent\INotificationHandler.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />
-    <Compile Include="Agent\Protocol\AuthStatus.cs" />
+    <Compile Include="Agent\Protocol\AutocompleteEditItem.cs" />
     <Compile Include="Agent\Protocol\AutocompleteItem.cs" />
     <Compile Include="Agent\Protocol\AutocompleteParams.cs" />
     <Compile Include="Agent\Protocol\AutocompleteResult.cs" />
+    <Compile Include="Agent\Protocol\AutoeditChanges.cs" />
+    <Compile Include="Agent\Protocol\AutoeditImageDiff.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />
     <Compile Include="Agent\Protocol\ProtocolAuthStatus.cs" />
     <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
     <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />
@@ -77,7 +80,6 @@
     <Compile Include="Agent\Protocol\CodyFilePath.cs" />
     <Compile Include="Agent\Protocol\ClientCapabilities.cs" />
     <Compile Include="Agent\Protocol\ClientInfo.cs" />
-    <Compile Include="Agent\Protocol\ConfigOverwrites.cs" />
     <Compile Include="Agent\Protocol\CreateWebviewPanelParams.cs" />
     <Compile Include="Agent\Protocol\CurrentUserCodySubscription.cs" />
     <Compile Include="Agent\Protocol\DefiniteWebviewOptions.cs" />
