@@ -30,7 +30,7 @@ namespace Cody.Core.Agent
         Task ReceiveMessageStringEncoded(ReceiveMessageStringEncodedParams paramValue);
 
         [AgentCall("extensionConfiguration/change")]
-        Task<AuthStatus> ConfigurationChange(ExtensionConfiguration configuration);
+        Task<ProtocolAuthStatus> ConfigurationChange(ExtensionConfiguration configuration);
 
         [AgentCall("textDocument/didOpen")]
         void DidOpen(ProtocolTextDocument docState);

@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Language.Suggestions;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Differencing;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using System;
@@ -26,6 +27,7 @@ namespace Cody.VisualStudio.Completions
 
         private readonly ITextDocumentFactoryService textDocumentFactoryService;
         private readonly SuggestionServiceBase suggestionServiceBase;
+        private readonly ITextDifferencingService textDifferencingService;
 
         public const string ProposalIdPrefix = "cody";
 
@@ -34,10 +36,12 @@ namespace Cody.VisualStudio.Completions
         [ImportingConstructor]
         public CodyProposalSourceProvider(
             ITextDocumentFactoryService textDocumentFactoryService,
-            SuggestionServiceBase suggestionServiceBase)
+            SuggestionServiceBase suggestionServiceBase,
+            ITextDifferencingSelectorService textDifferencingSelectorService)
         {
             this.textDocumentFactoryService = textDocumentFactoryService;
             this.suggestionServiceBase = suggestionServiceBase;
+            this.textDifferencingService = textDifferencingSelectorService.DefaultTextDifferencingService;
 
             //suggestionServiceBase.ProposalRejected += OnProposalRejected;
             this.suggestionServiceBase.ProposalDisplayed += OnProposalDisplayed;
@@ -68,7 +72,7 @@ namespace Cody.VisualStudio.Completions
                 CodyPackage.AgentService.CompletionSuggested(completionItem);
             }
 
-            if(CodyPackage.TestingSupportService != null)
+            if (CodyPackage.TestingSupportService != null)
             {
                 CodyPackage.TestingSupportService.SetAutocompleteSuggestion(
                     e.OriginalProposal.ProposalId,
@@ -98,7 +102,7 @@ namespace Cody.VisualStudio.Completions
                 if (document != null)
                 {
                     trace.TraceEvent("CreateProposalSource", "Created for '{0}'", document.FilePath);
-                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, view));
+                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, view, textDifferencingService));
                 }
             }
 

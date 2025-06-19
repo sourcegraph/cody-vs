@@ -10,9 +10,7 @@ namespace Cody.Core.Agent.Protocol
     {
         public string Name { get; set; }
         public bool? Authenticated { get; set; }
-        public bool? CodyEnabled { get; set; }
-        public string CodyVersion { get; set; }
-        public AuthStatus AuthStatus { get; set; }
+        public ProtocolAuthStatus AuthStatus { get; set; }
 
     }
 }

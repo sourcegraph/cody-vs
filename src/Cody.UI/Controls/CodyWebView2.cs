@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace Cody.UI.Controls
 {
-    public class CodyWebView2: WebView2
+    public class CodyWebView2 : WebView2CompositionControl
     {
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {

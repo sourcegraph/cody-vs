@@ -88,7 +88,7 @@ namespace Cody.Core.Tests
 
 
         [Test]
-        public void CustomConfiguration_Malformed_JSON_Should_Return_Null()
+        public void CustomConfiguration_Malformed_JSON_Should_Return_Empty()
         {
             // given
             var configurationJson =
@@ -101,7 +101,23 @@ namespace Cody.Core.Tests
             var config = _sut.GetCustomConfiguration();
 
             // then
-            Assert.That(config, Is.Null);
+            Assert.That(config, Is.Empty);
+        }
+
+        [Test]
+        public void CustomConfiguration_EnableAutoEdit_Should_Add_Entry()
+        {
+            // given
+            var configurationJson = @"{  }";
+            _userSettingsServiceMock.Setup(m => m.CustomConfiguration).Returns(configurationJson);
+            _userSettingsServiceMock.Setup(m => m.EnableAutoEdit).Returns(true);
+
+            // when
+            var config = _sut.GetCustomConfiguration();
+
+            // then
+            Assert.That(config, Contains.Key(ConfigurationService.CodySuggestionsMode));
+            Assert.That(config[ConfigurationService.CodySuggestionsMode], Is.EqualTo("auto-edit"));
         }
     }
 }

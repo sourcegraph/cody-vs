@@ -119,6 +119,16 @@ namespace Cody.Core.Settings
             set => Set(nameof(AutomaticallyTriggerCompletions), value.ToString());
         }
 
+        public bool EnableAutoEdit
+        {
+            get
+            {
+                var value = GetOrDefault(nameof(EnableAutoEdit), true.ToString());
+                return bool.Parse(value);
+            }
+            set => Set(nameof(EnableAutoEdit), value.ToString());
+        }
+
         public bool ForceAccessTokenForUITests { get; set; }
     }
 }
