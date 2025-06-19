@@ -12,11 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 
 namespace Cody.VisualStudio.Services
 {
-    public class DocumentsSyncService : IVsRunningDocTableEvents
+    public class DocumentsSyncService : IVsRunningDocTableEvents2
     {
         private static readonly TraceLogger trace = new TraceLogger(nameof(DocumentsSyncService));
 
@@ -393,6 +392,31 @@ namespace Cody.VisualStudio.Services
             var line = snapshot.GetLineFromPosition(position);
             int col = position - line.Start.Position;
             return new DocumentPosition { Line = line.LineNumber, Column = col };
+        }
+
+        public int OnAfterFirstDocumentLock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining) => VSConstants.S_OK;
+
+        public int OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType, uint dwReadLocksRemaining, uint dwEditLocksRemaining) => VSConstants.S_OK;
+
+        public int OnAfterSave(uint docCookie) => VSConstants.S_OK;
+
+        public int OnAfterAttributeChange(uint docCookie, uint grfAttribs) => VSConstants.S_OK;
+
+        public int OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow, IVsWindowFrame pFrame) => VSConstants.S_OK;
+
+        public int OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame) => VSConstants.S_OK;
+
+        public int OnAfterAttributeChangeEx(uint docCookie, uint grfAttribs, IVsHierarchy pHierOld, uint itemidOld, string pszMkDocumentOld, IVsHierarchy pHierNew, uint itemidNew, string pszMkDocumentNew)
+        {
+            const int DocumentMoved = 6;
+            trace.TraceEvent("OnAfterAttributeChangeEx");
+
+            if (grfAttribs == (uint)__VSRDTATTRIB.RDTA_MkDocument || grfAttribs == DocumentMoved)
+            {
+                trace.TraceEvent("OnRename");
+                documentActions.OnRename(pszMkDocumentOld, pszMkDocumentNew);
+            }
+            return VSConstants.S_OK;
         }
     }
 

@@ -414,8 +414,8 @@ namespace Cody.VisualStudio
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
                     DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, Logger);
+                    DocumentsSyncService.Initialize();
                 }
-                DocumentsSyncService.Initialize();
             }
             catch (Exception ex)
             {
@@ -428,6 +428,7 @@ namespace Cody.VisualStudio
             try
             {
                 DocumentsSyncService?.Deinitialize();
+                DocumentsSyncService = null;
                 var workspaceFolderEvent = new WorkspaceFolderDidChangeEvent
                 {
                     Uris = new List<string>()

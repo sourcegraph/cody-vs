@@ -18,6 +18,8 @@ namespace Cody.Core.DocumentSync
 
         void OnClosed(string fullPath);
 
+        void OnRename(string oldFullPath, string newFullPath);
+
     }
 
     public class DocumentPosition

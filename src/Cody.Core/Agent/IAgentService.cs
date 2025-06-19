@@ -47,6 +47,9 @@ namespace Cody.Core.Agent
         [AgentCall("textDocument/didClose")]
         void DidClose(ProtocolTextDocument docState);
 
+        [AgentCall("textDocument/didRename")]
+        void DidRename(CodyFileRename rename);
+
         [AgentCall("chat/new")]
         Task<string> NewChat();
 
