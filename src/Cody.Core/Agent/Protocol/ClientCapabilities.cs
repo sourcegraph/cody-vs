@@ -22,6 +22,7 @@ namespace Cody.Core.Agent.Protocol
         public Capability? Ignore { get; set; }
         public Capability? CodeActions { get; set; }
         public Capability? AccountSwitchingInWebview { get; set; }
+        public Capability? CodeCopyOnlyAction { get; set; }
 
         public Capability? Shell { get; set; }
         public WebviewMessagesCapability? WebviewMessages { get; set; }
