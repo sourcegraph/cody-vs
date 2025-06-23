@@ -1,5 +1,6 @@
 using Cody.Core.Common;
 using Cody.Core.Logging;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.IO;
@@ -56,6 +57,13 @@ namespace Cody.UI.Controls
         {
             _webview.DOMContentLoaded += CoreWebView2OnDOMContentLoaded;
             _webview.WebMessageReceived += HandleWebViewMessage;
+            _webview.NewWindowRequested += OnNewWindowRequested;
+        }
+
+        private void OnNewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            VsShellUtilities.OpenSystemBrowser(e.Uri);
+            e.Handled = true;
         }
 
         private void SetupVirtualHostMapping()
