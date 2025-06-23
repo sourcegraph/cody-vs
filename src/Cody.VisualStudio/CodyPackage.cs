@@ -51,7 +51,7 @@ namespace Cody.VisualStudio
 
         public const string PackageGuidString = "9b8925e1-803e-43d9-8f43-c4a4f35b4325";
 
-        public ILog Logger;
+        public static ILog Logger;
         public ILog AgentLogger;
         public ILog AgentNotificationsLogger;
 

@@ -26,7 +26,7 @@ namespace Cody.VisualStudio.Options
             _codyPackage = GetPackage();
             if (_codyPackage != null)
             {
-                _logger = _codyPackage.Logger;
+                _logger = CodyPackage.Logger;
                 _settingsService = CodyPackage.UserSettingsService;
 
                 _logger.Debug("Initialized.");

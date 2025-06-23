@@ -1,10 +1,10 @@
-using Microsoft.VisualStudio.Shell;
-using System;
-using System.Runtime.InteropServices;
 using Cody.UI.ViewModels;
 using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Runtime.InteropServices;
 
 #pragma warning disable VSTHRD010
 
@@ -36,7 +36,7 @@ namespace Cody.VisualStudio
             // the object returned by the Content property.
 
             var package = GetPackage();
-            var logger = package.Logger;
+            var logger = CodyPackage.Logger;
             var notificationsHandlers = package.NotificationHandlers;
             var webViewsManager = package.WebViewsManager;
 

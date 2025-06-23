@@ -1,6 +1,5 @@
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Trace;
-using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Proposals;
 using Microsoft.VisualStudio.Language.Suggestions;
 using Microsoft.VisualStudio.Text;
@@ -28,6 +27,19 @@ namespace Cody.VisualStudio.Completions
         private readonly ITextDocumentFactoryService textDocumentFactoryService;
         private readonly SuggestionServiceBase suggestionServiceBase;
         private readonly ITextDifferencingService textDifferencingService;
+
+        private readonly ReasonForDismiss[] usualDismissReason = new[]
+        {
+            ReasonForDismiss.DismissedAfterTypeChar,
+            ReasonForDismiss.DismissedAfterCaretMoved,
+            ReasonForDismiss.DismissedAfterUserEscape,
+            ReasonForDismiss.DismissedAfterUserDelete,
+            ReasonForDismiss.DismissedAfterBackspace,
+            ReasonForDismiss.DismissedAfterReturn,
+            ReasonForDismiss.DismissedAfterCompletionChange,
+            ReasonForDismiss.DismissedAfterViewClosed
+
+        };
 
         public const string ProposalIdPrefix = "cody";
 
@@ -60,6 +72,9 @@ namespace Cody.VisualStudio.Completions
         private void OnSuggestionDismissed(object sender, SuggestionDismissedEventArgs e)
         {
             trace.TraceEvent("SuggestionDismissed", "reason: {0}", e.Reason);
+
+            if (!usualDismissReason.Contains(e.Reason))
+                CodyPackage.Logger?.Warn($"Unusual dismissed suggestion. Reason: {e.Reason}");
         }
 
         private void OnProposalDisplayed(object sender, ProposalDisplayedEventArgs e)
@@ -102,6 +117,7 @@ namespace Cody.VisualStudio.Completions
                 if (document != null)
                 {
                     trace.TraceEvent("CreateProposalSource", "Created for '{0}'", document.FilePath);
+                    CodyPackage.Logger?.Info($"Suggestion provider attached to '{document.FilePath}'");
                     return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, view, textDifferencingService));
                 }
             }
