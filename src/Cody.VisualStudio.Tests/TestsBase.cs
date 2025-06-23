@@ -1,19 +1,19 @@
+using Cody.Core.Logging;
+using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Events;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.TextManager.Interop;
 using System;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using Cody.Core.Logging;
-using EnvDTE80;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
-using System.Diagnostics;
 using Thread = System.Threading.Thread;
-using Microsoft.VisualStudio.Shell.Events;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -27,7 +27,7 @@ namespace Cody.VisualStudio.Tests
         {
             _logger = output;
 
-            var logger = (Logger)CodyPackage?.Logger;
+            var logger = (Logger)CodyPackage.Logger;
             if (logger != null)
                 logger.WithTestLogger(this);
 

@@ -25,10 +25,10 @@ namespace Cody.VisualStudio.Tests
         public async Task Logger_Initialized_And_Info_MethodCalled()
         {
             // given
-            var codyPackage = await GetPackageAsync();
+            var logger = CodyPackage.Logger;
 
             // when
-            var logger = codyPackage.Logger;
+
             Assert.NotNull(logger);
 
             logger.Info("Hello World from integration tests!");
