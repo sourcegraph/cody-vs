@@ -30,15 +30,22 @@ namespace Cody.VisualStudio.Completions
 
         public override bool TryGetIsProposalPosition(VirtualSnapshotPoint caret, ProposalScenario scenario, char triggerCharacter, ref bool value)
         {
-            if (acceptedScenarios.Contains(scenario)) value = true;
-            else if (scenario == ProposalScenario.CaretMove)
+            try
             {
-                var currentLine = caret.Position.GetContainingLine();
-                if (currentLine.End != caret.Position) value = true;
-            }
+                if (acceptedScenarios.Contains(scenario)) value = true;
+                else if (scenario == ProposalScenario.CaretMove)
+                {
+                    var currentLine = caret.Position.GetContainingLine();
+                    if (currentLine.End != caret.Position) value = true;
+                }
 
-            trace.TraceEvent("ProposalScenario", scenario.ToString());
-            trace.TraceEvent("ShowProposal", value);
+                trace.TraceEvent("ProposalScenario", scenario.ToString());
+                trace.TraceEvent("ShowProposal", value);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed.", ex);
+            }
 
             return value;
         }

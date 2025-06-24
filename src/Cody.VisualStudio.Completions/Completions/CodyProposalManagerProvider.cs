@@ -24,7 +24,7 @@ namespace Cody.VisualStudio.Completions
         [ImportingConstructor]
         public CodyProposalManagerProvider(LoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.Create("Cody Completions");
+            _logger = loggerFactory.Create();
         }
 
         public async override Task<ProposalManagerBase> GetProposalManagerAsync(ITextView view, CancellationToken cancel)
