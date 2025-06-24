@@ -4,24 +4,26 @@ using Cody.Core.Common;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Differencing;
 using Microsoft.VisualStudio.Text.Editor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Completions
 {
     public class CodyProposalSource : ProposalSourceBase
     {
         private static TraceLogger trace = new TraceLogger(nameof(CodyProposalSource));
+
+        private readonly ILog _logger;
+
         private static readonly StringDifferenceOptions diffOptions = new StringDifferenceOptions(StringDifferenceTypes.Word, 0, true);
 
         private IAgentService agentService;
@@ -33,11 +35,13 @@ namespace Cody.VisualStudio.Completions
 
         private ITextSnapshot trackedSnapshot;
 
-        public CodyProposalSource(ITextDocument textDocument, ITextView view, ITextDifferencingService textDifferencingService)
+        public CodyProposalSource(ITextDocument textDocument, ITextView view,
+            ITextDifferencingService textDifferencingService, ILog logger)
         {
             this.textDocument = textDocument;
             this.view = view;
             this.textDifferencingService = textDifferencingService;
+            _logger = logger;
 
             trackedSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
@@ -68,11 +72,15 @@ namespace Cody.VisualStudio.Completions
                 trace.TraceEvent("Begin", "session: {0}", session);
                 trace.TraceEvent("Scenario", "session: {0}, scenario {1}", session, scenario);
 
+                if (scenario == ProposalScenario.ExplicitInvocation)
+                    _logger.Info("Autocomplete explicitly triggered");
+
                 agentService = CodyPackage.AgentService;
                 userSettingsService = CodyPackage.UserSettingsService;
 
                 if (!ShouldDoProposals(completionState, scenario, agentService, userSettingsService))
                 {
+                    _logger.Info("Autocomplete omitted (is autocomplete enabled in settings window?)");
                     return null;
                 }
 
@@ -120,11 +128,17 @@ namespace Cody.VisualStudio.Completions
                 if (autocomplete == null)
                 {
                     trace.TraceEvent("Result", "session: {0}, No results (null)", session);
+                    if (scenario == ProposalScenario.ExplicitInvocation)
+                        _logger.Info("Autocomplete returned no suggestions");
+
                     return null;
                 }
                 else if (autocomplete.InlineCompletionItems.Length == 0 && autocomplete.DecoratedEditItems.Length == 0)
                 {
                     trace.TraceEvent("Result", "session: {0}, No results (empty)", session);
+                    if (scenario == ProposalScenario.ExplicitInvocation)
+                        _logger.Info("Autocomplete returned zero suggestions");
+
                     return null;
                 }
                 else
@@ -145,13 +159,24 @@ namespace Cody.VisualStudio.Completions
 
                 CodyProposalCollection collection = null;
                 if (autocomplete.DecoratedEditItems.Any())
+                {
                     collection = CreateAutoeditProposals(autocomplete, caret, completionState, session);
+                    if (scenario == ProposalScenario.ExplicitInvocation && collection != null)
+                        _logger.Info($"Number of auto-edits: {collection.Proposals.Count}");
+                }
                 else if (autocomplete.InlineCompletionItems.Any())
+                {
                     collection = CreateAutocompleteProposals(autocomplete, caret, completionState, session);
+                    if (scenario == ProposalScenario.ExplicitInvocation && collection != null)
+                        _logger.Info($"Number of autocompletes: {collection.Proposals.Count}");
+                }
 
                 if (collection == null || collection.Proposals.Count == 0)
                 {
                     trace.TraceEvent("NoProposalsToDisplay", "session: {0}", session);
+                    if (scenario == ProposalScenario.ExplicitInvocation)
+                        _logger.Info("No suggestions to display");
+
                     return null;
                 }
 
@@ -165,6 +190,7 @@ namespace Cody.VisualStudio.Completions
             }
             catch (Exception ex)
             {
+                _logger.Error("Autocomplete error", ex);
                 trace.TraceException(ex);
             }
             finally

@@ -17,7 +17,7 @@ namespace Cody.VisualStudio.Completions
             
         }
 
-        public ILog Create(string outputName = null)
+        public ILog Create(string outputName = "Cody Completions")
         {
 
             Logger logger = null;
