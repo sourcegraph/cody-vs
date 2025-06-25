@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Cody.Core.Logging;
 using Cody.VisualStudio.Inf;
@@ -10,16 +12,19 @@ namespace Cody.VisualStudio.Completions
     [Export]
     public class LoggerFactory
     {
-
+        private static readonly ConcurrentDictionary<string, ILog> _loggers = new ConcurrentDictionary<string, ILog>();
 
         public LoggerFactory()
         {
-            
         }
 
         public ILog Create(string outputName = "Cody Completions")
         {
+            return _loggers.GetOrAdd(outputName, CreateLogger);
+        }
 
+        private ILog CreateLogger(string outputName = "Cody Completions")
+        {
             Logger logger = null;
             SentryLog sentryLog = null;
             try
