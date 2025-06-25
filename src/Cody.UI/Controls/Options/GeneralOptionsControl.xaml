@@ -7,6 +7,7 @@
              xmlns:controls="clr-namespace:Cody.UI.Controls"
              xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
              xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+             xmlns:converters="clr-namespace:Cody.UI.Converters"
              mc:Ignorable="d" 
              d:DesignWidth="500"
              d:DesignHeight="300"
@@ -79,18 +80,32 @@
                     Orientation="Horizontal"
                     Grid.Row="3"
                     Grid.Column="1"
-                    Margin="0 5 0 0">
+                    Margin="0 5 0 0"
+                    >
                     <CheckBox
                         Name="AutomaticallyTriggerCompletionsCheckBox"
                         IsChecked="{Binding AutomaticallyTriggerCompletions, Mode=TwoWay}"
                         Content="Automatically trigger completions"
+                        IsEnabled="{Binding HasCompletionSupport }"
                      />
+                    <!--Supported-->
                     <imaging:CrispImage
                         Width="16"
                         Height="16"
                         Margin="4 0 0 0"
                         Moniker="{x:Static catalog:KnownMonikers.InfoTipInline}"
-                        ToolTip="To use Cody autocomplete make sure that the “Show inline completions” option in the IntelliCode section is enabled." />
+                        ToolTip="To use Cody autocomplete make sure that the “Show inline completions” option in the IntelliCode section is enabled."
+                        Visibility="{Binding HasCompletionSupport , Converter={x:Static converters:BooleanToVisibilityConverter.Default}}"
+                        />
+                    <!--Not supported-->
+                    <imaging:CrispImage
+                        Width="16"
+                        Height="16"
+                        Margin="4 0 0 0"
+                        Moniker="{x:Static catalog:KnownMonikers.StatusInvalid}"
+                        ToolTip="Visual Studio 17.6+ is required to use Cody autocomplete or auto-edit. "
+                        Visibility="{Binding HasCompletionSupport , Converter={x:Static converters:BooleanToVisibilityConverter.Inverted}}"
+                    />
                 </StackPanel>
 
 
@@ -100,8 +115,9 @@
                     Grid.Column="1"
                     Margin="0 5 0 0"
                     IsChecked="{Binding EnableAutoEdit, Mode=TwoWay}"
-                    Content="Enable Cody Auto-edit (requires restart)"
- />
+                    Content="Enable Cody auto-edit (requires restart)"
+                    IsEnabled="{Binding HasCompletionSupport}"
+                   />
 
                 <!--Get Help-->
                 <Button 

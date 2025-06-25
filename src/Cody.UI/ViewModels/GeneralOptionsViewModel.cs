@@ -1,20 +1,22 @@
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using Cody.Core.Ide;
 
 namespace Cody.UI.ViewModels
 {
     public class GeneralOptionsViewModel : NotifyPropertyChangedBase, IDataErrorInfo
     {
+        private readonly IVsVersionService _vsVersionService;
         private readonly ILog _logger;
 
-        public GeneralOptionsViewModel(ILog logger)
+        public GeneralOptionsViewModel(IVsVersionService vsVersionService, ILog logger)
         {
+            _vsVersionService = vsVersionService;
             _logger = logger;
 
             _logger.Debug("Initialized.");
@@ -40,6 +42,19 @@ namespace Cody.UI.ViewModels
                 _logger.Error($"Opening '{uri}' failed.", ex);
             }
         }
+
+        private bool IsCompletionSupported()
+        {
+            if (!HasCompletionSupport)
+            {
+                _logger.Debug("Completion API not supported by VS");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool HasCompletionSupport => _vsVersionService.HasCompletionSupport;
 
         private string _customConfiguration;
 
@@ -75,6 +90,8 @@ namespace Cody.UI.ViewModels
             get => _automaticallyTriggerCompletions;
             set
             {
+                if (!IsCompletionSupported()) return;
+
                 if (SetProperty(ref _automaticallyTriggerCompletions, value))
                 {
                     _logger.Debug($"AutomaticallyTriggerCompletions set:{value}");
@@ -88,6 +105,8 @@ namespace Cody.UI.ViewModels
             get => _enableAutoEdit;
             set
             {
+                if (!IsCompletionSupported()) return;
+
                 if (SetProperty(ref _enableAutoEdit, value))
                 {
                     _logger.Debug($"EnableAutoEdit set:{value}");
