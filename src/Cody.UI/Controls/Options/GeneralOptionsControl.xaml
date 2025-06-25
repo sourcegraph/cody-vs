@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Cody.UI.Controls.Options"
              xmlns:controls="clr-namespace:Cody.UI.Controls"
+             xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+             xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
              mc:Ignorable="d" 
              d:DesignWidth="500"
              d:DesignHeight="300"
@@ -73,14 +75,24 @@
                     Content="Accept non-trusted certificates (requires restart)"
                  />
 
-                <CheckBox
-                    Name="AutomaticallyTriggerCompletionsCheckBox"
+                <StackPanel
+                    Orientation="Horizontal"
                     Grid.Row="3"
                     Grid.Column="1"
-                    Margin="0 5 0 0"
-                    IsChecked="{Binding AutomaticallyTriggerCompletions, Mode=TwoWay}"
-                    Content="Automatically trigger completions"
-                 />
+                    Margin="0 5 0 0">
+                    <CheckBox
+                        Name="AutomaticallyTriggerCompletionsCheckBox"
+                        IsChecked="{Binding AutomaticallyTriggerCompletions, Mode=TwoWay}"
+                        Content="Automatically trigger completions"
+                     />
+                    <imaging:CrispImage
+                        Width="16"
+                        Height="16"
+                        Margin="4 0 0 0"
+                        Moniker="{x:Static catalog:KnownMonikers.InfoTipInline}"
+                        ToolTip="To use Cody autocomplete make sure that the “Show inline completions” option in the IntelliCode section is enabled." />
+                </StackPanel>
+
 
                 <CheckBox
                     Name="EnableAutoEditCheckBox"
