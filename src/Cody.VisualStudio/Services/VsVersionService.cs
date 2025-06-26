@@ -15,9 +15,18 @@ namespace Cody.VisualStudio.Services
         {
             _logger = logger;
 
-            SemanticVersion = GetAppIdStringProperty(VSAPropID.ProductSemanticVersion);
-            DisplayVersion = GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
-            EditionName = GetAppIdStringProperty(VSAPropID.EditionName);
+            try
+            {
+                SemanticVersion = GetAppIdStringProperty(VSAPropID.ProductSemanticVersion);
+                DisplayVersion = GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
+                EditionName = GetAppIdStringProperty(VSAPropID.EditionName);
+
+                Version = Version.Parse(DisplayVersion);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Retrieving VS version failed.", ex);
+            }
         }
 
 
@@ -27,6 +36,19 @@ namespace Cody.VisualStudio.Services
 
         public string EditionName { get; }
 
+        public Version Version { get; }
+
+        public bool HasCompletionSupport
+        {
+            get
+            {
+                var minimalVersion = new Version(17, 6);
+
+                if (Version >= minimalVersion)
+                    return true;
+                return false;
+            }
+        }
 
         [Guid("1EAA526A-0898-11d3-B868-00C04F79F802")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

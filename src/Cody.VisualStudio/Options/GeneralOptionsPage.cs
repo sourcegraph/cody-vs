@@ -133,7 +133,7 @@ namespace Cody.VisualStudio.Options
                     _logger.Debug("Creating options control ...");
 
                     _control = new GeneralOptionsControl();
-                    _generalOptionsViewModel = new GeneralOptionsViewModel(_logger);
+                    _generalOptionsViewModel = new GeneralOptionsViewModel(_codyPackage.VsVersionService, _logger);
                     _control.DataContext = _generalOptionsViewModel;
 
                     _codyPackage.GeneralOptionsViewModel = _generalOptionsViewModel;
