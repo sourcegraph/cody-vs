@@ -4,6 +4,7 @@ using Cody.Core.Logging;
 using Cody.Core.Trace;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using Sentry;
 using StreamJsonRpc;
 using System;
 using System.Diagnostics;
@@ -98,6 +99,7 @@ namespace Cody.VisualStudio.Client
         {
             //agentLog.Debug(error);
             trace.TraceEvent("AgentErrorOutput", error);
+            SentrySdk.AddBreadcrumb(error, "AgentErrorOutput");
         }
 
         private IAgentConnector CreateConnector()
