@@ -46,18 +46,30 @@ namespace Cody.Core.Tests
         }
 
         [Test]
-        public void Parsing_Json_Dev_Config_Should_Not_Call_LoggerError()
+        public void Parsing_Json_Dev_Config_Should_Not_Call_LoggerError_When_Accessing_RemoteAgentPort()
         {
             // given
 
             // when
             Configuration.AddFromJsonFile(_tempJsonFile);
             int? remoteAgentPort = Configuration.RemoteAgentPort;
-            int? traceLogioPort = Configuration.TraceLogioPort;
 
             // then
             _loggerMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<Exception>(), It.IsAny<string>()), Times.Never);
             Assert.That(remoteAgentPort, Is.Not.Null);
+        }
+
+        [Test]
+        public void Parsing_Json_Dev_Config_Should_Not_Call_LoggerError_When_Accessing_TraceLogioPort()
+        {
+            // given
+
+            // when
+            Configuration.AddFromJsonFile(_tempJsonFile);
+            int? traceLogioPort = Configuration.TraceLogioPort;
+
+            // then
+            _loggerMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<Exception>(), It.IsAny<string>()), Times.Never);
             Assert.That(traceLogioPort, Is.Not.Null);
         }
 
