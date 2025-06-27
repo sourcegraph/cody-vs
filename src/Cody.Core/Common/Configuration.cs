@@ -14,7 +14,7 @@ namespace Cody.Core.Common
 
         public static string AgentDirectory => Get((string)null);
 
-        public static int? RemoteAgentPort => Get((int?)null);
+        public static int? RemoteAgentPort => (int?)Get((long?)null);
 
         public static bool Trace => Get(false);
 
@@ -22,7 +22,7 @@ namespace Cody.Core.Common
 
         public static string TraceLogioHostname => Get((string)null);
 
-        public static int? TraceLogioPort => Get((int?)null);
+        public static int? TraceLogioPort => (int?)Get((long?)null);
 
         public static bool ShowCodyAgentOutput => Get(false);
 
