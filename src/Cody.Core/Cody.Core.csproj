@@ -63,6 +63,7 @@
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
     <Compile Include="Agent\Protocol\CodyFileRename.cs" />
     <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />
+    <Compile Include="Agent\Protocol\OptionsParams.cs" />
     <Compile Include="Agent\Protocol\ProtocolAuthStatus.cs" />
     <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
     <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />
@@ -75,6 +76,8 @@
     <Compile Include="Agent\Protocol\SaveDialogOptionsParams.cs" />
     <Compile Include="Agent\Protocol\SelectedCompletionInfo.cs" />
     <Compile Include="Agent\Protocol\TestProgress.cs" />
+    <Compile Include="Agent\Protocol\TextDocumentEditParams.cs" />
+    <Compile Include="Agent\Protocol\WorkspaceEditEntryMetadata.cs" />
     <Compile Include="Agent\Protocol\WorkspaceFolderDidChangeEvent.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParamsOptions.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParams.cs" />
@@ -94,6 +97,8 @@
     <Compile Include="Agent\Protocol\WebviewCapabilities.cs" />
     <Compile Include="Agent\Protocol\ResolveWebviewViewParams.cs" />
     <Compile Include="Agent\SetHtmlEvent.cs" />
+    <Compile Include="Agent\TextDocumentNotificationHandlers.cs" />
+    <Compile Include="Agent\Protocol\TextEdit.cs" />
     <Compile Include="Agent\WebviewMessageHandler.cs" />
     <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Common\Configuration.cs" />

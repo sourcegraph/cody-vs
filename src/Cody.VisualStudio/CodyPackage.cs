@@ -74,6 +74,7 @@ namespace Cody.VisualStudio
         public MainView MainView;
         public NotificationHandlers NotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
+        public TextDocumentNotificationHandlers TextDocumentNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public static TestingSupportService TestingSupportService;
         public IFileService FileService;
@@ -137,6 +138,7 @@ namespace Cody.VisualStudio
 
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
+            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(FileService);
 
             var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
             ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
@@ -295,7 +297,7 @@ namespace Cody.VisualStudio
 
                 var options = new AgentClientOptions
                 {
-                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
+                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers, TextDocumentNotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = Configuration.RemoteAgentPort.HasValue,

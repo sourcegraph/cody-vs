@@ -16,7 +16,6 @@ namespace Cody.Core.Agent
 
         private readonly WebviewMessageHandler _messageFilter;
         private readonly IUserSettingsService _settingsService;
-        private readonly IFileService _fileService;
         private readonly ISecretStorageService _secretStorage;
         private readonly ILog _logger;
 
@@ -37,7 +36,6 @@ namespace Cody.Core.Agent
         public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService, ISecretStorageService secretStorage)
         {
             _settingsService = settingsService;
-            _fileService = fileService;
             _secretStorage = secretStorage;
             _logger = logger;
             _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
@@ -174,13 +172,6 @@ namespace Cody.Core.Agent
         public void IgnoreDidChange()
         {
             _logger.Debug("Changed");
-        }
-
-        [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
-        public Task<bool> ShowTextDocument(TextDocumentShowParams param)
-        {
-            var path = new Uri(param.Uri).ToString();
-            return Task.FromResult(_fileService.OpenFileInEditor(path));
         }
 
         [AgentCallback("env/openExternal")]
