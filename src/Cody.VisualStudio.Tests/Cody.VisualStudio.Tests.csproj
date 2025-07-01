@@ -79,10 +79,10 @@
       <Version>1.0.7</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Playwright">
-      <Version>1.45.0</Version>
+      <Version>1.53.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Playwright.TestAdapter">
-      <Version>1.45.0</Version>
+      <Version>1.53.0</Version>
     </PackageReference>
     <PackageReference Include="VsixTesting.Xunit">
       <Version>0.1.78</Version>
