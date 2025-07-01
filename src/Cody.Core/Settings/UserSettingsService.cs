@@ -123,7 +123,7 @@ namespace Cody.Core.Settings
         {
             get
             {
-                var value = GetOrDefault(nameof(EnableAutoEdit), false.ToString());
+                var value = GetOrDefault(nameof(EnableAutoEdit), true.ToString());
                 return bool.Parse(value);
             }
             set => Set(nameof(EnableAutoEdit), value.ToString());
