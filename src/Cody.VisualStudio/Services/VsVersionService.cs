@@ -1,9 +1,10 @@
 using Cody.Core.Ide;
+using Cody.Core.Logging;
+using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Services
 {
@@ -21,12 +22,20 @@ namespace Cody.VisualStudio.Services
                 DisplayVersion = GetAppIdStringProperty(VSAPropID.ProductDisplayVersion);
                 EditionName = GetAppIdStringProperty(VSAPropID.EditionName);
 
-                Version = Version.Parse(DisplayVersion);
+                Version = ParseVersion(DisplayVersion);
             }
             catch (Exception ex)
             {
                 _logger.Error("Retrieving VS version failed.", ex);
             }
+        }
+
+        private Version ParseVersion(string version)
+        {
+            int spaceIndex = version.IndexOf(' ');
+            if (spaceIndex >= 0) version = version.Substring(0, spaceIndex).Trim();
+
+            return Version.Parse(version);
         }
 
 
