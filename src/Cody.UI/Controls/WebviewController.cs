@@ -5,6 +5,7 @@ using Microsoft.Web.WebView2.Core;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -105,6 +106,11 @@ namespace Cody.UI.Controls
             catch (TaskCanceledException)
             {
                 System.Diagnostics.Debug.WriteLine(message, "Agent PostWebMessageAsJson task canceled");
+            }
+            catch (InvalidOperationException ex) when (ex.InnerException is COMException)
+            {
+                //CoreWebView2 members cannot be accessed after the WebView2 control is disposed.
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
             catch (AggregateException ex) when (ex.InnerException is InvalidOperationException inex)
             {

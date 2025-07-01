@@ -1,11 +1,11 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using Cody.Core.Logging;
 using Cody.VisualStudio.Inf;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -30,7 +30,7 @@ namespace Cody.VisualStudio.Completions
             try
             {
                 sentryLog = new SentryLog();
-                SentryLog.Initialize();
+                SentryLog.Initialize(VsShellUtilities.ShutdownToken);
                 logger = new Logger();
 
                 var failToCreateWindowPaneLogger = false;
