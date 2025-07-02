@@ -1,6 +1,5 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
-using Cody.Core.Common;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -34,6 +33,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using EnvDTE;
+using Configuration = Cody.Core.Common.Configuration;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Task = System.Threading.Tasks.Task;
 
@@ -86,13 +87,14 @@ namespace Cody.VisualStudio
             try
             {
                 InitializeErrorHandling();
-                Configuration.AddFromJsonFile("CodyDevConfig.json");
-                Configuration.AddFromEnviromentVariableJsonFile("CODY_VS_DEV_CONFIG");
+
+                var loggerFactory = InitializeMainLogger();
+                LoadDevConfiguration();
 
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
                 InitializeTrace();
-                InitializeServices();
+                InitializeServices(loggerFactory);
                 await InitOleMenu();
 
                 InitializeAgent();
@@ -105,12 +107,39 @@ namespace Cody.VisualStudio
             }
         }
 
-        private void InitializeServices()
+        private LoggerFactory InitializeMainLogger()
         {
             var loggerFactory = new LoggerFactory();
+            Logger = loggerFactory.Create(WindowPaneLogger.DefaultCody);
+
+            return loggerFactory;
+        }
+
+        private void LoadDevConfiguration()
+        {
+            try
+            {
+                Configuration.Initialize(Logger);
+                var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                if (location != null)
+                {
+                    var devConfig = Path.Combine(location, "CodyDevConfig.json");
+                    Configuration.AddFromJsonFile(devConfig);
+                }
+
+                Configuration.AddFromEnviromentVariableJsonFile("CODY_VS_DEV_CONFIG");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Loading DEV config failed.", ex);
+            }
+        }
+
+        private void InitializeServices(LoggerFactory loggerFactory)
+        {
             AgentLogger = loggerFactory.Create(Configuration.ShowCodyAgentOutput ? WindowPaneLogger.CodyAgent : null);
             AgentNotificationsLogger = loggerFactory.Create(Configuration.ShowCodyNotificationsOutput ? WindowPaneLogger.CodyNotifications : null);
-            Logger = loggerFactory.Create(WindowPaneLogger.DefaultCody);
+         
 
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution, Logger);
