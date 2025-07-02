@@ -250,7 +250,9 @@ namespace Cody.Core.Agent
         [AgentCallback("window/showMessage", deserializeToSingleObject: true)]
         public async Task<string> ShowMessage(ShowWindowMessageParams param)
         {
-            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null; // TODO: supports only single auto-edit notification for now
+            // TODO: supports only single auto-edit notification for now
+            // because how the code handles enabling/disabling auto-edits via UserSettingsService
+            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null; 
 
             var notifications = await _infobarNotificationsAsync;
 
@@ -258,6 +260,9 @@ namespace Cody.Core.Agent
             var selectedValue = await notifications.ShowNotification(param);
 
             _logger.Debug($"Selected value: '{selectedValue}'");
+
+            if (selectedValue == null) // an user want to stay on auto-edits
+                _settingsService.EnableAutoEdit = true;
 
             return selectedValue;
         }
