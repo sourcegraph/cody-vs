@@ -257,7 +257,7 @@ namespace Cody.Core.Agent
             var notifications = await _infobarNotificationsAsync;
 
             _logger.Debug($"ℹ ShowMessage:{param.Message}");
-            var selectedValue = await notifications.ShowNotification(param);
+            var selectedValue = await notifications.Show(param);
 
             _logger.Debug($"Selected value: '{selectedValue}'");
 

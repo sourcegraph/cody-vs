@@ -5,6 +5,6 @@ namespace Cody.Core.Ide
 {
     public interface IInfobarNotifications
     {
-        Task<string> ShowNotification(ShowWindowMessageParams messageParams);
+        Task<string> Show(ShowWindowMessageParams messageParams);
     }
 }

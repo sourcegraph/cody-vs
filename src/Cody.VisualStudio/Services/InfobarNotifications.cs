@@ -84,7 +84,7 @@ namespace Cody.VisualStudio.Services
             });
         }
 
-        public async Task<string> ShowNotification(ShowWindowMessageParams messageParams)
+        public async Task<string> Show(ShowWindowMessageParams messageParams)
         {
             try
             {
