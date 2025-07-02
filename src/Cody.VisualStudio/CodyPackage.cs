@@ -32,6 +32,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using EnvDTE;
 using Configuration = Cody.Core.Common.Configuration;
@@ -69,6 +70,11 @@ namespace Cody.VisualStudio
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
 
+        private IInfobarNotifications InfobarNotifications;
+
+        private readonly TaskCompletionSource<IInfobarNotifications> _infobarNotificationsCompletionSource = new TaskCompletionSource<IInfobarNotifications>();
+        public Task<IInfobarNotifications> InfobarNotificationsAsync => _infobarNotificationsCompletionSource.Task;
+
         public GeneralOptionsViewModel GeneralOptionsViewModel;
         public MainViewModel MainViewModel;
 
@@ -96,7 +102,7 @@ namespace Cody.VisualStudio
                 InitializeTrace();
                 InitializeServices(loggerFactory);
                 await InitOleMenu();
-
+                
                 InitializeAgent();
 
                 ReportSentryVsVersion();
@@ -159,7 +165,7 @@ namespace Cody.VisualStudio
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
 
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService, InfobarNotificationsAsync);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
@@ -278,6 +284,47 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger?.Error("Cannot initialize menu items", ex);
+            }
+        }
+
+        private void InitializeNotificationsBar()
+        {
+            try
+            {
+                if (InfobarNotifications != null) return;
+
+                var vsShell = (IVsShell)ServiceProvider.GlobalProvider.GetService(typeof(IVsShell));
+                if (vsShell != null)
+                {
+                    vsShell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out var obj);
+
+                    var host = obj as IVsInfoBarHost;
+                    if (host != null)
+                    {
+                        //Logger.Debug($"InitializeInfoBarService:{host}");
+
+                        var uiFactory = ServiceProvider.GlobalProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
+                        if (uiFactory != null)
+                        {
+                            InfobarNotifications = new InfobarNotifications(host, uiFactory, AgentNotificationsLogger);
+                            _infobarNotificationsCompletionSource.SetResult(InfobarNotifications);
+                            
+                        }
+                        else
+                        {
+                            Logger.Error("Cannot get IVsInfoBarUIFactory");
+                        }
+
+                    }
+                    else
+                        Logger.Error("Cannot get IVsInfoBarHost");
+                }
+                else
+                    Logger.Error("Cannot get IVsShell");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Cannot initialize InfoBarLicensePreordersService.", ex);
             }
         }
 
@@ -425,6 +472,7 @@ namespace Cody.VisualStudio
         private void OnAfterBackgroundSolutionLoadComplete(object sender = null, EventArgs e = null)
         {
             UpdateCurrentWorkspaceFolder();
+            InitializeNotificationsBar();
         }
 
         private void UpdateCurrentWorkspaceFolder()

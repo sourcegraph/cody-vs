@@ -7,6 +7,7 @@ using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
+using Cody.Core.Ide;
 
 namespace Cody.Core.Agent
 {
@@ -18,6 +19,7 @@ namespace Cody.Core.Agent
         private readonly IUserSettingsService _settingsService;
         private readonly IFileService _fileService;
         private readonly ISecretStorageService _secretStorage;
+        private readonly Task<IInfobarNotifications> _infobarNotificationsAsync;
         private readonly ILog _logger;
 
         public IAgentService agentClient;
@@ -34,11 +36,18 @@ namespace Cody.Core.Agent
 
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
-        public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService, ISecretStorageService secretStorage)
+        public NotificationHandlers(
+            IUserSettingsService settingsService,
+            ILog logger,
+            IFileService fileService,
+            ISecretStorageService secretStorage,
+            Task<IInfobarNotifications> infobarNotificationsAsync
+            )
         {
             _settingsService = settingsService;
             _fileService = fileService;
             _secretStorage = secretStorage;
+            _infobarNotificationsAsync = infobarNotificationsAsync;
             _logger = logger;
             _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
         }
@@ -236,6 +245,21 @@ namespace Cody.Core.Agent
             _logger.Debug($"Authenticated: {authStatus.Authenticated}");
 
             AuthorizationDetailsChanged?.Invoke(this, authStatus);
+        }
+
+        [AgentCallback("window/showMessage", deserializeToSingleObject: true)]
+        public async Task<string> ShowMessage(ShowWindowMessageParams param)
+        {
+            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null; // TODO: supports only single auto-edit notification for now
+
+            var notifications = await _infobarNotificationsAsync;
+
+            _logger.Debug($"ℹ ShowMessage:{param.Message}");
+            var selectedValue = await notifications.ShowNotification(param);
+
+            _logger.Debug($"Selected value: '{selectedValue}'");
+
+            return selectedValue;
         }
     }
 }
