@@ -101,30 +101,19 @@ namespace Cody.VisualStudio.Services
                 var infoBarModel = new InfoBarModel(spans, actions, KnownMonikers.InfoTipInline,
                     isCloseButtonVisible: true);
 
-
-                var notificationCallbackCompletionSource = new TaskCompletionSource<Notification>();
-                Application.Current.Dispatcher.Invoke(() =>
+                var notification = await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    try
-                    {
-                        var notificationBar = _infoBarUiFactory.CreateInfoBar(infoBarModel);
-                        notificationBar.Advise(this, out var cookie);
-                        _infoBarHost.AddInfoBar(notificationBar);
+                    var notificationBar = _infoBarUiFactory.CreateInfoBar(infoBarModel);
+                    notificationBar.Advise(this, out var cookie);
+                    _infoBarHost.AddInfoBar(notificationBar);
 
-                        var notification = new Notification(cookie);
-                        _notifications.Add(notificationBar, notification);
+                    var notificationObj = new Notification(cookie);
+                    _notifications.Add(notificationBar, notificationObj);
 
-                        notificationCallbackCompletionSource.SetResult(notification);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error($"Failed to create notification: {messageParams.Message}", ex);
-                    }
+                    return notificationObj;
                 });
 
-                var notificationAsync = await notificationCallbackCompletionSource.Task;
-                return await notificationAsync.SelectedValueAsync;
+                return await notification.SelectedValueAsync;
 
             }
             catch (Exception ex)
