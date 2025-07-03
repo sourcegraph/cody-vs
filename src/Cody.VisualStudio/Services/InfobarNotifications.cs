@@ -7,6 +7,7 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Ide;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -101,7 +102,8 @@ namespace Cody.VisualStudio.Services
 
                 var spans = new[] { text };
                 var actions = items.Cast<InfoBarActionItem>().ToArray();
-                var infoBarModel = new InfoBarModel(spans, actions, KnownMonikers.InfoTipInline,
+                var icon = GetIconForSeverity(messageParams.Severity);
+                var infoBarModel = new InfoBarModel(spans, actions, icon,
                     isCloseButtonVisible: true);
 
                 var notification = await Application.Current.Dispatcher.InvokeAsync(() =>
@@ -126,6 +128,21 @@ namespace Cody.VisualStudio.Services
             }
 
             return null;
+        }
+
+        private ImageMoniker GetIconForSeverity(SeverityEnum severity)
+        {
+            switch (severity)
+            {
+                case SeverityEnum.Error:
+                    return KnownMonikers.StatusError;
+                case SeverityEnum.Warning:
+                    return KnownMonikers.StatusWarning;
+                case SeverityEnum.Information:
+                    return KnownMonikers.StatusInformation;
+                default:
+                    return KnownMonikers.StatusInformation;
+            }
         }
     }
 }
