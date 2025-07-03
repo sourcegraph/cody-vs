@@ -21,7 +21,7 @@ For example, you can ask Cody:
 
 Autocompletes single lines, or whole functions, in any programming language, configuration file, or documentation. It’s powered by the latest instant LLM models, for accuracy and performance.
 
-<video src="https://github.com/user-attachments/assets/b595873e-7e1a-4d1c-afe0-441d4bae0c20" controls autoplay></video>
+<video src="https://github.com/user-attachments/assets/8ab72716-cd25-4a08-8ba1-2148aeaeda52" width="700" controls autoplay></video>
 
 ## Prompts
 
