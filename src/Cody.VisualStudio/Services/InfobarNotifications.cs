@@ -64,6 +64,8 @@ namespace Cody.VisualStudio.Services
                 {
                     if (_notifications.TryGetValue(notification, out var n))
                     {
+                        n.StopAutoCloseTimer();
+                        
                         var cookie = n.Cookie;
                         notification.Unadvise(cookie);
                         notification.Close();
@@ -71,6 +73,7 @@ namespace Cody.VisualStudio.Services
                         if (!n.SelectedValueAsync.IsCompleted)
                             n.SetValue(null);
 
+                        n.Dispose();
                         _notifications.Remove(notification);
                         _logger.Debug("Notification closed.");
                     }
@@ -107,7 +110,8 @@ namespace Cody.VisualStudio.Services
                     notificationBar.Advise(this, out var cookie);
                     _infoBarHost.AddInfoBar(notificationBar);
 
-                    var notificationObj = new Notification(cookie);
+                    var notificationObj = new Notification(cookie, _logger);
+                    notificationObj.StartAutoCloseTimer(() => Close(notificationBar));
                     _notifications.Add(notificationBar, notificationObj);
 
                     return notificationObj;
