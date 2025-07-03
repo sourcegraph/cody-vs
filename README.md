@@ -1,3 +1,5 @@
+IMPORTANT: There are changes to Cody Free, Pro, and Enterprise Starter plans. [Learn more](https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans)
+
 # Cody for Visual Studio
 
 Sourcegraph’s AI code assistant goes beyond individual dev productivity, helping you achieve consistency and quality at scale with AI. Sourcegraph accelerates the entire workflow for developers by providing them a more natural and intuitive way to work. Searching code, chatting with AI, invoking prompts, and using agents can now all be performed in one place with the best models available.
@@ -15,11 +17,11 @@ For example, you can ask Cody:
 - "Add helpful debug log statements"
 - "Make this work" _(seriously, it often works—try it!)_
 
-## Autocomplete
+## Auto-edit
 
 Autocompletes single lines, or whole functions, in any programming language, configuration file, or documentation. It’s powered by the latest instant LLM models, for accuracy and performance.
 
-<video src="https://github.com/user-attachments/assets/b595873e-7e1a-4d1c-afe0-441d4bae0c20" controls autoplay></video>
+<video src="https://github.com/user-attachments/assets/00685d11-c819-48ba-8672-78362af02ca0" controls autoplay></video>
 
 ## Prompts
 
