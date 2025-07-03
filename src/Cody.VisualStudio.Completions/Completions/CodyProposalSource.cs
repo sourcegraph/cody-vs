@@ -1,6 +1,7 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
+using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
@@ -11,10 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -284,33 +285,58 @@ namespace Cody.VisualStudio.Completions
                 var startPos = ToPosition(snapshot, item.Range.Start.Line, item.Range.Start.Character);
                 var endPos = ToPosition(snapshot, item.Range.End.Line, item.Range.End.Character);
 
+                if (endPos > snapshot.Length) throw new ArgumentOutOfRangeException(nameof(endPos));
+
                 var (actualText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
 
                 var modText = actualText;
                 if (completionState != null)
                 {
                     var span = completionState.ApplicableToSpan;
-                    modText = ReplaceRange(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem);
+                    modText = ReplaceRange(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem, "completionState");
                 }
 
                 var completionText = item.InsertText;
                 if (caret.IsInVirtualSpace) completionText = AdjustVirtualSpaces(completionText, caret.VirtualSpaces, session);
 
-                var newText = ReplaceRange(actualText, offset, startPos, endPos, completionText);
+                var newText = ReplaceRange(actualText, offset, startPos, endPos, completionText, $"newText");
 
                 var diffs = FindDifferences(modText, newText);
 
                 if (diffs.Any())
                 {
-                    var edits = diffs.Select(x => new ProposedEdit(new SnapshotSpan(snapshot, x.Position + offset, x.RemovedText.Length), x.AddedText)).ToList();
+                    try
+                    {
+                        var edits = diffs.Select(x => new ProposedEdit(new SnapshotSpan(snapshot, x.Position + offset, x.RemovedText.Length), x.AddedText)).ToList();
 
-                    var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
+                        var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                         completionState: completionState,
                         proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id,
                         flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
 
-                    if (proposal != null) proposalList.Add(proposal);
-                    else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
+                        if (proposal != null) proposalList.Add(proposal);
+                        else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
+                    }
+                    catch (ArgumentOutOfRangeException ex)
+                    {
+                        var dic = new Dictionary<string, object>()
+                        {
+                            ["actualText"] = actualText,
+                            ["insertText"] = item.InsertText,
+                            ["completionState"] = completionState?.SelectedItem,
+                            ["virtualSpaces"] = caret.VirtualSpaces,
+                            ["modText"] = modText,
+                            ["newText"] = newText,
+                            ["offset"] = offset,
+                            ["snapshotLength"] = snapshot.Length,
+                            ["diffs"] = diffs
+                        };
+                        ex.AddSentryContext("autocomplete", dic);
+
+                        throw;
+                    }
+
+
                 }
                 else
                 {
@@ -442,9 +468,27 @@ namespace Cody.VisualStudio.Completions
             return result;
         }
 
-        private static string ReplaceRange(string input, int offset, int startRange, int endRange, string replacementText)
+        private static string ReplaceRange(string input, int offset, int startRange, int endRange, string replacementText, string context = null)
         {
-            return input.Substring(0, startRange - offset) + replacementText + input.Substring(endRange - offset);
+            try
+            {
+                return input.Substring(0, startRange - offset) + replacementText + input.Substring(endRange - offset);
+            }
+            catch (Exception e)
+            {
+                var dic = new Dictionary<string, object>()
+                {
+                    ["input"] = input,
+                    ["replacementText"] = replacementText,
+                    ["offset"] = offset,
+                    ["startRange"] = startRange,
+                    ["endRange"] = endRange,
+                    ["context"] = context
+                };
+                e.AddSentryContext("autocomplete", dic);
+
+                throw;
+            }
         }
 
         private static int CountLines(string text)
