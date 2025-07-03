@@ -11,6 +11,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Cody.Core.Ide;
 
 namespace Cody.AgentTester
 {
@@ -33,9 +34,10 @@ namespace Cody.AgentTester
             var secretStorageService = new SecretStorageService(new FakeSecretStorageProvider(), logger);
             var settingsService = new UserSettingsService(new MemorySettingsProvider(), secretStorageService, logger);
             var editorService = new FileService(new FakeServiceProvider(), logger);
+            var infobarNotifications = Task.FromResult<IInfobarNotifications>(new FakeInfobarNotifications());
             var options = new AgentClientOptions
             {
-                CallbackHandlers = new List<object> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService) },
+                CallbackHandlers = new List<object> { new NotificationHandlers(settingsService, logger, editorService, secretStorageService, infobarNotifications) },
                 AgentDirectory = "../../../Cody.VisualStudio/Agent",
                 RestartAgentOnFailure = true,
                 Debug = true,
