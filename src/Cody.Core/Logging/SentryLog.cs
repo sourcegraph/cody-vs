@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Cody.Core.Logging
 {
@@ -67,7 +68,7 @@ namespace Cody.Core.Logging
             }
         }
 
-        public static void Initialize()
+        public static void Initialize(CancellationToken shutdownToken)
         {
             if (!Configuration.IsDebug && !Debugger.IsAttached)
             {
@@ -93,6 +94,7 @@ namespace Cody.Core.Logging
                         if (se.Message != null) return se;
                         if (se.Contexts.ContainsKey(ErrorData)) return se;
                         if (se.SentryExceptions == null) return se;
+                        if (se.Exception is ObjectDisposedException && shutdownToken.IsCancellationRequested) return null;
 
                         foreach (var ex in se.SentryExceptions)
                         {

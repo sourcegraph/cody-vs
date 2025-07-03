@@ -1,4 +1,6 @@
 using Cody.Core.Agent;
+using Cody.Core.Common;
+using Cody.Core.Logging;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Diagnostics;
@@ -8,8 +10,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Cody.Core.Logging;
-using Cody.Core.Common;
 
 namespace Cody.UI.Controls
 {

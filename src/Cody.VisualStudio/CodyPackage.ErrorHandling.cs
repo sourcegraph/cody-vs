@@ -1,4 +1,5 @@
 using Cody.Core.Logging;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace Cody.VisualStudio
             Application.Current.DispatcherUnhandledException += CurrentOnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
 
-            SentryLog.Initialize();
+            SentryLog.Initialize(VsShellUtilities.ShutdownToken);
         }
 
 
