@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,6 +45,12 @@ namespace Cody.VisualStudio.Completions
 
             trackedSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
+            textDocument.TextBuffer.ContentTypeChanged += OnContentTypeChanged;
+        }
+
+        private void OnContentTypeChanged(object sender, ContentTypeChangedEventArgs e)
+        {
+            trackedSnapshot = e.After;
         }
 
         private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
@@ -56,6 +61,7 @@ namespace Cody.VisualStudio.Completions
         public override Task DisposeAsync()
         {
             textDocument.TextBuffer.ChangedHighPriority -= OnTextBufferChanged;
+            textDocument.TextBuffer.ContentTypeChanged -= OnContentTypeChanged;
             return base.DisposeAsync();
         }
 
@@ -233,17 +239,16 @@ namespace Cody.VisualStudio.Completions
 
         private void UpdateCaretAndCompletion(ref VirtualSnapshotPoint caret, ref CompletionState completionState)
         {
-            if (trackedSnapshot == null || trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
+            if (trackedSnapshot == null ||
+                trackedSnapshot.TextBuffer != caret.Position.Snapshot.TextBuffer ||
+                trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
             {
                 trace.TraceEvent("TrackinSnapshotFailed");
                 return;
             }
 
             caret = caret.TranslateTo(trackedSnapshot);
-            if (completionState != null)
-            {
-                completionState = completionState.TranslateTo(trackedSnapshot);
-            }
+            completionState = completionState?.TranslateTo(trackedSnapshot);
         }
 
         private async Task<AutocompleteResult> GetAutocompleteItems(AutocompleteParams autocompleteRequest, uint session, CancellationToken cancel)
