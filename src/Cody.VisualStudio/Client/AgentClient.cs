@@ -85,7 +85,7 @@ namespace Cody.VisualStudio.Client
             if (e.Exception != null)
                 log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
             else
-                log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
+                log.Info($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
         }
 
         private void CreateAgentService()
