@@ -287,82 +287,24 @@ namespace Cody.VisualStudio.Completions
 
                 if (endPos > snapshot.Length) throw new ArgumentOutOfRangeException(nameof(endPos));
 
-                var (actualText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
+                var span = Span.FromBounds(startPos, endPos);
+                var snapshotSpan = new SnapshotSpan(snapshot, span);
+                var replacementText = AdjustVirtualSpaces(item.InsertText, caret.VirtualSpaces, session);
+                var edit = new ProposedEdit(snapshotSpan, replacementText);
+                var edits = new List<ProposedEdit>(1) { edit };
 
-                var modText = actualText;
-                if (completionState != null)
-                {
-                    var span = completionState.ApplicableToSpan;
-                    modText = ReplaceRange(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem, "completionState");
-                }
+                var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
+                completionState: completionState,
+                proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id,
+                flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
 
-                var completionText = item.InsertText;
-                if (caret.IsInVirtualSpace) completionText = AdjustVirtualSpaces(completionText, caret.VirtualSpaces, session);
+                if (proposal != null) proposalList.Add(proposal);
+                else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
 
-                var newText = ReplaceRange(actualText, offset, startPos, endPos, completionText, $"newText");
-
-                var diffs = FindDifferences(modText, newText);
-
-                if (diffs.Any())
-                {
-                    try
-                    {
-                        var edits = diffs.Select(x => new ProposedEdit(new SnapshotSpan(snapshot, x.Position + offset, x.RemovedText.Length), x.AddedText)).ToList();
-
-                        var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
-                        completionState: completionState,
-                        proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id,
-                        flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
-
-                        if (proposal != null) proposalList.Add(proposal);
-                        else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
-                    }
-                    catch (ArgumentOutOfRangeException ex)
-                    {
-                        var dic = new Dictionary<string, object>()
-                        {
-                            ["actualText"] = actualText,
-                            ["insertText"] = item.InsertText,
-                            ["completionState"] = completionState?.SelectedItem,
-                            ["virtualSpaces"] = caret.VirtualSpaces,
-                            ["modText"] = modText,
-                            ["newText"] = newText,
-                            ["offset"] = offset,
-                            ["snapshotLength"] = snapshot.Length,
-                            ["diffs"] = diffs
-                        };
-                        ex.AddSentryContext("autocomplete", dic);
-
-                        throw;
-                    }
-
-
-                }
-                else
-                {
-                    trace.TraceEvent("NothingNewToPropose", "session: {0}", session);
-                }
             }
 
             var collection = new CodyProposalCollection(proposalList);
             return collection;
-        }
-
-        private (string text, int offset) GetLinesOfOriginalText(ITextSnapshot snapshot, int startPos, int endPos)
-        {
-            int? offset = null;
-            var text = new StringBuilder();
-            var startLine = snapshot.GetLineNumberFromPosition(startPos);
-            var endLine = snapshot.GetLineNumberFromPosition(endPos);
-
-            for (int i = startLine; i <= endLine; i++)
-            {
-                var line = snapshot.GetLineFromLineNumber(i);
-                if (!offset.HasValue) offset = line.Start.Position;
-                text.Append(line.GetTextIncludingLineBreak());
-            }
-
-            return (text.ToString(), offset.Value);
         }
 
         private CodyProposalCollection CreateAutoeditProposals(AutocompleteResult autocomplete, VirtualSnapshotPoint caret, CompletionState completionState, uint session)
