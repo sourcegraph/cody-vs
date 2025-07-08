@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,6 +45,12 @@ namespace Cody.VisualStudio.Completions
 
             trackedSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
+            textDocument.TextBuffer.ContentTypeChanged += OnContentTypeChanged;
+        }
+
+        private void OnContentTypeChanged(object sender, ContentTypeChangedEventArgs e)
+        {
+            trackedSnapshot = e.After;
         }
 
         private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
@@ -56,6 +61,7 @@ namespace Cody.VisualStudio.Completions
         public override Task DisposeAsync()
         {
             textDocument.TextBuffer.ChangedHighPriority -= OnTextBufferChanged;
+            textDocument.TextBuffer.ContentTypeChanged -= OnContentTypeChanged;
             return base.DisposeAsync();
         }
 
@@ -233,17 +239,16 @@ namespace Cody.VisualStudio.Completions
 
         private void UpdateCaretAndCompletion(ref VirtualSnapshotPoint caret, ref CompletionState completionState)
         {
-            if (trackedSnapshot == null || trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
+            if (trackedSnapshot == null ||
+                trackedSnapshot.TextBuffer != caret.Position.Snapshot.TextBuffer ||
+                trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
             {
                 trace.TraceEvent("TrackinSnapshotFailed");
                 return;
             }
 
             caret = caret.TranslateTo(trackedSnapshot);
-            if (completionState != null)
-            {
-                completionState = completionState.TranslateTo(trackedSnapshot);
-            }
+            completionState = completionState?.TranslateTo(trackedSnapshot);
         }
 
         private async Task<AutocompleteResult> GetAutocompleteItems(AutocompleteParams autocompleteRequest, uint session, CancellationToken cancel)
@@ -287,21 +292,14 @@ namespace Cody.VisualStudio.Completions
 
                 if (endPos > snapshot.Length) throw new ArgumentOutOfRangeException(nameof(endPos));
 
-                var (actualText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
-
-                var modText = actualText;
-                if (completionState != null)
-                {
-                    var span = completionState.ApplicableToSpan;
-                    modText = ReplaceRange(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem, "completionState");
-                }
+                var (currentText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
 
                 var completionText = item.InsertText;
                 if (caret.IsInVirtualSpace) completionText = AdjustVirtualSpaces(completionText, caret.VirtualSpaces, session);
 
-                var newText = ReplaceRange(actualText, offset, startPos, endPos, completionText, $"newText");
+                var newText = ReplaceRange(currentText, offset, startPos, endPos, completionText);
 
-                var diffs = FindDifferences(modText, newText);
+                var diffs = FindDifferences(currentText, newText);
 
                 if (diffs.Any())
                 {
@@ -321,11 +319,10 @@ namespace Cody.VisualStudio.Completions
                     {
                         var dic = new Dictionary<string, object>()
                         {
-                            ["actualText"] = actualText,
+                            ["currentText"] = currentText,
                             ["insertText"] = item.InsertText,
                             ["completionState"] = completionState?.SelectedItem,
                             ["virtualSpaces"] = caret.VirtualSpaces,
-                            ["modText"] = modText,
                             ["newText"] = newText,
                             ["offset"] = offset,
                             ["snapshotLength"] = snapshot.Length,
@@ -468,7 +465,7 @@ namespace Cody.VisualStudio.Completions
             return result;
         }
 
-        private static string ReplaceRange(string input, int offset, int startRange, int endRange, string replacementText, string context = null)
+        private static string ReplaceRange(string input, int offset, int startRange, int endRange, string replacementText)
         {
             try
             {
@@ -482,8 +479,7 @@ namespace Cody.VisualStudio.Completions
                     ["replacementText"] = replacementText,
                     ["offset"] = offset,
                     ["startRange"] = startRange,
-                    ["endRange"] = endRange,
-                    ["context"] = context
+                    ["endRange"] = endRange
                 };
                 e.AddSentryContext("autocomplete", dic);
 
