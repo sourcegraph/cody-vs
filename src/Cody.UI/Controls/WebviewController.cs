@@ -160,7 +160,15 @@ namespace Cody.UI.Controls
             // NOTE: Serving the returned html doesn't work in Visual Studio,
             // as it doesn't allow access to the local storage _webview?.NavigateToString(html);
 
-            _webview.Navigate("https://cody.vs/index.html");
+            try
+            {
+                _webview.Navigate("https://cody.vs/index.html");
+            }
+            catch (InvalidOperationException ex) when (ex.InnerException is COMException)
+            {
+                //CoreWebView2 members cannot be accessed after the WebView2 control is disposed.
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         private static readonly string VsCodeApi = @"
