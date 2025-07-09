@@ -290,7 +290,26 @@ namespace Cody.VisualStudio.Completions
                 var startPos = ToPosition(snapshot, item.Range.Start.Line, item.Range.Start.Character);
                 var endPos = ToPosition(snapshot, item.Range.End.Line, item.Range.End.Character);
 
-                if (endPos > snapshot.Length) throw new ArgumentOutOfRangeException(nameof(endPos));
+                if (endPos > snapshot.Length)
+                {
+                    var oldText = snapshot.GetText(startPos, snapshot.Length - startPos);
+                    var oldTextStartLine = snapshot.GetLineFromLineNumber(item.Range.Start.Line)?.GetText();
+                    var dic = new Dictionary<string, object>()
+                    {
+                        ["endPos"] = endPos,
+                        ["snapshotLength"] = snapshot.Length,
+                        ["startPos"] = startPos,
+                        ["insertText"] = item.InsertText,
+                        ["selectedItem"] = completionState?.SelectedItem,
+                        ["oldText"] = oldText,
+                        ["oldTextStartLine"] = oldTextStartLine
+                    };
+
+                    var ex = new ArgumentOutOfRangeException(nameof(endPos));
+                    ex.AddSentryContext("autocomplete", dic);
+
+                    throw ex;
+                }
 
                 var (currentText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
 
@@ -371,7 +390,7 @@ namespace Cody.VisualStudio.Completions
                 var edits = new List<ProposedEdit>();
                 var snapshot = caret.Position.Snapshot;
 
-                var range = FindRange(snapshot, item.Range.Start.Line, item.OriginalText);
+                var range = FindRange(snapshot, item.Range.Start.Line, item.OriginalText, item.InsertText);
                 if (range == null)
                 {
                     trace.TraceEvent("TextMismatch");
@@ -415,26 +434,48 @@ namespace Cody.VisualStudio.Completions
             return new CodyProposalCollection(proposalList);
         }
 
-        private TextRange FindRange(ITextSnapshot snapshot, int startLine, string originalText)
+        private TextRange FindRange(ITextSnapshot snapshot, int startLine, string originalText, string newText)
         {
             var lineCount = CountLines(originalText);
-            int? offset = null;
             var textBlock = new StringBuilder();
-            for (int lineNum = startLine; lineNum < startLine + lineCount; lineNum++)
+            int count = 0;
+            try
             {
-                var line = snapshot.GetLineFromLineNumber(lineNum);
-                if (line == null) break;
-                if (!offset.HasValue) offset = line.Start.Position;
-                textBlock.Append(line.GetTextIncludingLineBreak());
-            }
 
-            var block = textBlock.ToString();
-            var index = block.IndexOf(originalText);
-            if (index >= 0) return new TextRange
+                int? offset = null;
+
+                for (int lineNum = startLine; lineNum < startLine + lineCount; lineNum++)
+                {
+                    var line = snapshot.GetLineFromLineNumber(lineNum);
+                    if (line == null) break;
+                    if (!offset.HasValue) offset = line.Start.Position;
+                    textBlock.Append(line.GetTextIncludingLineBreak());
+                    count++;
+                }
+
+                var block = textBlock.ToString();
+                var index = block.IndexOf(originalText);
+                if (index >= 0) return new TextRange
+                {
+                    Start = offset.Value + index,
+                    End = offset.Value + index + originalText.Length
+                };
+            }
+            catch (InvalidOperationException ex)
             {
-                Start = offset.Value + index,
-                End = offset.Value + index + originalText.Length
-            };
+                var dic = new Dictionary<string, object>()
+                {
+                    ["startLine"] = startLine,
+                    ["originalText"] = originalText,
+                    ["newText"] = newText,
+                    ["lineCount"] = lineCount,
+                    ["textBlock"] = textBlock.ToString(),
+                    ["count"] = count,
+                    ["snapshotLength"] = snapshot.Length
+                };
+                ex.AddSentryContext("autocomplete", dic);
+                throw;
+            }
 
             return null;
         }
