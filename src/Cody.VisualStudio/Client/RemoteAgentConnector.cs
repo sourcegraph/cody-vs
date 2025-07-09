@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Client
@@ -46,9 +47,15 @@ namespace Cody.VisualStudio.Client
         {
             if (client != null && client.Connected)
             {
+                _logger.Debug("Disconnecting from remote agent...");
                 client.Close();
                 client = null;
+                _logger.Info("Successfully disconnected from remote agent");
                 Disconnected?.Invoke(this, 0);
+            }
+            else
+            {
+                _logger.Debug("Disconnect called but client is not connected");
             }
         }
 
