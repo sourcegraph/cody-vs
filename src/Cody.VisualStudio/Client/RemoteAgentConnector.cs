@@ -13,6 +13,8 @@ namespace Cody.VisualStudio.Client
         private readonly ILog _logger;
         private TcpClient client;
 
+        private TimeSpan _defaultTimeout = TimeSpan.FromMinutes(5);
+
         public RemoteAgentConnector(ILog logger)
         {
             _logger = logger;
@@ -23,7 +25,8 @@ namespace Cody.VisualStudio.Client
 
         public void Connect(AgentClientOptions options)
         {
-            while (true)
+            var timeout = DateTime.UtcNow.Add(_defaultTimeout);
+            while (DateTime.UtcNow < timeout)
             {
                 try
                 {
@@ -41,6 +44,8 @@ namespace Cody.VisualStudio.Client
                     Thread.Sleep(TimeSpan.FromSeconds(5));
                 }
             }
+            
+            _logger.Error($"Failed to connect to remote agent within {_defaultTimeout.TotalMinutes} minutes timeout");
         }
 
         public void Disconnect()
@@ -51,6 +56,7 @@ namespace Cody.VisualStudio.Client
                 client.Close();
                 client = null;
                 _logger.Info("Successfully disconnected from remote agent");
+
                 Disconnected?.Invoke(this, 0);
             }
             else
