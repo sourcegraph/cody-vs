@@ -10,5 +10,11 @@ namespace Cody.Core.Infrastructure
     public interface IDocumentService
     {
         bool ShowDocument(string path, Range selection);
+
+        bool InsertTextInDocument(string path, Position position, string text);
+
+        bool ReplaceTextInDocument(string path, Range range, string text);
+
+        bool DeleteTextInDocument(string path, Range range);
     }
 }
