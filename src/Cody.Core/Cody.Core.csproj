@@ -107,6 +107,7 @@
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Infrastructure\ConfigurationService.cs" />
     <Compile Include="Infrastructure\IConfigurationService.cs" />
+    <Compile Include="Infrastructure\IDocumentService.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ISentryLog.cs" />
@@ -118,7 +119,6 @@
     <Compile Include="Trace\TraceListener.cs" />
     <Compile Include="Trace\TraceLogger.cs" />
     <Compile Include="Trace\TraceManager.cs" />
-    <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\WebViewsManager.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />

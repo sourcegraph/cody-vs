@@ -1,6 +1,5 @@
 using Cody.Core.Agent.Protocol;
-using Cody.Core.Settings;
-using Cody.Core.Workspace;
+using Cody.Core.Infrastructure;
 using Newtonsoft.Json.Linq;
 using System;
 
@@ -8,14 +7,12 @@ namespace Cody.Core.Agent
 {
     public class WebviewMessageHandler
     {
-        private readonly IUserSettingsService _settingsService;
-        private readonly IFileService _fileService;
+        private readonly IDocumentService _documentService;
         private readonly Action _onOptionsPageShowRequest;
 
-        public WebviewMessageHandler(IUserSettingsService settingsService, IFileService fileService, Action onOptionsPageShowRequest)
+        public WebviewMessageHandler(IDocumentService documentService, Action onOptionsPageShowRequest)
         {
-            _settingsService = settingsService;
-            _fileService = fileService;
+            _documentService = documentService;
             _onOptionsPageShowRequest = onOptionsPageShowRequest;
         }
 
@@ -69,7 +66,7 @@ namespace Cody.Core.Agent
             var range = json.range?.ToObject<Range>();
             if (!string.IsNullOrEmpty(path))
             {
-                _fileService.OpenFileInEditor(path, range);
+                _documentService.ShowDocument(path.ToWindowsPath(), range);
                 return true;
             }
             return false;

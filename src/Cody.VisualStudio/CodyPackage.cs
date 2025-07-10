@@ -8,7 +8,6 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
-using Cody.Core.Workspace;
 using Cody.UI.Controls;
 using Cody.UI.ViewModels;
 using Cody.UI.Views;
@@ -77,7 +76,7 @@ namespace Cody.VisualStudio
         public TextDocumentNotificationHandlers TextDocumentNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public static TestingSupportService TestingSupportService;
-        public IFileService FileService;
+        public IDocumentService DocumentService;
         public IVsUIShell VsUIShell;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
 
@@ -126,19 +125,19 @@ namespace Cody.VisualStudio
 
             StatusbarService = new StatusbarService();
             ThemeService = new ThemeService(this, Logger);
-            FileService = new FileService(this, Logger);
+            DocumentService = new DocumentService(Logger, this);
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
 
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService);
+            NotificationHandlers = new NotificationHandlers(AgentNotificationsLogger, DocumentService, SecretStorageService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
-            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(FileService);
+            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService);
 
             var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
             ThemeService.ThemeChanged += sidebarController.OnThemeChanged;

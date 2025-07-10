@@ -1,6 +1,6 @@
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.Infrastructure;
-using Cody.Core.Workspace;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +11,11 @@ namespace Cody.Core.Agent
 {
     public class TextDocumentNotificationHandlers
     {
-        private IFileService fileService;
+        private readonly IDocumentService documentService;
 
-        public TextDocumentNotificationHandlers(IFileService fileService)
+        public TextDocumentNotificationHandlers(IDocumentService documentService)
         {
-            this.fileService = fileService;
+            this.documentService = documentService;
         }
 
         [AgentCallback("textDocument/edit", deserializeToSingleObject: true)]
@@ -27,8 +27,8 @@ namespace Cody.Core.Agent
         [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
         public Task<bool> ShowTextDocument(TextDocumentShowParams textDocumentShow)
         {
-            var path = new Uri(textDocumentShow.Uri).ToString();
-            return Task.FromResult(fileService.OpenFileInEditor(path));
+            var result = documentService.ShowDocument(textDocumentShow.Uri.ToWindowsPath(), textDocumentShow.Options?.Selection);
+            return Task.FromResult(result);
         }
     }
 }

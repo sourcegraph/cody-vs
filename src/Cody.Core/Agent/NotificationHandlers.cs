@@ -3,7 +3,6 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
-using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ namespace Cody.Core.Agent
         private static TraceLogger trace = new TraceLogger(nameof(NotificationHandlers));
 
         private readonly WebviewMessageHandler _messageFilter;
-        private readonly IUserSettingsService _settingsService;
         private readonly ISecretStorageService _secretStorage;
         private readonly ILog _logger;
 
@@ -33,12 +31,11 @@ namespace Cody.Core.Agent
 
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
-        public NotificationHandlers(IUserSettingsService settingsService, ILog logger, IFileService fileService, ISecretStorageService secretStorage)
+        public NotificationHandlers(ILog logger, IDocumentService documentService, ISecretStorageService secretStorage)
         {
-            _settingsService = settingsService;
             _secretStorage = secretStorage;
             _logger = logger;
-            _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
+            _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
         }
 
         public void SetAgentClient(IAgentService client)
