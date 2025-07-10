@@ -1,4 +1,6 @@
 using Cody.Core.Agent.Protocol;
+using JsonSubTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace Cody.Core.Agent.Protocol
 {
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
+    [JsonSubtypes.KnownSubType(typeof(ReplaceTextEdit), "replace")]
+    [JsonSubtypes.KnownSubType(typeof(InsertTextEdit), "insert")]
+    [JsonSubtypes.KnownSubType(typeof(DeleteTextEdit), "delete")]
     public abstract class TextEdit
     {
         public string Type { get; set; }
