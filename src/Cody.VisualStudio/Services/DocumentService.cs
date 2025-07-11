@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,19 +31,24 @@ namespace Cody.VisualStudio.Services
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                if (VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame) == VSConstants.S_OK)
+                var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame);
+                if (tryOpenResult == VSConstants.S_OK)
                 {
                     windowFrame?.Show();
 
                     if (selection != null && windowFrame != null)
                     {
                         var textView = GetVsTextView(windowFrame);
-                        textView.CenterLines(selection.Start.Line, 0);
-                        textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
+                        if (textView != null)
+                        {
+                            textView.CenterLines(selection.Start.Line, 0);
+                            textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
+                        }
                     }
 
                     return true;
                 }
+                else log.Error($"Cannot show document '{path}' (error code: {tryOpenResult})");
 
                 return false;
             });
@@ -71,20 +77,47 @@ namespace Cody.VisualStudio.Services
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                if (VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame) == VSConstants.S_OK)
+                var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame);
+                if (tryOpenResult == VSConstants.S_OK)
                 {
                     var textView = GetVsTextView(windowFrame);
                     if (textView != null)
                     {
-                        textView.GetNearestPosition(range.Start.Line, range.Start.Character, out int startPos, out _);
-                        textView.GetNearestPosition(range.End.Line, range.End.Character, out int endPos, out _);
+                        var bufferResult = textView.GetBuffer(out IVsTextLines textLines);
+                        if (bufferResult != VSConstants.S_OK)
+                        {
+                            log.Error($"Cannot get text buffer (error code: {bufferResult})");
+                            return false;
+                        }
 
-                        if (text == null) text = string.Empty;
+                        var textPtr = IntPtr.Zero;
+                        var length = (text == null) ? 0 : text.Length;
+                        try
+                        {
+                            textPtr = Marshal.StringToCoTaskMemAuto(text);
+                            var replaceResult = textLines.ReplaceLines(
+                                range.Start.Line, range.Start.Character,
+                                range.End.Line, range.End.Character,
+                                textPtr, length,
+                                null);
 
-                        return textView.ReplaceTextOnLine(range.Start.Line, range.Start.Character, endPos - startPos, text, text.Length) == VSConstants.S_OK;
+                            if (replaceResult != VSConstants.S_OK)
+                            {
+                                log.Error($"Cannot change text in '{path}' (error code: {replaceResult})");
+                                return false;
+                            }
+                        }
+                        finally
+                        {
+                            if (textPtr != IntPtr.Zero) Marshal.FreeCoTaskMem(textPtr);
+                        }
+
+                        return true;
                     }
+                    else log.Error($"Cannot get VsTextView '{path}'");
 
                 }
+                else log.Error($"Cannot open document '{path}' (error code: {tryOpenResult})");
 
                 return false;
             });
