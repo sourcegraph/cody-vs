@@ -66,6 +66,7 @@ namespace Cody.VisualStudio
         public IAgentProxy AgentClient;
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
+        public IFileDialogService FileDialogService;
 
         public GeneralOptionsViewModel GeneralOptionsViewModel;
         public MainViewModel MainViewModel;
@@ -135,10 +136,6 @@ namespace Cody.VisualStudio
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
-
-            ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
-            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService);
-
             var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
             ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
@@ -147,6 +144,11 @@ namespace Cody.VisualStudio
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
             VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
+            FileDialogService = new FileDialogService(SolutionService, Logger);
+
+            ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
+            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService);
+
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
         }

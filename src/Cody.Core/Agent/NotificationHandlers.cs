@@ -180,12 +180,6 @@ namespace Cody.Core.Agent
 
         }
 
-        [AgentCallback("window/showSaveDialog")]
-        public Task<string> ShowSaveDialog(SaveDialogOptionsParams paramValues)
-        {
-            return Task.FromResult("Not Yet Implemented");
-        }
-
         [AgentCallback("secrets/get")]
         public Task<string> SecretGet(string key)
         {

@@ -147,5 +147,30 @@ namespace Cody.VisualStudio.Services
             return ppView;
         }
 
+        public bool CreateDocument(string path, string content, bool overwrite)
+        {
+            return false;
+        }
+
+        public bool RenameDocument(string oldName, string newName)
+        {
+            var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                try
+                {
+                    VsShellUtilities.RenameDocument(serviceProvider, oldName, newName);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            });
+
+            return result;
+        }
+
     }
 }
