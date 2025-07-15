@@ -409,7 +409,7 @@ namespace Cody.VisualStudio
         {
             try
             {
-                var solutionUri = new Uri(SolutionService.GetSolutionDirectory()).AbsoluteUri;
+                var solutionUri = SolutionService.GetSolutionDirectory().ToUri();
                 var workspaceFolderEvent = new WorkspaceFolderDidChangeEvent
                 {
                     Uris = new List<string> { solutionUri }

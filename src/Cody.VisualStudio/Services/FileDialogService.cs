@@ -27,14 +27,15 @@ namespace Cody.VisualStudio.Services
 
             var initialFileName = Path.GetFileName(initialPath);
             if (initialFileName == null || !initialFileName.Contains(".")) initialFileName = "Untitled";
-            if (string.IsNullOrEmpty(initialPath)) initialPath = solutionService.GetSolutionDirectory();
+            var initialDirectory = string.IsNullOrEmpty(initialPath) ?
+                solutionService.GetSolutionDirectory() : Path.GetDirectoryName(initialPath);
 
             var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                 var dlg = new Microsoft.Win32.SaveFileDialog();
-                dlg.InitialDirectory = Path.GetDirectoryName(initialPath);
+                dlg.InitialDirectory = initialDirectory;
                 dlg.Filter = filter;
                 dlg.FileName = initialFileName;
                 dlg.Title = title ?? "Cody: Save as New File";

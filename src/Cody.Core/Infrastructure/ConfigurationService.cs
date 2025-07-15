@@ -36,7 +36,7 @@ namespace Cody.Core.Infrastructure
                 Name = "VisualStudio",
                 Version = _versionService.Full.ToString(),
                 IdeVersion = _vsVersionService.DisplayVersion,
-                WorkspaceRootUri = _solutionService.GetSolutionDirectory(),
+                WorkspaceRootUri = _solutionService.GetSolutionDirectory().ToUri(),
                 Capabilities = new ClientCapabilities
                 {
                     Authentication = Capability.Enabled,
