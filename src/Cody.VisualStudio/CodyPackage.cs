@@ -127,7 +127,7 @@ namespace Cody.VisualStudio
 
             StatusbarService = new StatusbarService();
             ThemeService = new ThemeService(this, Logger);
-            DocumentService = new DocumentService(Logger, this, vsSolution);
+
 
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
@@ -147,6 +147,8 @@ namespace Cody.VisualStudio
             VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
             FileDialogService = new FileDialogService(SolutionService, Logger);
+
+            DocumentService = new DocumentService(Logger, this, vsSolution, VsEditorAdaptersFactoryService);
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
             TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService);

@@ -1,9 +1,12 @@
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
@@ -20,12 +23,14 @@ namespace Cody.VisualStudio.Services
         private readonly ILog log;
         private readonly IServiceProvider serviceProvider;
         private readonly IVsSolution vsSolution;
+        private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
 
-        public DocumentService(ILog log, IServiceProvider serviceProvider, IVsSolution vsSolution)
+        public DocumentService(ILog log, IServiceProvider serviceProvider, IVsSolution vsSolution, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
         {
             this.log = log;
             this.serviceProvider = serviceProvider;
             this.vsSolution = vsSolution;
+            this.editorAdaptersFactoryService = editorAdaptersFactoryService;
         }
 
         public bool ShowDocument(string path, Range selection)
@@ -93,8 +98,11 @@ namespace Cody.VisualStudio.Services
                             return false;
                         }
 
-                        var textPtr = IntPtr.Zero;
-                        var length = (text == null) ? 0 : text.Length;
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            var newLineChars = GetNewLineCharsForTextView(textView);
+                            text = text.ConvertLineBreaks(newLineChars);
+                        }
 
                         textLines.GetSize(out int bufferLength);
                         if (bufferLength == 0 && range.Start.IsPosition(0, 0) && range.End.IsPosition(9999, 0))
@@ -105,8 +113,11 @@ namespace Cody.VisualStudio.Services
                             return initResult == VSConstants.S_OK;
                         }
 
+                        var textPtr = IntPtr.Zero;
                         try
                         {
+                            var length = (text == null) ? 0 : text.Length;
+
                             textPtr = Marshal.StringToCoTaskMemAuto(text);
                             var replaceResult = textLines.ReplaceLines(
                                 range.Start.Line, range.Start.Character,
@@ -136,6 +147,16 @@ namespace Cody.VisualStudio.Services
             });
 
             return result;
+        }
+
+        private string GetNewLineCharsForTextView(IVsTextView view)
+        {
+            string newLine = null;
+            var wpfView = editorAdaptersFactoryService.GetWpfTextView(view);
+            if (wpfView != null)
+                newLine = wpfView.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
+
+            return newLine ?? Environment.NewLine;
         }
 
         private IVsTextView GetVsTextView(IVsWindowFrame windowFrame)
