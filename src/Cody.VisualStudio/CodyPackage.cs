@@ -113,6 +113,7 @@ namespace Cody.VisualStudio
             AgentNotificationsLogger = loggerFactory.Create(Configuration.ShowCodyNotificationsOutput ? WindowPaneLogger.CodyNotifications : null);
             Logger = loggerFactory.Create(WindowPaneLogger.DefaultCody);
 
+            var componentModel = this.GetService<SComponentModel, IComponentModel>();
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution, Logger);
             VersionService = loggerFactory.GetVersionService();
@@ -126,7 +127,8 @@ namespace Cody.VisualStudio
 
             StatusbarService = new StatusbarService();
             ThemeService = new ThemeService(this, Logger);
-            DocumentService = new DocumentService(Logger, this);
+            DocumentService = new DocumentService(Logger, this, vsSolution);
+
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
@@ -141,13 +143,15 @@ namespace Cody.VisualStudio
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
-            var componentModel = this.GetService<SComponentModel, IComponentModel>();
+
             VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
             FileDialogService = new FileDialogService(SolutionService, Logger);
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
             TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService);
+
+
 
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");

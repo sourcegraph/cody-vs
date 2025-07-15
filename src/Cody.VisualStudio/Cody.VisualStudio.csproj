@@ -67,6 +67,7 @@
     <Compile Include="CodyPackage.cs" />
     <Compile Include="Services\DocumentService.cs" />
     <Compile Include="Services\FileDialogService.cs" />
+    <Compile Include="Services\ProjectItem.cs" />
     <Compile Include="Services\SecretStorageService.cs" />
     <Compile Include="Services\DocumentsSyncService.cs" />
     <Compile Include="Services\ProgressService.cs" />

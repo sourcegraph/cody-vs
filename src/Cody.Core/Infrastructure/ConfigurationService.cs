@@ -46,7 +46,7 @@ namespace Cody.Core.Infrastructure
                     AutoeditAsideDiff = AutoeditAsideDiffCapability.Diff,
                     CodeCopyOnlyAction = Capability.None,
                     Edit = Capability.Enabled,
-                    EditWorkspace = Capability.None,
+                    EditWorkspace = Capability.Enabled,
                     ProgressBars = Capability.Enabled,
                     CodeLenses = Capability.None,
                     Shell = Capability.Enabled,

@@ -90,6 +90,9 @@ namespace Cody.Core.Agent
                     case RenameFileOperation renameFile:
                         result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
                         break;
+                    case DeleteFileOperation deleteFile:
+                        result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
+                        break;
                     case EditFileOperation editFile:
                         result = PerformTextEdits(editFile.Uri.ToWindowsPath(), editFile.Edits);
                         break;

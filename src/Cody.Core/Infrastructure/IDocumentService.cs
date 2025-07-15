@@ -20,5 +20,6 @@ namespace Cody.Core.Infrastructure
 
         bool CreateDocument(string path, string content, bool overwrite);
         bool RenameDocument(string oldName, string newName);
+        bool DeleteDocument(string path);
     }
 }
