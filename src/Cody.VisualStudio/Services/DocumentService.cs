@@ -171,7 +171,7 @@ namespace Cody.VisualStudio.Services
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                     var project = GetAllProjects()
-                        .First(x => x.IsFileUnderProjectDirectory(path));
+                        .FirstOrDefault(x => x.IsFileUnderProjectDirectory(path));
 
                     if (project != null)
                     {
@@ -183,7 +183,7 @@ namespace Cody.VisualStudio.Services
             }
             catch (Exception ex)
             {
-                log.Error($"Cannot create a new file {path}", ex);
+                log.Error($"Cannot create a new file '{path}'", ex);
                 return false;
             }
         }
