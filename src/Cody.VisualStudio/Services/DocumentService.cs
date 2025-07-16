@@ -185,7 +185,12 @@ namespace Cody.VisualStudio.Services
         {
             try
             {
-                CreateFileWithDirectories(path, content, overwrite);
+                if (CreateFileWithDirectories(path, content, overwrite)) log.Info($"File '{path}' created.");
+                else
+                {
+                    log.Warn($"File '{path}' already exists and overwriting is not allowed");
+                    return false;
+                }
 
                 return ThreadHelper.JoinableTaskFactory.Run(async delegate
                 {
@@ -199,7 +204,8 @@ namespace Cody.VisualStudio.Services
                         return project.AddFile(path);
                     }
 
-                    return false;
+                    log.Warn($"Cannot assign file '{path}' to any project");
+                    return true;
                 });
             }
             catch (Exception ex)
@@ -223,12 +229,13 @@ namespace Cody.VisualStudio.Services
                     return project.RemoveFile(path);
                 }
 
+                log.Warn($"Cannot assign file '{path}' to any project");
                 return false;
             });
 
             try
             {
-                File.Delete(path);
+                if (!result && File.Exists(path)) File.Delete(path);
                 return true;
             }
             catch (Exception ex)
@@ -276,6 +283,11 @@ namespace Cody.VisualStudio.Services
 
                 try
                 {
+                    string directoryPath = Path.GetDirectoryName(newName);
+                    if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
+
+                    File.Move(oldName, newName);
+
                     VsShellUtilities.RenameDocument(serviceProvider, oldName, newName);
                     return true;
                 }
