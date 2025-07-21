@@ -32,7 +32,9 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using Configuration = Cody.Core.Common.Configuration;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Task = System.Threading.Tasks.Task;
 
@@ -68,6 +70,11 @@ namespace Cody.VisualStudio
         public IConfigurationService ConfigurationService;
         public IFileDialogService FileDialogService;
 
+        private IInfobarNotifications InfobarNotifications;
+
+        private readonly TaskCompletionSource<IInfobarNotifications> _infobarNotificationsCompletionSource = new TaskCompletionSource<IInfobarNotifications>();
+        public Task<IInfobarNotifications> InfobarNotificationsAsync => _infobarNotificationsCompletionSource.Task;
+
         public GeneralOptionsViewModel GeneralOptionsViewModel;
         public MainViewModel MainViewModel;
 
@@ -87,13 +94,14 @@ namespace Cody.VisualStudio
             try
             {
                 InitializeErrorHandling();
-                Configuration.AddFromJsonFile("CodyDevConfig.json");
-                Configuration.AddFromEnviromentVariableJsonFile("CODY_VS_DEV_CONFIG");
+
+                var loggerFactory = InitializeMainLogger();
+                LoadDevConfiguration();
 
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
                 InitializeTrace();
-                InitializeServices();
+                InitializeServices(loggerFactory);
                 await InitOleMenu();
 
                 InitializeAgent();
@@ -106,12 +114,39 @@ namespace Cody.VisualStudio
             }
         }
 
-        private void InitializeServices()
+        private LoggerFactory InitializeMainLogger()
         {
             var loggerFactory = new LoggerFactory();
+            Logger = loggerFactory.Create(WindowPaneLogger.DefaultCody);
+
+            return loggerFactory;
+        }
+
+        private void LoadDevConfiguration()
+        {
+            try
+            {
+                Configuration.Initialize(Logger);
+                var location = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                if (location != null)
+                {
+                    var devConfig = Path.Combine(location, "CodyDevConfig.json");
+                    Configuration.AddFromJsonFile(devConfig);
+                }
+
+                Configuration.AddFromEnviromentVariableJsonFile("CODY_VS_DEV_CONFIG");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Loading DEV config failed.", ex);
+            }
+        }
+
+        private void InitializeServices(LoggerFactory loggerFactory)
+        {
             AgentLogger = loggerFactory.Create(Configuration.ShowCodyAgentOutput ? WindowPaneLogger.CodyAgent : null);
             AgentNotificationsLogger = loggerFactory.Create(Configuration.ShowCodyNotificationsOutput ? WindowPaneLogger.CodyNotifications : null);
-            Logger = loggerFactory.Create(WindowPaneLogger.DefaultCody);
+
 
             var componentModel = this.GetService<SComponentModel, IComponentModel>();
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
@@ -133,7 +168,8 @@ namespace Cody.VisualStudio
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
 
-            NotificationHandlers = new NotificationHandlers(AgentNotificationsLogger, DocumentService, SecretStorageService);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, DocumentService, SecretStorageService, InfobarNotificationsAsync);
+
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
@@ -258,6 +294,47 @@ namespace Cody.VisualStudio
             catch (Exception ex)
             {
                 Logger?.Error("Cannot initialize menu items", ex);
+            }
+        }
+
+        private void InitializeNotificationsBar()
+        {
+            try
+            {
+                if (InfobarNotifications != null) return;
+
+                var vsShell = (IVsShell)ServiceProvider.GlobalProvider.GetService(typeof(IVsShell));
+                if (vsShell != null)
+                {
+                    vsShell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out var obj);
+
+                    var host = obj as IVsInfoBarHost;
+                    if (host != null)
+                    {
+                        //Logger.Debug($"InitializeInfoBarService:{host}");
+
+                        var uiFactory = ServiceProvider.GlobalProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
+                        if (uiFactory != null)
+                        {
+                            InfobarNotifications = new InfobarNotifications(host, uiFactory, AgentNotificationsLogger);
+                            _infobarNotificationsCompletionSource.SetResult(InfobarNotifications);
+
+                        }
+                        else
+                        {
+                            Logger.Error("Cannot get IVsInfoBarUIFactory");
+                        }
+
+                    }
+                    else
+                        Logger.Error("Cannot get IVsInfoBarHost");
+                }
+                else
+                    Logger.Error("Cannot get IVsShell");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Cannot initialize InfoBarLicensePreordersService.", ex);
             }
         }
 
@@ -405,6 +482,7 @@ namespace Cody.VisualStudio
         private void OnAfterBackgroundSolutionLoadComplete(object sender = null, EventArgs e = null)
         {
             UpdateCurrentWorkspaceFolder();
+            InitializeNotificationsBar();
         }
 
         private void UpdateCurrentWorkspaceFolder()

@@ -52,6 +52,7 @@ namespace Cody.Core.Infrastructure
                     Shell = Capability.Enabled,
                     ShowDocument = Capability.Enabled,
                     Ignore = Capability.Enabled,
+                    ShowWindowMessage = ShowWindowMessageCapability.Request,
                     UntitledDocuments = Capability.None,
                     Webview = WebviewCapability.Native,
                     WebviewNativeConfig = new WebviewCapabilities

@@ -2,6 +2,7 @@ using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 using Cody.Core.Trace;
+using Microsoft.VisualStudio.Shell;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
@@ -79,10 +80,12 @@ namespace Cody.VisualStudio.Client
 
         private void OnDisconnected(object sender, JsonRpcDisconnectedEventArgs e)
         {
+            if (VsShellUtilities.ShutdownToken.IsCancellationRequested) return;
+
             if (e.Exception != null)
                 log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
             else
-                log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
+                log.Info($"Agent disconnected due to {e.Description} (reason: {e.Reason})");
         }
 
         private void CreateAgentService()
@@ -124,7 +127,7 @@ namespace Cody.VisualStudio.Client
             //to many calls to sentry
             //else log.Error($"The agent connection unexpectedly ended with code {exitCode}.");
 
-            if (options.RestartAgentOnFailure && exitCode != 0)
+            if (options.RestartAgentOnFailure && exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
             {
                 log.Info("Restarting the agent.");
 
@@ -143,10 +146,13 @@ namespace Cody.VisualStudio.Client
 
         private void DisconnectInternal()
         {
-            if (!jsonRpc.IsDisposed) jsonRpc.Dispose();
-            connector.ErrorReceived -= OnErrorReceived;
-            connector.Disconnected -= OnAgentDisconnected;
-            connector.Disconnect();
+            if (!jsonRpc.IsDisposed) jsonRpc?.Dispose();
+            if (connector != null)
+            {
+                connector.ErrorReceived -= OnErrorReceived;
+                connector.Disconnected -= OnAgentDisconnected;
+                connector.Disconnect();
+            }
 
             jsonRpc = null;
             connector = null;

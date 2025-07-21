@@ -61,6 +61,7 @@
     <Compile Include="Agent\Protocol\AutoeditChanges.cs" />
     <Compile Include="Agent\Protocol\AutoeditImageDiff.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\ShowWindowMessageParams.cs" />
     <Compile Include="Agent\Protocol\CodyFileRename.cs" />
     <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />
     <Compile Include="Agent\Protocol\DeleteFileOptions.cs" />
@@ -110,6 +111,8 @@
     <Compile Include="Common\Configuration.Setup.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
+    <Compile Include="Ide\IInfobarNotifications.cs" />
+    <Compile Include="Ide\Notification.cs" />
     <Compile Include="Infrastructure\ConfigurationService.cs" />
     <Compile Include="Infrastructure\IConfigurationService.cs" />
     <Compile Include="Infrastructure\IDocumentService.cs" />

@@ -1,6 +1,7 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
+using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio.Language.Proposals;
@@ -14,7 +15,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -45,6 +45,12 @@ namespace Cody.VisualStudio.Completions
 
             trackedSnapshot = textDocument.TextBuffer.CurrentSnapshot;
             textDocument.TextBuffer.ChangedHighPriority += OnTextBufferChanged;
+            textDocument.TextBuffer.ContentTypeChanged += OnContentTypeChanged;
+        }
+
+        private void OnContentTypeChanged(object sender, ContentTypeChangedEventArgs e)
+        {
+            trackedSnapshot = e.After;
         }
 
         private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
@@ -55,6 +61,7 @@ namespace Cody.VisualStudio.Completions
         public override Task DisposeAsync()
         {
             textDocument.TextBuffer.ChangedHighPriority -= OnTextBufferChanged;
+            textDocument.TextBuffer.ContentTypeChanged -= OnContentTypeChanged;
             return base.DisposeAsync();
         }
 
@@ -232,17 +239,16 @@ namespace Cody.VisualStudio.Completions
 
         private void UpdateCaretAndCompletion(ref VirtualSnapshotPoint caret, ref CompletionState completionState)
         {
-            if (trackedSnapshot == null || trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
+            if (trackedSnapshot == null ||
+                trackedSnapshot.TextBuffer != caret.Position.Snapshot.TextBuffer ||
+                trackedSnapshot.Version.VersionNumber < caret.Position.Snapshot.Version.VersionNumber)
             {
                 trace.TraceEvent("TrackinSnapshotFailed");
                 return;
             }
 
             caret = caret.TranslateTo(trackedSnapshot);
-            if (completionState != null)
-            {
-                completionState = completionState.TranslateTo(trackedSnapshot);
-            }
+            completionState = completionState?.TranslateTo(trackedSnapshot);
         }
 
         private async Task<AutocompleteResult> GetAutocompleteItems(AutocompleteParams autocompleteRequest, uint session, CancellationToken cancel)
@@ -284,33 +290,69 @@ namespace Cody.VisualStudio.Completions
                 var startPos = ToPosition(snapshot, item.Range.Start.Line, item.Range.Start.Character);
                 var endPos = ToPosition(snapshot, item.Range.End.Line, item.Range.End.Character);
 
-                var (actualText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
-
-                var modText = actualText;
-                if (completionState != null)
+                if (endPos > snapshot.Length)
                 {
-                    var span = completionState.ApplicableToSpan;
-                    modText = ReplaceRange(actualText, offset, span.Start.Position, span.End.Position, completionState.SelectedItem);
+                    var oldText = snapshot.GetText(startPos, snapshot.Length - startPos);
+                    var oldTextStartLine = snapshot.GetLineFromLineNumber(item.Range.Start.Line)?.GetText();
+                    var dic = new Dictionary<string, object>()
+                    {
+                        ["endPos"] = endPos,
+                        ["snapshotLength"] = snapshot.Length,
+                        ["startPos"] = startPos,
+                        ["insertText"] = item.InsertText,
+                        ["selectedItem"] = completionState?.SelectedItem,
+                        ["oldText"] = oldText,
+                        ["oldTextStartLine"] = oldTextStartLine
+                    };
+
+                    var ex = new ArgumentOutOfRangeException(nameof(endPos));
+                    ex.AddSentryContext("autocomplete", dic);
+
+                    throw ex;
                 }
+
+                var (currentText, offset) = GetLinesOfOriginalText(snapshot, startPos, endPos);
 
                 var completionText = item.InsertText;
                 if (caret.IsInVirtualSpace) completionText = AdjustVirtualSpaces(completionText, caret.VirtualSpaces, session);
 
-                var newText = ReplaceRange(actualText, offset, startPos, endPos, completionText);
+                var newText = ReplaceRange(currentText, offset, startPos, endPos, completionText);
 
-                var diffs = FindDifferences(modText, newText);
+                var diffs = FindDifferences(currentText, newText);
 
                 if (diffs.Any())
                 {
-                    var edits = diffs.Select(x => new ProposedEdit(new SnapshotSpan(snapshot, x.Position + offset, x.RemovedText.Length), x.AddedText)).ToList();
+                    try
+                    {
+                        var edits = diffs.Select(x => new ProposedEdit(new SnapshotSpan(snapshot, x.Position + offset, x.RemovedText.Length), x.AddedText)).ToList();
 
-                    var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
+                        var proposal = Proposal.TryCreateProposal("Cody", edits, caret,
                         completionState: completionState,
                         proposalId: CodyProposalSourceProvider.ProposalIdPrefix + item.Id,
                         flags: ProposalFlags.SingleTabToAccept | ProposalFlags.FormatAfterCommit);
 
-                    if (proposal != null) proposalList.Add(proposal);
-                    else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
+                        if (proposal != null) proposalList.Add(proposal);
+                        else trace.TraceEvent("ProposalInvalid", "session: {0}", session);
+                    }
+                    catch (ArgumentOutOfRangeException ex)
+                    {
+                        var dic = new Dictionary<string, object>()
+                        {
+                            ["currentText"] = currentText,
+                            ["insertText"] = item.InsertText,
+                            ["completionState"] = completionState?.SelectedItem,
+                            ["virtualSpaces"] = caret.VirtualSpaces,
+                            ["newText"] = newText,
+                            ["offset"] = offset,
+                            ["snapshotLength"] = snapshot.Length,
+                            ["diffs"] = diffs
+                        };
+                        ex.AddSentryContext("autocomplete", dic);
+
+                        throw;
+                    }
+
+
                 }
                 else
                 {
@@ -348,7 +390,7 @@ namespace Cody.VisualStudio.Completions
                 var edits = new List<ProposedEdit>();
                 var snapshot = caret.Position.Snapshot;
 
-                var range = FindRange(snapshot, item.Range.Start.Line, item.OriginalText);
+                var range = FindRange(snapshot, item.Range.Start.Line, item.OriginalText, item.InsertText);
                 if (range == null)
                 {
                     trace.TraceEvent("TextMismatch");
@@ -392,26 +434,48 @@ namespace Cody.VisualStudio.Completions
             return new CodyProposalCollection(proposalList);
         }
 
-        private TextRange FindRange(ITextSnapshot snapshot, int startLine, string originalText)
+        private TextRange FindRange(ITextSnapshot snapshot, int startLine, string originalText, string newText)
         {
             var lineCount = CountLines(originalText);
-            int? offset = null;
             var textBlock = new StringBuilder();
-            for (int lineNum = startLine; lineNum < startLine + lineCount; lineNum++)
+            int count = 0;
+            try
             {
-                var line = snapshot.GetLineFromLineNumber(lineNum);
-                if (line == null) break;
-                if (!offset.HasValue) offset = line.Start.Position;
-                textBlock.Append(line.GetTextIncludingLineBreak());
-            }
 
-            var block = textBlock.ToString();
-            var index = block.IndexOf(originalText);
-            if (index >= 0) return new TextRange
+                int? offset = null;
+
+                for (int lineNum = startLine; lineNum < startLine + lineCount; lineNum++)
+                {
+                    var line = snapshot.GetLineFromLineNumber(lineNum);
+                    if (line == null) break;
+                    if (!offset.HasValue) offset = line.Start.Position;
+                    textBlock.Append(line.GetTextIncludingLineBreak());
+                    count++;
+                }
+
+                var block = textBlock.ToString();
+                var index = block.IndexOf(originalText);
+                if (index >= 0) return new TextRange
+                {
+                    Start = offset.Value + index,
+                    End = offset.Value + index + originalText.Length
+                };
+            }
+            catch (InvalidOperationException ex)
             {
-                Start = offset.Value + index,
-                End = offset.Value + index + originalText.Length
-            };
+                var dic = new Dictionary<string, object>()
+                {
+                    ["startLine"] = startLine,
+                    ["originalText"] = originalText,
+                    ["newText"] = newText,
+                    ["lineCount"] = lineCount,
+                    ["textBlock"] = textBlock.ToString(),
+                    ["count"] = count,
+                    ["snapshotLength"] = snapshot.Length
+                };
+                ex.AddSentryContext("autocomplete", dic);
+                throw;
+            }
 
             return null;
         }
@@ -444,7 +508,24 @@ namespace Cody.VisualStudio.Completions
 
         private static string ReplaceRange(string input, int offset, int startRange, int endRange, string replacementText)
         {
-            return input.Substring(0, startRange - offset) + replacementText + input.Substring(endRange - offset);
+            try
+            {
+                return input.Substring(0, startRange - offset) + replacementText + input.Substring(endRange - offset);
+            }
+            catch (Exception e)
+            {
+                var dic = new Dictionary<string, object>()
+                {
+                    ["input"] = input,
+                    ["replacementText"] = replacementText,
+                    ["offset"] = offset,
+                    ["startRange"] = startRange,
+                    ["endRange"] = endRange
+                };
+                e.AddSentryContext("autocomplete", dic);
+
+                throw;
+            }
         }
 
         private static int CountLines(string text)

@@ -1,4 +1,5 @@
 using Cody.Core.Infrastructure;
+using Cody.Core.Logging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
@@ -11,7 +12,6 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Services
 {
@@ -304,6 +304,12 @@ namespace Cody.VisualStudio.Services
             EnvironmentColors.StatusBarHighlightColorKey,
             EnvironmentColors.StatusBarNoSolutionColorKey,
             EnvironmentColors.StatusBarTextColorKey,
+            EnvironmentColors.CommandBarMenuIconBackgroundColorKey,
+            //EnvironmentColors.CommandBarMenuItemMouseOverTextColorKey,
+            EnvironmentColors.CommandBarMenuItemMouseOverColorKey,
+            EnvironmentColors.SystemMenuTextColorKey,
+            EnvironmentColors.CommandBarMenuWatermarkTextColorKey,
+            EnvironmentColors.CommandBarMenuSeparatorColorKey,
         };
     }
 }

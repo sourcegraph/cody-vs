@@ -1,4 +1,5 @@
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Ide;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
@@ -15,7 +16,9 @@ namespace Cody.Core.Agent
 
         private readonly WebviewMessageHandler _messageFilter;
         private readonly ISecretStorageService _secretStorage;
+        private readonly Task<IInfobarNotifications> _infobarNotificationsAsync;
         private readonly ILog _logger;
+        private readonly IUserSettingsService _settingsService;
 
         public IAgentService agentClient;
 
@@ -31,9 +34,16 @@ namespace Cody.Core.Agent
 
         public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
-        public NotificationHandlers(ILog logger, IDocumentService documentService, ISecretStorageService secretStorage)
+        public NotificationHandlers(
+            IUserSettingsService settingsService,
+            ILog logger,
+            IDocumentService documentService,
+            ISecretStorageService secretStorage,
+            Task<IInfobarNotifications> infobarNotificationsAsync)
         {
+            _settingsService = settingsService;
             _secretStorage = secretStorage;
+            _infobarNotificationsAsync = infobarNotificationsAsync;
             _logger = logger;
             _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
         }
@@ -218,6 +228,26 @@ namespace Cody.Core.Agent
             _logger.Debug($"Authenticated: {authStatus.Authenticated}");
 
             AuthorizationDetailsChanged?.Invoke(this, authStatus);
+        }
+
+        [AgentCallback("window/showMessage", deserializeToSingleObject: true)]
+        public async Task<string> ShowMessage(ShowWindowMessageParams param)
+        {
+            // TODO: supports only single auto-edit notification for now
+            // because how the code handles enabling/disabling auto-edits via UserSettingsService
+            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null;
+
+            var notifications = await _infobarNotificationsAsync;
+
+            _logger.Debug($"ℹ ShowMessage:{param.Message}");
+            var selectedValue = await notifications.Show(param);
+
+            _logger.Debug($"Selected value: '{selectedValue}'");
+
+            if (selectedValue == null) // an user want to stay on auto-edits
+                _settingsService.EnableAutoEdit = true;
+
+            return selectedValue;
         }
     }
 }

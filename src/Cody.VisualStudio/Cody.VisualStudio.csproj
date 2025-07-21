@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
@@ -68,6 +68,7 @@
     <Compile Include="Services\DocumentService.cs" />
     <Compile Include="Services\FileDialogService.cs" />
     <Compile Include="Services\ProjectItem.cs" />
+    <Compile Include="Services\InfobarNotifications.cs" />
     <Compile Include="Services\SecretStorageService.cs" />
     <Compile Include="Services\DocumentsSyncService.cs" />
     <Compile Include="Services\ProgressService.cs" />
@@ -79,14 +80,15 @@
     <Compile Include="Services\VsVersionService.cs" />
     <Compile Include="Utilities\FilePathHelper.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <Content Include="..\CodyDevConfig.json">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\sourcegraph.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <None Include="..\CodyDevConfig.json">
-      <Link>CodyDevConfig.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="publishManifest.json" />
     <None Include="..\..\README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -128,20 +130,27 @@
   <!--Completions dll start -->
   <!--Workaround to get Cody.VisualStudio.Completions compiled when using Visual Studio to run and debug the extension
   Only works with Visual Studio, but unfortunately not with msbuild-->
-  <Target Name="Completions" BeforeTargets="GetVsixSourceItems" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
-    <MSBuild Projects="..\Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj" Properties="Configuration=$(Configuration)" Targets="Build" />
+  <Target Name="Completions" BeforeTargets="GetVsixSourceItems"
+          Condition="'$(BuildingInsideVisualStudio)' == 'true'"
+          >
+      <MSBuild Projects="..\Cody.VisualStudio.Completions\Cody.VisualStudio.Completions.csproj"
+               Properties="Configuration=$(Configuration)"
+               Targets="Build" />
   </Target>
+
   <Target Name="CopyCompletionsDllToVsix" BeforeTargets="GetVsixSourceItems">
-    <PropertyGroup>
-      <CompletionsDllPath>..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll</CompletionsDllPath>
-    </PropertyGroup>
-    <ItemGroup Condition="Exists('$(CompletionsDllPath)')">
-      <VSIXSourceItem Include="$(CompletionsDllPath)">
-        <VSIXSubPath>.</VSIXSubPath>
-      </VSIXSourceItem>
-    </ItemGroup>
+      <PropertyGroup>
+          <CompletionsDllPath>..\Cody.VisualStudio.Completions\bin\$(Configuration)\Cody.VisualStudio.Completions.dll</CompletionsDllPath>
+      </PropertyGroup>
+
+      <ItemGroup Condition="Exists('$(CompletionsDllPath)')">
+          <VSIXSourceItem Include="$(CompletionsDllPath)">
+              <VSIXSubPath>.</VSIXSubPath>
+          </VSIXSourceItem>
+      </ItemGroup>
   </Target>
   <!--Completions dll end -->
+
   <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
       <Project>{9FF2CC40-78E9-46C8-B2EF-30A1F1BE82F2}</Project>
