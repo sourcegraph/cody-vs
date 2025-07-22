@@ -53,9 +53,16 @@
     <Compile Include="FakeInfobarNotifications.cs" />
     <Compile Include="FakeSecretStorageProvider.cs" />
     <Compile Include="FakeServiceProvider.cs" />
+    <Compile Include="FakeVsEditorAdaptersFactoryService.cs" />
+    <Compile Include="FakeVsSolution.cs" />
     <Compile Include="MemorySettingsProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop">
+      <Version>3.11.2177</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cody.Core\Cody.Core.csproj">
@@ -66,11 +73,6 @@
       <Project>{3bb34f98-f069-4a38-bc4d-cf407d59b863}</Project>
       <Name>Cody.VisualStudio</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop">
-      <Version>3.11.2177</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

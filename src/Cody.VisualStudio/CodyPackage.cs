@@ -1,5 +1,6 @@
 using Cody.Core.Agent;
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.DocumentSync;
 using Cody.Core.Ide;
 using Cody.Core.Inf;
@@ -7,7 +8,6 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
-using Cody.Core.Workspace;
 using Cody.UI.Controls;
 using Cody.UI.ViewModels;
 using Cody.UI.Views;
@@ -34,7 +34,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using EnvDTE;
 using Configuration = Cody.Core.Common.Configuration;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Task = System.Threading.Tasks.Task;
@@ -69,6 +68,7 @@ namespace Cody.VisualStudio
         public IAgentProxy AgentClient;
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
+        public IFileDialogService FileDialogService;
 
         private IInfobarNotifications InfobarNotifications;
 
@@ -81,9 +81,10 @@ namespace Cody.VisualStudio
         public MainView MainView;
         public NotificationHandlers NotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
+        public TextDocumentNotificationHandlers TextDocumentNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public static TestingSupportService TestingSupportService;
-        public IFileService FileService;
+        public IDocumentService DocumentService;
         public IVsUIShell VsUIShell;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
 
@@ -102,7 +103,7 @@ namespace Cody.VisualStudio
                 InitializeTrace();
                 InitializeServices(loggerFactory);
                 await InitOleMenu();
-                
+
                 InitializeAgent();
 
                 ReportSentryVsVersion();
@@ -145,8 +146,9 @@ namespace Cody.VisualStudio
         {
             AgentLogger = loggerFactory.Create(Configuration.ShowCodyAgentOutput ? WindowPaneLogger.CodyAgent : null);
             AgentNotificationsLogger = loggerFactory.Create(Configuration.ShowCodyNotificationsOutput ? WindowPaneLogger.CodyNotifications : null);
-         
 
+
+            var componentModel = this.GetService<SComponentModel, IComponentModel>();
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution, Logger);
             VersionService = loggerFactory.GetVersionService();
@@ -160,27 +162,35 @@ namespace Cody.VisualStudio
 
             StatusbarService = new StatusbarService();
             ThemeService = new ThemeService(this, Logger);
-            FileService = new FileService(this, Logger);
+
+
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
 
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService, InfobarNotificationsAsync);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, DocumentService, SecretStorageService, InfobarNotificationsAsync);
+
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
-
-
-            ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
 
             var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
             ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
             NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
-            var componentModel = this.GetService<SComponentModel, IComponentModel>();
+
             VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
+            FileDialogService = new FileDialogService(SolutionService, Logger);
+
+            DocumentService = new DocumentService(Logger, this, vsSolution, VsEditorAdaptersFactoryService);
+
+            ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
+            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService);
+
+
+
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
         }
@@ -308,7 +318,7 @@ namespace Cody.VisualStudio
                         {
                             InfobarNotifications = new InfobarNotifications(host, uiFactory, AgentNotificationsLogger);
                             _infobarNotificationsCompletionSource.SetResult(InfobarNotifications);
-                            
+
                         }
                         else
                         {
@@ -371,7 +381,7 @@ namespace Cody.VisualStudio
 
                 var options = new AgentClientOptions
                 {
-                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers },
+                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers, TextDocumentNotificationHandlers },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = Configuration.RemoteAgentPort.HasValue,
@@ -479,7 +489,7 @@ namespace Cody.VisualStudio
         {
             try
             {
-                var solutionUri = new Uri(SolutionService.GetSolutionDirectory()).AbsoluteUri;
+                var solutionUri = SolutionService.GetSolutionDirectory().ToUri();
                 var workspaceFolderEvent = new WorkspaceFolderDidChangeEvent
                 {
                     Uris = new List<string> { solutionUri }

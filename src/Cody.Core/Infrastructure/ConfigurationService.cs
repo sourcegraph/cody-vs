@@ -36,7 +36,7 @@ namespace Cody.Core.Infrastructure
                 Name = "VisualStudio",
                 Version = _versionService.Full.ToString(),
                 IdeVersion = _vsVersionService.DisplayVersion,
-                WorkspaceRootUri = _solutionService.GetSolutionDirectory(),
+                WorkspaceRootUri = _solutionService.GetSolutionDirectory().ToUri(),
                 Capabilities = new ClientCapabilities
                 {
                     Authentication = Capability.Enabled,
@@ -44,9 +44,9 @@ namespace Cody.Core.Infrastructure
                     Autoedit = Capability.Enabled,
                     AutoeditInlineDiff = AutoeditInlineDiffCapability.None,
                     AutoeditAsideDiff = AutoeditAsideDiffCapability.Diff,
-                    CodeCopyOnlyAction = Capability.Enabled,
-                    Edit = Capability.None,
-                    EditWorkspace = Capability.None,
+                    CodeCopyOnlyAction = Capability.None,
+                    Edit = Capability.Enabled,
+                    EditWorkspace = Capability.Enabled,
                     ProgressBars = Capability.Enabled,
                     CodeLenses = Capability.None,
                     Shell = Capability.Enabled,

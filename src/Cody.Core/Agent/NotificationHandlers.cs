@@ -1,13 +1,12 @@
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Ide;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
-using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
-using Cody.Core.Ide;
 
 namespace Cody.Core.Agent
 {
@@ -16,11 +15,10 @@ namespace Cody.Core.Agent
         private static TraceLogger trace = new TraceLogger(nameof(NotificationHandlers));
 
         private readonly WebviewMessageHandler _messageFilter;
-        private readonly IUserSettingsService _settingsService;
-        private readonly IFileService _fileService;
         private readonly ISecretStorageService _secretStorage;
         private readonly Task<IInfobarNotifications> _infobarNotificationsAsync;
         private readonly ILog _logger;
+        private readonly IUserSettingsService _settingsService;
 
         public IAgentService agentClient;
 
@@ -39,17 +37,15 @@ namespace Cody.Core.Agent
         public NotificationHandlers(
             IUserSettingsService settingsService,
             ILog logger,
-            IFileService fileService,
+            IDocumentService documentService,
             ISecretStorageService secretStorage,
-            Task<IInfobarNotifications> infobarNotificationsAsync
-            )
+            Task<IInfobarNotifications> infobarNotificationsAsync)
         {
             _settingsService = settingsService;
-            _fileService = fileService;
             _secretStorage = secretStorage;
             _infobarNotificationsAsync = infobarNotificationsAsync;
             _logger = logger;
-            _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
+            _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
         }
 
         public void SetAgentClient(IAgentService client)
@@ -185,13 +181,6 @@ namespace Cody.Core.Agent
             _logger.Debug("Changed");
         }
 
-        [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
-        public Task<bool> ShowTextDocument(TextDocumentShowParams param)
-        {
-            var path = new Uri(param.Uri).ToString();
-            return Task.FromResult(_fileService.OpenFileInEditor(path));
-        }
-
         [AgentCallback("env/openExternal")]
         public Task<bool> OpenExternalLink(CodyFilePath path)
         {
@@ -199,12 +188,6 @@ namespace Cody.Core.Agent
             System.Diagnostics.Process.Start(path.Uri);
             return Task.FromResult(true);
 
-        }
-
-        [AgentCallback("window/showSaveDialog")]
-        public Task<string> ShowSaveDialog(SaveDialogOptionsParams paramValues)
-        {
-            return Task.FromResult("Not Yet Implemented");
         }
 
         [AgentCallback("secrets/get")]
@@ -252,7 +235,7 @@ namespace Cody.Core.Agent
         {
             // TODO: supports only single auto-edit notification for now
             // because how the code handles enabling/disabling auto-edits via UserSettingsService
-            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null; 
+            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null;
 
             var notifications = await _infobarNotificationsAsync;
 
