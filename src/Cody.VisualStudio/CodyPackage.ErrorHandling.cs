@@ -1,3 +1,4 @@
+using Cody.Core.Common;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell;
 using System;
@@ -20,14 +21,32 @@ namespace Cody.VisualStudio
             SentryLog.Initialize(VsShellUtilities.ShutdownToken);
         }
 
+        private bool IsCodyException(Exception ex)
+        {
+            const string cody = "cody";
+            if (ex.Message.ContainsIgnoreCase(cody) ||
+                ex.Source.ContainsIgnoreCase(cody) ||
+                ex.StackTrace.ContainsIgnoreCase(cody))
+            {
+                return true;
+            }
+            else
+            {
+                if (ex.InnerException != null) return IsCodyException(ex.InnerException);
+                else return false;
+            }
+        }
 
 
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            var exception = e.ExceptionObject as Exception;
+            if (exception != null && !IsCodyException(exception)) return;
+
             Logger.Error($"Unhandled domain exception:{e.ExceptionObject}");
             Logger.Error($"Unhandled domain exception, is terminating:{e.IsTerminating}");
 
-            var exception = e.ExceptionObject as Exception;
+
             Logger.Error("Unhandled domain exception occurred.", exception);
 
         }
@@ -35,8 +54,9 @@ namespace Cody.VisualStudio
         private void CurrentOnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             var exception = e.Exception;
-            Logger.Error("Unhandled exception occurred on the UI thread.", exception);
+            if (!IsCodyException(exception)) return;
 
+            Logger.Error("Unhandled exception occurred on the UI thread.", exception);
             if (!System.Diagnostics.Debugger.IsAttached)
                 e.Handled = true;
         }

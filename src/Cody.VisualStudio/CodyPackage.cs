@@ -34,7 +34,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using EnvDTE;
 using Configuration = Cody.Core.Common.Configuration;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Task = System.Threading.Tasks.Task;
@@ -89,7 +88,6 @@ namespace Cody.VisualStudio
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-
             try
             {
                 InitializeErrorHandling();
@@ -98,11 +96,10 @@ namespace Cody.VisualStudio
                 LoadDevConfiguration();
 
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
                 InitializeTrace();
                 InitializeServices(loggerFactory);
                 await InitOleMenu();
-                
+
                 InitializeAgent();
 
                 ReportSentryVsVersion();
@@ -145,7 +142,7 @@ namespace Cody.VisualStudio
         {
             AgentLogger = loggerFactory.Create(Configuration.ShowCodyAgentOutput ? WindowPaneLogger.CodyAgent : null);
             AgentNotificationsLogger = loggerFactory.Create(Configuration.ShowCodyNotificationsOutput ? WindowPaneLogger.CodyNotifications : null);
-         
+
 
             var vsSolution = this.GetService<SVsSolution, IVsSolution>();
             SolutionService = new SolutionService(vsSolution, Logger);
@@ -308,7 +305,7 @@ namespace Cody.VisualStudio
                         {
                             InfobarNotifications = new InfobarNotifications(host, uiFactory, AgentNotificationsLogger);
                             _infobarNotificationsCompletionSource.SetResult(InfobarNotifications);
-                            
+
                         }
                         else
                         {

@@ -16,7 +16,7 @@ namespace Cody.Core.Common
                 var uri = new Uri("file:///" + path).AbsoluteUri;
                 return Regex.Replace(uri, "(file:///)(\\D+)(:)", m => m.Groups[1].Value + m.Groups[2].Value.ToLower() + "%3A");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ex.Data.Add("path", path);
                 throw;
@@ -26,6 +26,11 @@ namespace Cody.Core.Common
         public static string ConvertLineBreaks(this string text, string lineBrakeChars)
         {
             return Regex.Replace(text, @"\r\n?|\n", lineBrakeChars);
+        }
+
+        public static bool ContainsIgnoreCase(this string source, string toCheck)
+        {
+            return source?.IndexOf(toCheck, StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }
