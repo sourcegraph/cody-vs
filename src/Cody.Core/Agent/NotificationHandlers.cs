@@ -20,6 +20,7 @@ namespace Cody.Core.Agent
         private readonly IFileService _fileService;
         private readonly ISecretStorageService _secretStorage;
         private readonly Task<IInfobarNotifications> _infobarNotificationsAsync;
+        private readonly IDocumentService _documentSercvice;
         private readonly ILog _logger;
 
         public IAgentService agentClient;
@@ -41,15 +42,23 @@ namespace Cody.Core.Agent
             ILog logger,
             IFileService fileService,
             ISecretStorageService secretStorage,
-            Task<IInfobarNotifications> infobarNotificationsAsync
+            Task<IInfobarNotifications> infobarNotificationsAsync,
+            IDocumentService documentSercvice
             )
         {
             _settingsService = settingsService;
             _fileService = fileService;
             _secretStorage = secretStorage;
             _infobarNotificationsAsync = infobarNotificationsAsync;
+            _documentSercvice = documentSercvice;
             _logger = logger;
-            _messageFilter = new WebviewMessageHandler(settingsService, fileService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
+
+            _messageFilter = new WebviewMessageHandler(
+                settingsService,
+                fileService,
+                documentSercvice,
+                () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty),
+                _logger);
         }
 
         public void SetAgentClient(IAgentService client)

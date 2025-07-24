@@ -101,6 +101,7 @@
     <Compile Include="Common\Configuration.Setup.cs" />
     <Compile Include="DocumentSync\DocumentSyncCallback.cs" />
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
+    <Compile Include="Ide\IDocumentService.cs" />
     <Compile Include="Ide\IInfobarNotifications.cs" />
     <Compile Include="Ide\Notification.cs" />
     <Compile Include="Infrastructure\ConfigurationService.cs" />

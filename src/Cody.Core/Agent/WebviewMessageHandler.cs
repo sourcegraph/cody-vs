@@ -3,6 +3,8 @@ using Cody.Core.Settings;
 using Cody.Core.Workspace;
 using Newtonsoft.Json.Linq;
 using System;
+using Cody.Core.Ide;
+using Cody.Core.Logging;
 
 namespace Cody.Core.Agent
 {
@@ -10,13 +12,23 @@ namespace Cody.Core.Agent
     {
         private readonly IUserSettingsService _settingsService;
         private readonly IFileService _fileService;
+        private readonly IDocumentService _documentService;
         private readonly Action _onOptionsPageShowRequest;
+        private readonly ILog _logger;
 
-        public WebviewMessageHandler(IUserSettingsService settingsService, IFileService fileService, Action onOptionsPageShowRequest)
+        public WebviewMessageHandler(
+            IUserSettingsService settingsService,
+            IFileService fileService,
+            IDocumentService documentService,
+            Action onOptionsPageShowRequest,
+            ILog logger
+            )
         {
             _settingsService = settingsService;
             _fileService = fileService;
+            _documentService = documentService;
             _onOptionsPageShowRequest = onOptionsPageShowRequest;
+            _logger = logger;
         }
 
         public bool HandleMessage(string message)
@@ -24,6 +36,7 @@ namespace Cody.Core.Agent
             try
             {
                 dynamic json = JObject.Parse(message);
+
                 // Return true for message requests that only need to be handled by the client.
                 // Return false for messages that are not handled by the filter,
                 // or for messages that are intercepted but should still be forwarded to the agent.
@@ -35,6 +48,8 @@ namespace Cody.Core.Agent
                         return HandleCommandCommand(json);
                     case "openFileLink":
                         return HandleOpenFileLinkCommand(json);
+                    case "insert":
+                        return HandleTextInsert(json.text.ToString());
                     default:
                         return false;
                 }
@@ -43,6 +58,11 @@ namespace Cody.Core.Agent
             {
                 return false;
             }
+        }
+
+        private bool HandleTextInsert(string text)
+        {
+            return _documentService.InsertAtCursor(text);
         }
 
         private bool HandleAuthCommand(dynamic json)

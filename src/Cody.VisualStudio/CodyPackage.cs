@@ -69,6 +69,7 @@ namespace Cody.VisualStudio
         public IAgentProxy AgentClient;
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
+        public IDocumentService DocumentService;
 
         private IInfobarNotifications InfobarNotifications;
 
@@ -151,6 +152,7 @@ namespace Cody.VisualStudio
             SolutionService = new SolutionService(vsSolution, Logger);
             VersionService = loggerFactory.GetVersionService();
             VsVersionService = new VsVersionService(Logger);
+            DocumentService = new DocumentService(Logger);
 
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
@@ -165,7 +167,9 @@ namespace Cody.VisualStudio
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
 
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService, InfobarNotificationsAsync);
+            
+
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, FileService, SecretStorageService, InfobarNotificationsAsync, DocumentService);
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
