@@ -19,7 +19,7 @@ namespace Cody.VisualStudio.Inf
 
             logger = logger.WithSentryForErrors(sentryLog);
 
-            if(!string.IsNullOrEmpty(outputName))
+            if (!string.IsNullOrEmpty(outputName))
             {
                 try
                 {
@@ -36,7 +36,7 @@ namespace Cody.VisualStudio.Inf
 
             logger = logger.Build();
 
-            if(failToCreateWindowPaneLogger) logger.Error("Could not create WindowPaneLogger.");
+            if (failToCreateWindowPaneLogger) logger.Error("Could not create WindowPaneLogger.");
             else logger.Debug("Logger created.");
 
             _versionService = new VersionService(logger);

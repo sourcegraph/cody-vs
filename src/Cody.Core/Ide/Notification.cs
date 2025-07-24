@@ -13,7 +13,7 @@ namespace Cody.Core.Ide
         private bool _disposed = false;
 
         private readonly TaskCompletionSource<string> _selectedValueCompletionSource = new TaskCompletionSource<string>();
-        
+
 
         public Task<string> SelectedValueAsync => _selectedValueCompletionSource.Task;
 
@@ -49,7 +49,7 @@ namespace Cody.Core.Ide
 
                     _logger.Debug("Notification timer invoked.");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.Error("Running timer failed.", ex);
                 }
@@ -73,10 +73,10 @@ namespace Cody.Core.Ide
             if (!_disposed)
             {
                 StopAutoCloseTimer();
-                
+
                 if (!_selectedValueCompletionSource.Task.IsCompleted)
                     _selectedValueCompletionSource.SetResult(null);
-                    
+
                 _disposed = true;
             }
         }

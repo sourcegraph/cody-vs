@@ -50,7 +50,7 @@ namespace Cody.Core.Infrastructure
         public string Full { get; }
         public string Agent { get; }
         public string Node { get; }
-        
+
         private string GetAgentVersion()
         {
             var agentVersionFile = Path.Combine(_agentDirectory, "agent.version");

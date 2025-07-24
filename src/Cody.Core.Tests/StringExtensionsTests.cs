@@ -13,7 +13,7 @@ namespace Cody.Core.Tests
     [TestFixture]
     public class StringExtensionsTests
     {
-        
+
         [TestCase(@"c:\path\to\file", "file:///c%3A/path/to/file")]
         [TestCase(@"c:/path/to/file", "file:///c%3A/path/to/file")]
         [TestCase(@"c:/file.txt", "file:///c%3A/file.txt")]

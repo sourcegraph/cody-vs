@@ -29,12 +29,12 @@ namespace Cody.VisualStudio.Services
         public void SetAutocompleteSuggestion(string suggestionId, bool isCodySuggestion, string suggestionText)
         {
             autocompleteSuggestion = new AutocompleteSuggestion(suggestionId, isCodySuggestion, suggestionText);
-            if(suggestionSemaphore.CurrentCount == 0) suggestionSemaphore.Release();
+            if (suggestionSemaphore.CurrentCount == 0) suggestionSemaphore.Release();
         }
 
         public async Task<AutocompleteSuggestion> GetAutocompleteSuggestion(int milisecondsTimeout = 8000)
         {
-            if(await suggestionSemaphore.WaitAsync(milisecondsTimeout))
+            if (await suggestionSemaphore.WaitAsync(milisecondsTimeout))
                 return autocompleteSuggestion;
             else
                 return null;

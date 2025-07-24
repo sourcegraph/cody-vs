@@ -44,7 +44,7 @@ namespace Cody.VisualStudio.Client
                     Thread.Sleep(TimeSpan.FromSeconds(5));
                 }
             }
-            
+
             _logger.Error($"Failed to connect to remote agent within {_defaultTimeout.TotalMinutes} minutes timeout");
         }
 

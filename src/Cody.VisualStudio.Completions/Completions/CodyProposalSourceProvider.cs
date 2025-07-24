@@ -113,7 +113,7 @@ namespace Cody.VisualStudio.Completions
             }
         }
 
-        public async override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
+        public override Task<ProposalSourceBase> GetProposalSourceAsync(ITextView view, CancellationToken cancel)
         {
             trace.TraceEvent("Enter");
             IWpfTextView wpfTextView = view as IWpfTextView;
@@ -124,11 +124,11 @@ namespace Cody.VisualStudio.Completions
                 {
                     trace.TraceEvent("CreateProposalSource", "Created for '{0}'", document.FilePath);
                     _logger.Info($"Suggestion provider attached to '{document.FilePath}'");
-                    return view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, view, textDifferencingService, _logger));
+                    return Task.FromResult(view.Properties.GetOrCreateSingletonProperty(() => new CodyProposalSource(document, view, textDifferencingService, _logger)));
                 }
             }
 
-            return null;
+            return Task.FromResult(null);
         }
 
         public void Dispose()

@@ -54,6 +54,7 @@ namespace Cody.AgentTester
             Console.ReadKey();
         }
 
+        [Obsolete]
         private static async Task Initialize()
         {
             var clientInfo = new ClientInfo

@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Cody.VisualStudio.Services
 {
-    public class InfobarNotifications: IVsInfoBarUIEvents, IInfobarNotifications
+    public class InfobarNotifications : IVsInfoBarUIEvents, IInfobarNotifications
     {
         private readonly ILog _logger;
         private readonly Dictionary<IVsInfoBarUIElement, Notification> _notifications;
@@ -66,7 +66,7 @@ namespace Cody.VisualStudio.Services
                     if (_notifications.TryGetValue(notification, out var n))
                     {
                         n.StopAutoCloseTimer();
-                        
+
                         var cookie = n.Cookie;
                         notification.Unadvise(cookie);
                         notification.Close();

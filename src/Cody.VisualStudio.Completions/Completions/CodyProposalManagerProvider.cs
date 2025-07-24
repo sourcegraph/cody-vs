@@ -27,10 +27,10 @@ namespace Cody.VisualStudio.Completions
             _logger = loggerFactory.Create();
         }
 
-        public async override Task<ProposalManagerBase> GetProposalManagerAsync(ITextView view, CancellationToken cancel)
+        public override Task<ProposalManagerBase> GetProposalManagerAsync(ITextView view, CancellationToken cancel)
         {
             _trace.TraceEvent("Enter");
-            return new CodyProposalManager(_logger);
+            return Task.FromResult(new CodyProposalManager(_logger));
         }
     }
 }

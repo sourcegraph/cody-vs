@@ -71,6 +71,7 @@ namespace Cody.Core.Infrastructure
             return clientInfo;
         }
 
+        [Obsolete]
         public ExtensionConfiguration GetConfiguration()
         {
             var config = new ExtensionConfiguration
