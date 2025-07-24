@@ -3,7 +3,7 @@ name: Code Style Checks
 on:
   push:
     branches:
-      - code-style-check-on
+      - piotr/code-style-check-on
   pull_request:
     branches:
       - main
