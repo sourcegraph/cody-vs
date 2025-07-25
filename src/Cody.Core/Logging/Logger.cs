@@ -28,7 +28,7 @@ namespace Cody.Core.Logging
 
         public void Debug(string message, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = null)
         {
-            if (Configuration.IsDebug)
+            if (Configuration.DebugLogs)
             {
                 var callerTypeName = Path.GetFileNameWithoutExtension(callerFilePath);
                 callerName = $"{callerTypeName}.{callerName}";
@@ -43,10 +43,9 @@ namespace Cody.Core.Logging
 
         public void Debug(string message, Exception ex, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFilePath = null)
         {
-            if (Configuration.IsDebug)
+            if (Configuration.DebugLogs)
             {
                 Debug(message, callerName, callerFilePath);
-                Error(message, ex, callerName);
             }
         }
 

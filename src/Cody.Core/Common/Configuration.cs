@@ -5,6 +5,7 @@ namespace Cody.Core.Common
 {
     public static partial class Configuration
     {
+        public static bool DebugLogs => Get(false);
 
         public static bool AgentDebug => Get(false);
 
