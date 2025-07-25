@@ -1,7 +1,8 @@
 {
 	"AgentDebug": true,
 	"AgentVerboseDebug": true,
-	"AllowNodeDebug": true,
+  "AllowNodeDebug": true,
+  "DebugLogs":  true,
 	
 	//"AgentDirectory": "C:/dev/cody/agent/dist",
 	
