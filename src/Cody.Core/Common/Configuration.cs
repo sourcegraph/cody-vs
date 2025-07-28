@@ -20,10 +20,6 @@ namespace Cody.Core.Common
 
         public static string TraceFile => Get((string)null);
 
-        public static string TraceLogioHostname => Get((string)null);
-
-        public static int? TraceLogioPort => (int?)Get((long?)null);
-
         public static bool ShowCodyAgentOutput => Get(false);
 
         public static bool ShowCodyNotificationsOutput => Get(false);
