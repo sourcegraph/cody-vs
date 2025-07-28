@@ -200,9 +200,6 @@ namespace Cody.VisualStudio
                 if (!string.IsNullOrEmpty(Configuration.TraceFile))
                     TraceManager.Listeners.Add(new FileTraceListener(Configuration.TraceFile));
 
-                if (!string.IsNullOrEmpty(Configuration.TraceLogioHostname) && Configuration.TraceLogioPort.HasValue)
-                    TraceManager.Listeners.Add(new LogioTraceListener(Configuration.TraceLogioHostname, Configuration.TraceLogioPort.Value));
-
                 TraceManager.Enabled = true;
             }
         }
