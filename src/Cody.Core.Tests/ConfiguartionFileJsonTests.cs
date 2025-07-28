@@ -1,13 +1,13 @@
+using Cody.Core.Common;
+using Cody.Core.Logging;
+using Moq;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Cody.Core.Common;
-using Cody.Core.Logging;
-using Moq;
-using NUnit.Framework;
 
 namespace Cody.Core.Tests
 {
@@ -35,9 +35,6 @@ namespace Cody.Core.Tests
 	                    ""Trace"": true,
 	                    ""TraceFile"": ""C:/tmp/cody.log"",
 	                    
-	                    ""TraceLogioHostname"": ""localhost"",
-	                    ""TraceLogioPort"": 6689,
-	                    
 	                    ""ShowCodyAgentOutput"": true,
 	                    ""ShowCodyNotificationsOutput"": true
                     }";
@@ -57,20 +54,6 @@ namespace Cody.Core.Tests
             // then
             _loggerMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<Exception>(), It.IsAny<string>()), Times.Never);
             Assert.That(remoteAgentPort, Is.Not.Null);
-        }
-
-        [Test]
-        public void Parsing_Json_Dev_Config_Should_Not_Call_LoggerError_When_Accessing_TraceLogioPort()
-        {
-            // given
-
-            // when
-            Configuration.AddFromJsonFile(_tempJsonFile);
-            int? traceLogioPort = Configuration.TraceLogioPort;
-
-            // then
-            _loggerMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<Exception>(), It.IsAny<string>()), Times.Never);
-            Assert.That(traceLogioPort, Is.Not.Null);
         }
 
         [TearDown]
