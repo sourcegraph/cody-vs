@@ -10,5 +10,7 @@ namespace Cody.Core.Agent.Protocol
     {
         public int Line { get; set; }
         public int Character { get; set; }
+
+        public bool IsPosition(int line, int character) => this.Line == line && this.Character == character;
     }
 }

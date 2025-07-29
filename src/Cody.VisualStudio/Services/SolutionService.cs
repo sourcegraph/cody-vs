@@ -1,9 +1,9 @@
 using Cody.Core.Infrastructure;
+using Cody.Core.Logging;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Diagnostics;
 using System.IO;
-using Cody.Core.Logging;
 
 namespace Cody.VisualStudio.Services
 {
@@ -31,14 +31,16 @@ namespace Cody.VisualStudio.Services
         public string GetSolutionDirectory()
         {
             _vsSolution.GetProperty((int)__VSPROPID.VSPROPID_SolutionFileName, out object value);
-            var solutionDir = Path.GetDirectoryName(value as string);
 
-            // Use user directory if solution directory is null.
-            var userDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var solutionDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + Path.DirectorySeparatorChar;
+            if (value != null)
+            {
+                solutionDir = Path.GetDirectoryName(value as string) + Path.DirectorySeparatorChar;
+            }
 
-            _logger.Debug($"'{solutionDir}'");
+            _logger.Debug($"Solution directory: '{solutionDir}'");
 
-            return new Uri(solutionDir ?? userDir).ToString();
+            return solutionDir;
         }
     }
 }

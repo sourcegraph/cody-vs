@@ -64,6 +64,8 @@
     <Compile Include="Agent\Protocol\ShowWindowMessageParams.cs" />
     <Compile Include="Agent\Protocol\CodyFileRename.cs" />
     <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />
+    <Compile Include="Agent\Protocol\DeleteFileOptions.cs" />
+    <Compile Include="Agent\Protocol\OptionsParams.cs" />
     <Compile Include="Agent\Protocol\ProtocolAuthStatus.cs" />
     <Compile Include="Agent\Protocol\CompletionBookkeepingEvent.cs" />
     <Compile Include="Agent\Protocol\CompletionItemInfo.cs" />
@@ -76,6 +78,11 @@
     <Compile Include="Agent\Protocol\SaveDialogOptionsParams.cs" />
     <Compile Include="Agent\Protocol\SelectedCompletionInfo.cs" />
     <Compile Include="Agent\Protocol\TestProgress.cs" />
+    <Compile Include="Agent\Protocol\TextDocumentEditParams.cs" />
+    <Compile Include="Agent\Protocol\WorkspaceEditEntryMetadata.cs" />
+    <Compile Include="Agent\Protocol\WorkspaceEditMetadata.cs" />
+    <Compile Include="Agent\Protocol\WorkspaceEditOperation.cs" />
+    <Compile Include="Agent\Protocol\WorkspaceEditParams.cs" />
     <Compile Include="Agent\Protocol\WorkspaceFolderDidChangeEvent.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParamsOptions.cs" />
     <Compile Include="Agent\Protocol\TextDocumentShowParams.cs" />
@@ -94,7 +101,10 @@
     <Compile Include="Agent\Protocol\ServerInfo.cs" />
     <Compile Include="Agent\Protocol\WebviewCapabilities.cs" />
     <Compile Include="Agent\Protocol\ResolveWebviewViewParams.cs" />
+    <Compile Include="Agent\Protocol\WriteFileOptions.cs" />
     <Compile Include="Agent\SetHtmlEvent.cs" />
+    <Compile Include="Agent\TextDocumentNotificationHandlers.cs" />
+    <Compile Include="Agent\Protocol\TextEdit.cs" />
     <Compile Include="Agent\WebviewMessageHandler.cs" />
     <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Common\Configuration.cs" />
@@ -105,6 +115,8 @@
     <Compile Include="Ide\Notification.cs" />
     <Compile Include="Infrastructure\ConfigurationService.cs" />
     <Compile Include="Infrastructure\IConfigurationService.cs" />
+    <Compile Include="Infrastructure\IDocumentService.cs" />
+    <Compile Include="Infrastructure\IFileDialogService.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
     <Compile Include="Logging\ISentryLog.cs" />
@@ -115,7 +127,6 @@
     <Compile Include="Trace\TraceListener.cs" />
     <Compile Include="Trace\TraceLogger.cs" />
     <Compile Include="Trace\TraceManager.cs" />
-    <Compile Include="Workspace\IFileService.cs" />
     <Compile Include="Ide\IVsVersionService.cs" />
     <Compile Include="Infrastructure\WebViewsManager.cs" />
     <Compile Include="Infrastructure\IColorThemeService.cs" />
@@ -133,6 +144,9 @@
     <Compile Include="Settings\UserSettingsService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="JsonSubTypes">
+      <Version>2.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>
     </PackageReference>

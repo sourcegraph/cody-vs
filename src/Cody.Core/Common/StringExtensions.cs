@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,6 +20,20 @@ namespace Cody.Core.Common
             catch (Exception ex)
             {
                 ex.Data.Add("path", path);
+                throw;
+            }
+        }
+
+        public static string ToWindowsPath(this string uri)
+        {
+            try
+            {
+                var uriObj = new Uri(Uri.UnescapeDataString(uri));
+                return uriObj.LocalPath;
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("uri", uri);
                 throw;
             }
         }
