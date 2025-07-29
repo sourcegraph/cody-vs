@@ -46,6 +46,7 @@ namespace Cody.Core.Logging
             if (Configuration.DebugLogs)
             {
                 Debug(message, callerName, callerFilePath);
+                Error(message, ex, callerName);
             }
         }
 
