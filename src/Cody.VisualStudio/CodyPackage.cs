@@ -167,6 +167,8 @@ namespace Cody.VisualStudio
             var statusCenterService = this.GetService<SVsTaskStatusCenterService, IVsTaskStatusCenterService>();
             ProgressService = new ProgressService(statusCenterService);
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
+            VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+            DocumentService = new DocumentService(Logger, this, vsSolution, VsEditorAdaptersFactoryService);
 
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, DocumentService, SecretStorageService, InfobarNotificationsAsync);
 
@@ -180,11 +182,9 @@ namespace Cody.VisualStudio
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
 
-            VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
             FileDialogService = new FileDialogService(SolutionService, Logger);
-
-            DocumentService = new DocumentService(Logger, this, vsSolution, VsEditorAdaptersFactoryService);
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
             TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService);

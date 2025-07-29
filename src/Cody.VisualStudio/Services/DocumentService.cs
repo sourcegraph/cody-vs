@@ -6,14 +6,13 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Cody.VisualStudio.Services
@@ -66,20 +65,23 @@ namespace Cody.VisualStudio.Services
 
         public bool InsertTextInDocument(string path, Position position, string text)
         {
-            return ChangeTextInDocument(path, new Range { Start = position, End = position }, text);
+            var edits = new TextEdit[1] { new InsertTextEdit { Position = position, Value = text } };
+            return EditTextInDocument(path, edits);
         }
 
         public bool ReplaceTextInDocument(string path, Range range, string text)
         {
-            return ChangeTextInDocument(path, range, text);
+            var edits = new TextEdit[1] { new ReplaceTextEdit { Range = range, Value = text } };
+            return EditTextInDocument(path, edits);
         }
 
         public bool DeleteTextInDocument(string path, Range range)
         {
-            return ChangeTextInDocument(path, range, string.Empty);
+            var edits = new TextEdit[1] { new DeleteTextEdit { Range = range } };
+            return EditTextInDocument(path, edits);
         }
 
-        private bool ChangeTextInDocument(string path, Range range, string text)
+        public bool EditTextInDocument(string path, IEnumerable<TextEdit> edits)
         {
             var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
             {
@@ -91,49 +93,61 @@ namespace Cody.VisualStudio.Services
                     var textView = GetVsTextView(windowFrame);
                     if (textView != null)
                     {
-                        var bufferResult = textView.GetBuffer(out IVsTextLines textLines);
-                        if (bufferResult != VSConstants.S_OK)
+                        var wpfView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                        if (wpfView == null)
                         {
-                            log.Error($"Cannot get text buffer (error code: {bufferResult})");
+                            log.Error($"Cannot get wpf text view for '{path}'");
                             return false;
                         }
 
-                        if (!string.IsNullOrEmpty(text))
+                        var newLineChars = GetNewLineCharsForTextView(textView);
+                        using (var editContext = wpfView.TextBuffer.CreateEdit())
                         {
-                            var newLineChars = GetNewLineCharsForTextView(textView);
-                            text = text.ConvertLineBreaks(newLineChars);
-                        }
-
-                        textLines.GetSize(out int bufferLength);
-                        if (bufferLength == 0 && range.Start.IsPosition(0, 0) && range.End.IsPosition(9999, 0))
-                        {
-                            // For new files, agent does not specify the exact range, but only one ending in line 9999
-                            log.Info($"Initializing content for '{path}'");
-                            var initResult = textLines.InitializeContent(text, text.Length);
-                            return initResult == VSConstants.S_OK;
-                        }
-
-                        var textPtr = IntPtr.Zero;
-                        try
-                        {
-                            var length = (text == null) ? 0 : text.Length;
-
-                            textPtr = Marshal.StringToCoTaskMemAuto(text);
-                            var replaceResult = textLines.ReplaceLines(
-                                range.Start.Line, range.Start.Character,
-                                range.End.Line, range.End.Character,
-                                textPtr, length,
-                                null);
-
-                            if (replaceResult != VSConstants.S_OK)
+                            foreach (var edit in edits)
                             {
-                                log.Error($"Cannot change text in '{path}' (error code: {replaceResult})");
+                                if (edit is InsertTextEdit insert)
+                                {
+                                    var text = insert.Value.ConvertLineBreaks(newLineChars);
+                                    var position = ToPosition(editContext.Snapshot, insert.Position.Line, insert.Position.Character);
+
+                                    editContext.Insert(position, text);
+                                }
+                                else if (edit is DeleteTextEdit delete)
+                                {
+                                    var range = delete.Range;
+                                    var startPos = ToPosition(editContext.Snapshot, range.Start.Line, range.Start.Character);
+                                    var endPos = ToPosition(editContext.Snapshot, range.End.Line, range.End.Character);
+
+                                    editContext.Delete(startPos, endPos - startPos);
+                                }
+                                else if (edit is ReplaceTextEdit replace)
+                                {
+                                    var text = replace.Value.ConvertLineBreaks(newLineChars);
+                                    var range = replace.Range;
+                                    if (editContext.Snapshot.Length == 0 && range.Start.IsPosition(0, 0) && range.End.IsPosition(9999, 0))
+                                    {
+                                        // For new files, agent does not specify the exact range, but only one replacement with end line eq. 9999
+                                        editContext.Insert(0, text);
+                                    }
+                                    else
+                                    {
+                                        var startPos = ToPosition(editContext.Snapshot, range.Start.Line, range.Start.Character);
+                                        var endPos = ToPosition(editContext.Snapshot, range.End.Line, range.End.Character);
+
+                                        editContext.Replace(startPos, endPos - startPos, text);
+                                    }
+                                }
+                            }
+
+                            try
+                            {
+                                editContext.Apply();
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                log.Error($"Cannot commit edits in document '{path}'", ex);
                                 return false;
                             }
-                        }
-                        finally
-                        {
-                            if (textPtr != IntPtr.Zero) Marshal.FreeCoTaskMem(textPtr);
                         }
 
                         return true;
@@ -149,10 +163,17 @@ namespace Cody.VisualStudio.Services
             return result;
         }
 
+        private int ToPosition(ITextSnapshot textSnapshot, int line, int col)
+        {
+            var containgLine = textSnapshot.GetLineFromLineNumber(line);
+            return containgLine.Start.Position + col;
+        }
+
         private string GetNewLineCharsForTextView(IVsTextView view)
         {
             string newLine = null;
             var wpfView = editorAdaptersFactoryService.GetWpfTextView(view);
+
             if (wpfView != null)
                 newLine = wpfView.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
 

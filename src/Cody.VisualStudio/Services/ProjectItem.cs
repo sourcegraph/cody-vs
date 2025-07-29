@@ -40,15 +40,7 @@ namespace Cody.VisualStudio.Services
         {
             if (Directory == null) return false;
 
-            var normalizedFilePath = Path.GetFullPath(filePath);
-            var normalizedDirPath = Path.GetFullPath(Directory);
-
-            if (!normalizedDirPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                normalizedDirPath += Path.DirectorySeparatorChar;
-
-            var directoryUri = new Uri(normalizedDirPath);
-            var fileUri = new Uri(normalizedFilePath);
-
+            var (directoryUri, fileUri) = CreateNormalizedUris(Directory, filePath);
             return directoryUri.IsBaseOf(fileUri);
         }
 
@@ -83,19 +75,29 @@ namespace Cody.VisualStudio.Services
 
         private string GetRelativePath(string basePath, string targetPath)
         {
-            string absoluteBasePath = Path.GetFullPath(basePath);
-            string absoluteTargetPath = Path.GetFullPath(targetPath);
-
-            if (!absoluteBasePath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                absoluteBasePath += Path.DirectorySeparatorChar;
-
-            var baseUri = new Uri(absoluteBasePath);
-            var targetUri = new Uri(absoluteTargetPath);
-
+            var (baseUri, targetUri) = CreateNormalizedUris(basePath, targetPath);
             Uri relativeUri = baseUri.MakeRelativeUri(targetUri);
             string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-
             return relativePath.Replace('/', Path.DirectorySeparatorChar);
+        }
+
+        private (Uri baseUri, Uri targetUri) CreateNormalizedUris(string basePath, string targetPath)
+        {
+            var normalizedBasePath = NormalizeDirectoryPath(basePath);
+            var normalizedTargetPath = Path.GetFullPath(targetPath);
+
+            var baseUri = new Uri(normalizedBasePath);
+            var targetUri = new Uri(normalizedTargetPath);
+
+            return (baseUri, targetUri);
+        }
+
+        private string NormalizeDirectoryPath(string path)
+        {
+            var normalizedPath = Path.GetFullPath(path);
+            if (!normalizedPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                normalizedPath += Path.DirectorySeparatorChar;
+            return normalizedPath;
         }
 
     }

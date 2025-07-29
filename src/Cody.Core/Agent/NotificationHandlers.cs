@@ -235,7 +235,7 @@ namespace Cody.Core.Agent
         {
             // TODO: supports only single auto-edit notification for now
             // because how the code handles enabling/disabling auto-edits via UserSettingsService
-            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null;
+            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null; 
 
             var notifications = await _infobarNotificationsAsync;
 

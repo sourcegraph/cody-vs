@@ -35,45 +35,14 @@ namespace Cody.Core.Agent
         public bool Edit(TextDocumentEditParams textDocumentEdit)
         {
             var path = textDocumentEdit.Uri.ToWindowsPath();
-            foreach (var edit in textDocumentEdit.Edits)
-            {
-                bool result = false;
-                if (edit is InsertTextEdit insert)
-                    result = documentService.InsertTextInDocument(path, insert.Position, insert.Value);
-                else if (edit is ReplaceTextEdit replace)
-                    result = documentService.ReplaceTextInDocument(path, replace.Range, replace.Value);
-                else if (edit is DeleteTextEdit delete)
-                    result = documentService.DeleteTextInDocument(path, delete.Range);
-
-                if (!result) return false;
-            }
-
-            return true;
-        }
-
-        private bool PerformTextEdits(string path, TextEdit[] edits)
-        {
-            foreach (var edit in edits)
-            {
-                bool result = false;
-                if (edit is InsertTextEdit insert)
-                    result = documentService.InsertTextInDocument(path, insert.Position, insert.Value);
-                else if (edit is ReplaceTextEdit replace)
-                    result = documentService.ReplaceTextInDocument(path, replace.Range, replace.Value);
-                else if (edit is DeleteTextEdit delete)
-                    result = documentService.DeleteTextInDocument(path, delete.Range);
-
-                if (!result) return false;
-            }
-
-            return true;
+            return documentService.EditTextInDocument(path, textDocumentEdit.Edits);
         }
 
         [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
-        public Task<bool> ShowTextDocument(TextDocumentShowParams textDocumentShow)
+        public bool ShowTextDocument(TextDocumentShowParams textDocumentShow)
         {
             var result = documentService.ShowDocument(textDocumentShow.Uri.ToWindowsPath(), textDocumentShow.Options?.Selection);
-            return Task.FromResult(result);
+            return result;
         }
 
         [AgentCallback("workspace/edit", deserializeToSingleObject: true)]
@@ -94,7 +63,7 @@ namespace Cody.Core.Agent
                         result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
                         break;
                     case EditFileOperation editFile:
-                        result = PerformTextEdits(editFile.Uri.ToWindowsPath(), editFile.Edits);
+                        result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
                         break;
                 }
 

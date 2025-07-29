@@ -17,6 +17,8 @@ namespace Cody.Core.Infrastructure
 
         bool DeleteTextInDocument(string path, Range range);
 
+        bool EditTextInDocument(string path, IEnumerable<TextEdit> edits);
+
 
         bool CreateDocument(string path, string content, bool overwrite);
         bool RenameDocument(string oldName, string newName);
