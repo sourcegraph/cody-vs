@@ -108,7 +108,7 @@ namespace Cody.VisualStudio.Client
             IAgentConnector connector;
             if (options.ConnectToRemoteAgent)
             {
-                connector = new RemoteAgentConnector();
+                connector = new RemoteAgentConnector(log);
                 log.Info("Remote agent connector created");
             }
             else

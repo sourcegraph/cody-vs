@@ -90,7 +90,6 @@ namespace Cody.VisualStudio
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-
             try
             {
                 InitializeErrorHandling();
@@ -99,7 +98,6 @@ namespace Cody.VisualStudio
                 LoadDevConfiguration();
 
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
                 InitializeTrace();
                 InitializeServices(loggerFactory);
                 await InitOleMenu();
@@ -212,9 +210,6 @@ namespace Cody.VisualStudio
             {
                 if (!string.IsNullOrEmpty(Configuration.TraceFile))
                     TraceManager.Listeners.Add(new FileTraceListener(Configuration.TraceFile));
-
-                if (!string.IsNullOrEmpty(Configuration.TraceLogioHostname) && Configuration.TraceLogioPort.HasValue)
-                    TraceManager.Listeners.Add(new LogioTraceListener(Configuration.TraceLogioHostname, Configuration.TraceLogioPort.Value));
 
                 TraceManager.Enabled = true;
             }

@@ -123,7 +123,6 @@
     <Compile Include="Logging\ITestLogger.cs" />
     <Compile Include="Logging\SentryLog.cs" />
     <Compile Include="Trace\FileTraceListener.cs" />
-    <Compile Include="Trace\LogioTraceListener.cs" />
     <Compile Include="Trace\TraceEvent.cs" />
     <Compile Include="Trace\TraceListener.cs" />
     <Compile Include="Trace\TraceLogger.cs" />
