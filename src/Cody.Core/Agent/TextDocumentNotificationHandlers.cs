@@ -1,11 +1,8 @@
+using System;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
 using Cody.Core.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Cody.Core.Logging;
 
 namespace Cody.Core.Agent
 {
@@ -13,36 +10,65 @@ namespace Cody.Core.Agent
     {
         private readonly IDocumentService documentService;
         private readonly IFileDialogService fileDialogService;
+        private readonly ILog logger;
 
-        public TextDocumentNotificationHandlers(IDocumentService documentService, IFileDialogService fileDialogService)
+        public TextDocumentNotificationHandlers(IDocumentService documentService, IFileDialogService fileDialogService, ILog logger)
         {
             this.documentService = documentService;
             this.fileDialogService = fileDialogService;
+            this.logger = logger;
         }
 
         [AgentCallback("window/showSaveDialog", deserializeToSingleObject: true)]
         public string ShowSaveDialog(SaveDialogOptionsParams paramValues)
         {
-            var filePath = fileDialogService.ShowSaveFileDialog(
-                paramValues.DefaultUri?.ToWindowsPath(), paramValues.Title, paramValues.Filters);
+            try
+            {
+                var filePath = fileDialogService.ShowSaveFileDialog(
+                    paramValues.DefaultUri?.ToWindowsPath(), paramValues.Title, paramValues.Filters);
 
-            var uri = filePath?.ToUri();
+                var uri = filePath?.ToUri();
 
-            return uri;
+                return uri;
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Save file dialog failed.", ex);
+            }
+
+            return null;
         }
 
         [AgentCallback("textDocument/edit", deserializeToSingleObject: true)]
         public bool Edit(TextDocumentEditParams textDocumentEdit)
         {
-            var path = textDocumentEdit.Uri.ToWindowsPath();
-            return documentService.EditTextInDocument(path, textDocumentEdit.Edits);
+            try
+            {
+                var path = textDocumentEdit.Uri.ToWindowsPath();
+                return documentService.EditTextInDocument(path, textDocumentEdit.Edits);
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"Document edit failed for '{textDocumentEdit.Uri}'", ex);
+            }
+
+            return false;
         }
 
         [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
         public bool ShowTextDocument(TextDocumentShowParams textDocumentShow)
         {
-            var result = documentService.ShowDocument(textDocumentShow.Uri.ToWindowsPath(), textDocumentShow.Options?.Selection);
-            return result;
+            try
+            {
+                var result = documentService.ShowDocument(textDocumentShow.Uri.ToWindowsPath(), textDocumentShow.Options?.Selection);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"Document show failed for '{textDocumentShow.Uri}'", ex);
+            }
+
+            return false;
         }
 
         [AgentCallback("workspace/edit", deserializeToSingleObject: true)]
