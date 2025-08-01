@@ -74,29 +74,62 @@ namespace Cody.Core.Agent
         [AgentCallback("workspace/edit", deserializeToSingleObject: true)]
         public bool WorkspaceEdit(WorkspaceEditParams workspaceEdit)
         {
+            if (workspaceEdit?.Operations == null)
+            {
+                logger.Error("Workspace edit failed - operations are NULL.");
+                return false;
+            }
+
             foreach (var operation in workspaceEdit.Operations)
             {
-                bool result = false;
-                switch (operation)
+                bool result;
+                try
                 {
-                    case CreateFileOperation createFile:
-                        result = documentService.CreateDocument(createFile.Uri.ToWindowsPath(), createFile.TextContents, createFile.Options?.Overwrite ?? false);
-                        break;
-                    case RenameFileOperation renameFile:
-                        result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
-                        break;
-                    case DeleteFileOperation deleteFile:
-                        result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
-                        break;
-                    case EditFileOperation editFile:
-                        result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
-                        break;
+                    switch (operation)
+                    {
+                        case CreateFileOperation createFile:
+                            result = documentService.CreateDocument(createFile.Uri.ToWindowsPath(), createFile.TextContents, createFile.Options?.Overwrite ?? false);
+                            break;
+                        case RenameFileOperation renameFile:
+                            result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
+                            break;
+                        case DeleteFileOperation deleteFile:
+                            result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
+                            break;
+                        case EditFileOperation editFile:
+                            result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
+                            break;
+                        default:
+                            throw new NotSupportedException($"Not supported operation: {operation}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error($"Workspace operation ('{operation.Type}') failed for '{GetOperationUri(operation)}'", ex);
+                    return false;
                 }
 
                 if (!result) return false;
             }
 
             return true;
+        }
+
+        private string GetOperationUri(WorkspaceEditOperation operation)
+        {
+            switch (operation)
+            {
+                case CreateFileOperation createFile:
+                    return createFile.Uri;
+                case RenameFileOperation renameFile:
+                    return renameFile.OldUri;
+                case DeleteFileOperation deleteFile:
+                    return deleteFile.Uri;
+                case EditFileOperation editFile:
+                    return editFile.Uri;
+                default:
+                    return "unknown";
+            }
         }
     }
 }
