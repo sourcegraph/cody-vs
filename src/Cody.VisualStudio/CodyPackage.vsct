@@ -92,11 +92,12 @@
             <Button guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" priority="0x0100" type="Button">
                 <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
                 <Icon guid="ImageCatalogGuid" id="ShowAllCode" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
                 <CommandFlag>IconIsMoniker</CommandFlag>
                 <Strings>
                     <ButtonText>Document Code</ButtonText>
-                    <CanonicalName>Cody.DocumentCode</CanonicalName>
-                    <LocCanonicalName>Cody.DocumentCode</LocCanonicalName>
+                    <CanonicalName>DocumentCode</CanonicalName>
                     <ToolTipText>Documents the selected code</ToolTipText>
                 </Strings>
             </Button>
@@ -104,11 +105,12 @@
             <Button guid="guidCodyPackageCmdSet" id="GenerateUnitTestsCommandId" priority="0x0200" type="Button">
                 <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
                 <Icon guid="ImageCatalogGuid" id="CodeTest" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
                 <CommandFlag>IconIsMoniker</CommandFlag>
                 <Strings>
                     <ButtonText>Generate Unit Tests</ButtonText>
-                    <CanonicalName>Cody.GenerateUnitTests</CanonicalName>
-                    <LocCanonicalName>Cody.GenerateUnitTests</LocCanonicalName>
+                    <CanonicalName>GenerateUnitTests</CanonicalName>
                     <ToolTipText>Generates unit tests for the selected code</ToolTipText>
                 </Strings>
             </Button>
@@ -116,11 +118,12 @@
             <Button guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" priority="0x0300" type="Button">
                 <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
                 <Icon guid="ImageCatalogGuid" id="CodeReviewDashboard" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
                 <CommandFlag>IconIsMoniker</CommandFlag>
                 <Strings>
                     <ButtonText>Explain Code</ButtonText>
-                    <CanonicalName>Cody.ExplainCode</CanonicalName>
-                    <LocCanonicalName>Cody.ExplainCode</LocCanonicalName>
+                    <CanonicalName>ExplainCode</CanonicalName>
                     <ToolTipText>Explain the selected code</ToolTipText>
                 </Strings>
             </Button>
@@ -128,11 +131,12 @@
             <Button guid="guidCodyPackageCmdSet" id="FindCodeSmellsCommandId" priority="0x0400" type="Button">
                 <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
                 <Icon guid="ImageCatalogGuid" id="CodeInformation" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
                 <CommandFlag>IconIsMoniker</CommandFlag>
                 <Strings>
                     <ButtonText>Find Code Smells</ButtonText>
-                    <CanonicalName>Cody.FindCodeSmells</CanonicalName>
-                    <LocCanonicalName>Cody.FindCodeSmells</LocCanonicalName>
+                    <CanonicalName>FindCodeSmells</CanonicalName>
                     <ToolTipText>Find code smells in the selected code</ToolTipText>
                 </Strings>
             </Button>

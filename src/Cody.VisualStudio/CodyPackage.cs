@@ -86,6 +86,7 @@ namespace Cody.VisualStudio
         public static TestingSupportService TestingSupportService;
         public IDocumentService DocumentService;
         public IVsUIShell VsUIShell;
+        public OleMenuCommandService OleMenuService;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -100,7 +101,7 @@ namespace Cody.VisualStudio
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
                 InitializeTrace();
                 InitializeServices(loggerFactory);
-                await InitOleMenu();
+                InitOleMenu();
 
                 InitializeAgent();
 
@@ -155,6 +156,7 @@ namespace Cody.VisualStudio
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
+            OleMenuService = this.GetService<IMenuCommandService, OleMenuCommandService>();
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
@@ -245,6 +247,7 @@ namespace Cody.VisualStudio
             try
             {
                 Logger.Debug($"Checking authorization status ...");
+                EnableContextMenu(status.Authenticated);
                 if (ConfigurationService == null || AgentService == null)
                 {
                     Logger.Debug("Not changed.");
@@ -351,7 +354,6 @@ namespace Cody.VisualStudio
                 if (e.Authenticated == true && e.AuthStatus is ProtocolAuthenticatedAuthStatus status)
                 {
                     StatusbarService.SetText($"Hello {status.DisplayName}! Press Alt + L to open Cody Chat.");
-
                     Logger.Info("Authenticated.");
                     UserSettingsService.LastTimeAuthorized = true;
                     SentrySdk.ConfigureScope(scope =>

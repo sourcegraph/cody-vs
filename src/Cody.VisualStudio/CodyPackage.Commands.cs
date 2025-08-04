@@ -13,45 +13,41 @@ namespace Cody.VisualStudio
 {
     public partial class CodyPackage
     {
-        private readonly Dictionary<int, string> codyCommandMap = new Dictionary<int, string>()
-        {
-            [CommandIds.DocumentCodeCommandId] = "cody.command.document-code",
-            [CommandIds.GenerateUnitTestsCommandId] = "cody.command.unit-test",
-            [CommandIds.ExplainCodeCommandId] = "cody.command.explain-code",
-            [CommandIds.FindCodeSmellsCommandId] = "cody.command.smell-code",
-        };
+        private readonly Dictionary<int, CodyCommand> codyCommands = new Dictionary<int, CodyCommand>();
 
-        private async Task InitOleMenu()
+        private void InitOleMenu()
+        {
+            AddCommand(CommandIds.CodyToolWindow, null, ShowToolWindow, true);
+            AddCommand(CommandIds.DocumentCodeCommandId, "cody.command.document-code", InvokeCodyCommand, false);
+            AddCommand(CommandIds.GenerateUnitTestsCommandId, "cody.command.unit-tests", InvokeCodyCommand, false);
+            AddCommand(CommandIds.ExplainCodeCommandId, "cody.command.explain-code", InvokeCodyCommand, false);
+            AddCommand(CommandIds.FindCodeSmellsCommandId, "cody.command.smell-code", InvokeCodyCommand, false);
+        }
+
+        private void AddCommand(int commandId, string commandName, EventHandler handler, bool enabled)
         {
             try
             {
-                if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService oleMenuService)
-                {
-                    var commandId = new CommandID(Guids.CodyPackageCommandSet, CommandIds.CodyToolWindow);
-                    oleMenuService.AddCommand(new MenuCommand(ShowToolWindow, commandId));
+                var command = new CommandID(Guids.CodyPackageCommandSet, commandId);
+                var menuCommand = new MenuCommand(handler, command);
+                menuCommand.Enabled = enabled;
 
+                codyCommands[commandId] = new CodyCommand { MenuCommand = menuCommand, CommandName = commandName };
 
-                    var documentCodeCmdId = new CommandID(Guids.CodyPackageCommandSet, CommandIds.DocumentCodeCommandId);
-                    oleMenuService.AddCommand(new MenuCommand(InvokeCodyCommand, documentCodeCmdId));
-
-                    var generateUnitTestsCmdId = new CommandID(Guids.CodyPackageCommandSet, CommandIds.GenerateUnitTestsCommandId);
-                    oleMenuService.AddCommand(new MenuCommand(InvokeCodyCommand, generateUnitTestsCmdId));
-
-                    var explainCodeCmdId = new CommandID(Guids.CodyPackageCommandSet, CommandIds.ExplainCodeCommandId);
-                    oleMenuService.AddCommand(new MenuCommand(InvokeCodyCommand, explainCodeCmdId));
-
-                    var findCodeSmellsCmdId = new CommandID(Guids.CodyPackageCommandSet, CommandIds.FindCodeSmellsCommandId);
-                    oleMenuService.AddCommand(new MenuCommand(InvokeCodyCommand, findCodeSmellsCmdId));
-                }
-                else
-                {
-                    throw new NotSupportedException($"Cannot get {nameof(OleMenuCommandService)}");
-                }
+                OleMenuService.AddCommand(menuCommand);
             }
             catch (Exception ex)
             {
-                Logger?.Error("Cannot initialize menu items", ex);
+                Logger.Error($"Failed to add command {commandName}", ex);
             }
+        }
+
+        public void EnableContextMenu(bool enabled)
+        {
+            codyCommands
+                .Where(x => x.Value.CommandName != null)
+                .ToList()
+                .ForEach(x => x.Value.MenuCommand.Enabled = enabled);
         }
 
         public async void InvokeCodyCommand(object sender, EventArgs eventArgs)
@@ -67,20 +63,24 @@ namespace Cody.VisualStudio
 
                 var commandId = menuCommand.CommandID.ID;
 
-                if (codyCommandMap.TryGetValue(commandId, out string command))
+                if (codyCommands.TryGetValue(commandId, out var command))
                 {
                     if (commandId == CommandIds.ExplainCodeCommandId ||
-                       commandId == CommandIds.FindCodeSmellsCommandId)
+                        commandId == CommandIds.FindCodeSmellsCommandId)
                     {
                         Logger.Debug($"Showing the chat window for the {command} command");
                         await ShowToolWindowAsync();
                     }
 
-                    Logger.Info($"Invoking command: {command}");
-                    await AgentService.CommandExecute(new ExecuteCommandParams
+                    if (AgentClient != null)
                     {
-                        Command = command
-                    });
+                        Logger.Info($"Invoking command: {command}");
+                        await AgentService.CommandExecute(new ExecuteCommandParams
+                        {
+                            Command = command.CommandName
+                        });
+                    }
+                    else Logger.Warn($"AgentClient not jet initialized. Can't invoke command: {command}");
                 }
                 else Logger.Error($"Cant find command for id: {commandId}");
             }
@@ -118,6 +118,12 @@ namespace Cody.VisualStudio
             {
                 Logger.Error("Cannot toggle Tool Window.", ex);
             }
+        }
+
+        public class CodyCommand
+        {
+            public MenuCommand MenuCommand { get; set; }
+            public string CommandName { get; set; }
         }
     }
 }
