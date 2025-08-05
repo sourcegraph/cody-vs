@@ -178,10 +178,14 @@
             <IDSymbol name="bmpPicArrows" value="5" />
             <IDSymbol name="bmpPicStrikethrough" value="6" />
         </GuidSymbol>
+
+        <GuidSymbol name="guidTextEditor" value="{8B382828-6202-11D1-8870-0000F87579D2}" />
     </Symbols>
 
     <KeyBindings>
         <!-- This is the keybinding for opening chat. -->
         <KeyBinding guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" editor="guidVSStd97" key1="L" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" editor="guidTextEditor" key1="K" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" editor="guidTextEditor" key1="I" mod1="Alt" />
     </KeyBindings>
 </CommandTable>
