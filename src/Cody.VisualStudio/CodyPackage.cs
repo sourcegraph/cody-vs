@@ -187,7 +187,7 @@ namespace Cody.VisualStudio
             FileDialogService = new FileDialogService(SolutionService, Logger);
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
-            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService);
+            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService, StatusbarService);
 
 
 

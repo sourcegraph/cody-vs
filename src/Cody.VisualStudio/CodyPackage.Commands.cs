@@ -66,10 +66,15 @@ namespace Cody.VisualStudio
                 if (codyCommands.TryGetValue(commandId, out var command))
                 {
                     if (commandId == CommandIds.ExplainCodeCommandId ||
-                        commandId == CommandIds.FindCodeSmellsCommandId)
+                        commandId == CommandIds.FindCodeSmellsCommandId ||
+                        commandId == CommandIds.GenerateUnitTestsCommandId)
                     {
                         Logger.Debug($"Showing the chat window for the {command} command");
                         await ShowToolWindowAsync();
+                    }
+                    else
+                    {
+                        StatusbarService?.StartProgressAnimation();
                     }
 
                     if (AgentClient != null)

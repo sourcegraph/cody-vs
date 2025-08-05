@@ -13,11 +13,14 @@ namespace Cody.Core.Agent
     {
         private readonly IDocumentService documentService;
         private readonly IFileDialogService fileDialogService;
+        private readonly IStatusbarService statusbarService;
 
-        public TextDocumentNotificationHandlers(IDocumentService documentService, IFileDialogService fileDialogService)
+        public TextDocumentNotificationHandlers(IDocumentService documentService,
+            IFileDialogService fileDialogService, IStatusbarService statusbarService)
         {
             this.documentService = documentService;
             this.fileDialogService = fileDialogService;
+            this.statusbarService = statusbarService;
         }
 
         [AgentCallback("window/showSaveDialog", deserializeToSingleObject: true)]
@@ -34,8 +37,15 @@ namespace Cody.Core.Agent
         [AgentCallback("textDocument/edit", deserializeToSingleObject: true)]
         public bool Edit(TextDocumentEditParams textDocumentEdit)
         {
-            var path = textDocumentEdit.Uri.ToWindowsPath();
-            return documentService.EditTextInDocument(path, textDocumentEdit.Edits);
+            try
+            {
+                var path = textDocumentEdit.Uri.ToWindowsPath();
+                return documentService.EditTextInDocument(path, textDocumentEdit.Edits);
+            }
+            finally
+            {
+                statusbarService.StopProgressAnimation();
+            }
         }
 
         [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
@@ -48,29 +58,36 @@ namespace Cody.Core.Agent
         [AgentCallback("workspace/edit", deserializeToSingleObject: true)]
         public bool WorkspaceEdit(WorkspaceEditParams workspaceEdit)
         {
-            foreach (var operation in workspaceEdit.Operations)
+            try
             {
-                bool result = false;
-                switch (operation)
+                foreach (var operation in workspaceEdit.Operations)
                 {
-                    case CreateFileOperation createFile:
-                        result = documentService.CreateDocument(createFile.Uri.ToWindowsPath(), createFile.TextContents, createFile.Options?.Overwrite ?? false);
-                        break;
-                    case RenameFileOperation renameFile:
-                        result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
-                        break;
-                    case DeleteFileOperation deleteFile:
-                        result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
-                        break;
-                    case EditFileOperation editFile:
-                        result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
-                        break;
+                    bool result = false;
+                    switch (operation)
+                    {
+                        case CreateFileOperation createFile:
+                            result = documentService.CreateDocument(createFile.Uri.ToWindowsPath(), createFile.TextContents, createFile.Options?.Overwrite ?? false);
+                            break;
+                        case RenameFileOperation renameFile:
+                            result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
+                            break;
+                        case DeleteFileOperation deleteFile:
+                            result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
+                            break;
+                        case EditFileOperation editFile:
+                            result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
+                            break;
+                    }
+
+                    if (!result) return false;
                 }
 
-                if (!result) return false;
+                return true;
             }
-
-            return true;
+            finally
+            {
+                statusbarService.StopProgressAnimation();
+            }
         }
     }
 }
