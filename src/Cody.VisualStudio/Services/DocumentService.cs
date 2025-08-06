@@ -85,82 +85,118 @@ namespace Cody.VisualStudio.Services
         {
             var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame);
-                if (tryOpenResult == VSConstants.S_OK)
+                try
                 {
-                    var textView = GetVsTextView(windowFrame);
-                    if (textView != null)
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                    var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _,
+                        out _, out IVsWindowFrame windowFrame);
+                    if (tryOpenResult == VSConstants.S_OK)
                     {
-                        var wpfView = editorAdaptersFactoryService.GetWpfTextView(textView);
-                        if (wpfView == null)
+                        var textView = GetVsTextView(windowFrame);
+                        if (textView != null)
                         {
-                            log.Error($"Cannot get wpf text view for '{path}'");
-                            return false;
-                        }
-
-                        var newLineChars = GetNewLineCharsForTextView(textView);
-                        using (var editContext = wpfView.TextBuffer.CreateEdit())
-                        {
-                            foreach (var edit in edits)
+                            var wpfView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                            if (wpfView == null)
                             {
-                                if (edit is InsertTextEdit insert)
-                                {
-                                    var text = insert.Value.ConvertLineBreaks(newLineChars);
-                                    var position = ToPosition(editContext.Snapshot, insert.Position.Line, insert.Position.Character);
-
-                                    editContext.Insert(position, text);
-                                }
-                                else if (edit is DeleteTextEdit delete)
-                                {
-                                    var range = delete.Range;
-                                    var startPos = ToPosition(editContext.Snapshot, range.Start.Line, range.Start.Character);
-                                    var endPos = ToPosition(editContext.Snapshot, range.End.Line, range.End.Character);
-
-                                    editContext.Delete(startPos, endPos - startPos);
-                                }
-                                else if (edit is ReplaceTextEdit replace)
-                                {
-                                    var text = replace.Value.ConvertLineBreaks(newLineChars);
-                                    var range = replace.Range;
-                                    if (editContext.Snapshot.Length == 0 && range.Start.IsPosition(0, 0) && range.End.IsPosition(9999, 0))
-                                    {
-                                        // For new files, agent does not specify the exact range, but only one replacement with end line eq. 9999
-                                        editContext.Insert(0, text);
-                                    }
-                                    else
-                                    {
-                                        var startPos = ToPosition(editContext.Snapshot, range.Start.Line, range.Start.Character);
-                                        var endPos = ToPosition(editContext.Snapshot, range.End.Line, range.End.Character);
-
-                                        editContext.Replace(startPos, endPos - startPos, text);
-                                    }
-                                }
-                            }
-
-                            try
-                            {
-                                editContext.Apply();
-                            }
-                            catch (InvalidOperationException ex)
-                            {
-                                log.Error($"Cannot commit edits in document '{path}'", ex);
+                                log.Error($"Cannot get wpf text view for '{path}'");
                                 return false;
                             }
+
+                            return ApplyTextEdit(path, edits, textView, wpfView);
                         }
 
-                        return true;
-                    }
-                    else log.Error($"Cannot get VsTextView '{path}'");
+                        log.Error($"Cannot get VsTextView '{path}'");
 
+                    }
+                    else
+                        log.Error($"Cannot open document '{path}' (error code: {tryOpenResult})");
                 }
-                else log.Error($"Cannot open document '{path}' (error code: {tryOpenResult})");
+                catch (Exception ex)
+                {
+                    log.Error($"Attempt to edit text document failed: '{path}'", ex);
+                }
+
 
                 return false;
             });
 
             return result;
+        }
+
+        private bool ApplyTextEdit(string path, IEnumerable<TextEdit> edits, IVsTextView textView, IWpfTextView wpfView)
+        {
+            ITextEdit editContext = null;
+            try
+            {
+                var newLineChars = GetNewLineCharsForTextView(textView);
+                editContext = wpfView.TextBuffer.CreateEdit();
+                {
+                    foreach (var edit in edits)
+                    {
+                        if (edit is InsertTextEdit insert)
+                        {
+                            var text = insert.Value.ConvertLineBreaks(newLineChars);
+                            var position = ToPosition(editContext.Snapshot, insert.Position.Line,
+                                insert.Position.Character);
+
+                            editContext.Insert(position, text);
+                        }
+                        else if (edit is DeleteTextEdit delete)
+                        {
+                            var range = delete.Range;
+                            var startPos = ToPosition(editContext.Snapshot, range.Start.Line, range.Start.Character);
+                            var endPos = ToPosition(editContext.Snapshot, range.End.Line, range.End.Character);
+
+                            editContext.Delete(startPos, endPos - startPos);
+                        }
+                        else if (edit is ReplaceTextEdit replace)
+                        {
+                            var text = replace.Value.ConvertLineBreaks(newLineChars);
+                            var range = replace.Range;
+                            if (editContext.Snapshot.Length == 0 && range.Start.IsPosition(0, 0) &&
+                                range.End.IsPosition(9999, 0))
+                            {
+                                // For new files, agent does not specify the exact range, but only one replacement with end line eq. 9999
+                                editContext.Insert(0, text);
+                            }
+                            else
+                            {
+                                var startPos = ToPosition(editContext.Snapshot, range.Start.Line,
+                                    range.Start.Character);
+                                var endPos = ToPosition(editContext.Snapshot, range.End.Line, range.End.Character);
+
+                                editContext.Replace(startPos, endPos - startPos, text);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Context edit failed.", ex);
+                if (editContext != null)
+                    editContext.Dispose();
+
+                return false;
+            }
+
+            try
+            {
+                editContext.Apply();
+            }
+            catch (InvalidOperationException ex)
+            {
+                log.Error($"Cannot commit edits in document '{path}'", ex);
+                return false;
+            }
+            finally
+            {
+                if (editContext != null)
+                    editContext.Dispose();
+            }
+
+            return true;
         }
 
         private int ToPosition(ITextSnapshot textSnapshot, int line, int col)

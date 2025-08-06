@@ -2,18 +2,23 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Infrastructure;
 using Newtonsoft.Json.Linq;
 using System;
+using Cody.Core.Logging;
 
 namespace Cody.Core.Agent
 {
     public class WebviewMessageHandler
     {
         private readonly IDocumentService _documentService;
-        private readonly Action _onOptionsPageShowRequest;
+        private readonly ILog _logger;
 
-        public WebviewMessageHandler(IDocumentService documentService, Action onOptionsPageShowRequest)
+        private readonly Action _onOptionsPageShowRequest;
+        
+
+        public WebviewMessageHandler(IDocumentService documentService, Action onOptionsPageShowRequest, ILog logger)
         {
             _documentService = documentService;
             _onOptionsPageShowRequest = onOptionsPageShowRequest;
+            _logger = logger;
         }
 
         public bool HandleMessage(string message)
@@ -62,13 +67,22 @@ namespace Cody.Core.Agent
 
         private bool HandleOpenFileLinkCommand(dynamic json)
         {
-            var path = json.uri?.path?.ToString();
-            var range = json.range?.ToObject<Range>();
-            if (!string.IsNullOrEmpty(path))
+            try
             {
-                _documentService.ShowDocument(path.ToWindowsPath(), range);
-                return true;
+
+                var path = json.uri?.path?.ToString();
+                var range = json.range?.ToObject<Range>();
+                if (!string.IsNullOrEmpty(path))
+                {
+                    _documentService.ShowDocument(path.ToWindowsPath(), range);
+                    return true;
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.Error($"Opening file link failed:'{json.ToString()}'", ex);
+            }
+
             return false;
         }
     }
