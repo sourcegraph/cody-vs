@@ -69,7 +69,6 @@ namespace Cody.Core.Agent
         {
             try
             {
-
                 var path = json.uri?.path?.ToString();
                 var range = json.range?.ToObject<Range>();
                 if (!string.IsNullOrEmpty(path))

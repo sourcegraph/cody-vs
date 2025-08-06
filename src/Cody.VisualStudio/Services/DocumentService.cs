@@ -126,11 +126,10 @@ namespace Cody.VisualStudio.Services
 
         private bool ApplyTextEdit(string path, IEnumerable<TextEdit> edits, IVsTextView textView, IWpfTextView wpfView)
         {
-            ITextEdit editContext = null;
             try
             {
                 var newLineChars = GetNewLineCharsForTextView(textView);
-                editContext = wpfView.TextBuffer.CreateEdit();
+                using (var editContext = wpfView.TextBuffer.CreateEdit())
                 {
                     foreach (var edit in edits)
                     {
@@ -170,33 +169,25 @@ namespace Cody.VisualStudio.Services
                             }
                         }
                     }
+
+                    try
+                    {
+                        editContext.Apply();
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        log.Error($"Cannot commit edits in document '{path}'", ex);
+                        return false;
+                    }
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
                 log.Error("Context edit failed.", ex);
-                if (editContext != null)
-                    editContext.Dispose();
-
                 return false;
             }
-
-            try
-            {
-                editContext.Apply();
-            }
-            catch (InvalidOperationException ex)
-            {
-                log.Error($"Cannot commit edits in document '{path}'", ex);
-                return false;
-            }
-            finally
-            {
-                if (editContext != null)
-                    editContext.Dispose();
-            }
-
-            return true;
         }
 
         private int ToPosition(ITextSnapshot textSnapshot, int line, int col)
