@@ -146,7 +146,7 @@ namespace Cody.VisualStudio.Client
 
         private void DisconnectInternal()
         {
-            if (!jsonRpc.IsDisposed) jsonRpc?.Dispose();
+            if (jsonRpc != null && !jsonRpc.IsDisposed) jsonRpc?.Dispose();
             if (connector != null)
             {
                 connector.ErrorReceived -= OnErrorReceived;
