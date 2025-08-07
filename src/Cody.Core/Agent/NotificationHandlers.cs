@@ -45,7 +45,7 @@ namespace Cody.Core.Agent
             _secretStorage = secretStorage;
             _infobarNotificationsAsync = infobarNotificationsAsync;
             _logger = logger;
-            _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty));
+            _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty), _logger);
         }
 
         public void SetAgentClient(IAgentService client)
