@@ -61,6 +61,7 @@
     <Compile Include="Agent\Protocol\AutoeditChanges.cs" />
     <Compile Include="Agent\Protocol\AutoeditImageDiff.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
+    <Compile Include="Agent\Protocol\ExecuteCommandParams.cs" />
     <Compile Include="Agent\Protocol\ShowWindowMessageParams.cs" />
     <Compile Include="Agent\Protocol\CodyFileRename.cs" />
     <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />

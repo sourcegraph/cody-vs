@@ -80,6 +80,9 @@ namespace Cody.Core.Agent
         [AgentCall("testing/workspaceDocuments")]
         Task<GetDocumentsResult> GetWorkspaceDocuments(GetDocumentsParams documents);
 
+        [AgentCall("command/execute")]
+        Task CommandExecute(ExecuteCommandParams command);
+
         //---------------------------------------------------------
         // For notifications return type MUST be void!
         //---------------------------------------------------------

@@ -86,6 +86,7 @@ namespace Cody.VisualStudio
         public static TestingSupportService TestingSupportService;
         public IDocumentService DocumentService;
         public IVsUIShell VsUIShell;
+        public OleMenuCommandService OleMenuService;
         public IVsEditorAdaptersFactoryService VsEditorAdaptersFactoryService;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -100,7 +101,7 @@ namespace Cody.VisualStudio
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
                 InitializeTrace();
                 InitializeServices(loggerFactory);
-                await InitOleMenu();
+                InitOleMenu();
 
                 InitializeAgent();
 
@@ -155,6 +156,7 @@ namespace Cody.VisualStudio
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
+            OleMenuService = this.GetService<IMenuCommandService, OleMenuCommandService>();
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
@@ -185,7 +187,7 @@ namespace Cody.VisualStudio
             FileDialogService = new FileDialogService(SolutionService, Logger);
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
-            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService, Logger);
+            TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService, StatusbarService, Logger);
 
 
 
@@ -245,6 +247,7 @@ namespace Cody.VisualStudio
             try
             {
                 Logger.Debug($"Checking authorization status ...");
+                EnableContextMenu(status.Authenticated);
                 if (ConfigurationService == null || AgentService == null)
                 {
                     Logger.Debug("Not changed.");
@@ -270,26 +273,6 @@ namespace Cody.VisualStudio
         {
             Logger.Debug($"Logout detected. Showing tool window ...");
             await ShowToolWindowAsync();
-        }
-
-        private async Task InitOleMenu()
-        {
-            try
-            {
-                if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService oleMenuService)
-                {
-                    var commandId = new CommandID(Guids.CodyPackageCommandSet, (int)CommandIds.CodyToolWindow);
-                    oleMenuService.AddCommand(new MenuCommand(ShowToolWindow, commandId));
-                }
-                else
-                {
-                    throw new NotSupportedException($"Cannot get {nameof(OleMenuCommandService)}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger?.Error("Cannot initialize menu items", ex);
-            }
         }
 
         private void InitializeNotificationsBar()
@@ -333,38 +316,6 @@ namespace Cody.VisualStudio
             }
         }
 
-        public async void ShowToolWindow(object sender, EventArgs eventArgs)
-        {
-            await ShowToolWindowAsync();
-        }
-
-        public async Task ShowToolWindowAsync()
-        {
-            try
-            {
-                Logger.Debug("Showing Tool Window ...");
-                var window = await ShowToolWindowAsync(typeof(CodyToolWindow), 0, true, DisposalToken);
-                if (window?.Frame is IVsWindowFrame windowFrame)
-                {
-                    bool isVisible = windowFrame.IsVisible() == 0;
-                    bool isOnScreen = windowFrame.IsOnScreen(out int screenTmp) == 0 && screenTmp == 1;
-
-                    Logger.Debug($"IsVisible:{isVisible} IsOnScreen:{isOnScreen}");
-
-                    if (!isVisible || !isOnScreen)
-                    {
-                        ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                        Logger.Debug("Shown.");
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Cannot toggle Tool Window.", ex);
-            }
-        }
-
         private void PrepareAgentConfiguration()
         {
             try
@@ -403,7 +354,6 @@ namespace Cody.VisualStudio
                 if (e.Authenticated == true && e.AuthStatus is ProtocolAuthenticatedAuthStatus status)
                 {
                     StatusbarService.SetText($"Hello {status.DisplayName}! Press Alt + L to open Cody Chat.");
-
                     Logger.Info("Authenticated.");
                     UserSettingsService.LastTimeAuthorized = true;
                     SentrySdk.ConfigureScope(scope =>
