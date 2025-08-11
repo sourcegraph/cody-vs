@@ -1,73 +1,84 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<!--  This is the file that defines the actual layout and type of the commands.
+    <!--  This is the file that defines the actual layout and type of the commands.
         It is divided in different sections (e.g. command definition, command
         placement, ...), with each defining a specific set of properties.
         See the comment before each section for more details about how to
         use it. -->
 
-	<!--  The VSCT compiler (the tool that translates this file into the binary
+    <!--  The VSCT compiler (the tool that translates this file into the binary
         format that VisualStudio will consume) has the ability to run a preprocessor
         on the vsct file; this preprocessor is (usually) the C++ preprocessor, so
         it is possible to define includes and macros with the same syntax used
         in C++ files. Using this ability of the compiler here, we include some files
         defining some of the constants that we will use inside the file. -->
 
-	<!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
-	<Extern href="stdidcmd.h"/>
+    <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+    <Extern href="stdidcmd.h"/>
 
-	<!--This header contains the command ids for the menus provided by the shell. -->
-	<Extern href="vsshlids.h"/>
+    <!--This header contains the command ids for the menus provided by the shell. -->
+    <Extern href="vsshlids.h"/>
 
-	<!--The Commands section is where commands, menus, and menu groups are defined.
+    <Include href="KnownImageIds.vsct"/>
+
+    <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
-	<Commands package="guidCodyPackage">
-		<!-- Inside this section we have different sub-sections: one for the menus, another
+    <Commands package="guidCodyPackage">
+        <!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
     is a unique pair of guid and numeric identifier; the guid part of the identifier is usually
     called "command set" and is used to group different command inside a logically related
     group; your package should define its own command set in order to avoid collisions
     with command ids defined by other packages. -->
-		<Groups>
+        <!-- Add Menus section for the submenu -->
+        <Menus>
+            <!-- Submenu in the editor context menu -->
+            <Menu guid="guidCodyPackageCmdSet" id="CodySubmenu" priority="0x0100" type="Menu">
+                <Parent guid="guidCodyPackageCmdSet" id="CodyEditorContextMenuGroup"/>
+                <Strings>
+                    <ButtonText>Cody</ButtonText>
+                    <MenuText>Cody</MenuText>
+                </Strings>
+            </Menu>
+        </Menus>
+        <Groups>
             <Group guid="guidCodyPackageCmdSet" id="CodyToolsMenuGroup" priority="0x0100">
                 <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
             </Group>
-            <!-- Context Menu group -->
-			<Group guid="guidCodyPackageCmdSet" id="CodyEditorContextMenuGroup" priority="0x0100">
-				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
-			</Group>
-		</Groups>
-		<!--Buttons section. -->
-		<!--This section defines the elements the user can interact with, like a menu command or a button
+            <!-- Context Menu group - this goes directly in the editor context menu -->
+            <Group guid="guidCodyPackageCmdSet" id="CodyEditorContextMenuGroup" priority="0xD000">
+                <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+            </Group>
+
+            <!-- Group for items inside the Cody submenu -->
+            <Group guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" priority="0x0100">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenu"/>
+            </Group>
+        </Groups>
+        <!--Buttons section. -->
+        <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
-		<Buttons>
-			<!--To define a menu group you have to specify its ID, the parent menu and its display priority.
+        <Buttons>
+            <!--To define a menu group you have to specify its ID, the parent menu and its display priority.
           The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
           the CommandFlag node.
           You can add more than one CommandFlag node e.g.:
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-			<Button guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" priority="0x0100" type="Button">
-				<Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
-				<Icon guid="guidImages" id="bmpPic1" />
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<Strings>
-					<ButtonText>Cody Chat</ButtonText>
-				</Strings>
-			</Button>
-			<!-- New button in the editor context menu -->
-			<Button guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" priority="0x0100" type="Button">
-				<Parent guid="guidCodyPackageCmdSet" id="CodyEditorContextMenuGroup" />
-				<Icon guid="guidImages" id="bmpPic1" />
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<Strings>
-					<ButtonText>Cody Chat</ButtonText>
-				</Strings>
-			</Button>
-            <!-- New button in the toolbar -->
+            <Button guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" priority="0x0100" type="Button">
+                <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
+                <Icon guid="guidImages" id="bmpPic1" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <Strings>
+                    <CanonicalName>Cody.Chat</CanonicalName>
+                    <LocCanonicalName>Cody.Chat</LocCanonicalName>
+                    <ButtonText>Cody Chat</ButtonText>
+                </Strings>
+            </Button>
+            <!-- Cody in Tools menu -->
             <Button guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" priority="0x100" type="Button">
                 <Parent guid="guidCodyPackageCmdSet" id="CodyToolsMenuGroup"/>
                 <Icon guid="guidImages" id="bmpPic1"/>
@@ -76,41 +87,105 @@
                     <ButtonText>Cody</ButtonText>
                 </Strings>
             </Button>
-		</Buttons>
-		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
-		<Bitmaps>
-			<!--  The bitmap id is defined in a way that is a little bit different from the others:
+
+            <!-- Document Code button in the submenu -->
+            <Button guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" priority="0x0100" type="Button">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Icon guid="ImageCatalogGuid" id="ShowAllCode" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <ButtonText>Document Code</ButtonText>
+                    <CanonicalName>DocumentCode</CanonicalName>
+                    <ToolTipText>Documents the selected code</ToolTipText>
+                </Strings>
+            </Button>
+            <!-- Generate Unit Tests button in the submenu -->
+            <Button guid="guidCodyPackageCmdSet" id="GenerateUnitTestsCommandId" priority="0x0200" type="Button">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Icon guid="ImageCatalogGuid" id="CodeTest" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <ButtonText>Generate Unit Tests</ButtonText>
+                    <CanonicalName>GenerateUnitTests</CanonicalName>
+                    <ToolTipText>Generates unit tests for the selected code</ToolTipText>
+                </Strings>
+            </Button>
+            <!-- Explain Code button in the submenu -->
+            <Button guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" priority="0x0300" type="Button">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Icon guid="ImageCatalogGuid" id="CodeReviewDashboard" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <ButtonText>Explain Code</ButtonText>
+                    <CanonicalName>ExplainCode</CanonicalName>
+                    <ToolTipText>Explain the selected code</ToolTipText>
+                </Strings>
+            </Button>
+            <!-- Find Code Smells button in the submenu -->
+            <Button guid="guidCodyPackageCmdSet" id="FindCodeSmellsCommandId" priority="0x0400" type="Button">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Icon guid="ImageCatalogGuid" id="CodeInformation" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <ButtonText>Find Code Smells</ButtonText>
+                    <CanonicalName>FindCodeSmells</CanonicalName>
+                    <ToolTipText>Find code smells in the selected code</ToolTipText>
+                </Strings>
+            </Button>
+        </Buttons>
+        <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
+        <Bitmaps>
+            <!--  The bitmap id is defined in a way that is a little bit different from the others:
             the declaration starts with a guid for the bitmap strip, then there is the resource id of the
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
-			<Bitmap guid="guidImages" href="Resources\CodyToolWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
-		</Bitmaps>
-	</Commands>
+            <Bitmap guid="guidImages" href="Resources\CodyToolWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
+        </Bitmaps>
+    </Commands>
 
-	<Symbols>
-		<!-- This is the package guid. -->
-		<GuidSymbol name="guidCodyPackage" value="{9b8925e1-803e-43d9-8f43-c4a4f35b4325}" />
+    <Symbols>
+        <!-- This is the package guid. -->
+        <GuidSymbol name="guidCodyPackage" value="{9b8925e1-803e-43d9-8f43-c4a4f35b4325}" />
 
-		<!-- This is the guid used to group the menu commands together -->
-		<GuidSymbol name="guidCodyPackageCmdSet" value="{0ac9104c-5f89-4834-9360-849c7aa6a198}">
-			<IDSymbol name="CodyEditorContextMenuGroup" value="0x0101" />
-			<IDSymbol name="CodyToolWindowCommandId" value="0x0100" />
+        <!-- This is the guid used to group the menu commands together -->
+        <GuidSymbol name="guidCodyPackageCmdSet" value="{0ac9104c-5f89-4834-9360-849c7aa6a198}">
+            <IDSymbol name="CodyEditorContextMenuGroup" value="0x0101" />
+            <IDSymbol name="CodyToolWindowCommandId" value="0x0100" />
             <IDSymbol name="CodyToolsMenuGroup" value="0x1010" />
-		</GuidSymbol>
 
-		<GuidSymbol name="guidImages" value="{9cf94066-686e-4dd8-99c8-3dee4bfb3f59}" >
-			<IDSymbol name="bmpPic1" value="1" />
-			<IDSymbol name="bmpPic2" value="2" />
-			<IDSymbol name="bmpPicSearch" value="3" />
-			<IDSymbol name="bmpPicX" value="4" />
-			<IDSymbol name="bmpPicArrows" value="5" />
-			<IDSymbol name="bmpPicStrikethrough" value="6" />
-		</GuidSymbol>
-	</Symbols>
+            <IDSymbol name="CodySubmenu" value="0x0102" />
+            <IDSymbol name="CodySubmenuGroup" value="0x0103" />
+            <IDSymbol name="DocumentCodeCommandId" value="0x0104" />
+            <IDSymbol name="GenerateUnitTestsCommandId" value="0x0105" />
+            <IDSymbol name="ExplainCodeCommandId" value="0x0106" />
+            <IDSymbol name="FindCodeSmellsCommandId" value="0x0107" />
+        </GuidSymbol>
 
-	<KeyBindings>
-		<!-- This is the keybinding for opening chat. -->
-		<KeyBinding guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" editor="guidVSStd97" key1="L" mod1="Alt" />
-	</KeyBindings>
+        <GuidSymbol name="guidImages" value="{9cf94066-686e-4dd8-99c8-3dee4bfb3f59}" >
+            <IDSymbol name="bmpPic1" value="1" />
+            <IDSymbol name="bmpPic2" value="2" />
+            <IDSymbol name="bmpPicSearch" value="3" />
+            <IDSymbol name="bmpPicX" value="4" />
+            <IDSymbol name="bmpPicArrows" value="5" />
+            <IDSymbol name="bmpPicStrikethrough" value="6" />
+        </GuidSymbol>
+
+        <GuidSymbol name="guidTextEditor" value="{8B382828-6202-11D1-8870-0000F87579D2}" />
+    </Symbols>
+
+    <KeyBindings>
+        <!-- This is the keybinding for opening chat. -->
+        <KeyBinding guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" editor="guidVSStd97" key1="L" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" editor="guidTextEditor" key1="K" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" editor="guidTextEditor" key1="I" mod1="Alt" />
+    </KeyBindings>
 </CommandTable>

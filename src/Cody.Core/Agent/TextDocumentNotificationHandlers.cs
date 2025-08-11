@@ -1,8 +1,8 @@
-using System;
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
+using System;
 
 namespace Cody.Core.Agent
 {
@@ -11,12 +11,15 @@ namespace Cody.Core.Agent
         private readonly IDocumentService documentService;
         private readonly IFileDialogService fileDialogService;
         private readonly ILog logger;
+        private readonly IStatusbarService statusbarService;
 
-        public TextDocumentNotificationHandlers(IDocumentService documentService, IFileDialogService fileDialogService, ILog logger)
+        public TextDocumentNotificationHandlers(IDocumentService documentService,
+            IFileDialogService fileDialogService, IStatusbarService statusbarService, ILog logger)
         {
             this.documentService = documentService;
             this.fileDialogService = fileDialogService;
             this.logger = logger;
+            this.statusbarService = statusbarService;
         }
 
         [AgentCallback("window/showSaveDialog", deserializeToSingleObject: true)]
@@ -50,9 +53,13 @@ namespace Cody.Core.Agent
             catch (Exception ex)
             {
                 logger.Error($"Document edit failed for '{textDocumentEdit.Uri}'", ex);
+                return false;
+            }
+            finally
+            {
+                statusbarService.StopProgressAnimation();
             }
 
-            return false;
         }
 
         [AgentCallback("textDocument/show", deserializeToSingleObject: true)]
@@ -80,39 +87,44 @@ namespace Cody.Core.Agent
                 return false;
             }
 
-            foreach (var operation in workspaceEdit.Operations)
+            try
             {
-                bool result;
-                try
+                foreach (var operation in workspaceEdit.Operations)
                 {
-                    switch (operation)
+                    bool result;
+                    try
                     {
-                        case CreateFileOperation createFile:
-                            result = documentService.CreateDocument(createFile.Uri.ToWindowsPath(), createFile.TextContents, createFile.Options?.Overwrite ?? false);
-                            break;
-                        case RenameFileOperation renameFile:
-                            result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
-                            break;
-                        case DeleteFileOperation deleteFile:
-                            result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
-                            break;
-                        case EditFileOperation editFile:
-                            result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
-                            break;
-                        default:
-                            throw new NotSupportedException($"Not supported operation: {operation}");
+                        switch (operation)
+                        {
+                            case CreateFileOperation createFile:
+                                result = documentService.CreateDocument(createFile.Uri.ToWindowsPath(), createFile.TextContents, createFile.Options?.Overwrite ?? false);
+                                break;
+                            case RenameFileOperation renameFile:
+                                result = documentService.RenameDocument(renameFile.OldUri.ToWindowsPath(), renameFile.NewUri.ToWindowsPath());
+                                break;
+                            case DeleteFileOperation deleteFile:
+                                result = documentService.DeleteDocument(deleteFile.Uri.ToWindowsPath());
+                                break;
+                            case EditFileOperation editFile:
+                                result = documentService.EditTextInDocument(editFile.Uri.ToWindowsPath(), editFile.Edits);
+                                break;
+                            default:
+                                throw new NotSupportedException($"Not supported operation: {operation}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error($"Workspace operation ('{operation.Type}') failed for '{GetOperationUri(operation)}'", ex);
+                        return false;
                     }
                 }
-                catch (Exception ex)
-                {
-                    logger.Error($"Workspace operation ('{operation.Type}') failed for '{GetOperationUri(operation)}'", ex);
-                    return false;
-                }
 
-                if (!result) return false;
+                return true;
             }
-
-            return true;
+            finally
+            {
+                statusbarService.StopProgressAnimation();
+            }
         }
 
         private string GetOperationUri(WorkspaceEditOperation operation)

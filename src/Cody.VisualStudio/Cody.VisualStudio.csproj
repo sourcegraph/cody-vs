@@ -53,6 +53,7 @@
     <Compile Include="Client\NameTransformer.cs" />
     <Compile Include="Client\RemoteAgentConnector.cs" />
     <Compile Include="Client\TraceJsonRpc.cs" />
+    <Compile Include="CodyPackage.Commands.cs" />
     <Compile Include="CodyPackage.ErrorHandling.cs" />
     <Compile Include="CodyToolWindow.cs" />
     <Compile Include="Infrastructure\LoggerFactory.cs" />
