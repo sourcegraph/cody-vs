@@ -23,48 +23,17 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Cody_Free_Cody_Pro_Section_Is_Present()
-        {
-            // given
-            var sectionText = "Free or Pro";
-            var buttonText = "Continue with GitHub";
-
-            // then
-            await NotInLoggedState(async () =>
-            {
-                await AssertTextIsPresent(sectionText);
-                await AssertTextIsPresent(buttonText);
-            });
-
-        }
-
-        [VsFact(Version = VsVersion.VS2022)]
         public async Task Cody_Enterprise_Section_Is_Present()
         {
             // given
-            var sectionText = "Enterprise";
-            var browserButtonText = "Continue with a URL";
+            var sectionText = "Sign in to Sourcegraph";
+            var browserButtonText = "Sourcegraph Instance URL";
 
             // then
             await NotInLoggedState(async () =>
             {
                 await AssertTextIsPresent(sectionText);
                 await AssertTextIsPresent(browserButtonText);
-            });
-        }
-
-        [VsFact(Version = VsVersion.VS2022)]
-        public async Task Logins_With_GitLab_Google_Are_Present()
-        {
-            // given
-            var gitlabButtonText = "Continue with GitLab";
-            var googleButtonText = "Continue with Google";
-
-            // then
-            await NotInLoggedState(async () =>
-            {
-                await AssertTextIsPresent(gitlabButtonText);
-                await AssertTextIsPresent(googleButtonText);
             });
         }
 

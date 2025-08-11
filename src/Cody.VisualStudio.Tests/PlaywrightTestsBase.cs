@@ -197,6 +197,7 @@ namespace Cody.VisualStudio.Tests
             var textContents = await getStarted.AllTextContentsAsync();
 
             // then
+            Assert.Contains(text, textContents);
             Assert.Equal(text, textContents.First());
         }
 
