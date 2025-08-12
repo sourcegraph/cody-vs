@@ -69,6 +69,7 @@ namespace Cody.VisualStudio
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
         public IFileDialogService FileDialogService;
+        public IEditCodeService EditCodeService;
 
         private IInfobarNotifications InfobarNotifications;
 
@@ -82,6 +83,7 @@ namespace Cody.VisualStudio
         public NotificationHandlers NotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
         public TextDocumentNotificationHandlers TextDocumentNotificationHandlers;
+        public EditTaskNotificationHandlers EditTaskNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public static TestingSupportService TestingSupportService;
         public IDocumentService DocumentService;
@@ -185,12 +187,11 @@ namespace Cody.VisualStudio
 
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
             FileDialogService = new FileDialogService(SolutionService, Logger);
+            EditCodeService = new EditCodeService();
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
             TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService, StatusbarService, Logger);
-
-
-
+            EditTaskNotificationHandlers = new EditTaskNotificationHandlers(Logger, EditCodeService, StatusbarService);
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
         }
@@ -327,7 +328,13 @@ namespace Cody.VisualStudio
 
                 var options = new AgentClientOptions
                 {
-                    CallbackHandlers = new List<object> { NotificationHandlers, ProgressNotificationHandlers, TextDocumentNotificationHandlers },
+                    CallbackHandlers = new List<object>
+                    {
+                        NotificationHandlers,
+                        ProgressNotificationHandlers,
+                        TextDocumentNotificationHandlers,
+                        EditTaskNotificationHandlers
+                    },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = Configuration.RemoteAgentPort.HasValue,

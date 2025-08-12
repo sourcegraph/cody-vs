@@ -17,14 +17,15 @@ namespace Cody.VisualStudio
 
         private void InitOleMenu()
         {
-            AddCommand(CommandIds.CodyToolWindow, null, ShowToolWindow, true);
-            AddCommand(CommandIds.DocumentCodeCommandId, "cody.command.document-code", InvokeCodyCommand, false);
-            AddCommand(CommandIds.GenerateUnitTestsCommandId, "cody.command.unit-tests", InvokeCodyCommand, false);
-            AddCommand(CommandIds.ExplainCodeCommandId, "cody.command.explain-code", InvokeCodyCommand, false);
-            AddCommand(CommandIds.FindCodeSmellsCommandId, "cody.command.smell-code", InvokeCodyCommand, false);
+            AddCommand(CommandIds.CodyToolWindow, null, ShowToolWindow, true, false);
+            AddCommand(CommandIds.EditCodeCommandId, null, ShowEditCodeWindow, false, true);
+            AddCommand(CommandIds.DocumentCodeCommandId, "cody.command.document-code", InvokeCodyCommand, false, true);
+            AddCommand(CommandIds.GenerateUnitTestsCommandId, "cody.command.unit-tests", InvokeCodyCommand, false, true);
+            AddCommand(CommandIds.ExplainCodeCommandId, "cody.command.explain-code", InvokeCodyCommand, false, true);
+            AddCommand(CommandIds.FindCodeSmellsCommandId, "cody.command.smell-code", InvokeCodyCommand, false, true);
         }
 
-        private void AddCommand(int commandId, string commandName, EventHandler handler, bool enabled)
+        private void AddCommand(int commandId, string commandName, EventHandler handler, bool enabled, bool isContextMenuItem)
         {
             try
             {
@@ -32,7 +33,12 @@ namespace Cody.VisualStudio
                 var menuCommand = new MenuCommand(handler, command);
                 menuCommand.Enabled = enabled;
 
-                codyCommands[commandId] = new CodyCommand { MenuCommand = menuCommand, CommandName = commandName };
+                codyCommands[commandId] = new CodyCommand
+                {
+                    MenuCommand = menuCommand,
+                    CommandName = commandName,
+                    IsContextMenuItem = isContextMenuItem
+                };
 
                 OleMenuService.AddCommand(menuCommand);
             }
@@ -45,7 +51,7 @@ namespace Cody.VisualStudio
         public void EnableContextMenu(bool enabled)
         {
             codyCommands
-                .Where(x => x.Value.CommandName != null)
+                .Where(x => x.Value.IsContextMenuItem)
                 .ToList()
                 .ForEach(x => x.Value.MenuCommand.Enabled = enabled);
         }
@@ -125,10 +131,16 @@ namespace Cody.VisualStudio
             }
         }
 
+        public async void ShowEditCodeWindow(object sender, EventArgs eventArgs)
+        {
+            var taskId = await AgentService.EditTaskStart();
+        }
+
         public class CodyCommand
         {
             public MenuCommand MenuCommand { get; set; }
             public string CommandName { get; set; }
+            public bool IsContextMenuItem { get; set; }
         }
     }
 }

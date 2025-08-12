@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Agent\AgentCallAttribute.cs" />
     <Compile Include="Agent\AgentCallbackAttribute.cs" />
+    <Compile Include="Agent\EditTaskNotificationHandlers.cs" />
     <Compile Include="Agent\IAgentProxy.cs" />
     <Compile Include="Agent\IAgentService.cs" />
     <Compile Include="Agent\INotificationHandler.cs" />
@@ -62,6 +63,10 @@
     <Compile Include="Agent\Protocol\AutoeditImageDiff.cs" />
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
     <Compile Include="Agent\Protocol\ExecuteCommandParams.cs" />
+    <Compile Include="Agent\Protocol\Model.cs" />
+    <Compile Include="Agent\Protocol\ModelAvailabilityStatus.cs" />
+    <Compile Include="Agent\Protocol\ModelContextWindow.cs" />
+    <Compile Include="Agent\Protocol\ModelRef.cs" />
     <Compile Include="Agent\Protocol\ShowWindowMessageParams.cs" />
     <Compile Include="Agent\Protocol\CodyFileRename.cs" />
     <Compile Include="Agent\Protocol\AutoeditTextDiff.cs" />
@@ -80,6 +85,8 @@
     <Compile Include="Agent\Protocol\SelectedCompletionInfo.cs" />
     <Compile Include="Agent\Protocol\TestProgress.cs" />
     <Compile Include="Agent\Protocol\TextDocumentEditParams.cs" />
+    <Compile Include="Agent\Protocol\UserEditPromptRequest.cs" />
+    <Compile Include="Agent\Protocol\UserEditPromptResult.cs" />
     <Compile Include="Agent\Protocol\WorkspaceEditEntryMetadata.cs" />
     <Compile Include="Agent\Protocol\WorkspaceEditMetadata.cs" />
     <Compile Include="Agent\Protocol\WorkspaceEditOperation.cs" />
@@ -117,6 +124,7 @@
     <Compile Include="Infrastructure\ConfigurationService.cs" />
     <Compile Include="Infrastructure\IConfigurationService.cs" />
     <Compile Include="Infrastructure\IDocumentService.cs" />
+    <Compile Include="Infrastructure\IEditCodeService.cs" />
     <Compile Include="Infrastructure\IFileDialogService.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
