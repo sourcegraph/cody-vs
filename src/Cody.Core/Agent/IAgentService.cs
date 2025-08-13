@@ -86,6 +86,9 @@ namespace Cody.Core.Agent
         [AgentCall("editTask/start")]
         Task<string> EditTaskStart();
 
+        [AgentCall("editTask/accept")]
+        Task EditTaskAccept(string taskId);
+
 
 
         //---------------------------------------------------------

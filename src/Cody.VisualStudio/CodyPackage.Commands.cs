@@ -133,7 +133,9 @@ namespace Cody.VisualStudio
 
         public async void ShowEditCodeWindow(object sender, EventArgs eventArgs)
         {
+
             var taskId = await AgentService.EditTaskStart();
+            if (taskId != null) await AgentService.EditTaskAccept(taskId);
         }
 
         public class CodyCommand

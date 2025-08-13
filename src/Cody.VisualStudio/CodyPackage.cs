@@ -191,7 +191,7 @@ namespace Cody.VisualStudio
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
             TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService, StatusbarService, Logger);
-            EditTaskNotificationHandlers = new EditTaskNotificationHandlers(Logger, EditCodeService, StatusbarService);
+            EditTaskNotificationHandlers = new EditTaskNotificationHandlers(Logger, EditCodeService, DocumentService, StatusbarService);
 
             Logger.Info($"Visual Studio version: {VsVersionService.DisplayVersion} ({VsVersionService.EditionName})");
         }

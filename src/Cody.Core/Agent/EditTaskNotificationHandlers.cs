@@ -1,4 +1,5 @@
 using Cody.Core.Agent.Protocol;
+using Cody.Core.Common;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using System;
@@ -13,13 +14,24 @@ namespace Cody.Core.Agent
     {
         private readonly ILog logger;
         private readonly IEditCodeService editCodeService;
+        private readonly IDocumentService documentService;
         private readonly IStatusbarService statusbarService;
 
-        public EditTaskNotificationHandlers(ILog logger, IEditCodeService editCodeService, IStatusbarService statusbarService)
+        public EditTaskNotificationHandlers(ILog logger, IEditCodeService editCodeService,
+            IDocumentService documentService, IStatusbarService statusbarService)
         {
             this.logger = logger;
             this.editCodeService = editCodeService;
+            this.documentService = documentService;
             this.statusbarService = statusbarService;
+        }
+
+        [AgentCallback("textEditor/selection")]
+        public void Selection(string uri, Range selection)
+        {
+            // no needed yet
+            //var path = uri.ToWindowsPath();
+            //documentService.SelectInDocument(path, selection);
         }
 
         [AgentCallback("editTask/getUserInput", deserializeToSingleObject: true)]
