@@ -18,7 +18,7 @@ namespace Cody.VisualStudio.Services
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                var vm = new EditCodeViewModel(models.Select(x => new Model { Id = x.Id, Name = x.Name }),
+                var vm = new EditCodeViewModel(models.Select(x => new Model { Id = x.Id, Name = x.Name, Provider = x.Provider }),
                     defaultModelId, instruction);
                 var window = new EditCodeView();
 

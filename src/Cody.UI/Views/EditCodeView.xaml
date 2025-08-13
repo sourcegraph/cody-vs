@@ -41,10 +41,22 @@
                      Margin="0,0,0,12"/>
             <ComboBox Grid.Row="2"
                       Name="Model"                      
-                      ItemsSource="{Binding Models}"                      
+                      ItemsSource="{Binding Models.View}"                      
                       SelectedItem="{Binding SelectedModel}"                      
-                      DisplayMemberPath="Name"                      
-                      />
+                      DisplayMemberPath="Name">
+                <ComboBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"          
+                               FontWeight="Bold"
+                               FontSize="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=FontSize}"
+                               Margin="2,4,2,2"/>
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                    </GroupStyle>
+                </ComboBox.GroupStyle>
+            </ComboBox>
         </Grid>
         <!-- Button Area -->
         <StackPanel Grid.Row="1"                     

@@ -204,6 +204,7 @@
         <!-- This is the keybinding for opening chat. -->
         <KeyBinding guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" editor="guidVSStd97" key1="L" mod1="Alt" />
         <KeyBinding guid="guidCodyPackageCmdSet" id="EditCodeCommandId" editor="guidTextEditor" key1="K" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" editor="guidTextEditor" key1="H" mod1="Alt" />
         <KeyBinding guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" editor="guidTextEditor" key1="I" mod1="Alt" />
     </KeyBindings>
 </CommandTable>

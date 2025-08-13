@@ -41,7 +41,7 @@ namespace Cody.Core.Agent
             {
                 var models = request.AvailableModels
                     .Where(x => x.IsModelAvailable)
-                    .Select(x => new EditModel { Id = x.Model.Id, Name = x.Model.Title });
+                    .Select(x => new EditModel { Id = x.Model.Id, Name = x.Model.Title, Provider = x.Model.Provider });
 
                 var result = editCodeService.ShowEditCodeDialog(models, request.SelectedModelId, request.Instruction);
 
@@ -55,7 +55,7 @@ namespace Cody.Core.Agent
             }
             catch (Exception ex)
             {
-                logger.Error("Save file dialog failed.", ex);
+                logger.Error("User input failed.", ex);
             }
 
             return null;
