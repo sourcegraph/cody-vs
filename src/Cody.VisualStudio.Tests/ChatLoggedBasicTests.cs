@@ -31,17 +31,16 @@ namespace Cody.VisualStudio.Tests
             TakeScreenshot(testName);
         }
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Solution_Name_Is_Added_To_Chat_Input()
+        public async Task No_Tags_Added_To_Chat_Prompt_After_Solution_Is_Loaded()
         {
             // given
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
             var tags = await GetChatContextTags();
-            var projectName = tags.ElementAt(0).Name;
 
             // then
-            Assert.Equal("ConsoleApp1", projectName);
+            Assert.Empty(tags);
         }
 
         //[VsFact(Version = VsVersion.VS2022)]

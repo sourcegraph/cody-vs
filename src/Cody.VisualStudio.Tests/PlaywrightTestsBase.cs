@@ -9,6 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Threading;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -227,6 +230,9 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ClickNewChat() => await Page.Locator("button span :text-is('New Chat')").ClickAsync();
 
+        private DTE2 _dte;
+        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(EnvDTE.DTE)));
+
         protected async Task EnterChatTextAndSend(string prompt)
         {
             var entryArea = Page.Locator("span[data-lexical-text='true']");
@@ -300,6 +306,93 @@ namespace Cody.VisualStudio.Tests
             }
 
             return tagsList;
+        }
+
+        protected async Task OpenSolution(string path)
+        {
+            WriteLog($"Opening solution '{path}' ...");
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            var backgroundLoadTcs = new TaskCompletionSource<bool>();
+            EventHandler backgroundLoadHandler = (sender, e) => backgroundLoadTcs.TrySetResult(true);
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += backgroundLoadHandler;
+
+            Dte.Solution.Open(path);
+
+            // Wait for background load event
+            await backgroundLoadTcs.Task;
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= backgroundLoadHandler;
+
+            WriteLog("Background solution load complete, performing additional verification...");
+
+            // Wait for solution to be fully loaded by checking IsFullyLoaded property
+            // and by waiting for projects to be accessible
+            await WaitForAsync(() => {
+                try
+                {
+                    var solutionService = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+                    if (solutionService == null) return Task.FromResult(false);
+
+                    solutionService.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object isOpen);
+                    solutionService.GetProperty((int)__VSPROPID4.VSPROPID_IsSolutionFullyLoaded, out object isFullyLoaded);
+                    var areProjectsAccessible = Dte.Solution.Projects.Count > 0;
+
+                    WriteLog($"Solution status: Open={isOpen}, FullyLoaded={isFullyLoaded}, ProjectsAccessible={areProjectsAccessible}");
+                    return Task.FromResult((bool)isOpen && (bool)isFullyLoaded && areProjectsAccessible);
+                }
+                catch (Exception ex)
+                {
+                    WriteLog($"Exception while checking solution status: {ex.Message}");
+                    return Task.FromResult(false);
+                }
+            });
+
+            WriteLog("Solution fully loaded and verified.");
+            await Task.Delay(TimeSpan.FromSeconds(1));
+
+            await CloseAllDocuments(path);
+        }
+
+        protected async Task CloseAllDocuments(string solutionPath)
+        {
+            try
+            {
+                WriteLog("Checking if there are opened documents to close ...");
+
+                var documents = _dte.Documents.OfType<Document>();
+                var docs = documents as Document[] ?? documents.ToArray();
+                var areOpenedDocuments = docs.Any();
+                if (areOpenedDocuments) WriteLog($"Closing {docs.Count()} opened documents...");
+                foreach (var doc in docs)
+                {
+                    try
+                    {
+                        doc.Close(vsSaveChanges.vsSaveChangesYes);
+                        await Task.Delay(TimeSpan.FromMilliseconds(100)); // allows to unblock UI thread if it's blocked by closing documents API calls
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLog($"Cannot close document:{doc.FullName} exception:{ex.Message}");
+                    }
+                }
+
+                WriteLog(areOpenedDocuments ? $"Documents closed." : $"No opened documents to close.");
+
+                // HACK: webview shows last tag for a last opened file, even if this file is closed (bug)
+                // All files are closed, so trigger clearing the tag for the last opened file
+                var chatPrompt = Page.Locator("[data-lexical-editor=true]");
+                await chatPrompt.ClearAsync();
+
+
+                var tags = await GetChatContextTags();
+                if (tags.Count > 0) throw new Exception("Chat's tags not removed properly after closing all files!");
+
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"Failed at closing documents - exception:{ex.Message}");
+            }
         }
     }
 
