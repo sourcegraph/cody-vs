@@ -135,14 +135,17 @@ namespace Cody.VisualStudio.Tests
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";
 
+            MakeScreenShot("empty_prompt");
             await EnterChatTextAndSend(prompt);
+            MakeScreenShot("filled_prompt");
 
             // when
             await ShowHistoryTab();
             var isPresentInHistory = await IsPresentInHistory(num.ToString());
 
-            // then
+            MakeScreenShot("history");
 
+            // then
             Assert.True(isPresentInHistory);
         }
 

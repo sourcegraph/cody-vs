@@ -385,10 +385,13 @@ namespace Cody.VisualStudio.Tests
 
                 WriteLog(areOpenedDocuments ? $"Documents closed." : $"No opened documents to close.");
 
-                // HACK: webview shows last tag for a last opened file, even if this file is closed (bug)
-                // All files are closed, so trigger clearing the tag for the last opened file
-                var chatPrompt = GetChatEntryArea();
-                await chatPrompt.ClearAsync();
+                if (areOpenedDocuments)
+                {
+                    // HACK: webview shows last tag for a last opened file, even if this file is closed (bug)
+                    // All files are closed, so trigger clearing the tag for the last opened file
+                    var chatPrompt = GetChatEntryArea();
+                    await chatPrompt.ClearAsync();
+                }
 
 
                 var tags = await GetChatContextTags();
