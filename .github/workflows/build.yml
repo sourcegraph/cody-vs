@@ -26,50 +26,50 @@ jobs:
 
       - name: Add msbuild
         uses: microsoft/setup-msbuild@v2
-        
+
       - name: Cache nuget
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ github.sha }}
           restore-keys: ${{ runner.os }}-nuget-
-        
+
       - name: Cache agent
         id: cache-agent
         uses: actions/cache@v4
         with:
           path: src/Cody.VisualStudio/Agent
-          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version', 'agent/buildAgent.ps1', 'agent/runBuildAgent.ps1') }}  
-        
+          key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version', 'agent/buildAgent.ps1', 'agent/runBuildAgent.ps1') }}
+
       - name: Build agent if needed
         if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.PRIVATE_SG_ACCESS_TOKEN }}
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
-        
+
 
       - name: Build extension (${{ env.Configuration }})
         shell: pwsh
         run: ./src/build.ps1 -configuration ${{ env.Configuration }}
-        
+
       - name: Upload Cody.VisualStudio.vsix artifact
         uses: actions/upload-artifact@v4
         with:
           name: Cody.VisualStudio.vsix
           path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
-        
-      #Running tests  
+
+      #Running tests
 
       - name: Change Screen Resolution
         shell: pwsh
         run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
-        
+
       - name: Run tests
         env:
           Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
-        
+
       - name: Upload screenshots for UI tests
         uses: actions/upload-artifact@v4
         if: always()
