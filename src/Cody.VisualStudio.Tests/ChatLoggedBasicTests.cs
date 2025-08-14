@@ -34,6 +34,7 @@ namespace Cody.VisualStudio.Tests
         public async Task No_Tags_Added_To_Chat_Prompt_After_Solution_Is_Loaded()
         {
             // given
+            await NewChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
@@ -47,7 +48,7 @@ namespace Cody.VisualStudio.Tests
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
-
+            await NewChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
@@ -63,12 +64,11 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Changing_In_Chat_Input()
         {
             // given
             await NewChat();
-
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
@@ -94,7 +94,7 @@ namespace Cody.VisualStudio.Tests
 
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
@@ -127,10 +127,11 @@ namespace Cody.VisualStudio.Tests
             Assert.True(isOpen);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
             //given
+            await NewChat();
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";
 

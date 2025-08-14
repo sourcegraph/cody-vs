@@ -235,7 +235,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task EnterChatTextAndSend(string prompt)
         {
-            var entryArea = Page.Locator("span[data-lexical-text='true']");
+            var entryArea = GetChatEntryArea();
             var enterArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
 
             await entryArea.FillAsync(prompt);
@@ -252,6 +252,12 @@ namespace Cody.VisualStudio.Tests
             await Task.Delay(500);
 
             await DismissStartWindow();
+        }
+
+        private ILocator GetChatEntryArea()
+        {
+            var entryArea = Page.Locator("[data-lexical-editor=true]");
+            return entryArea;
         }
 
         protected async Task<bool> IsPresentInHistory(string entry)
@@ -381,7 +387,7 @@ namespace Cody.VisualStudio.Tests
 
                 // HACK: webview shows last tag for a last opened file, even if this file is closed (bug)
                 // All files are closed, so trigger clearing the tag for the last opened file
-                var chatPrompt = Page.Locator("[data-lexical-editor=true]");
+                var chatPrompt = GetChatEntryArea();
                 await chatPrompt.ClearAsync();
 
 
