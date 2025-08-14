@@ -43,6 +43,8 @@ jobs:
         
       - name: Build agent if needed
         if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: ./agent/runBuildAgent.ps1
         
