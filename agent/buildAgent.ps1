@@ -51,8 +51,7 @@ if (!(Test-Path -Path $agentDir -PathType Container)) {
 
 if (!(Test-Path -Path $codyDir -PathType Container)) {
     New-Item -Path $codyDir -ItemType Directory
-	Write-Host "Created $codyDir directory"
-	
+    Write-Host "Created $codyDir directory"
 }
 
 if($skipGit -eq $false) {
@@ -92,9 +91,14 @@ if (!(Test-Path -Path $nodeArmBinFile -PathType Leaf)) {
     Invoke-WebRequest -Uri $nodeArmUrl -OutFile $nodeArmBinFile
 }
 
+
 #Clear agent\dist
-Write-Host "Clearing $codyAgentDistDir"
-Get-ChildItem -Path $codyAgentDistDir -Recurse | Remove-Item -Recurse
+if (Test-Path $codyAgentDistDir) {
+  Write-Host "Clearing $codyAgentDistDir"
+  Get-ChildItem -Path $codyAgentDistDir -Recurse | Remove-Item -Recurse
+} else {
+  Write-Host "Dir '$codyAgentDistDir' not found - skipping"
+}
 
 #pnpm install and build
 Push-Location -Path $codyAgentDir
