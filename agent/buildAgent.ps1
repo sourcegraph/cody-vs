@@ -12,7 +12,8 @@ $versionFile = Join-Path $agentDir "\agent.version"
 $codyAgentDir = Join-Path $codyDir "\agent"
 $codyAgentDistDir = Join-Path $codyAgentDir "\dist"
 
-$codyRepo = "https://github.com/sourcegraph/cody.git"
+$authPart = if ($Env:GITHUB_TOKEN) { "$Env:GITHUB_TOKEN@" } else { "" }
+$codyRepo = "https://$authPart" + "github.com/sourcegraph/cody.git"
 
 $nodeBinFile = Join-Path $nodeDir "node-win-x64.exe"
 $nodeArmBinFile = Join-Path $nodeDir "node-win-arm64.exe"
