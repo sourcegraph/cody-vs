@@ -19,6 +19,7 @@ namespace Cody.VisualStudio.Tests
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
+                await OpenCodyChatToolWindow();
             });
         }
 
