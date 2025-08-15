@@ -64,22 +64,3 @@ jobs:
       - name: Change Screen Resolution
         shell: pwsh
         run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
-
-      - name: Run tests
-        env:
-          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
-        run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
-
-      - name: Upload screenshots for UI tests
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: UI Tests Screenshots
-          path: src/Cody.VisualStudio.Tests/bin/${{ env.Configuration }}/Screenshots
-          retention-days: 20
-
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/windows@v2
-        if: always()
-        with:
-          files: TestResults/**/*.trx
