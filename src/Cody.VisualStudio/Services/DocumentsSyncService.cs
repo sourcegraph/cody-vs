@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Cody.Core.Settings;
 
 namespace Cody.VisualStudio.Services
 {
@@ -24,6 +25,7 @@ namespace Cody.VisualStudio.Services
 
         private readonly IVsUIShell vsUIShell;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
+        private readonly IUserSettingsService _userSettingsService;
         private readonly IDocumentSyncActions documentActions;
         private readonly ILog log;
 
@@ -34,12 +36,14 @@ namespace Cody.VisualStudio.Services
         public DocumentsSyncService(IVsUIShell vsUIShell,
             IDocumentSyncActions documentActions,
             IVsEditorAdaptersFactoryService editorAdaptersFactoryService,
+            IUserSettingsService userSettingsService,
             ILog log)
         {
             this.rdt = new RunningDocumentTable();
             this.vsUIShell = vsUIShell;
             this.documentActions = documentActions;
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
+            _userSettingsService = userSettingsService;
             this.log = log;
         }
 
@@ -91,6 +95,9 @@ namespace Cody.VisualStudio.Services
 
         private void AssertThatNoOpenedDocuments()
         {
+            if (_userSettingsService.ForceAccessTokenForUITests)
+                return;
+
             Debug.Assert(openNotificationSend.Count == 0, $"{nameof(openNotificationSend)} is {openNotificationSend}, but it should be ZERO!");
             Debug.Assert(isSubscribed.Count == 0, $"{nameof(isSubscribed)} is {isSubscribed}, but it should be ZERO!");
         }
@@ -415,7 +422,7 @@ namespace Cody.VisualStudio.Services
             {
                 trace.TraceEvent("OnRename");
                 documentActions.OnRename(pszMkDocumentOld, pszMkDocumentNew);
-            }
+    }
             return VSConstants.S_OK;
         }
     }

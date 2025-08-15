@@ -4,15 +4,16 @@ using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Threading;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Xunit;
 using Xunit.Abstractions;
-using Window = EnvDTE.Window;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -83,6 +84,45 @@ namespace Cody.VisualStudio.Tests
                 _sync.Release();
             }
         }
+
+        protected async Task WaitForChatLoadingWhenLoggedIn()
+        {
+            WriteLog("Waiting for Cody chat to be fully initialized...");
+            await WaitForAsync(async () =>
+            {
+                try
+                {
+                    var loadingElement = await Page.QuerySelectorAsync("text=Loading");
+                    if (loadingElement != null)
+                    {
+                        WriteLog("'Loading' text found, waiting for it to disappear...");
+
+                        return false;
+                    }
+
+                    WriteLog("'Loading' text not found, Cody is already initialized.");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteLog($"Error while waiting for 'Loading' text to disappear: {ex.Message}");
+                }
+
+                return true;
+            });
+        }
+
+        protected async Task WaitForLogOutState()
+        {
+            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+        }
+
+        protected async Task WaitForLogInState()
+        {
+            await Page.WaitForSelectorAsync("[data-testid='new-chat-button']");
+            await WaitForChatLoadingWhenLoggedIn();
+        }
+
 
         protected async Task WaitForPlaywrightAsync()
         {
@@ -160,6 +200,7 @@ namespace Cody.VisualStudio.Tests
             var textContents = await getStarted.AllTextContentsAsync();
 
             // then
+            Assert.Contains(text, textContents);
             Assert.Equal(text, textContents.First());
         }
 
@@ -171,14 +212,15 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task NewChat()
         {
-            await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "New Chat" }).ClickAsync();
+            await Page.ClickAsync("[data-testid='new-chat-button']");
 
             await Task.Delay(500);
         }
 
         protected async Task ShowHistoryTab()
         {
-            await Page.GetByTestId("tab-history").ClickAsync();
+            await Page.ClickAsync("[data-testid='tab-history']");
+
             await Task.Delay(500);
         }
 
@@ -188,9 +230,12 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task ClickNewChat() => await Page.Locator("button span :text-is('New Chat')").ClickAsync();
 
+        private DTE2 _dte;
+        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(EnvDTE.DTE)));
+
         protected async Task EnterChatTextAndSend(string prompt)
         {
-            var entryArea = Page.Locator("span[data-lexical-text='true']");
+            var entryArea = GetChatEntryArea();
             var enterArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
 
             await entryArea.FillAsync(prompt);
@@ -209,14 +254,20 @@ namespace Cody.VisualStudio.Tests
             await DismissStartWindow();
         }
 
-        protected async Task<string[]> GetTodayChatHistory()
+        private ILocator GetChatEntryArea()
         {
-            var todaySection = await Page.QuerySelectorAsync("div[id='history-today-content']");
+            var entryArea = Page.Locator("[data-lexical-editor=true]");
+            return entryArea;
+        }
 
-            return (await todaySection.QuerySelectorAllAsync("button span"))
-                .Select(async x => await x.TextContentAsync())
-                .Select(x => x.Result)
-                .ToArray();
+        protected async Task<bool> IsPresentInHistory(string entry)
+        {
+            var todaySection = await Page.QuerySelectorAsync($"div[data-value*='{entry}']");
+
+            if (todaySection != null)
+                return true;
+
+            return false;
         }
 
         protected async Task<IReadOnlyCollection<ContextTag>> GetChatContextTags()
@@ -255,10 +306,100 @@ namespace Cody.VisualStudio.Tests
                     }
                 }
 
+                WriteLog($"Found '{tag}' tag");
+
                 tagsList.Add(tag);
             }
 
             return tagsList;
+        }
+
+        protected async Task OpenSolution(string path)
+        {
+            WriteLog($"Opening solution '{path}' ...");
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            var backgroundLoadTcs = new TaskCompletionSource<bool>();
+            EventHandler backgroundLoadHandler = (sender, e) => backgroundLoadTcs.TrySetResult(true);
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += backgroundLoadHandler;
+
+            Dte.Solution.Open(path);
+
+            // Wait for background load event
+            await backgroundLoadTcs.Task;
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= backgroundLoadHandler;
+
+            WriteLog("Background solution load complete, performing additional verification...");
+
+            // Wait for solution to be fully loaded by checking IsFullyLoaded property
+            // and by waiting for projects to be accessible
+            await WaitForAsync(() => {
+                try
+                {
+                    var solutionService = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+                    if (solutionService == null) return Task.FromResult(false);
+
+                    solutionService.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object isOpen);
+                    solutionService.GetProperty((int)__VSPROPID4.VSPROPID_IsSolutionFullyLoaded, out object isFullyLoaded);
+                    var areProjectsAccessible = Dte.Solution.Projects.Count > 0;
+
+                    WriteLog($"Solution status: Open={isOpen}, FullyLoaded={isFullyLoaded}, ProjectsAccessible={areProjectsAccessible}");
+                    return Task.FromResult((bool)isOpen && (bool)isFullyLoaded && areProjectsAccessible);
+                }
+                catch (Exception ex)
+                {
+                    WriteLog($"Exception while checking solution status: {ex.Message}");
+                    return Task.FromResult(false);
+                }
+            });
+
+            WriteLog("Solution fully loaded and verified.");
+            await Task.Delay(TimeSpan.FromSeconds(1));
+
+            await CloseAllDocuments(path);
+        }
+
+        protected async Task CloseAllDocuments(string solutionPath)
+        {
+            try
+            {
+                WriteLog("Checking if there are opened documents to close ...");
+
+                var documents = _dte.Documents.OfType<Document>();
+                var docs = documents as Document[] ?? documents.ToArray();
+                var areOpenedDocuments = docs.Any();
+                if (areOpenedDocuments) WriteLog($"Closing {docs.Count()} opened documents...");
+                foreach (var doc in docs)
+                {
+                    try
+                    {
+                        doc.Close(vsSaveChanges.vsSaveChangesYes);
+                        await Task.Delay(TimeSpan.FromMilliseconds(100)); // allows to unblock UI thread if it's blocked by closing documents API calls
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLog($"Cannot close document:{doc.FullName} exception:{ex.Message}");
+                    }
+                }
+
+                WriteLog(areOpenedDocuments ? $"Documents closed." : $"No opened documents to close.");
+
+                // HACK: webview shows last tag for a last opened file, even if this file is closed (bug)
+                // All files are closed, so trigger clearing the tag for the last opened file
+                await ShowChatTab();
+                var chatPrompt = GetChatEntryArea();
+                await chatPrompt.ClearAsync();
+
+
+                var tags = await GetChatContextTags();
+                if (tags.Count > 0) throw new Exception("Chat's tags not removed properly after closing all files!");
+
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"Failed at closing documents - exception:{ex.Message}");
+            }
         }
     }
 
@@ -269,5 +410,13 @@ namespace Cody.VisualStudio.Tests
         public int? StartLine { get; set; }
 
         public int? EndLine { get; set; }
+
+        public override string ToString()
+        {
+            if (StartLine.HasValue && EndLine.HasValue)
+                return $"'{Name}' {StartLine}-{EndLine}";
+
+            return $"{Name}";
+        }
     }
 }

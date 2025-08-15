@@ -63,7 +63,7 @@ namespace Cody.Core.Settings
             set => Set(nameof(LastTimeAuthorized), value.ToString());
         }
 
-        public string DefaultServerEndpoint => "https://sourcegraph.com/";
+        public string DefaultServerEndpoint => "https://sourcegraph.sourcegraph.com/";
 
         public string AccessToken
         {

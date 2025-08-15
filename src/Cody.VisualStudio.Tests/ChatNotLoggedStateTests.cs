@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Playwright;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,31 +19,16 @@ namespace Cody.VisualStudio.Tests
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
+                await OpenCodyChatToolWindow();
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
-        public async Task Cody_Free_Cody_Pro_Section_Is_Present()
-        {
-            // given
-            var sectionText = "Free or Pro";
-            var buttonText = "Continue with GitHub";
-
-            // then
-            await NotInLoggedState(async () =>
-            {
-                await AssertTextIsPresent(sectionText);
-                await AssertTextIsPresent(buttonText);
-            });
-
-        }
-
-        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Cody_Enterprise_Section_Is_Present()
         {
             // given
-            var sectionText = "Enterprise";
-            var browserButtonText = "Continue with a URL";
+            var sectionText = "Sign in to Sourcegraph";
+            var browserButtonText = "Sourcegraph Instance URL";
 
             // then
             await NotInLoggedState(async () =>
@@ -52,31 +38,22 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
-        public async Task Logins_With_GitLab_Google_Are_Present()
-        {
-            // given
-            var gitlabButtonText = "Continue with GitLab";
-            var googleButtonText = "Continue with Google";
-
-            // then
-            await NotInLoggedState(async () =>
-            {
-                await AssertTextIsPresent(gitlabButtonText);
-                await AssertTextIsPresent(googleButtonText);
-            });
-        }
-
         private async Task NotInLoggedState(Func<Task> action)
         {
             try
             {
+                MakeScreenShot("init");
+
                 await UseInvalidToken();
+                MakeScreenShot("invalid_token_set");
                 await action();
+                MakeScreenShot("action");
             }
             finally
             {
                 await RevertToken();
+
+                MakeScreenShot("token_reverted");
             }
         }
 
@@ -86,7 +63,9 @@ namespace Cody.VisualStudio.Tests
             if (_accessToken != null)
             {
                 WriteLog("Making access token invalid ...");
+
                 await SetAccessToken("INVALID");
+                await WaitForLogOutState();
 
                 WriteLog("Invalid token set.");
             }
@@ -94,13 +73,13 @@ namespace Cody.VisualStudio.Tests
 
         private async Task RevertToken()
         {
-            var testName = GetTestName();
-            TakeScreenshot(testName);
-
             if (_accessToken != null)
             {
                 WriteLog("Reverting the access token ...");
+
                 await SetAccessToken(_accessToken); // make it valid
+                await WaitForLogInState();
+
                 WriteLog("The access token reverted.");
             }
         }
