@@ -155,6 +155,7 @@ namespace Cody.VisualStudio
 
             var vsSecretStorage = this.GetService<SVsCredentialStorageService, IVsCredentialStorageService>();
             SecretStorageService = new SecretStorageService(vsSecretStorage, Logger);
+            SecretStorageService.AccessTokenRefreshed += AccessTokenRefreshed;
             UserSettingsService = new UserSettingsService(new UserSettingsProvider(this), SecretStorageService, Logger);
             OleMenuService = this.GetService<IMenuCommandService, OleMenuCommandService>();
 
@@ -269,6 +270,28 @@ namespace Cody.VisualStudio
             }
         }
 
+        private async void AccessTokenRefreshed(object sender, EventArgs e)
+        {
+            try
+            {
+                Logger.Debug($"Checking authorization status ...");
+                if (ConfigurationService == null || AgentService == null)
+                {
+                    Logger.Debug("Not changed.");
+                    return;
+                }
+
+                var config = ConfigurationService.GetConfiguration();
+                var status = await AgentService.ConfigurationChange(config);
+
+                Logger.Debug($"After access token refresh. Authenticated: {status.Authenticated}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed.", ex);
+            }
+        }
+
         private async Task ShowToolWindowWhenLoggedOut()
         {
             Logger.Debug($"Logout detected. Showing tool window ...");
@@ -288,18 +311,18 @@ namespace Cody.VisualStudio
 
                     var host = obj as IVsInfoBarHost;
                     if (host != null)
-                    {
+        {
                         //Logger.Debug($"InitializeInfoBarService:{host}");
 
                         var uiFactory = ServiceProvider.GlobalProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
                         if (uiFactory != null)
-                        {
+        {
                             InfobarNotifications = new InfobarNotifications(host, uiFactory, AgentNotificationsLogger);
                             _infobarNotificationsCompletionSource.SetResult(InfobarNotifications);
 
                         }
                         else
-                        {
+                    {
                             Logger.Error("Cannot get IVsInfoBarUIFactory");
                         }
 
@@ -445,9 +468,9 @@ namespace Cody.VisualStudio
                 if (DocumentsSyncService == null)
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
-                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, Logger);
-                    DocumentsSyncService.Initialize();
-                }
+                    DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, UserSettingsService, Logger);
+                DocumentsSyncService.Initialize();
+            }
             }
             catch (Exception ex)
             {

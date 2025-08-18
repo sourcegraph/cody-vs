@@ -14,6 +14,8 @@ namespace Cody.VisualStudio.Services
         private readonly string UserName = "CodyAgent";
         private readonly string Type = "token";
 
+        public event EventHandler AccessTokenRefreshed;
+
         public SecretStorageService(IVsCredentialStorageService secretStorageService, ILog logger)
         {
             _secretStorageService = secretStorageService;
@@ -87,6 +89,9 @@ namespace Cody.VisualStudio.Services
             {
                 var oldAccessToken = AccessToken;
                 Set(AccessTokenKey, value);
+
+                if (oldAccessToken != value)
+                    AccessTokenRefreshed?.Invoke(this, EventArgs.Empty);
             }
         }
     }

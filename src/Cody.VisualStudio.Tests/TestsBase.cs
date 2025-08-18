@@ -11,9 +11,11 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Xunit.Abstractions;
-using System.Diagnostics;
 using Thread = System.Threading.Thread;
-using Microsoft.VisualStudio.Shell.Events;
+using System.Linq;
+using EnvDTE;
+using Process = System.Diagnostics.Process;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -46,6 +48,12 @@ namespace Cody.VisualStudio.Tests
             }
         }
 
+        protected void MakeScreenShot(string postfix = null)
+        {
+            var testName = $"{GetTestName()}_{postfix}";
+            TakeScreenshot(testName);
+        }
+
         protected string GetTestName()
         {
             var test = (ITest)_logger.GetType()
@@ -74,24 +82,6 @@ namespace Cody.VisualStudio.Tests
 
         private IVsUIShell _uiShell;
         protected IVsUIShell UIShell => _uiShell ?? (_uiShell = (IVsUIShell)Package.GetGlobalService(typeof(SVsUIShell)));
-
-        private DTE2 _dte;
-        protected DTE2 Dte => _dte ?? (_dte = (DTE2)Package.GetGlobalService(typeof(EnvDTE.DTE)));
-
-        protected async Task OpenSolution(string path)
-        {
-            var tcs = new TaskCompletionSource<bool>();
-            EventHandler handler = (sender, e) => tcs.TrySetResult(true);
-            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += handler;
-
-            WriteLog($"Opening solution '{path}' ...");
-            Dte.Solution.Open(path);
-
-            await tcs.Task;
-            SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= handler;
-        }
-
-        protected void CloseSolution() => Dte.Solution.Close();
 
         protected async Task OpenDocument(string path, int? selectLineStart = null, int? selectLineEnd = null)
         {
@@ -124,7 +114,7 @@ namespace Cody.VisualStudio.Tests
 
             windowFrame.Show();
 
-            await WaitForAsync(() => CodyPackage.MainViewModel.IsChatLoaded);
+            await WaitForAsync(() => Task.FromResult(CodyPackage.MainViewModel.IsChatLoaded));
         }
 
         protected async Task CloseCodyChatToolWindow()
@@ -156,11 +146,11 @@ namespace Cody.VisualStudio.Tests
             return codyPackage;
         }
 
-        protected async Task WaitForAsync(Func<bool> condition)
+        protected async Task WaitForAsync(Func<Task<bool>> condition)
         {
             var startTime = DateTime.Now;
             var timeout = TimeSpan.FromMinutes(2);
-            while (!condition.Invoke())
+            while (!await condition())
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -176,7 +166,7 @@ namespace Cody.VisualStudio.Tests
                 }
             }
 
-            if (condition.Invoke())
+            if (await condition())
             {
                 WriteLog($"Condition meet.");
             }
@@ -199,7 +189,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog("ShowToolWindowAsync called.");
 
             var viewModel = CodyPackage.MainViewModel;
-            await WaitForAsync(() => viewModel.IsChatLoaded);
+            await WaitForAsync(() => Task.FromResult(viewModel.IsChatLoaded));
 
             isChatLoaded = viewModel.IsChatLoaded;
             WriteLog($"Chat loaded:{isChatLoaded}");

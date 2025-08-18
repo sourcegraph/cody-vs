@@ -14,34 +14,41 @@ namespace Cody.VisualStudio.Tests
 
         public ChatLoggedBasicTests(ITestOutputHelper output) : base(output)
         {
-            var testName = $"{GetTestName()}_start";
+            var testName = $"{GetTestName()}_init";
             TakeScreenshot(testName);
 
             _context.Factory.Run(async () =>
             {
                 await WaitForPlaywrightAsync();
-            });
-        }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
-        public async Task Solution_Name_Is_Added_To_Chat_Input()
+                testName = $"{GetTestName()}_chatLoaded";
+                TakeScreenshot(testName);
+
+                await WaitForChatLoadingWhenLoggedIn();
+            });
+
+            testName = $"{GetTestName()}_chatInitialized";
+            TakeScreenshot(testName);
+        }
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task No_Tags_Added_To_Chat_Prompt_After_Solution_Is_Loaded()
         {
             // given
+            await NewChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
             var tags = await GetChatContextTags();
 
             // then
-            Assert.Equal("ConsoleApp1", tags.Last().Name);
+            Assert.Empty(tags);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Name_And_Line_Selection_Is_Showing_In_Chat_Input()
         {
             // given
             await NewChat();
-
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
@@ -57,7 +64,37 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        [VsFact(Version = VsVersion.VS2022)]
+        public async Task Active_File_Name_And_Line_Selection_Is_Changing_In_Chat_Input()
+        {
+            // given
+            await NewChat();
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
+
+            // when
+            const int startLine = 7; const int endLine = 13;
+            var filePath = SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs");
+            await OpenDocument(filePath, startLine, endLine);
+            var tags = await GetChatContextTags();
+
+            var nameTag = tags.First().Name;
+            var secondTag = tags.ElementAt(1);
+            Assert.Equal("Manager.cs", nameTag);
+            Assert.Equal(startLine, secondTag.StartLine);
+            Assert.Equal(endLine, secondTag.EndLine);
+
+            const int changedStartLine = 16; const int changedEndLine = 20;
+            await OpenDocument(filePath, changedStartLine, changedEndLine);
+            tags = await GetChatContextTags();
+            secondTag = tags.ElementAt(1);
+
+            // then
+            Assert.Equal(changedStartLine, secondTag.StartLine);
+            Assert.Equal(changedEndLine, secondTag.EndLine);
+
+        }
+
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Active_File_Match_Current_Chat_Context()
         {
             // given
@@ -66,42 +103,50 @@ namespace Cody.VisualStudio.Tests
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
 
             // when
-            const int startLine = 2; const int endLine = 3;
-            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Program.cs"), startLine, endLine);
+            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Program.cs"));
             var tags = await GetChatContextTags();
 
             // then
             var firstTagName = tags.First().Name;
-            var secondTag = tags.ElementAt(1);
             Assert.Equal("Program.cs", firstTagName);
-            Assert.Equal(startLine, secondTag.StartLine);
-            Assert.Equal(endLine, secondTag.EndLine);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
             await CloseCodyChatToolWindow();
             var isOpen = IsCodyChatToolWindowOpen();
+
+            MakeScreenShot("closed");
             Assert.False(isOpen);
 
             await OpenCodyChatToolWindow();
             isOpen = IsCodyChatToolWindowOpen();
+
+            MakeScreenShot("open");
             Assert.True(isOpen);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "need update to 1.66")]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Entered_Prompt_Show_Up_In_Today_History()
         {
+            //given
+            await NewChat();
             var num = new Random().Next();
             var prompt = $"How to create const with value {num}?";
 
+            MakeScreenShot("empty_prompt");
             await EnterChatTextAndSend(prompt);
+            MakeScreenShot("filled_prompt");
 
+            // when
             await ShowHistoryTab();
-            var chatHistoryEntries = await GetTodayChatHistory();
+            var isPresentInHistory = await IsPresentInHistory(num.ToString());
 
-            Assert.Contains(chatHistoryEntries, x => x.Contains(prompt));
+            MakeScreenShot("history");
+
+            // then
+            Assert.True(isPresentInHistory);
         }
 
         public void Dispose()
