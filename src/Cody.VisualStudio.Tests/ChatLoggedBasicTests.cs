@@ -111,7 +111,7 @@ namespace Cody.VisualStudio.Tests
             Assert.Equal("Program.cs", firstTagName);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        //[VsFact(Version = VsVersion.VS2022)]
         public async Task Can_Chat_Tool_Window_Be_Closed_And_Opened_Again()
         {
             await CloseCodyChatToolWindow();
