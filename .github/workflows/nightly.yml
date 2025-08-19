@@ -1,8 +1,6 @@
 name: Nightly Build
 
 on:
-  push:
-    branches: [piotr/nightly-build-fix]
   schedule:
     - cron: "0 2 * * *" # Runs at 2 AM UTC every day
   workflow_dispatch:
