@@ -37,6 +37,7 @@ jobs:
           repository: sourcegraph/cody
           regex: 'vscode(-insiders)?-v\d+\.\d+\.\d+'
           sort-tags: true
+          token: ${{ secrets.PRIVATE_SG_ACCESS_TOKEN }}
           
       - name: Hash tag name
         uses: pplanel/hash-calculator-action@v1.3.2
@@ -53,6 +54,8 @@ jobs:
         
       - name: Build agent if needed (tag ${{ steps.cody.outputs.tag }})
         if: ${{ steps.cache-agent.outputs.cache-hit != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRIVATE_SG_ACCESS_TOKEN }}
         shell: pwsh
         run: ./agent/buildAgent.ps1 -version ${{ steps.cody.outputs.tag }}
         
@@ -75,7 +78,7 @@ jobs:
         
       - name: Run tests
         env:
-          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
+          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_S2 }}
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
         
       - name: Upload screenshots for UI tests
