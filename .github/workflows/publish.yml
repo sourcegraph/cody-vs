@@ -96,7 +96,7 @@ jobs:
         
       - name: Run tests
         env:
-          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_DOTCOM }}
+          Access_Token_UI_Tests: ${{ secrets.SRC_ACCESS_TOKEN_S2 }}
           WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: '--remote-debugging-port=9222'
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
         
