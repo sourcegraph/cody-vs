@@ -87,13 +87,13 @@ namespace Cody.VisualStudio.Tests
         {
             WriteLog($"CodyPackage: {CodyPackage} ");
 
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             VsShellUtilities.OpenDocument(CodyPackage, path, Guid.Empty, out _, out _, out IVsWindowFrame frame);
             frame.Show();
 
             if (selectLineStart.HasValue && selectLineEnd.HasValue)
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
                 frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocView, out var pvar);
                 IVsTextView textView = pvar as IVsTextView;
                 if (textView == null && pvar is IVsCodeWindow vsCodeWindow)
@@ -103,8 +103,10 @@ namespace Cody.VisualStudio.Tests
                 }
 
                 textView.SetSelection(selectLineStart.Value - 1, 0, selectLineEnd.Value, 0);
-                await Task.Delay(500);
+                
             }
+
+            await Task.Delay(500);
         }
 
         protected async Task OpenCodyChatToolWindow()
