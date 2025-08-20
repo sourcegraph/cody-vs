@@ -83,6 +83,14 @@ namespace Cody.Core.Agent
         [AgentCall("command/execute")]
         Task CommandExecute(ExecuteCommandParams command);
 
+        [AgentCall("editTask/start")]
+        Task<string> EditTaskStart();
+
+        [AgentCall("editTask/accept")]
+        Task EditTaskAccept(string taskId);
+
+
+
         //---------------------------------------------------------
         // For notifications return type MUST be void!
         //---------------------------------------------------------

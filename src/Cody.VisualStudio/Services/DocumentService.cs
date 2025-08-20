@@ -63,6 +63,31 @@ namespace Cody.VisualStudio.Services
             return result;
         }
 
+        public bool SelectInDocument(string path, Range selection)
+        {
+            var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame);
+                if (tryOpenResult == VSConstants.S_OK)
+                {
+                    var textView = GetVsTextView(windowFrame);
+                    if (textView != null)
+                    {
+                        textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
+                    }
+                    else log.Error($"Cannot get VsTextView '{path}'");
+
+                }
+                else log.Error($"Cannot open document '{path}' (error code: {tryOpenResult})");
+
+                return false;
+            });
+
+            return result;
+        }
+
         public bool InsertTextInDocument(string path, Position position, string text)
         {
             var edits = new TextEdit[1] { new InsertTextEdit { Position = position, Value = text } };

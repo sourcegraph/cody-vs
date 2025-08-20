@@ -7,5 +7,6 @@ namespace Cody.VisualStudio
         public const int GenerateUnitTestsCommandId = 0x0105;
         public const int ExplainCodeCommandId = 0x0106;
         public const int FindCodeSmellsCommandId = 0x0107;
+        public const int EditCodeCommandId = 0x0108;
     }
 }

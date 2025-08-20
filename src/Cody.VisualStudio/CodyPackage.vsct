@@ -53,7 +53,10 @@
             </Group>
 
             <!-- Group for items inside the Cody submenu -->
-            <Group guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" priority="0x0100">
+            <Group guid="guidCodyPackageCmdSet" id="CodySubmenuGroup1" priority="0x0100">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenu"/>
+            </Group>
+            <Group guid="guidCodyPackageCmdSet" id="CodySubmenuGroup2" priority="0x0200">
                 <Parent guid="guidCodyPackageCmdSet" id="CodySubmenu"/>
             </Group>
         </Groups>
@@ -88,9 +91,22 @@
                 </Strings>
             </Button>
 
+            <!-- Edit code button in the submenu -->
+            <Button guid="guidCodyPackageCmdSet" id="EditCodeCommandId" priority="0x0000" type="Button">
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup1" />
+                <Icon guid="ImageCatalogGuid" id="Writeable" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>DefaultInvisible</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <ButtonText>Edit Code...</ButtonText>
+                    <CanonicalName>EditCode</CanonicalName>
+                    <ToolTipText>Opens the Edit Code dialog</ToolTipText>
+                </Strings>
+            </Button>
             <!-- Document Code button in the submenu -->
             <Button guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" priority="0x0100" type="Button">
-                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup1" />
                 <Icon guid="ImageCatalogGuid" id="ShowAllCode" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>
@@ -103,7 +119,7 @@
             </Button>
             <!-- Generate Unit Tests button in the submenu -->
             <Button guid="guidCodyPackageCmdSet" id="GenerateUnitTestsCommandId" priority="0x0200" type="Button">
-                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup2" />
                 <Icon guid="ImageCatalogGuid" id="CodeTest" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>
@@ -116,7 +132,7 @@
             </Button>
             <!-- Explain Code button in the submenu -->
             <Button guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" priority="0x0300" type="Button">
-                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup2" />
                 <Icon guid="ImageCatalogGuid" id="CodeReviewDashboard" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>
@@ -129,7 +145,7 @@
             </Button>
             <!-- Find Code Smells button in the submenu -->
             <Button guid="guidCodyPackageCmdSet" id="FindCodeSmellsCommandId" priority="0x0400" type="Button">
-                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup" />
+                <Parent guid="guidCodyPackageCmdSet" id="CodySubmenuGroup2" />
                 <Icon guid="ImageCatalogGuid" id="CodeInformation" />
                 <CommandFlag>DynamicVisibility</CommandFlag>
                 <CommandFlag>DefaultInvisible</CommandFlag>
@@ -163,11 +179,13 @@
             <IDSymbol name="CodyToolsMenuGroup" value="0x1010" />
 
             <IDSymbol name="CodySubmenu" value="0x0102" />
-            <IDSymbol name="CodySubmenuGroup" value="0x0103" />
+            <IDSymbol name="CodySubmenuGroup1" value="0x0103" />
+            <IDSymbol name="CodySubmenuGroup2" value="0x0109" />
             <IDSymbol name="DocumentCodeCommandId" value="0x0104" />
             <IDSymbol name="GenerateUnitTestsCommandId" value="0x0105" />
             <IDSymbol name="ExplainCodeCommandId" value="0x0106" />
             <IDSymbol name="FindCodeSmellsCommandId" value="0x0107" />
+            <IDSymbol name="EditCodeCommandId" value="0x0108" />
         </GuidSymbol>
 
         <GuidSymbol name="guidImages" value="{9cf94066-686e-4dd8-99c8-3dee4bfb3f59}" >
@@ -185,7 +203,8 @@
     <KeyBindings>
         <!-- This is the keybinding for opening chat. -->
         <KeyBinding guid="guidCodyPackageCmdSet" id="CodyToolWindowCommandId" editor="guidVSStd97" key1="L" mod1="Alt" />
-        <KeyBinding guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" editor="guidTextEditor" key1="K" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="EditCodeCommandId" editor="guidTextEditor" key1="K" mod1="Alt" />
+        <KeyBinding guid="guidCodyPackageCmdSet" id="DocumentCodeCommandId" editor="guidTextEditor" key1="H" mod1="Alt" />
         <KeyBinding guid="guidCodyPackageCmdSet" id="ExplainCodeCommandId" editor="guidTextEditor" key1="I" mod1="Alt" />
     </KeyBindings>
 </CommandTable>
