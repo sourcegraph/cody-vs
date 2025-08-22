@@ -92,6 +92,8 @@ namespace Cody.VisualStudio.Tests
             VsShellUtilities.OpenDocument(CodyPackage, path, Guid.Empty, out _, out _, out IVsWindowFrame frame);
             frame.Show();
 
+            WriteLog($"Opened file: '{path}'");
+
             if (selectLineStart.HasValue && selectLineEnd.HasValue)
             {
                 frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocView, out var pvar);

@@ -1,5 +1,6 @@
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Common;
+using Cody.Core.Ide;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Microsoft.VisualStudio;
@@ -23,6 +24,9 @@ namespace Cody.VisualStudio.Services
         private readonly IServiceProvider serviceProvider;
         private readonly IVsSolution vsSolution;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
+
+        private readonly TaskCompletionSource<bool> _editCompletionSource = new TaskCompletionSource<bool>();
+        public Task<bool> EditCompletion => _editCompletionSource.Task;
 
         public DocumentService(ILog log, IServiceProvider serviceProvider, IVsSolution vsSolution, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
         {
@@ -198,6 +202,7 @@ namespace Cody.VisualStudio.Services
                     try
                     {
                         editContext.Apply();
+                        _editCompletionSource.SetResult(true);
                     }
                     catch (InvalidOperationException ex)
                     {
