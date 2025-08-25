@@ -128,6 +128,7 @@
     <Compile Include="Infrastructure\IFileDialogService.cs" />
     <Compile Include="Infrastructure\ISecretStorageService.cs" />
     <Compile Include="Infrastructure\IProgressService.cs" />
+    <Compile Include="Infrastructure\IToastNotificationService.cs" />
     <Compile Include="Logging\ISentryLog.cs" />
     <Compile Include="Logging\ITestLogger.cs" />
     <Compile Include="Logging\SentryLog.cs" />

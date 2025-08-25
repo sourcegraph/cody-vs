@@ -70,6 +70,7 @@ namespace Cody.VisualStudio
         public IConfigurationService ConfigurationService;
         public IFileDialogService FileDialogService;
         public IEditCodeService EditCodeService;
+        public IToastNotificationService ToastNotificationService;
 
         private IInfobarNotifications InfobarNotifications;
 
@@ -172,8 +173,10 @@ namespace Cody.VisualStudio
             TestingSupportService = null; // new TestingSupportService(statusCenterService);
             VsEditorAdaptersFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             DocumentService = new DocumentService(Logger, this, vsSolution, VsEditorAdaptersFactoryService);
+            ToastNotificationService = new ToastNotificationService(Logger);
 
-            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger, DocumentService, SecretStorageService, InfobarNotificationsAsync);
+            NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger,
+                DocumentService, SecretStorageService, InfobarNotificationsAsync, StatusbarService, ToastNotificationService);
 
             NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
@@ -312,18 +315,18 @@ namespace Cody.VisualStudio
 
                     var host = obj as IVsInfoBarHost;
                     if (host != null)
-        {
+                    {
                         //Logger.Debug($"InitializeInfoBarService:{host}");
 
                         var uiFactory = ServiceProvider.GlobalProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
                         if (uiFactory != null)
-        {
+                        {
                             InfobarNotifications = new InfobarNotifications(host, uiFactory, AgentNotificationsLogger);
                             _infobarNotificationsCompletionSource.SetResult(InfobarNotifications);
 
                         }
                         else
-                    {
+                        {
                             Logger.Error("Cannot get IVsInfoBarUIFactory");
                         }
 
@@ -476,8 +479,8 @@ namespace Cody.VisualStudio
                 {
                     var documentSyncCallback = new DocumentSyncCallback(AgentService, Logger);
                     DocumentsSyncService = new DocumentsSyncService(VsUIShell, documentSyncCallback, VsEditorAdaptersFactoryService, UserSettingsService, Logger);
-                DocumentsSyncService.Initialize();
-            }
+                    DocumentsSyncService.Initialize();
+                }
             }
             catch (Exception ex)
             {

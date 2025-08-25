@@ -19,7 +19,8 @@ namespace Cody.Core.Agent
         private readonly Task<IInfobarNotifications> _infobarNotificationsAsync;
         private readonly ILog _logger;
         private readonly IUserSettingsService _settingsService;
-
+        private readonly IStatusbarService _statusbarService;
+        private readonly IToastNotificationService _toastNotificationService;
         public IAgentService agentClient;
 
         public delegate Task PostWebMessageAsJsonDelegate(string message);
@@ -39,13 +40,17 @@ namespace Cody.Core.Agent
             ILog logger,
             IDocumentService documentService,
             ISecretStorageService secretStorage,
-            Task<IInfobarNotifications> infobarNotificationsAsync)
+            Task<IInfobarNotifications> infobarNotificationsAsync,
+            IStatusbarService statusbarService,
+            IToastNotificationService toastNotificationService)
         {
             _settingsService = settingsService;
             _secretStorage = secretStorage;
             _infobarNotificationsAsync = infobarNotificationsAsync;
             _logger = logger;
             _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty), _logger);
+            _statusbarService = statusbarService;
+            _toastNotificationService = toastNotificationService;
         }
 
         public void SetAgentClient(IAgentService client)
@@ -235,19 +240,25 @@ namespace Cody.Core.Agent
         {
             // TODO: supports only single auto-edit notification for now
             // because how the code handles enabling/disabling auto-edits via UserSettingsService
-            if (!param.Message.Contains("You have been enrolled to Cody Auto-edit")) return null; 
+            if (param.Message.Contains("You have been enrolled to Cody Auto-edit"))
+            {
 
-            var notifications = await _infobarNotificationsAsync;
+                var notifications = await _infobarNotificationsAsync;
 
-            _logger.Debug($"ℹ ShowMessage:{param.Message}");
-            var selectedValue = await notifications.Show(param);
+                _logger.Debug($"ℹ ShowMessage:{param.Message}");
+                var selectedValue = await notifications.Show(param);
 
-            _logger.Debug($"Selected value: '{selectedValue}'");
+                _logger.Debug($"Selected value: '{selectedValue}'");
 
-            if (selectedValue == null) // an user want to stay on auto-edits
-                _settingsService.EnableAutoEdit = true;
+                if (selectedValue == null) // an user want to stay on auto-edits
+                    _settingsService.EnableAutoEdit = true;
 
-            return selectedValue;
+                return selectedValue;
+            }
+
+            _statusbarService.SetText(param.Message);
+
+            return null;
         }
     }
 }

@@ -64,6 +64,7 @@
     <Compile Include="ViewModels\EditCodeViewModel.cs" />
     <Compile Include="ViewModels\GeneralOptionsViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\ToastViewModel.cs" />
     <Compile Include="Views\EditCodeView.xaml.cs">
       <DependentUpon>EditCodeView.xaml</DependentUpon>
     </Compile>
@@ -71,6 +72,9 @@
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\WebviewController.cs" />
+    <Compile Include="Views\ToastView.xaml.cs">
+      <DependentUpon>ToastView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\Options\GeneralOptionsControl.xaml">
@@ -89,6 +93,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ToastView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
