@@ -27,28 +27,36 @@ namespace Cody.VisualStudio.Services
 
         public async Task<string> ShowNotification(SeverityEnum severity, string message, string details, IEnumerable<string> actions)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            if (currentView != null) currentView.Close();
-
-            var actionsList = actions != null ? actions.Where(x => !string.IsNullOrEmpty(x)) : new List<string>();
-
-            var result = new TaskCompletionSource<string>();
-            currentView = new ToastView();
-            var vm = new ToastViewModel(currentView, severity, message, details, actionsList);
-
-            currentView.DataContext = vm;
-            currentView.Closed += (sender, e) =>
+            try
             {
-                currentView = null;
-                result.SetResult(vm.SelectedAction);
-            };
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            currentView.Owner = Application.Current.MainWindow;
-            currentView.Show();
-            currentView.PositionWindow();
+                if (currentView != null) currentView.Close();
 
-            return await result.Task;
+                var actionsList = actions != null ? actions.Where(x => !string.IsNullOrEmpty(x)) : new List<string>();
+
+                var result = new TaskCompletionSource<string>();
+                currentView = new ToastView();
+                var vm = new ToastViewModel(currentView, severity, message, details, actionsList);
+
+                currentView.DataContext = vm;
+                currentView.Closed += (sender, e) =>
+                {
+                    currentView = null;
+                    result.SetResult(vm.SelectedAction);
+                };
+
+                currentView.Owner = Application.Current.MainWindow;
+                currentView.Show();
+                currentView.PositionWindow();
+
+                return await result.Task;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Show notification error", ex);
+                return null;
+            }
         }
     }
 }
