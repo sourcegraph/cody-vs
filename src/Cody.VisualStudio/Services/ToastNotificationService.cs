@@ -27,14 +27,15 @@ namespace Cody.VisualStudio.Services
 
         public async Task<string> ShowNotification(SeverityEnum severity, string message, string details, IEnumerable<string> actions)
         {
-            if (currentView != null)
-            {
-                currentView.Close();
-            }
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            if (currentView != null) currentView.Close();
+
+            var actionsList = actions != null ? actions.Where(x => !string.IsNullOrEmpty(x)) : new List<string>();
 
             var result = new TaskCompletionSource<string>();
             currentView = new ToastView();
-            var vm = new ToastViewModel(currentView, severity, message, details, actions);
+            var vm = new ToastViewModel(currentView, severity, message, details, actionsList);
 
             currentView.DataContext = vm;
             currentView.Closed += (sender, e) =>
@@ -42,8 +43,6 @@ namespace Cody.VisualStudio.Services
                 currentView = null;
                 result.SetResult(vm.SelectedAction);
             };
-
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             currentView.Owner = Application.Current.MainWindow;
             currentView.Show();

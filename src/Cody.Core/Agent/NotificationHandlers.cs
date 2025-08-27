@@ -255,8 +255,20 @@ namespace Cody.Core.Agent
 
                 return selectedValue;
             }
-
-            _statusbarService.SetText(param.Message);
+            else if (param.Message.StartsWith("Edit applied to"))
+            {
+                _statusbarService.SetText(param.Message);
+            }
+            else if (param.Items != null && param.Items.Count > 0 && !string.IsNullOrEmpty(param.Items[0]))
+            {
+                var result = await _toastNotificationService.ShowNotification(
+                    param.Severity, param.Message, param.Options?.Detail, param.Items);
+                return result;
+            }
+            else
+            {
+                _statusbarService.SetText(param.Message);
+            }
 
             return null;
         }
