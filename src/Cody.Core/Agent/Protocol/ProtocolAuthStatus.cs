@@ -1,15 +1,17 @@
+using JsonSubTypes;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
 
 
 namespace Cody.Core.Agent.Protocol
 {
-    [JsonConverter(typeof(ProtocolAuthStatusConverter))]
+    [JsonConverter(typeof(JsonSubtypes), "Status")]
+    [JsonSubtypes.KnownSubType(typeof(ProtocolAuthenticatedAuthStatus), "authenticated")]
+    [JsonSubtypes.KnownSubType(typeof(ProtocolUnauthenticatedAuthStatus), "unauthenticated")]
     public abstract class ProtocolAuthStatus
     {
-        public StatusEnum Status { get; set; }
+        public string Status { get; set; }
 
         public bool Authenticated { get; set; }
 
@@ -17,11 +19,6 @@ namespace Cody.Core.Agent.Protocol
 
         public bool PendingValidation { get; set; }
 
-        public enum StatusEnum
-        {
-            [EnumMember(Value = "authenticated")] Authenticated,
-            [EnumMember(Value = "unauthenticated")] Unauthenticated
-        }
     }
 
     public class ProtocolAuthenticatedAuthStatus : ProtocolAuthStatus
@@ -46,41 +43,6 @@ namespace Cody.Core.Agent.Protocol
     public class ProtocolUnauthenticatedAuthStatus : ProtocolAuthStatus
     {
         public AuthError Error { get; set; }
-    }
-
-    public class ProtocolAuthStatusConverter : JsonConverter
-    {
-        public override bool CanConvert(Type objectType)
-        {
-            return objectType == typeof(ProtocolAuthStatus);
-        }
-
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-            JsonSerializer serializer)
-        {
-            var jsonObject = JObject.Load(reader);
-
-            // Get the status discriminator
-            var status = jsonObject["status"]?.ToString();
-
-            // Create the appropriate concrete type based on the discriminator
-            ProtocolAuthStatus result;
-            if (status == "authenticated")
-                result = new ProtocolAuthenticatedAuthStatus();
-            else if (status == "unauthenticated")
-                result = new ProtocolUnauthenticatedAuthStatus();
-            else
-                throw new Exception($"Unknown discriminator {status}");
-
-            serializer.Populate(jsonObject.CreateReader(), result);
-
-            return result;
-        }
-
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            JObject.FromObject(value, serializer).WriteTo(writer);
-        }
     }
 
     public class OrganizationsParams
