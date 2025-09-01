@@ -146,7 +146,7 @@ jobs:
           
       - name: Upload feed files as artifact
         if: ${{ github.event.inputs.publish == 'Preview' }}
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           name: vsix-gallery-feed
           path: feed/
