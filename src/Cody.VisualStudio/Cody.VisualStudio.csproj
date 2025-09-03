@@ -78,6 +78,7 @@
     <Compile Include="Services\TestingSupportService.cs" />
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\StatusbarService.cs" />
+    <Compile Include="Services\ToastNotificationService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
     <Compile Include="Utilities\FilePathHelper.cs" />
