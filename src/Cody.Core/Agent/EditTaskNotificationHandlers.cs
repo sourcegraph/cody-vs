@@ -3,9 +3,7 @@ using Cody.Core.Common;
 using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -29,9 +27,15 @@ namespace Cody.Core.Agent
         [AgentCallback("textEditor/selection")]
         public void Selection(string uri, Range selection)
         {
-            // no needed yet
-            //var path = uri.ToWindowsPath();
-            //documentService.SelectInDocument(path, selection);
+            var path = uri.ToWindowsPath();
+            documentService.SelectInDocument(path, selection);
+        }
+
+        [AgentCallback("textEditor/revealRange")]
+        public void RevealRange(string uri, Range range)
+        {
+            var path = uri.ToWindowsPath();
+            documentService.RevealRangeInDocument(path, range);
         }
 
         [AgentCallback("editTask/getUserInput", deserializeToSingleObject: true)]
