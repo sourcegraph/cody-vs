@@ -32,53 +32,19 @@ namespace Cody.VisualStudio.Services
             this.editorAdaptersFactoryService = editorAdaptersFactoryService;
         }
 
-        public bool ShowDocument(string path, Range selection)
+        private bool ForDocument(string path, Func<IVsWindowFrame, IVsTextView, bool> action)
         {
             var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                 var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame);
-                if (tryOpenResult == VSConstants.S_OK)
-                {
-                    windowFrame?.Show();
-
-                    if (selection != null && windowFrame != null)
-                    {
-                        var textView = GetVsTextView(windowFrame);
-                        if (textView != null)
-                        {
-                            textView.CenterLines(selection.Start.Line, 0);
-                            textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
-                        }
-                    }
-
-                    return true;
-                }
-                else log.Error($"Cannot show document '{path}' (error code: {tryOpenResult})");
-
-                return false;
-            });
-
-            return result;
-        }
-
-        public bool SelectInDocument(string path, Range selection)
-        {
-            var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
-            {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                var tryOpenResult = VsShellUtilities.TryOpenDocument(serviceProvider, path, Guid.Empty, out _, out _, out IVsWindowFrame windowFrame);
-                if (tryOpenResult == VSConstants.S_OK)
+                if (tryOpenResult == VSConstants.S_OK && windowFrame != null)
                 {
                     var textView = GetVsTextView(windowFrame);
-                    if (textView != null)
-                    {
-                        textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
-                    }
-                    else log.Error($"Cannot get VsTextView '{path}'");
+                    if (textView == null) log.Warn($"Cannot get VsTextView '{path}'");
 
+                    return action(windowFrame, textView);
                 }
                 else log.Error($"Cannot open document '{path}' (error code: {tryOpenResult})");
 
@@ -86,6 +52,52 @@ namespace Cody.VisualStudio.Services
             });
 
             return result;
+        }
+
+        public bool ShowDocument(string path, Range selection)
+        {
+            return ForDocument(path, (windowFrame, textView) =>
+            {
+                windowFrame.Show();
+                if (selection != null && textView != null)
+                {
+                    textView.CenterLines(selection.Start.Line, 0);
+                    textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
+                }
+                return true;
+            });
+        }
+
+        public bool SelectInDocument(string path, Range selection)
+        {
+            return ForDocument(path, (windowFrame, textView) =>
+            {
+                if (selection != null && textView != null)
+                {
+                    textView.SetSelection(selection.Start.Line, selection.Start.Character, selection.End.Line, selection.End.Character);
+                }
+                return true;
+            });
+        }
+
+        public bool RevealRangeInDocument(string path, Range range)
+        {
+            return ForDocument(path, (windowFrame, textView) =>
+            {
+                if (textView != null && range != null)
+                {
+                    var span = new TextSpan()
+                    {
+                        iStartLine = range.Start.Line,
+                        iStartIndex = range.Start.Character,
+                        iEndLine = range.End.Line,
+                        iEndIndex = range.End.Character
+                    };
+
+                    textView.EnsureSpanVisible(span);
+                }
+                return true;
+            });
         }
 
         public bool InsertTextInDocument(string path, Position position, string text)

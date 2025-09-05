@@ -13,6 +13,8 @@ namespace Cody.Core.Infrastructure
 
         bool SelectInDocument(string path, Range selection);
 
+        bool RevealRangeInDocument(string path, Range range);
+
         bool InsertTextInDocument(string path, Position position, string text);
 
         bool ReplaceTextInDocument(string path, Range range, string text);
