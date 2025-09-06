@@ -208,7 +208,7 @@ namespace Cody.VisualStudio
                 scope.SetTag("agent", VersionService.Agent);
             });
 
-            VsShellUtilities.ShutdownToken.Register(() => SentrySdk.ConfigureScope(s => s.SetTag("isShuttingDown", "true")));
+            VsShellUtilities.ShutdownToken.Register(() => SentrySdk.AddBreadcrumb("VS is shutting down"));
         }
 
         private static void InitializeTrace()
