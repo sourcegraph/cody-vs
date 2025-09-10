@@ -25,8 +25,17 @@ namespace Cody.VisualStudio.Services
         private readonly IVsSolution vsSolution;
         private readonly IVsEditorAdaptersFactoryService editorAdaptersFactoryService;
 
-        private readonly TaskCompletionSource<bool> _editCompletionSource = new TaskCompletionSource<bool>();
-        public Task<bool> EditCompletion => _editCompletionSource.Task;
+        private TaskCompletionSource<bool> _editCompletionSource = new TaskCompletionSource<bool>();
+        public Task<bool> EditCompletion
+        {
+            get
+            {
+                if (_editCompletionSource.Task.IsCompleted)
+                    _editCompletionSource = new TaskCompletionSource<bool>();
+
+                return _editCompletionSource.Task;
+            }
+        }
 
         public DocumentService(ILog log, IServiceProvider serviceProvider, IVsSolution vsSolution, IVsEditorAdaptersFactoryService editorAdaptersFactoryService)
         {

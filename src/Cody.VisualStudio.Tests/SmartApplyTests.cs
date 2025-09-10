@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             Assert.NotEqual(modifiedText, originalText);
         }
 
-        //[VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Apply_Suggestion_Is_Modifying_Manager_Document()
         {
             // given
@@ -82,7 +82,11 @@ namespace Cody.VisualStudio.Tests
             await EnterChatTextAndSend("Suggest improvements");
 
             var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
-            await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')");
+
+            // checking if Chat window is too narrow to show "Apply" text
+            var hasHiddenClass = await apply.EvaluateAsync<bool>(@"element => element.classList.contains('tw-hidden')");
+            if (hasHiddenClass)
+                await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')"); // force shows "Apply" text so it will be possible to click on it
 
             await apply.ClickAsync(new() {Force = true});
 
