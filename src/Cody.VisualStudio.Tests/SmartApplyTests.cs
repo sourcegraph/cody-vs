@@ -49,7 +49,7 @@ namespace Cody.VisualStudio.Tests
             var originalText = await GetActiveDocumentText();
 
             // when
-            await ApplyLastSuggestion();
+            await ApplyLastSuggestionFor("Suggest improvements");
 
             var modifiedText = await GetActiveDocumentText();
 
@@ -69,7 +69,7 @@ namespace Cody.VisualStudio.Tests
             var originalText = await GetActiveDocumentText();
 
             // when
-            await ApplyLastSuggestion();
+            await ApplyLastSuggestionFor("Suggest improvements in Print() method");
 
             var modifiedText = await GetActiveDocumentText();
 
@@ -77,9 +77,9 @@ namespace Cody.VisualStudio.Tests
             Assert.NotEqual(modifiedText, originalText);
         }
 
-        private async Task ApplyLastSuggestion()
+        private async Task ApplyLastSuggestionFor(string chatText)
         {
-            await EnterChatTextAndSend("Suggest improvements");
+            await EnterChatTextAndSend(chatText);
 
             var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
 
