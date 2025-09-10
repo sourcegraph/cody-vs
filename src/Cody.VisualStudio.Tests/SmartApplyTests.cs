@@ -38,7 +38,7 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Test1()
+        public async Task Apply_Suggestion_Is_Modifying_Document()
         {
             // given
             await NewChat();
@@ -46,14 +46,32 @@ namespace Cody.VisualStudio.Tests
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Point.cs"));
 
+            var originalText = await GetActiveDocumentText();
+
             // when
+            await ApplyLastSuggestion();
+
+            var modifiedText = await GetActiveDocumentText();
+
+            // then
+            Assert.NotEqual(modifiedText, originalText);
+        }
+
+        private async Task ApplyLastSuggestion()
+        {
             await EnterChatTextAndSend("Suggest improvements");
             await Page.GetByRole(AriaRole.Button, new() { Name = "Apply" }).Last.ClickAsync();
 
-            await CodyPackage.DocumentService.EditCompletion;
+            await EditAppliedAsync();
+        }
+
+        private async Task EditAppliedAsync()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             await CodyPackage.DocumentService.EditCompletion;
 
-            await Task.Delay(TimeSpan.FromDays(1));
+            WriteLog("Changes applied");
         }
 
         public void Dispose()

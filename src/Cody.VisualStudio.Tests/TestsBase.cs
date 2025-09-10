@@ -14,6 +14,9 @@ using Xunit.Abstractions;
 using Thread = System.Threading.Thread;
 using System.Linq;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Text.Editor;
 using Process = System.Diagnostics.Process;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
@@ -109,6 +112,24 @@ namespace Cody.VisualStudio.Tests
             }
 
             await Task.Delay(500);
+        }
+
+        protected async Task<string> GetActiveDocumentText()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            var dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE2;
+            if (dte?.ActiveDocument != null)
+            {
+                var textDocument = dte.ActiveDocument.Object("TextDocument") as TextDocument;
+                if (textDocument != null)
+                {
+                    var startPoint = textDocument.StartPoint.CreateEditPoint();
+                    var endPoint = textDocument.EndPoint;
+                    return startPoint.GetText(endPoint);
+                }
+            }
+            return string.Empty;
         }
 
         protected async Task OpenCodyChatToolWindow()
