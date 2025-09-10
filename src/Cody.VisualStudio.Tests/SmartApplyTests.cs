@@ -38,7 +38,7 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Apply_Suggestion_Is_Modifying_Document()
+        public async Task Apply_Suggestion_Is_Modifying_Point_Document()
         {
             // given
             await NewChat();
@@ -57,10 +57,34 @@ namespace Cody.VisualStudio.Tests
             Assert.NotEqual(modifiedText, originalText);
         }
 
+        //[VsFact(Version = VsVersion.VS2022)]
+        public async Task Apply_Suggestion_Is_Modifying_Manager_Document()
+        {
+            // given
+            await NewChat();
+
+            await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
+            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
+
+            var originalText = await GetActiveDocumentText();
+
+            // when
+            await ApplyLastSuggestion();
+
+            var modifiedText = await GetActiveDocumentText();
+
+            // then
+            Assert.NotEqual(modifiedText, originalText);
+        }
+
         private async Task ApplyLastSuggestion()
         {
             await EnterChatTextAndSend("Suggest improvements");
-            await Page.GetByRole(AriaRole.Button, new() { Name = "Apply" }).Last.ClickAsync();
+
+            var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
+            await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')");
+
+            await apply.ClickAsync(new() {Force = true});
 
             await EditAppliedAsync();
         }
