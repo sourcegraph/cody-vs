@@ -114,5 +114,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Resource Include="..\Cody.VisualStudio\Resources\sourcegraph.png">
+      <Link>Resources\sourcegraph.png</Link>
+    </Resource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
