@@ -12,6 +12,6 @@ namespace Cody.Core.Agent.Protocol
 
         public string SelectedModelId { get; set; }
 
-        public ModelAvailabilityStatus[] AvailableModels { get; set; }
+        public Model[] AvailableModels { get; set; }
     }
 }

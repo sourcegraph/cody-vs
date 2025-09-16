@@ -64,7 +64,6 @@
     <Compile Include="Agent\Protocol\ChatPanelInfo.cs" />
     <Compile Include="Agent\Protocol\ExecuteCommandParams.cs" />
     <Compile Include="Agent\Protocol\Model.cs" />
-    <Compile Include="Agent\Protocol\ModelAvailabilityStatus.cs" />
     <Compile Include="Agent\Protocol\ModelContextWindow.cs" />
     <Compile Include="Agent\Protocol\ModelRef.cs" />
     <Compile Include="Agent\Protocol\ShowWindowMessageParams.cs" />
