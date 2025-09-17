@@ -63,22 +63,53 @@
     </FrameworkElement.Resources>
     <StackPanel Margin="12">
         <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition  Height="16"/>
+                <RowDefinition  Height="Auto"/>
+            </Grid.RowDefinitions>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="32"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <imaging:CrispImage Grid.Column="0"
+
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Orientation="Horizontal"
+                Margin="-5,-7,0,0"
+                >
+                <Image
+                    Width="16"
+                    Source="/Cody.UI;Component/Resources/sourcegraph.png" 
+                />
+                <TextBlock
+                    Text="Cody"
+                    VerticalAlignment="Center"
+                    Margin="5,0,0,0"
+                    />
+
+
+            </StackPanel>
+
+            
+
+            <imaging:CrispImage Grid.Row="1"
+                                Grid.Column="0"
                                 Width="24"
                                 Height="24"
-                                Margin="2,2,0,0"
+                                Margin="2,12,0,0"
                                 VerticalAlignment="Top"
                                 Moniker="{Binding Moniker}"/>
 
 
-            <StackPanel Grid.Column="1"
-                        Margin="8,0,20,0"
+            <StackPanel Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="8,10,20,0"
                         Orientation="Vertical"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Left">
@@ -97,7 +128,8 @@
                 </TextBlock>
             </StackPanel>
 
-            <Button Grid.Column="2"
+            <Button Grid.Row="0"
+                    Grid.Column="2"
                     Width="14"
                     Height="14"
                     Margin="0,-6,-6,0"
@@ -109,7 +141,7 @@
                     Style="{StaticResource IgnoreButtonStyle}">
                 <StaticResourceExtension ResourceKey="DismissGlyphPathKey"/>
             </Button>
-            
+
         </Grid>
         <StackPanel x:Name="ActionButtonPanel" Margin="46,17,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
             <ItemsControl ItemsSource="{Binding Actions}">
