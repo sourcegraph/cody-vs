@@ -2,7 +2,7 @@ name: Build and test extension
 
 on:
   push:
-    branches: [piotr/smart-apply-ui-tests]
+    branches: [main]
   pull_request:
     branches: [main]
 
