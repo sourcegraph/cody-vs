@@ -238,7 +238,7 @@ namespace Cody.VisualStudio.Tests
             var entryArea = GetChatEntryArea();
             var enterArea = Page.Locator("[data-keep-toolbar-open=true]").Last;
 
-            await entryArea.FillAsync(prompt);
+            await entryArea.PressSequentiallyAsync(prompt);
             await enterArea.PressAsync("Enter");
             await Task.Delay(500);
 

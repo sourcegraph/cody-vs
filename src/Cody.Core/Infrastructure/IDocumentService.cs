@@ -23,6 +23,7 @@ namespace Cody.Core.Infrastructure
 
         bool EditTextInDocument(string path, IEnumerable<TextEdit> edits);
 
+        Task<bool> EditCompletion { get; }
 
         bool CreateDocument(string path, string content, bool overwrite);
         bool RenameDocument(string oldName, string newName);
