@@ -44,8 +44,7 @@ namespace Cody.Core.Agent
             try
             {
                 var models = request.AvailableModels
-                    .Where(x => x.IsModelAvailable)
-                    .Select(x => new EditModel { Id = x.Model.Id, Name = x.Model.Title, Provider = x.Model.Provider });
+                    .Select(x => new EditModel { Id = x.Id, Name = x.Title, Provider = x.Provider });
 
                 var result = editCodeService.ShowEditCodeDialog(models, request.SelectedModelId, request.Instruction);
 
