@@ -1,6 +1,7 @@
 using Cody.Core.Common;
 using Sentry;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -30,14 +31,9 @@ namespace Cody.Core.Logging
 
         public void Error(string message, [CallerMemberName] string callerName = "")
         {
-            SentrySdk.CaptureMessage(message, scope =>
-            {
-                scope.Contexts[ErrorData] = new
-                {
-                    Message = message,
-                    CallerName = callerName,
-                };
-            });
+            SentrySdk.AddBreadcrumb(message,
+                data: new Dictionary<string, string> { ["callerName"] = callerName },
+                level: BreadcrumbLevel.Error);
         }
 
         private static DateTime GetLinkerBuildTime(Assembly assembly)
@@ -84,7 +80,7 @@ namespace Cody.Core.Logging
                 {
                     options.Dsn = "https://d129345ba8e1848a01435eb2596ca899@o19358.ingest.us.sentry.io/4508375896752129";
                     options.IsGlobalModeEnabled = true;
-                    options.MaxBreadcrumbs = 10;
+                    options.MaxBreadcrumbs = 50;
                     options.Environment = env;
                     options.Release = "cody-vs@" + version.ToString();
                     options.SetBeforeSend(se =>
