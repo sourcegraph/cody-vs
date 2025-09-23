@@ -108,7 +108,7 @@ namespace Cody.UI.Controls
             return null;
         }
 
-        public static async Task PostWebMessageAsJson(string message)
+        public static async void PostWebMessageAsJson(object sender, string message)
         {
             await _controller.PostWebMessageAsJson(message);
         }
