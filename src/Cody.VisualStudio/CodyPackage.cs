@@ -425,7 +425,7 @@ namespace Cody.VisualStudio
         {
             try
             {
-                StatusbarService?.SetCodyStatus(CodyStatus.Hide, "Initializing Cody...");
+                StatusbarService?.SetCodyStatus(CodyStatus.Hide);
                 PrepareAgentConfiguration();
 
                 _ = Task.Run(async () =>

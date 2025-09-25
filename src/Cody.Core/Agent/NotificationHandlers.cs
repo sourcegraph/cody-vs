@@ -6,6 +6,7 @@ using Cody.Core.Settings;
 using Cody.Core.Trace;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -219,16 +220,26 @@ namespace Cody.Core.Agent
         [AgentCallback("statusBar/didChange", deserializeToSingleObject: true)]
         public void StatusBarChanged(StatusBarChangeParams param)
         {
-            _logger.Info($"STATUS: {param.TextWithIcon} -> {param.Tooltip}");
+            _logger.Info($"statusbar status: {param.TextWithIcon} - {param.Tooltip}");
+
+            var match = Regex.Match(param.TextWithIcon, @"\$\(([^)]+)\)(?:\s+(.+))?");
+
+            string icon = null;
+            string text = null;
+
+            if (match.Success)
+            {
+                icon = match.Groups[1].Value;
+                text = match.Groups[2].Success ? match.Groups[2].Value : null;
+            }
 
             CodyStatus status = CodyStatus.Unavailable;
-            if (param.TextWithIcon.Contains("Sign In")) status = CodyStatus.Unavailable;
-            else if (param.TextWithIcon.StartsWith("$(cody-logo-heavy)")) status = CodyStatus.Available;
-            else if (param.TextWithIcon.StartsWith("$(cody-logo-heavy-slash)")) status = CodyStatus.Unavailable;
-            else if (param.TextWithIcon.StartsWith("$(loading~spin)")) status = CodyStatus.Loading;
+            if (text == "Sign In") status = CodyStatus.Unavailable;
+            else if (icon == "cody-logo-heavy") status = CodyStatus.Available;
+            else if (icon == "cody-logo-heavy-slash") status = CodyStatus.Unavailable;
+            else if (icon == "loading~spin") status = CodyStatus.Loading;
 
-
-            _statusbarService.SetCodyStatus(status, param.Tooltip);
+            _statusbarService.SetCodyStatus(status, param.Tooltip, text);
         }
 
         [AgentCallback("window/focusSidebar")]

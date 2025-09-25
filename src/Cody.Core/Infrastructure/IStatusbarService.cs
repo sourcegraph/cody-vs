@@ -14,7 +14,7 @@ namespace Cody.Core.Infrastructure
 
         void StopProgressAnimation();
 
-        void SetCodyStatus(CodyStatus status, string tooltip = null);
+        void SetCodyStatus(CodyStatus status, string tooltip = null, string text = null);
 
         event EventHandler CodyStatusIconClicked;
     }
