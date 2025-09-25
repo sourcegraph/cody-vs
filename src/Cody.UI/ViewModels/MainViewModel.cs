@@ -1,39 +1,29 @@
-using System;
-using System.Threading.Tasks;
 using Cody.Core.Agent;
+using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.UI.MVVM;
+using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using Cody.Core.Infrastructure;
 
 namespace Cody.UI.ViewModels
 {
     public class MainViewModel : NotifyPropertyChangedBase, IWebChatHost
     {
         private readonly IWebViewsManager _webViewsManager;
-        public readonly NotificationHandlers NotificationHandlers;
+        public readonly WebviewNotificationHandlers NotificationHandlers;
 
         private readonly ILog _logger;
 
-        public MainViewModel(IWebViewsManager webViewsManager, NotificationHandlers notificationHandlers, ILog logger)
+        public MainViewModel(IWebViewsManager webViewsManager, WebviewNotificationHandlers notificationHandlers, ILog logger)
         {
             _webViewsManager = webViewsManager;
             NotificationHandlers = notificationHandlers;
             _logger = logger;
 
             NotificationHandlers.OnSetHtmlEvent += OnSetHtmlHandler;
-            NotificationHandlers.OnPostMessageEvent += OnPostMessageHandler;
 
             _logger.Debug("MainViewModel Initialized.");
-        }
-
-        private void OnPostMessageHandler(object sender, AgentResponseEvent e)
-        {
-            PostMessage = new AgentResponseEvent()
-            {
-                Id = e.Id,
-                StringEncodedMessage = e.StringEncodedMessage
-            };
         }
 
         private void OnWebviewRequestHandler(object sender, SetWebviewRequestEvent e)

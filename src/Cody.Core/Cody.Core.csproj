@@ -52,7 +52,6 @@
     <Compile Include="Agent\EditTaskNotificationHandlers.cs" />
     <Compile Include="Agent\IAgentProxy.cs" />
     <Compile Include="Agent\IAgentService.cs" />
-    <Compile Include="Agent\INotificationHandler.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AutocompleteEditItem.cs" />
@@ -109,10 +108,12 @@
     <Compile Include="Agent\Protocol\WebviewCapabilities.cs" />
     <Compile Include="Agent\Protocol\ResolveWebviewViewParams.cs" />
     <Compile Include="Agent\Protocol\WriteFileOptions.cs" />
+    <Compile Include="Agent\SecretNotificationHandlers.cs" />
     <Compile Include="Agent\SetHtmlEvent.cs" />
     <Compile Include="Agent\TextDocumentNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\TextEdit.cs" />
     <Compile Include="Agent\WebviewMessageHandler.cs" />
+    <Compile Include="Agent\WebviewNotificationHandlers.cs" />
     <Compile Include="Common\StringExtensions.cs" />
     <Compile Include="Common\Configuration.cs" />
     <Compile Include="Common\Configuration.Setup.cs" />

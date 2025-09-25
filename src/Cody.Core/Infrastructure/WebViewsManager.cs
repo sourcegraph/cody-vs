@@ -1,12 +1,12 @@
+using Cody.Core.Agent;
+using Cody.Core.Agent.Protocol;
+using Cody.Core.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Cody.Core.Agent;
-using Cody.Core.Agent.Protocol;
-using Cody.Core.Logging;
 
 namespace Cody.Core.Infrastructure
 {
@@ -38,7 +38,7 @@ namespace Cody.Core.Infrastructure
     {
         private readonly IAgentProxy _agentProxy;
         private IAgentService _agentService;
-        private readonly INotificationHandler _notificationHandler;
+        private readonly WebviewNotificationHandlers _notificationHandler;
         private readonly ILog _logger;
 
         private readonly List<IWebChatHost> _chatHosts;
@@ -48,7 +48,7 @@ namespace Cody.Core.Infrastructure
 
         private readonly BlockingCollection<WebViewEvent> _events; //TODO: when custom editors will be introduced, make it richer, like BlockingCollection<WebViewsEvents>, where WebViewsEvents will be a class
 
-        public WebViewsManager(IAgentProxy agentProxy, INotificationHandler notificationHandler, ILog logger)
+        public WebViewsManager(IAgentProxy agentProxy, WebviewNotificationHandlers notificationHandler, ILog logger)
         {
             _agentProxy = agentProxy;
             _notificationHandler = notificationHandler;

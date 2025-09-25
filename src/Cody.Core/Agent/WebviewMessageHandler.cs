@@ -7,14 +7,12 @@ namespace Cody.Core.Agent
 {
     public class WebviewMessageHandler
     {
-        private readonly IDocumentService _documentService;
         private readonly ILog _logger;
 
         private readonly Action _onOptionsPageShowRequest;
 
-        public WebviewMessageHandler(IDocumentService documentService, Action onOptionsPageShowRequest, ILog logger)
+        public WebviewMessageHandler(Action onOptionsPageShowRequest, ILog logger)
         {
-            _documentService = documentService;
             _onOptionsPageShowRequest = onOptionsPageShowRequest;
             _logger = logger;
         }
