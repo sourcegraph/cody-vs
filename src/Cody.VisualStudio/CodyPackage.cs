@@ -165,6 +165,7 @@ namespace Cody.VisualStudio
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
             StatusbarService = new StatusbarService();
+            StatusbarService.CodyStatusIconClicked += ShowToolWindow;
             ThemeService = new ThemeService(this, Logger);
 
 
@@ -424,6 +425,7 @@ namespace Cody.VisualStudio
         {
             try
             {
+                StatusbarService?.SetCodyStatus(CodyStatus.Hide, "Initializing Cody...");
                 PrepareAgentConfiguration();
 
                 _ = Task.Run(async () =>

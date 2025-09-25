@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace Cody.VisualStudio.Services
 {
@@ -14,6 +17,12 @@ namespace Cody.VisualStudio.Services
     {
         private static bool animationIsRunning = false;
         private object icon = (short)Constants.SBAI_General;
+
+        private const string resourcePath = "/Cody.VisualStudio;Component/Resources/";
+        private BitmapImage availableIcon = new BitmapImage(new Uri(resourcePath + "SourcegraphWhite.png", UriKind.Relative));
+        private BitmapImage unavailableIcon = new BitmapImage(new Uri(resourcePath + "SourcegraphWhiteError.png", UriKind.Relative));
+        private BitmapImage waitIcon = new BitmapImage(new Uri(resourcePath + "Wait.png", UriKind.Relative));
+        Image codyIcon;
 
         public void SetText(string text)
         {
@@ -56,6 +65,59 @@ namespace Cody.VisualStudio.Services
                 var statusBar = (IVsStatusbar)Package.GetGlobalService(typeof(SVsStatusbar));
 
                 return statusBar.Animation(enable ? 1 : 0, ref icon) == VSConstants.S_OK;
+            });
+        }
+
+        private void InitializeCodyIcon()
+        {
+            codyIcon = new Image()
+            {
+                MaxHeight = 16,
+                MaxWidth = 16,
+                Margin = new Thickness(0, 0, 5, 0)
+            };
+
+            DockPanel.SetDock(codyIcon, Dock.Right);
+            codyIcon.MouseUp += (sender, args) => CodyStatusIconClicked?.Invoke(codyIcon, EventArgs.Empty);
+
+            var resizeGripControl = Utilities.UIHelper.FindChild<Control>(Application.Current.MainWindow, "ResizeGripControl");
+            var dockPanel = resizeGripControl.Parent as DockPanel;
+            dockPanel.Children.Insert(2, codyIcon);
+        }
+
+        public event EventHandler CodyStatusIconClicked;
+
+        public void SetCodyStatus(CodyStatus status, string tooltip = null)
+        {
+            ThreadHelper.JoinableTaskFactory.Run(async delegate
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                if (codyIcon == null) InitializeCodyIcon();
+
+                switch (status)
+                {
+                    case CodyStatus.Loading:
+                        codyIcon.Source = waitIcon;
+                        codyIcon.Visibility = Visibility.Visible;
+                        break;
+                    case CodyStatus.Available:
+                        codyIcon.Source = availableIcon;
+                        codyIcon.Visibility = Visibility.Visible;
+                        break;
+                    case CodyStatus.Unavailable:
+                        codyIcon.Source = unavailableIcon;
+                        codyIcon.Visibility = Visibility.Visible;
+                        break;
+                    case CodyStatus.Hide:
+                    default:
+                        codyIcon.Visibility = Visibility.Hidden;
+                        break;
+                }
+
+                codyIcon.ToolTip = tooltip;
+
+                return Task.CompletedTask;
             });
         }
     }

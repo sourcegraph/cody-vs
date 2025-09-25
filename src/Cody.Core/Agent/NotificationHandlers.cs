@@ -216,6 +216,21 @@ namespace Cody.Core.Agent
             _secretStorage.Delete(key);
         }
 
+        [AgentCallback("statusBar/didChange", deserializeToSingleObject: true)]
+        public void StatusBarChanged(StatusBarChangeParams param)
+        {
+            _logger.Info($"STATUS: {param.TextWithIcon} -> {param.Tooltip}");
+
+            CodyStatus status = CodyStatus.Unavailable;
+            if (param.TextWithIcon.Contains("Sign In")) status = CodyStatus.Unavailable;
+            else if (param.TextWithIcon.StartsWith("$(cody-logo-heavy)")) status = CodyStatus.Available;
+            else if (param.TextWithIcon.StartsWith("$(cody-logo-heavy-slash)")) status = CodyStatus.Unavailable;
+            else if (param.TextWithIcon.StartsWith("$(loading~spin)")) status = CodyStatus.Loading;
+
+
+            _statusbarService.SetCodyStatus(status, param.Tooltip);
+        }
+
         [AgentCallback("window/focusSidebar")]
         public void FocusSidebar(object param)
         {

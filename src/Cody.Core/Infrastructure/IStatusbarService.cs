@@ -13,5 +13,17 @@ namespace Cody.Core.Infrastructure
         void StartProgressAnimation();
 
         void StopProgressAnimation();
+
+        void SetCodyStatus(CodyStatus status, string tooltip = null);
+
+        event EventHandler CodyStatusIconClicked;
+    }
+
+    public enum CodyStatus
+    {
+        Hide,
+        Loading,
+        Available,
+        Unavailable
     }
 }

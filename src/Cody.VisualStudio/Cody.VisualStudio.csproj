@@ -82,6 +82,7 @@
     <Compile Include="Services\UserSettingsProvider.cs" />
     <Compile Include="Services\VsVersionService.cs" />
     <Compile Include="Utilities\FilePathHelper.cs" />
+    <Compile Include="Utilities\UIHelper.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <Content Include="..\CodyDevConfig.json">
@@ -89,6 +90,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Wait.png" />
+    <Resource Include="Resources\SourcegraphWhiteError.png" />
+    <Resource Include="Resources\SourcegraphWhite.png" />
     <Content Include="Resources\sourcegraph.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
