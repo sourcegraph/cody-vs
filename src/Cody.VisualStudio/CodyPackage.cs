@@ -387,7 +387,6 @@ namespace Cody.VisualStudio
             {
                 if (e.Authenticated == true && e.AuthStatus is ProtocolAuthenticatedAuthStatus status)
                 {
-                    StatusbarService.SetText($"Hello {status.DisplayName}! Press Alt + L to open Cody Chat.");
                     Logger.Info("Authenticated.");
                     UserSettingsService.LastTimeAuthorized = true;
                     SentrySdk.ConfigureScope(scope =>

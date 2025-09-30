@@ -226,6 +226,7 @@ namespace Cody.Core.Agent
 
             string icon = null;
             string text = null;
+            string tooltip = param.Tooltip;
 
             if (match.Success)
             {
@@ -233,13 +234,15 @@ namespace Cody.Core.Agent
                 text = match.Groups[2].Success ? match.Groups[2].Value : null;
             }
 
-            CodyStatus status = CodyStatus.Unavailable;
+            CodyStatus status = CodyStatus.Hide;
             if (text == "Sign In") status = CodyStatus.Unavailable;
             else if (icon == "cody-logo-heavy") status = CodyStatus.Available;
             else if (icon == "cody-logo-heavy-slash") status = CodyStatus.Unavailable;
             else if (icon == "loading~spin") status = CodyStatus.Loading;
 
-            _statusbarService.SetCodyStatus(status, param.Tooltip, text);
+            if (icon == "cody-logo-heavy" && tooltip == "Cody Settings") tooltip = "Cody ready. Click to open Cody Chat.";
+
+            _statusbarService.SetCodyStatus(status, tooltip, text);
         }
 
         [AgentCallback("window/focusSidebar")]

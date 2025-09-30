@@ -76,7 +76,7 @@ namespace Cody.VisualStudio.Services
             stackPanel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 0, 5, 0),
+                Margin = new Thickness(0, 0, 10, 0),
             };
 
             codyIcon = new Image()
