@@ -158,7 +158,7 @@
       <Version>2.0.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
+      <Version>13.0.4</Version>
     </PackageReference>
     <PackageReference Include="Sentry" Version="4.13.0" />
   </ItemGroup>
