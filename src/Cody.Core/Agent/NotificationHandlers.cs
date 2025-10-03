@@ -4,71 +4,39 @@ using Cody.Core.Infrastructure;
 using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
-    public class NotificationHandlers : INotificationHandler
+    public class NotificationHandlers
     {
         private static TraceLogger trace = new TraceLogger(nameof(NotificationHandlers));
 
-        private readonly WebviewMessageHandler _messageFilter;
-        private readonly ISecretStorageService _secretStorage;
         private readonly Task<IInfobarNotifications> _infobarNotificationsAsync;
         private readonly ILog _logger;
         private readonly IUserSettingsService _settingsService;
         private readonly IStatusbarService _statusbarService;
         private readonly IToastNotificationService _toastNotificationService;
-        public IAgentService agentClient;
 
-        public delegate Task PostWebMessageAsJsonDelegate(string message);
-        public PostWebMessageAsJsonDelegate PostWebMessageAsJson { get; set; }
-
-        public event EventHandler<SetHtmlEvent> OnSetHtmlEvent;
 
         public event EventHandler<ProtocolAuthStatus> AuthorizationDetailsChanged;
-        public event EventHandler<string> OnRegisterWebViewRequest;
-        public event EventHandler OnOptionsPageShowRequest;
         public event EventHandler OnFocusSidebarRequest;
-
-        public event EventHandler<AgentResponseEvent> OnPostMessageEvent;
 
         public NotificationHandlers(
             IUserSettingsService settingsService,
             ILog logger,
             IDocumentService documentService,
-            ISecretStorageService secretStorage,
             Task<IInfobarNotifications> infobarNotificationsAsync,
             IStatusbarService statusbarService,
             IToastNotificationService toastNotificationService)
         {
             _settingsService = settingsService;
-            _secretStorage = secretStorage;
             _infobarNotificationsAsync = infobarNotificationsAsync;
             _logger = logger;
-            _messageFilter = new WebviewMessageHandler(documentService, () => OnOptionsPageShowRequest?.Invoke(this, EventArgs.Empty), _logger);
             _statusbarService = statusbarService;
             _toastNotificationService = toastNotificationService;
-        }
-
-        public void SetAgentClient(IAgentService client)
-        {
-            agentClient = client;
-        }
-
-        // Send a message to the host from webview.
-        public async Task SendWebviewMessage(string handle, string message)
-        {
-            bool handled = _messageFilter.HandleMessage(message);
-            if (!handled)
-                await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
-                {
-                    Id = handle,
-                    MessageStringEncoded = message
-                });
         }
 
         [AgentCallback("debug/message")]
@@ -76,87 +44,6 @@ namespace Cody.Core.Agent
         {
             //_logger.Debug($"[{channel} {message}]");
             trace.TraceEvent("AgentDebug", message);
-        }
-
-        [AgentCallback("webview/registerWebview")]
-        public void RegisterWebview(string handle)
-        {
-            _logger.Debug(handle);
-        }
-
-        [AgentCallback("webview/registerWebviewViewProvider")]
-        public void RegisterWebviewViewProvider(string viewId, bool retainContextWhenHidden)
-        {
-            _logger.Debug(viewId);
-            OnRegisterWebViewRequest?.Invoke(this, viewId);
-        }
-
-        [AgentCallback("webview/createWebviewPanel", deserializeToSingleObject: true)]
-        public void CreateWebviewPanel(CreateWebviewPanelParams panelParams)
-        {
-            _logger.Debug(panelParams.ToString());
-        }
-
-        [AgentCallback("webview/setOptions")]
-        public void SetOptions(string handle, DefiniteWebviewOptions options)
-        {
-            if (options.EnableCommandUris is bool enableCmd)
-            {
-                _logger.Debug(handle);
-            }
-            else if (options.EnableCommandUris is JArray jArray)
-            {
-                var uris = jArray.ToObject<string[]>();
-            }
-        }
-
-        [AgentCallback("webview/setHtml")]
-        public void SetHtml(string handle, string html)
-        {
-            OnSetHtmlEvent?.Invoke(this, new SetHtmlEvent() { Handle = handle, Html = html });
-        }
-
-        [AgentCallback("webview/PostMessage")]
-        public void PostMessage(string handle, string message)
-        {
-            PostMessageStringEncoded(handle, message);
-        }
-
-        [AgentCallback("webview/postMessageStringEncoded")]
-        public void PostMessageStringEncoded(string id, string stringEncodedMessage)
-        {
-            _logger.Debug(stringEncodedMessage);
-            PostWebMessageAsJson?.Invoke(stringEncodedMessage);
-        }
-
-        [AgentCallback("webview/didDisposeNative")]
-        public void DidDisposeNative(string handle)
-        {
-            _logger.Debug(handle);
-        }
-
-        [AgentCallback("webview/dispose")]
-        public void Dispose(string handle)
-        {
-            _logger.Debug(handle);
-        }
-
-        [AgentCallback("webview/reveal")]
-        public void Reveal(string handle, int viewColumn, bool preserveFocus)
-        {
-            _logger.Debug(handle);
-        }
-
-        [AgentCallback("webview/setTitle")]
-        public void SetTitle(string handle, string title)
-        {
-            _logger.Debug(title);
-        }
-
-        [AgentCallback("webview/setIconPath")]
-        public void SetIconPath(string handle, string iconPathUri)
-        {
-            _logger.Debug(iconPathUri);
         }
 
         [AgentCallback("window/didChangeContext")]
@@ -196,27 +83,7 @@ namespace Cody.Core.Agent
 
         }
 
-        [AgentCallback("secrets/get")]
-        public Task<string> SecretGet(string key)
-        {
-            _logger.Debug(key, $@"SecretGet - {key}");
-            return Task.FromResult(_secretStorage.Get(key));
-        }
-
-        [AgentCallback("secrets/store")]
-        public void SecretStore(string key, string value)
-        {
-            _logger.Debug(key, $@"SecretStore - {key}");
-            _secretStorage.Set(key, value);
-        }
-
-        [AgentCallback("secrets/delete")]
-        public void SecretDelete(string key)
-        {
-            _logger.Debug(key, $@"SecretDelete - {key}");
-            _secretStorage.Delete(key);
-        }
-
+        
         [AgentCallback("statusBar/didChange", deserializeToSingleObject: true)]
         public void StatusBarChanged(StatusBarChangeParams param)
         {

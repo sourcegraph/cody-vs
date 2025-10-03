@@ -82,9 +82,11 @@ namespace Cody.VisualStudio
 
         public MainView MainView;
         public NotificationHandlers NotificationHandlers;
+        public WebviewNotificationHandlers WebviewNotificationHandlers;
         public ProgressNotificationHandlers ProgressNotificationHandlers;
         public TextDocumentNotificationHandlers TextDocumentNotificationHandlers;
         public EditTaskNotificationHandlers EditTaskNotificationHandlers;
+        public SecretNotificationHandlers SecretNotificationHandlers;
         public DocumentsSyncService DocumentsSyncService;
         public static TestingSupportService TestingSupportService;
         public IDocumentService DocumentService;
@@ -177,15 +179,17 @@ namespace Cody.VisualStudio
             ToastNotificationService = new ToastNotificationService(Logger);
 
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger,
-                DocumentService, SecretStorageService, InfobarNotificationsAsync, StatusbarService, ToastNotificationService);
+                DocumentService, InfobarNotificationsAsync, StatusbarService, ToastNotificationService);
+            WebviewNotificationHandlers = new WebviewNotificationHandlers(Logger);
+            SecretNotificationHandlers = new SecretNotificationHandlers(SecretStorageService, Logger);
 
-            NotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
+            WebviewNotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
             NotificationHandlers.OnFocusSidebarRequest += HandleOnFocusSidebarRequest;
             NotificationHandlers.AuthorizationDetailsChanged += AuthorizationDetailsChanged;
 
             var sidebarController = WebView2Dev.InitializeController(ThemeService.GetThemingScript(), Logger);
             ThemeService.ThemeChanged += sidebarController.OnThemeChanged;
-            NotificationHandlers.PostWebMessageAsJson = WebView2Dev.PostWebMessageAsJson;
+            WebviewNotificationHandlers.PostWebMessageAsJson += WebView2Dev.PostWebMessageAsJson;
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
 
@@ -358,9 +362,11 @@ namespace Cody.VisualStudio
                     CallbackHandlers = new List<object>
                     {
                         NotificationHandlers,
+                        WebviewNotificationHandlers,
                         ProgressNotificationHandlers,
                         TextDocumentNotificationHandlers,
-                        EditTaskNotificationHandlers
+                        EditTaskNotificationHandlers,
+                        SecretNotificationHandlers
                     },
                     AgentDirectory = agentDir,
                     RestartAgentOnFailure = true,
@@ -373,7 +379,7 @@ namespace Cody.VisualStudio
                 AgentClient = new AgentClient(options, Logger, AgentLogger);
                 AgentClient.OnInitialized += OnAgentInitialized;
 
-                WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
+                WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
             }
             catch (Exception ex)
             {
@@ -438,7 +444,7 @@ namespace Cody.VisualStudio
                         AgentService = await AgentClient.Initialize(clientConfig);
 
                         WebViewsManager.SetAgentService(AgentService);
-                        NotificationHandlers.SetAgentClient(AgentService);
+                        WebviewNotificationHandlers.SetAgentClient(AgentService);
                         ProgressNotificationHandlers.SetAgentService(AgentService);
 
                         if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();

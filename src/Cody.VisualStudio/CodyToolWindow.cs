@@ -1,10 +1,10 @@
-using Microsoft.VisualStudio.Shell;
-using System;
-using System.Runtime.InteropServices;
 using Cody.UI.ViewModels;
 using Cody.UI.Views;
 using Cody.VisualStudio.Inf;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Runtime.InteropServices;
 
 #pragma warning disable VSTHRD010
 
@@ -37,7 +37,7 @@ namespace Cody.VisualStudio
 
             var package = GetPackage();
             var logger = package.Logger;
-            var notificationsHandlers = package.NotificationHandlers;
+            var notificationsHandlers = package.WebviewNotificationHandlers;
             var webViewsManager = package.WebViewsManager;
 
             var viewModel = new MainViewModel(webViewsManager, notificationsHandlers, logger);
