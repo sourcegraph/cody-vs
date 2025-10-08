@@ -2,6 +2,8 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +11,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Threading;
-using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 using Xunit;
 using Xunit.Abstractions;
+using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Cody.VisualStudio.Tests
 {
@@ -114,7 +114,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForLogOutState()
         {
-            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+            await Page.WaitForSelectorAsync("text=Let's get you started");
         }
 
         protected async Task WaitForLogInState()
@@ -334,7 +334,8 @@ namespace Cody.VisualStudio.Tests
 
             // Wait for solution to be fully loaded by checking IsFullyLoaded property
             // and by waiting for projects to be accessible
-            await WaitForAsync(() => {
+            await WaitForAsync(() =>
+            {
                 try
                 {
                     var solutionService = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
