@@ -66,6 +66,7 @@ namespace Cody.VisualStudio
         public IWebViewsManager WebViewsManager;
         public IProgressService ProgressService;
         public IAgentProxy AgentClient;
+        public Services.AgentService AgentServiceManager;
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
         public IFileDialogService FileDialogService;
@@ -380,10 +381,44 @@ namespace Cody.VisualStudio
                 AgentClient.OnInitialized += OnAgentInitialized;
 
                 WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
+                // Create AgentService to manage initialization and restart workflow
+                AgentServiceManager = new Services.AgentService(
+                    (AgentClient)AgentClient,
+                    () => ConfigurationService.GetClientInfo(),
+                    OnAgentServiceInitialized,
+                    Logger);
+
+                WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed.", ex);
+            }
+        }
+
+        private void OnAgentServiceInitialized(IAgentService agentService)
+        {
+            try
+            {
+                // Set the AgentService for all components
+                AgentService = agentService;
+                WebViewsManager.SetAgentService(AgentService);
+                NotificationHandlers.SetAgentClient(AgentService);
+                ProgressNotificationHandlers.SetAgentService(AgentService);
+
+                // Set up solution events
+                SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= OnAfterBackgroundSolutionLoadComplete;
+                SolutionEvents.OnAfterCloseSolution -= OnAfterCloseSolution;
+
+                if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
+                SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
+                SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
+
+                Logger.Info("Agent service initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Error in OnAgentServiceInitialized", ex);
             }
         }
 
@@ -438,24 +473,14 @@ namespace Cody.VisualStudio
                     try
                     {
                         await TestServerConnection(UserSettingsService.DefaultServerEndpoint);
-                        AgentClient.Start();
-
-                        var clientConfig = ConfigurationService.GetClientInfo();
-                        AgentService = await AgentClient.Initialize(clientConfig);
-
-                        WebViewsManager.SetAgentService(AgentService);
-                        WebviewNotificationHandlers.SetAgentClient(AgentService);
-                        ProgressNotificationHandlers.SetAgentService(AgentService);
-
-                        if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
-                        SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
-                        SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
+                        
+                        // Use AgentService to manage the full initialization workflow
+                        await AgentServiceManager.InitializeAsync();
                     }
                     catch (Exception ex)
                     {
                         Logger.Error("Agent initialization failed.", ex);
                     }
-
                 });
             }
             catch (Exception ex)
@@ -466,8 +491,12 @@ namespace Cody.VisualStudio
 
         private void OnAfterBackgroundSolutionLoadComplete(object sender = null, EventArgs e = null)
         {
+            Logger.Debug("Init ...");
+
             UpdateCurrentWorkspaceFolder();
             InitializeNotificationsBar();
+
+            Logger.Debug("completed.");
         }
 
         private void UpdateCurrentWorkspaceFolder()

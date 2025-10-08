@@ -11,5 +11,6 @@ namespace Cody.Core.Agent
         void Start();
         Task<IAgentService> Initialize(ClientInfo clientInfo);
         event EventHandler<ServerInfo> OnInitialized;
+        event EventHandler<int> AgentDisconnected;
     }
 }

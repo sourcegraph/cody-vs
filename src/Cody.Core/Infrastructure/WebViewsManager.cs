@@ -58,6 +58,7 @@ namespace Cody.Core.Infrastructure
             _events = new BlockingCollection<WebViewEvent>();
             _processedWebViewsRequests = new List<WebViewEvent>();
 
+            _agentProxy.AgentDisconnected += OnAgentDisconnected;
             _notificationHandler.OnRegisterWebViewRequest += OnRegisterWebViewRequestHandler;
 
             Task.Run(ProcessEvents);
@@ -127,6 +128,14 @@ namespace Cody.Core.Infrastructure
             {
                 _logger.Debug("Processing events queue stopped.", ex);
             }
+        }
+
+        private void OnAgentDisconnected(object sender, int e)
+        {
+            _agentService = null;
+            _processedWebViewsRequests.RemoveAll(r => r.Type == WebViewsEventTypes.RegisterWebViewRequest);
+
+            _logger.Debug("Cleared old agent service reference.");
         }
 
         private async Task WaitForAgentInitialization()
