@@ -166,7 +166,7 @@ namespace Cody.VisualStudio
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
-            StatusbarService = new StatusbarService();
+            StatusbarService = new StatusbarService(Logger);
             StatusbarService.CodyStatusIconClicked += ShowToolWindow;
             ThemeService = new ThemeService(this, Logger);
 

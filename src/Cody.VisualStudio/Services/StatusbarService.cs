@@ -30,6 +30,11 @@ namespace Cody.VisualStudio.Services
         StackPanel stackPanel;
         TextBlock textBlock;
 
+        public StatusbarService(ILog logger)
+        {
+            this.logger = logger;
+        }
+
         public void SetText(string text)
         {
             ThreadHelper.JoinableTaskFactory.Run(async delegate
