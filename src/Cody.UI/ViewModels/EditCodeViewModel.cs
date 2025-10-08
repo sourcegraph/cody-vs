@@ -1,4 +1,5 @@
 using Cody.UI.MVVM;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,7 +12,10 @@ namespace Cody.UI.ViewModels
 {
     public class EditCodeViewModel : NotifyPropertyChangedBase
     {
-        public EditCodeViewModel(IEnumerable<Model> models, string selectedModelId, string instruction)
+        private List<string> instructionsHistory;
+        private int currentHistoryItem;
+
+        public EditCodeViewModel(IEnumerable<Model> models, string selectedModelId, string instruction, List<string> instructionsHistory)
         {
             var collection = new ObservableCollection<Model>(models);
             var modelsSource = new CollectionViewSource();
@@ -21,6 +25,9 @@ namespace Cody.UI.ViewModels
             Models = modelsSource;
 
             SelectedModel = collection.FirstOrDefault(x => x.Id == selectedModelId);
+
+            this.instructionsHistory = instructionsHistory;
+            currentHistoryItem = instructionsHistory.Count;
             Instruction = instruction;
         }
 
@@ -41,10 +48,40 @@ namespace Cody.UI.ViewModels
             {
                 SetProperty(ref instruction, value);
                 OnNotifyPropertyChanged(nameof(EditButtonIsEnabled));
+                currentHistoryItem = instructionsHistory.Count;
             }
         }
 
         public bool EditButtonIsEnabled => !string.IsNullOrWhiteSpace(instruction);
+
+        private DelegateCommand historyUpCommand;
+        public DelegateCommand HistoryUpCommand => historyUpCommand = historyUpCommand ?? new DelegateCommand(OnHistoryUp);
+
+        private DelegateCommand historyDownCommand;
+        public DelegateCommand HistoryDownCommand => historyDownCommand = historyDownCommand ?? new DelegateCommand(OnHistoryDown);
+
+        private void OnHistoryUp()
+        {
+            if (currentHistoryItem - 1 >= 0)
+            {
+                currentHistoryItem--;
+                SetProperty(ref instruction, instructionsHistory[currentHistoryItem], nameof(Instruction));
+                OnNotifyPropertyChanged(nameof(EditButtonIsEnabled));
+            }
+        }
+
+        private void OnHistoryDown()
+        {
+            if (currentHistoryItem + 1 <= instructionsHistory.Count)
+            {
+                currentHistoryItem++;
+                var inst = string.Empty;
+                if (currentHistoryItem != instructionsHistory.Count) inst = instructionsHistory[currentHistoryItem];
+
+                SetProperty(ref instruction, inst, nameof(Instruction));
+                OnNotifyPropertyChanged(nameof(EditButtonIsEnabled));
+            }
+        }
     }
 
     public class Model

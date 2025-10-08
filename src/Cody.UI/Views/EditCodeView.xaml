@@ -1,6 +1,6 @@
 <platformui:DialogWindow        
         xmlns:platformui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"        
-        xmlns:theme="clr-namespace:Community.VisualStudio.Toolkit"        
+        xmlns:theme="clr-namespace:Community.VisualStudio.Toolkit"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"        
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"        
         x:Class="Cody.UI.Views.EditCodeView"        
@@ -14,6 +14,10 @@
         ShowInTaskbar="False"        
         theme:Themes.UseVsTheme="True"        
         FocusManager.FocusedElement="{Binding ElementName=InputTextBox}">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding HistoryUpCommand}" Gesture="ALT+UP" />
+        <KeyBinding Command="{Binding HistoryDownCommand}" Gesture="ALT+DOWN" />
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -35,7 +39,7 @@
                    />
             <TextBox Grid.Row="1"
                      x:Name="InputTextBox"                     
-                     Text="{Binding Instruction, UpdateSourceTrigger=PropertyChanged}"                     
+                     Text="{Binding Instruction, UpdateSourceTrigger=PropertyChanged}"                  
                      TextWrapping="Wrap"                     
                      VerticalScrollBarVisibility="Auto"
                      Margin="0,0,0,12"/>
@@ -59,25 +63,37 @@
             </ComboBox>
         </Grid>
         <!-- Button Area -->
-        <StackPanel Grid.Row="1"                     
-                     Orientation="Horizontal"                     
-                     HorizontalAlignment="Right"                     
-                     Margin="12">
-            <Button x:Name="EditButton"                    
-                    IsDefault="True"                    
-                    Content="Edit Code"                     
-                    Width="75"                     
-                    Height="23"                     
-                    Margin="0,0,6,0"                    
-                    IsEnabled="{Binding EditButtonIsEnabled}"                    
-                    Click="OnEditCodeClick"                    
-                    />
-            <Button x:Name="CancelButton"                     
-                    Content="Cancel"                    
-                    IsCancel="True"                    
-                    Width="75"                     
-                    Height="23"                    
-                    />
-        </StackPanel>
+        <Grid Grid.Row="1" Margin="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" 
+               Text="Alt+🡡🡣 for history" 
+               Foreground="Gray"
+               VerticalAlignment="Center">
+            </TextBlock>
+
+            <Button Grid.Column="1"
+            x:Name="EditButton"
+            IsDefault="True"
+            Content="Edit Code"
+            Width="75"
+            Height="23"
+            Margin="0,0,6,0"
+            IsEnabled="{Binding EditButtonIsEnabled}"
+            Click="OnEditCodeClick"
+            />
+
+            <Button Grid.Column="2"
+            x:Name="CancelButton"
+            Content="Cancel"
+            IsCancel="True"
+            Width="75"
+            Height="23"
+            />
+        </Grid>
     </Grid>
 </platformui:DialogWindow>

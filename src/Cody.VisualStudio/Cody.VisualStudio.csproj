@@ -80,6 +80,7 @@
     <Compile Include="Services\StatusbarService.cs" />
     <Compile Include="Services\ToastNotificationService.cs" />
     <Compile Include="Services\UserSettingsProvider.cs" />
+    <Compile Include="Services\VsFolderStoreService.cs" />
     <Compile Include="Services\VsVersionService.cs" />
     <Compile Include="Utilities\FilePathHelper.cs" />
   </ItemGroup>
