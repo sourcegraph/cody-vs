@@ -24,6 +24,7 @@ namespace Cody.VisualStudio.Client
         private IAgentService _proxy;
 
         public event EventHandler<ServerInfo> OnInitialized;
+        public event EventHandler<int> AgentDisconnected;
 
         public AgentClient(AgentClientOptions options, ILog log, ILog agentLog)
         {
@@ -127,12 +128,7 @@ namespace Cody.VisualStudio.Client
             //to many calls to sentry
             //else log.Error($"The agent connection unexpectedly ended with code {exitCode}.");
 
-            if (options.RestartAgentOnFailure && exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
-            {
-                log.Info("Restarting the agent.");
-
-                Start();
-            }
+            AgentDisconnected?.Invoke(this, exitCode);
 
             Debug.Assert(false, $"OnAgentDisconnected exitCode: {exitCode}");
         }
