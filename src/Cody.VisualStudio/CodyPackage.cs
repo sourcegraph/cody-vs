@@ -180,7 +180,7 @@ namespace Cody.VisualStudio
 
             NotificationHandlers = new NotificationHandlers(UserSettingsService, AgentNotificationsLogger,
                 DocumentService, InfobarNotificationsAsync, StatusbarService, ToastNotificationService);
-            WebviewNotificationHandlers = new WebviewNotificationHandlers(Logger);
+            WebviewNotificationHandlers = new WebviewNotificationHandlers(AgentNotificationsLogger);
             SecretNotificationHandlers = new SecretNotificationHandlers(SecretStorageService, Logger);
 
             WebviewNotificationHandlers.OnOptionsPageShowRequest += HandleOnOptionsPageShowRequest;
