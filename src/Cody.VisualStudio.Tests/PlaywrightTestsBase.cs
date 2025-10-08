@@ -114,7 +114,7 @@ namespace Cody.VisualStudio.Tests
 
         protected async Task WaitForLogOutState()
         {
-            await Page.WaitForSelectorAsync("text=By signing in to Cody");
+            await Page.WaitForSelectorAsync("text=Let's get you started");
         }
 
         protected async Task WaitForLogInState()
