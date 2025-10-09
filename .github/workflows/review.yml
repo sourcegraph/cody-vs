@@ -1,0 +1,32 @@
+name: Amp Code Review
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  workflow_dispatch:
+
+jobs:
+  review:
+    # Skip draft PRs unless manually triggered
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+
+    # Ensure only one review runs per PR
+    concurrency:
+      group: pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    permissions:
+      pull-requests: write
+      checks: write
+      contents: read
+
+    steps:
+      - name: Run Amp Code Review
+        uses: docker://ghcr.io/sourcegraph/cra-github:latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AMP_SERVER_URL: ${{ vars.AMP_SERVER_URL }} # Optional, defaults to https://ampcode.com
+          AMP_API_KEY: ${{ secrets.AMP_API_KEY }}
+        with:
+          args: node /app/dist/bin/review-action.js
