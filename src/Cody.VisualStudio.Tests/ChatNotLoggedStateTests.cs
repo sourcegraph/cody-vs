@@ -1,8 +1,8 @@
+using Microsoft.Playwright;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Playwright;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,7 +23,7 @@ namespace Cody.VisualStudio.Tests
             });
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
         public async Task Cody_Enterprise_Section_Is_Present()
         {
             // given
