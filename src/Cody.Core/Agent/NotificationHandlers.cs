@@ -5,6 +5,7 @@ using Cody.Core.Logging;
 using Cody.Core.Settings;
 using Cody.Core.Trace;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
@@ -80,6 +81,42 @@ namespace Cody.Core.Agent
             System.Diagnostics.Process.Start(path.Uri);
             return Task.FromResult(true);
 
+        }
+
+
+        [AgentCallback("statusBar/didChange", deserializeToSingleObject: true)]
+        public void StatusBarChanged(StatusBarChangeParams param)
+        {
+            _logger.Info($"statusbar status: {param.TextWithIcon} - {param.Tooltip}");
+
+            try
+            {
+                var match = Regex.Match(param.TextWithIcon, @"\$\(([^)]+)\)(?:\s+(.+))?");
+
+                string icon = null;
+                string text = null;
+                string tooltip = param.Tooltip;
+
+                if (match.Success)
+                {
+                    icon = match.Groups[1].Value;
+                    text = match.Groups[2].Success ? match.Groups[2].Value : null;
+                }
+
+                CodyStatus status = CodyStatus.Hide;
+                if (text == "Sign In") status = CodyStatus.Unavailable;
+                else if (icon == "cody-logo-heavy") status = CodyStatus.Available;
+                else if (icon == "cody-logo-heavy-slash") status = CodyStatus.Unavailable;
+                else if (icon == "loading~spin") status = CodyStatus.Loading;
+
+                if (icon == "cody-logo-heavy" && tooltip == "Cody Settings") tooltip = "Cody ready. Click to open Cody Chat.";
+
+                _statusbarService.SetCodyStatus(status, tooltip, text);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Status bar change error", ex);
+            }
         }
 
         [AgentCallback("window/focusSidebar")]

@@ -81,6 +81,7 @@
     <Compile Include="Agent\Protocol\ProgressStartParams.cs" />
     <Compile Include="Agent\Protocol\SaveDialogOptionsParams.cs" />
     <Compile Include="Agent\Protocol\SelectedCompletionInfo.cs" />
+    <Compile Include="Agent\Protocol\StatusBarChangeParams.cs" />
     <Compile Include="Agent\Protocol\TestProgress.cs" />
     <Compile Include="Agent\Protocol\TextDocumentEditParams.cs" />
     <Compile Include="Agent\Protocol\UserEditPromptRequest.cs" />

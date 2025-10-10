@@ -166,7 +166,8 @@ namespace Cody.VisualStudio
 
             ConfigurationService = new ConfigurationService(VersionService, VsVersionService, SolutionService, UserSettingsService, Logger);
 
-            StatusbarService = new StatusbarService();
+            StatusbarService = new StatusbarService(Logger);
+            StatusbarService.CodyStatusIconClicked += ShowToolWindow;
             ThemeService = new ThemeService(this, Logger);
 
 
@@ -392,7 +393,6 @@ namespace Cody.VisualStudio
             {
                 if (e.Authenticated == true && e.AuthStatus is ProtocolAuthenticatedAuthStatus status)
                 {
-                    StatusbarService.SetText($"Hello {status.DisplayName}! Press Alt + L to open Cody Chat.");
                     Logger.Info("Authenticated.");
                     UserSettingsService.LastTimeAuthorized = true;
                     SentrySdk.ConfigureScope(scope =>
@@ -430,6 +430,7 @@ namespace Cody.VisualStudio
         {
             try
             {
+                StatusbarService?.SetCodyStatus(CodyStatus.Hide);
                 PrepareAgentConfiguration();
 
                 _ = Task.Run(async () =>
