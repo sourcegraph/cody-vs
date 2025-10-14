@@ -44,7 +44,7 @@ namespace Cody.VisualStudio.Services
                 {
                     if (!string.IsNullOrWhiteSpace(vm.Instruction) && instructionsHistory.LastOrDefault() != vm.Instruction)
                     {
-                        SaveInstructioninHistory(vm.Instruction);
+                        SaveInstructionInHistory(vm.Instruction);
                     }
 
                     return new EditCodeResult { Instruction = vm.Instruction, ModelId = vm.SelectedModel.Id };
@@ -56,7 +56,7 @@ namespace Cody.VisualStudio.Services
             return result;
         }
 
-        private void SaveInstructioninHistory(string instruction)
+        private void SaveInstructionInHistory(string instruction)
         {
             instructionsHistory.Add(instruction);
             var itemsToRemove = instructionsHistory.Count - MaxHistoryItems;

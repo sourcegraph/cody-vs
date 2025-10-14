@@ -36,6 +36,7 @@ namespace Cody.VisualStudio.Services
             try
             {
                 var path = GetVsFolder();
+                if (path == null) return false;
                 var json = JsonConvert.SerializeObject(data);
                 var filePath = Path.Combine(path, fileName);
                 File.WriteAllText(filePath, json);
@@ -56,6 +57,7 @@ namespace Cody.VisualStudio.Services
             try
             {
                 var path = GetVsFolder();
+                if (path == null) return null;
                 var filePath = Path.Combine(path, fileName);
                 if (File.Exists(filePath))
                 {
