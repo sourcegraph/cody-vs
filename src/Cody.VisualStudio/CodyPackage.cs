@@ -388,7 +388,7 @@ namespace Cody.VisualStudio
                     OnAgentServiceInitialized,
                     Logger);
 
-                WebViewsManager = new WebViewsManager(AgentClient, NotificationHandlers, Logger);
+                WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
             }
             catch (Exception ex)
             {
@@ -403,7 +403,7 @@ namespace Cody.VisualStudio
                 // Set the AgentService for all components
                 AgentService = agentService;
                 WebViewsManager.SetAgentService(AgentService);
-                NotificationHandlers.SetAgentClient(AgentService);
+                WebviewNotificationHandlers.SetAgentClient(AgentService);
                 ProgressNotificationHandlers.SetAgentService(AgentService);
 
                 // Set up solution events
