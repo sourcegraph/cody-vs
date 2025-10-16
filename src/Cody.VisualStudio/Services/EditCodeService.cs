@@ -60,7 +60,7 @@ namespace Cody.VisualStudio.Services
         {
             instructionsHistory.Add(instruction);
             var itemsToRemove = instructionsHistory.Count - MaxHistoryItems;
-            if (itemsToRemove > 0) instructionsHistory = instructionsHistory.Skip(itemsToRemove).ToList();
+            if (itemsToRemove > 0) instructionsHistory.RemoveRange(0, itemsToRemove);
 
             vsFolderStoreService.SaveData(InstructionsHistoryFile, instructionsHistory);
         }
