@@ -108,6 +108,85 @@
     {
       "WindowType": "ExternalWindow",
       "Window": {
+        "Left": 1966,
+        "Top": 1080,
+        "Width": 1874,
+        "Height": 1080
+      },
+      "Docks": [
+        {
+          "Documents": [
+            {
+              "FilePath": "E:\\Sigmaloc\\Sourcegraph\\cody-vs-pr-reviews\\src\\Cody.Core\\Infrastructure\\WebViewsManager.cs",
+              "RelativePath": "..\\Cody.Core\\Infrastructure\\WebViewsManager.cs",
+              "FullName": "WebViewsManager.cs",
+              "DockedHeight": {
+                "UnitType": "Stretch",
+                "Value": 200
+              },
+              "DockedWidth": {
+                "UnitType": "Stretch",
+                "Value": 200
+              },
+              "Line": 110,
+              "Column": 1,
+              "Breakpoints": [
+                {
+                  "IsEnabled": true,
+                  "Line": 77,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                },
+                {
+                  "IsEnabled": true,
+                  "Line": 80,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                },
+                {
+                  "IsEnabled": true,
+                  "Line": 100,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                },
+                {
+                  "IsEnabled": true,
+                  "Line": 102,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                },
+                {
+                  "IsEnabled": true,
+                  "Line": 142,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                },
+                {
+                  "IsEnabled": true,
+                  "Line": 166,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                }
+              ],
+              "IsPinned": false,
+              "IsSelected": true
+            }
+          ],
+          "DockedHeight": {
+            "UnitType": "Stretch",
+            "Value": 200
+          },
+          "DockedWidth": {
+            "UnitType": "Stretch",
+            "Value": 200
+          }
+        }
+      ],
+      "Orientation": "Horizontal"
+    },
+    {
+      "WindowType": "ExternalWindow",
+      "Window": {
         "Left": 91,
         "Top": 1080,
         "Width": 1875,
@@ -139,7 +218,7 @@
                 },
                 {
                   "IsEnabled": true,
-                  "Line": 67,
+                  "Line": 68,
                   "Condition": "",
                   "ConditionType": "WhenTrue"
                 }
@@ -160,6 +239,23 @@
         {
           "Documents": [
             {
+              "FilePath": "E:\\Sigmaloc\\Sourcegraph\\cody-vs-pr-reviews\\src\\Cody.Core\\Agent\\IAgentApi.cs",
+              "RelativePath": "..\\Cody.Core\\Agent\\IAgentApi.cs",
+              "FullName": "IAgentApi.cs",
+              "DockedHeight": {
+                "UnitType": "Stretch",
+                "Value": 200
+              },
+              "DockedWidth": {
+                "UnitType": "Stretch",
+                "Value": 200
+              },
+              "Line": 1,
+              "Column": 32,
+              "IsPinned": false,
+              "IsSelected": true
+            },
+            {
               "FilePath": "E:\\Sigmaloc\\Sourcegraph\\cody-vs-pr-reviews\\src\\Cody.Core\\Agent\\SetHtmlEvent.cs",
               "RelativePath": "..\\Cody.Core\\Agent\\SetHtmlEvent.cs",
               "FullName": "SetHtmlEvent.cs",
@@ -169,22 +265,10 @@
               },
               "DockedWidth": {
                 "UnitType": "Stretch",
-                "Value": 218
-              },
-              "IsPinned": false
-            },
-            {
-              "FilePath": "E:\\Sigmaloc\\Sourcegraph\\cody-vs-pr-reviews\\src\\Cody.Core\\Agent\\IAgentService.cs",
-              "RelativePath": "..\\Cody.Core\\Agent\\IAgentService.cs",
-              "FullName": "IAgentService.cs",
-              "DockedHeight": {
-                "UnitType": "Stretch",
                 "Value": 200
               },
-              "DockedWidth": {
-                "UnitType": "Stretch",
-                "Value": 218
-              },
+              "Line": 1,
+              "Column": 1,
               "IsPinned": false
             },
             {
@@ -197,10 +281,10 @@
               },
               "DockedWidth": {
                 "UnitType": "Stretch",
-                "Value": 218
+                "Value": 200
               },
-              "Line": 98,
-              "Column": 1,
+              "Line": 82,
+              "Column": 42,
               "Breakpoints": [
                 {
                   "IsEnabled": true,
@@ -209,8 +293,7 @@
                   "ConditionType": "WhenTrue"
                 }
               ],
-              "IsPinned": false,
-              "IsSelected": true
+              "IsPinned": false
             }
           ],
           "DockedHeight": {
@@ -219,7 +302,7 @@
           },
           "DockedWidth": {
             "UnitType": "Stretch",
-            "Value": 218
+            "Value": 200
           }
         }
       ],
@@ -248,6 +331,16 @@
                 "UnitType": "Stretch",
                 "Value": 221
               },
+              "Line": 1,
+              "Column": 1,
+              "Breakpoints": [
+                {
+                  "IsEnabled": true,
+                  "Line": 166,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                }
+              ],
               "IsPinned": false
             },
             {
@@ -262,6 +355,8 @@
                 "UnitType": "Stretch",
                 "Value": 221
               },
+              "Line": 1,
+              "Column": 1,
               "IsPinned": false
             },
             {
@@ -346,6 +441,8 @@
                 "UnitType": "Stretch",
                 "Value": 200
               },
+              "Line": 1,
+              "Column": 1,
               "IsPinned": false
             },
             {
@@ -362,47 +459,14 @@
               },
               "Line": 369,
               "Column": 73,
-              "IsPinned": false,
-              "IsSelected": true
-            }
-          ],
-          "DockedHeight": {
-            "UnitType": "Stretch",
-            "Value": 200
-          },
-          "DockedWidth": {
-            "UnitType": "Stretch",
-            "Value": 200
-          }
-        }
-      ],
-      "Orientation": "Horizontal"
-    },
-    {
-      "WindowType": "ExternalWindow",
-      "Window": {
-        "Left": 1966,
-        "Top": 1080,
-        "Width": 1874,
-        "Height": 1080
-      },
-      "Docks": [
-        {
-          "Documents": [
-            {
-              "FilePath": "E:\\Sigmaloc\\Sourcegraph\\cody-vs-pr-reviews\\src\\Cody.Core\\Infrastructure\\WebViewsManager.cs",
-              "RelativePath": "..\\Cody.Core\\Infrastructure\\WebViewsManager.cs",
-              "FullName": "WebViewsManager.cs",
-              "DockedHeight": {
-                "UnitType": "Stretch",
-                "Value": 200
-              },
-              "DockedWidth": {
-                "UnitType": "Stretch",
-                "Value": 200
-              },
-              "Line": 110,
-              "Column": 1,
+              "Breakpoints": [
+                {
+                  "IsEnabled": true,
+                  "Line": 394,
+                  "Condition": "",
+                  "ConditionType": "WhenTrue"
+                }
+              ],
               "IsPinned": false,
               "IsSelected": true
             }

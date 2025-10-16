@@ -21,7 +21,7 @@ namespace Cody.VisualStudio.Client
         private ILog agentLog;
         private IAgentConnector connector;
         private JsonRpc jsonRpc;
-        private IAgentService _proxy;
+        private IAgentApi _proxy;
 
         public event EventHandler<ServerInfo> OnInitialized;
         public event EventHandler<int> AgentDisconnected;
@@ -66,7 +66,7 @@ namespace Cody.VisualStudio.Client
             jsonRpc.StartListening();
         }
 
-        public async Task<IAgentService> Initialize(ClientInfo clientInfo)
+        public async Task<IAgentApi> Initialize(ClientInfo clientInfo)
         {
             CreateAgentService();
 
@@ -91,8 +91,8 @@ namespace Cody.VisualStudio.Client
 
         private void CreateAgentService()
         {
-            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentService>() };
-            _proxy = jsonRpc.Attach<IAgentService>(proxyOptions);
+            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentApi>() };
+            _proxy = jsonRpc.Attach<IAgentApi>(proxyOptions);
 
             IsConnected = true;
             log.Info("A connection with the agent has been established.");

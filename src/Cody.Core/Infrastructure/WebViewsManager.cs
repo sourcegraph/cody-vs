@@ -100,7 +100,7 @@ namespace Cody.Core.Infrastructure
                                 try
                                 {
                                     await WaitForAgentInitialization();
-                                    await _agentService.ResolveWebviewView(new ResolveWebviewViewParams
+                                    await _agentService.Get().ResolveWebviewView(new ResolveWebviewViewParams
                                     {
                                         // cody.chat for sidebar view, or cody.editorPanel for editor panel
                                         // TODO support custom editors
@@ -132,7 +132,6 @@ namespace Cody.Core.Infrastructure
 
         private void OnAgentDisconnected(object sender, int e)
         {
-            _agentService = null;
             _processedWebViewsRequests.RemoveAll(r => r.Type == WebViewsEventTypes.RegisterWebViewRequest);
 
             _logger.Debug("Cleared old agent service reference.");
@@ -141,7 +140,7 @@ namespace Cody.Core.Infrastructure
         private async Task WaitForAgentInitialization()
         {
             var startTime = DateTime.Now;
-            while (!_agentProxy.IsInitialized || _agentService == null)
+            while (!_agentProxy.IsInitialized || _agentService.Get() == null)
             {
                 _logger.Debug("Waiting for Agent initialization ...");
                 await Task.Delay(TimeSpan.FromSeconds(1));

@@ -6,6 +6,7 @@ using Cody.Core.Trace;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cody.Core.Infrastructure;
 
 namespace Cody.Core.DocumentSync
 {
@@ -80,7 +81,7 @@ namespace Cody.Core.DocumentSync
                 }).ToArray()
             };
 
-            agentService.DidChange(docState);
+            agentService.Get().DidChange(docState);
         }
 
         public void OnClosed(string fullPath)
@@ -93,13 +94,13 @@ namespace Cody.Core.DocumentSync
             };
 
             // Only the 'uri' property is required, other properties are ignored.
-            agentService.DidClose(docState);
+            agentService.Get().DidClose(docState);
         }
 
         public void OnFocus(string fullPath)
         {
             trace.TraceEvent("DidFocus", "{0}", fullPath);
-            agentService.DidFocus(new CodyFilePath { Uri = fullPath.ToUri() });
+            agentService.Get().DidFocus(new CodyFilePath { Uri = fullPath.ToUri() });
         }
 
         public void OnOpened(string fullPath, string content, DocumentRange visibleRange, DocumentRange selection)
@@ -152,7 +153,7 @@ namespace Cody.Core.DocumentSync
                     Selection = selRange
                 };
 
-                agentService.DidOpen(docState);
+                agentService.Get().DidOpen(docState);
             }
             catch (Exception ex)
             {
@@ -163,13 +164,13 @@ namespace Cody.Core.DocumentSync
         public void OnRename(string oldFullPath, string newFullPath)
         {
             trace.TraceEvent("DidRename", "{0} -> {1}", oldFullPath, newFullPath);
-            agentService.DidRename(new CodyFileRename { OldUri = oldFullPath.ToUri(), NewUri = newFullPath.ToUri() });
+            agentService.Get().DidRename(new CodyFileRename { OldUri = oldFullPath.ToUri(), NewUri = newFullPath.ToUri() });
         }
 
         public void OnSaved(string fullPath)
         {
             trace.TraceEvent("DidSave", "{0}", fullPath);
-            agentService.DidSave(new CodyFilePath { Uri = fullPath.ToUri() });
+            agentService.Get().DidSave(new CodyFilePath { Uri = fullPath.ToUri() });
         }
     }
 }

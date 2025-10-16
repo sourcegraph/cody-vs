@@ -56,8 +56,9 @@ namespace Cody.VisualStudio
         public ILog AgentLogger;
         public ILog AgentNotificationsLogger;
 
-        public static IAgentService AgentService;
+        public static AgentService AgentService;
         public static IUserSettingsService UserSettingsService;
+        
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
         public IStatusbarService StatusbarService;
@@ -66,7 +67,6 @@ namespace Cody.VisualStudio
         public IWebViewsManager WebViewsManager;
         public IProgressService ProgressService;
         public IAgentProxy AgentClient;
-        public Services.AgentService AgentServiceManager;
         public ISecretStorageService SecretStorageService;
         public IConfigurationService ConfigurationService;
         public IFileDialogService FileDialogService;
@@ -259,7 +259,7 @@ namespace Cody.VisualStudio
             {
                 Logger.Debug($"Checking authorization status ...");
                 EnableContextMenu(status.Authenticated);
-                if (ConfigurationService == null || AgentService == null)
+                if (ConfigurationService == null || AgentService.Get() == null)
                 {
                     Logger.Debug("Not changed.");
                     return;
@@ -285,14 +285,14 @@ namespace Cody.VisualStudio
             try
             {
                 Logger.Debug($"Checking authorization status ...");
-                if (ConfigurationService == null || AgentService == null)
+                if (ConfigurationService == null || AgentService.Get() == null)
                 {
                     Logger.Debug("Not changed.");
                     return;
                 }
 
                 var config = ConfigurationService.GetConfiguration();
-                var status = await AgentService.ConfigurationChange(config);
+                var status = await AgentService.Get().ConfigurationChange(config);
 
                 Logger.Debug($"After access token refresh. Authenticated: {status.Authenticated}");
             }
@@ -382,7 +382,7 @@ namespace Cody.VisualStudio
 
                 WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
                 // Create AgentService to manage initialization and restart workflow
-                AgentServiceManager = new Services.AgentService(
+                AgentService = new Services.AgentService(
                     (AgentClient)AgentClient,
                     () => ConfigurationService.GetClientInfo(),
                     OnAgentServiceInitialized,
@@ -396,12 +396,11 @@ namespace Cody.VisualStudio
             }
         }
 
-        private void OnAgentServiceInitialized(IAgentService agentService)
+        private void OnAgentServiceInitialized()
         {
             try
             {
                 // Set the AgentService for all components
-                AgentService = agentService;
                 WebViewsManager.SetAgentService(AgentService);
                 WebviewNotificationHandlers.SetAgentClient(AgentService);
                 ProgressNotificationHandlers.SetAgentService(AgentService);
@@ -475,7 +474,7 @@ namespace Cody.VisualStudio
                         await TestServerConnection(UserSettingsService.DefaultServerEndpoint);
                         
                         // Use AgentService to manage the full initialization workflow
-                        await AgentServiceManager.InitializeAsync();
+                        await AgentService.InitializeAsync();
                     }
                     catch (Exception ex)
                     {
@@ -508,7 +507,7 @@ namespace Cody.VisualStudio
                 {
                     Uris = new List<string> { solutionUri }
                 };
-                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                AgentService.Get().WorkspaceFolderDidChange(workspaceFolderEvent);
                 Logger.Debug($"Workspace updated:{solutionUri}");
 
                 if (DocumentsSyncService == null)
@@ -534,7 +533,7 @@ namespace Cody.VisualStudio
                 {
                     Uris = new List<string>()
                 };
-                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                AgentService.Get().WorkspaceFolderDidChange(workspaceFolderEvent);
 
             }
             catch (Exception ex)

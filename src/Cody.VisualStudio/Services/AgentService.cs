@@ -5,25 +5,26 @@ using Cody.VisualStudio.Client;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Threading.Tasks;
+using Cody.Core.Infrastructure;
 
 namespace Cody.VisualStudio.Services
 {
-    public class AgentService: IDisposable
+    public class AgentService: IAgentService, IDisposable
     {
         private readonly AgentClient _agentClient;
         private readonly Func<ClientInfo> _getClientConfig;
-        private readonly Action<IAgentService> _onAgentInitialized;
+        private readonly Action _onAgentInitialized;
 
         private readonly ILog _logger;
         private readonly bool _restartOnFailure;
 
 
-        public IAgentService Agent { get; set; }
+        private IAgentApi _agent;
 
         public AgentService(
             AgentClient agentClient, 
             Func<ClientInfo> getClientConfig, 
-            Action<IAgentService> onAgentInitialized,
+            Action  onAgentInitialized,
             ILog logger,
             bool restartOnFailure = true)
         {
@@ -46,9 +47,9 @@ namespace Cody.VisualStudio.Services
                 _agentClient.Start();
 
                 var clientConfig = _getClientConfig();
-                Agent = await _agentClient.Initialize(clientConfig);
+                _agent = await _agentClient.Initialize(clientConfig);
 
-                _onAgentInitialized?.Invoke(Agent);
+                _onAgentInitialized?.Invoke();
 
                 _logger.Info("Agent initialization completed successfully.");
             }
@@ -71,7 +72,7 @@ namespace Cody.VisualStudio.Services
                 }
 
                 // Clear the current agent reference
-                Agent = null;
+                _agent = null;
 
                 // Reinitialize the agent
                 await InitializeAsync();
@@ -93,7 +94,7 @@ namespace Cody.VisualStudio.Services
                 _agentClient.Stop();
             }
 
-            Agent = null;
+            _agent = null;
         }
 
         private void OnAgentClientInitialized(object sender, ServerInfo serverInfo)
@@ -106,7 +107,7 @@ namespace Cody.VisualStudio.Services
             _logger.Info($"Agent disconnected with exit code: {exitCode}");
             
             // Clear the current agent reference
-            Agent = null;
+            _agent = null;
 
             if (_restartOnFailure && exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
             {
@@ -124,6 +125,11 @@ namespace Cody.VisualStudio.Services
                     }
                 });
             }
+        }
+
+        public IAgentApi Get()
+        {
+            return _agent;
         }
 
         public void Dispose()

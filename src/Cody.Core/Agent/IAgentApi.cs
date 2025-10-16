@@ -1,6 +1,4 @@
 using Cody.Core.Agent.Protocol;
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,7 +7,7 @@ namespace Cody.Core.Agent
     //---------------------------------------------------------
     // For notifications return type MUST be void!
     //---------------------------------------------------------
-    public interface IAgentService
+    public interface IAgentApi
     {
         [AgentCall("initialize")]
         Task<ServerInfo> Initialize(ClientInfo clientInfo);

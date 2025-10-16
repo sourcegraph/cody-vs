@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Cody.Core.Infrastructure;
 
 namespace Cody.VisualStudio.Completions
 {
@@ -216,7 +217,7 @@ namespace Cody.VisualStudio.Completions
                 return false;
             }
 
-            if (agentService == null)
+            if (agentService == null || agentService.Get() == null)
             {
                 trace.TraceMessage("Agent service not jet ready");
                 return false;
@@ -257,7 +258,7 @@ namespace Cody.VisualStudio.Completions
             var stopwatch = new Stopwatch();
 
             var autocompleteCancel = new CancellationTokenSource();
-            var autocompleteTask = agentService.Autocomplete(autocompleteRequest, autocompleteCancel.Token);
+            var autocompleteTask = agentService.Get().Autocomplete(autocompleteRequest, autocompleteCancel.Token);
             var cancelationTask = Task.Delay(8000, cancel);
             stopwatch.Start();
             var resultTask = await Task.WhenAny(autocompleteTask, cancelationTask);
