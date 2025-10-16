@@ -71,6 +71,7 @@ namespace Cody.VisualStudio
         public IFileDialogService FileDialogService;
         public IEditCodeService EditCodeService;
         public IToastNotificationService ToastNotificationService;
+        public IVsFolderStoreService VsFolderStoreService;
 
         private IInfobarNotifications InfobarNotifications;
 
@@ -193,10 +194,11 @@ namespace Cody.VisualStudio
 
             var runningDocumentTable = this.GetService<SVsRunningDocumentTable, IVsRunningDocumentTable>();
 
-
             VsUIShell = this.GetService<SVsUIShell, IVsUIShell>();
             FileDialogService = new FileDialogService(SolutionService, Logger);
-            EditCodeService = new EditCodeService();
+            VsFolderStoreService = new VsFolderStoreService(vsSolution, Logger);
+            EditCodeService = new EditCodeService(VsFolderStoreService);
+
 
             ProgressNotificationHandlers = new ProgressNotificationHandlers(ProgressService);
             TextDocumentNotificationHandlers = new TextDocumentNotificationHandlers(DocumentService, FileDialogService, StatusbarService, Logger);
