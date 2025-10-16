@@ -114,15 +114,15 @@ namespace Cody.UI.Controls
         }
 
         public static readonly DependencyProperty HtmlProperty = DependencyProperty.Register(
-            "Html", typeof(string), typeof(WebView2Dev),
+            "Html", typeof(SetHtmlEvent), typeof(WebView2Dev),
             new PropertyMetadata(null, (d, e) =>
             {
-                _controller.SetHtml(e.NewValue as string);
+                _controller.SetHtml(e.NewValue as SetHtmlEvent);
             }));
 
-        public string Html
+        public SetHtmlEvent Html
         {
-            get => (string)GetValue(HtmlProperty);
+            get => (SetHtmlEvent)GetValue(HtmlProperty);
             set => SetValue(HtmlProperty, value);
         }
 

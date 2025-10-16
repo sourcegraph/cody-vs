@@ -90,7 +90,7 @@ namespace Cody.VisualStudio.Completions
                 var completionId = e.OriginalProposal.ProposalId.Substring(ProposalIdPrefix.Length);
                 var completionItem = new CompletionItemParams() { CompletionID = completionId };
                 trace.TraceEvent("ProposalDisplayed", completionId);
-                CodyPackage.AgentService.CompletionSuggested(completionItem);
+                CodyPackage.AgentService.Get().CompletionSuggested(completionItem);
             }
 
             if (CodyPackage.TestingSupportService != null)
@@ -109,7 +109,7 @@ namespace Cody.VisualStudio.Completions
                 var completionId = e.OriginalProposal.ProposalId.Substring(ProposalIdPrefix.Length);
                 var completionItem = new CompletionItemParams() { CompletionID = completionId };
                 trace.TraceEvent("SuggestionAccepted", completionId);
-                CodyPackage.AgentService.CompletionAccepted(completionItem);
+                CodyPackage.AgentService.Get().CompletionAccepted(completionItem);
             }
         }
 

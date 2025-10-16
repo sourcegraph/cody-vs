@@ -56,8 +56,9 @@ namespace Cody.VisualStudio
         public ILog AgentLogger;
         public ILog AgentNotificationsLogger;
 
-        public static IAgentService AgentService;
+        public static AgentService AgentService;
         public static IUserSettingsService UserSettingsService;
+        
         public IVersionService VersionService;
         public IVsVersionService VsVersionService;
         public IStatusbarService StatusbarService;
@@ -260,7 +261,7 @@ namespace Cody.VisualStudio
             {
                 Logger.Debug($"Checking authorization status ...");
                 EnableContextMenu(status.Authenticated);
-                if (ConfigurationService == null || AgentService == null)
+                if (ConfigurationService == null || AgentService.Get() == null)
                 {
                     Logger.Debug("Not changed.");
                     return;
@@ -286,14 +287,14 @@ namespace Cody.VisualStudio
             try
             {
                 Logger.Debug($"Checking authorization status ...");
-                if (ConfigurationService == null || AgentService == null)
+                if (ConfigurationService == null || AgentService.Get() == null)
                 {
                     Logger.Debug("Not changed.");
                     return;
                 }
 
                 var config = ConfigurationService.GetConfiguration();
-                var status = await AgentService.ConfigurationChange(config);
+                var status = await AgentService.Get().ConfigurationChange(config);
 
                 Logger.Debug($"After access token refresh. Authenticated: {status.Authenticated}");
             }
@@ -382,10 +383,43 @@ namespace Cody.VisualStudio
                 AgentClient.OnInitialized += OnAgentInitialized;
 
                 WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
+                // Create AgentService to manage initialization and restart workflow
+                AgentService = new Services.AgentService(
+                    (AgentClient)AgentClient,
+                    () => ConfigurationService.GetClientInfo(),
+                    OnAgentServiceInitialized,
+                    Logger);
+
+                WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed.", ex);
+            }
+        }
+
+        private void OnAgentServiceInitialized()
+        {
+            try
+            {
+                // Set the AgentService for all components
+                WebViewsManager.SetAgentService(AgentService);
+                WebviewNotificationHandlers.SetAgentClient(AgentService);
+                ProgressNotificationHandlers.SetAgentService(AgentService);
+
+                // Set up solution events
+                SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= OnAfterBackgroundSolutionLoadComplete;
+                SolutionEvents.OnAfterCloseSolution -= OnAfterCloseSolution;
+
+                if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
+                SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
+                SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
+
+                Logger.Info("Agent service initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Error in OnAgentServiceInitialized", ex);
             }
         }
 
@@ -440,24 +474,14 @@ namespace Cody.VisualStudio
                     try
                     {
                         await TestServerConnection(UserSettingsService.DefaultServerEndpoint);
-                        AgentClient.Start();
-
-                        var clientConfig = ConfigurationService.GetClientInfo();
-                        AgentService = await AgentClient.Initialize(clientConfig);
-
-                        WebViewsManager.SetAgentService(AgentService);
-                        WebviewNotificationHandlers.SetAgentClient(AgentService);
-                        ProgressNotificationHandlers.SetAgentService(AgentService);
-
-                        if (SolutionService.IsSolutionOpen()) OnAfterBackgroundSolutionLoadComplete();
-                        SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OnAfterBackgroundSolutionLoadComplete;
-                        SolutionEvents.OnAfterCloseSolution += OnAfterCloseSolution;
+                        
+                        // Use AgentService to manage the full initialization workflow
+                        await AgentService.InitializeAsync();
                     }
                     catch (Exception ex)
                     {
                         Logger.Error("Agent initialization failed.", ex);
                     }
-
                 });
             }
             catch (Exception ex)
@@ -468,8 +492,12 @@ namespace Cody.VisualStudio
 
         private void OnAfterBackgroundSolutionLoadComplete(object sender = null, EventArgs e = null)
         {
+            Logger.Debug("Init ...");
+
             UpdateCurrentWorkspaceFolder();
             InitializeNotificationsBar();
+
+            Logger.Debug("completed.");
         }
 
         private void UpdateCurrentWorkspaceFolder()
@@ -481,7 +509,7 @@ namespace Cody.VisualStudio
                 {
                     Uris = new List<string> { solutionUri }
                 };
-                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                AgentService.Get().WorkspaceFolderDidChange(workspaceFolderEvent);
                 Logger.Debug($"Workspace updated:{solutionUri}");
 
                 if (DocumentsSyncService == null)
@@ -507,7 +535,7 @@ namespace Cody.VisualStudio
                 {
                     Uris = new List<string>()
                 };
-                AgentService.WorkspaceFolderDidChange(workspaceFolderEvent);
+                AgentService.Get().WorkspaceFolderDidChange(workspaceFolderEvent);
 
             }
             catch (Exception ex)

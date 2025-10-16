@@ -1,25 +1,20 @@
 using Cody.Core.Agent.Protocol;
 using Cody.Core.Infrastructure;
-using Cody.Core.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cody.Core.Agent
 {
     public class ProgressNotificationHandlers
     {
-        private IProgressService progressService;
-        private IAgentService agentService;
+        private readonly IProgressService _progressService;
+        private IAgentService _agentService;
 
         public ProgressNotificationHandlers(IProgressService progressService)
         {
-            this.progressService = progressService;
+            this._progressService = progressService;
         }
 
-        public void SetAgentService(IAgentService agentService) => this.agentService = agentService;
+        public void SetAgentService(IAgentService agentService) => this._agentService = agentService;
 
         [AgentCallback("progress/start", deserializeToSingleObject: true)]
         public void Start(ProgressStartParams progressStart)
@@ -27,22 +22,22 @@ namespace Cody.Core.Agent
             Action cancelAction = null;
             if (progressStart.Options.Cancellable == true)
             {
-                cancelAction = () => agentService.CancelProgress(progressStart.Id);
+                cancelAction = () => _agentService.Get().CancelProgress(progressStart.Id);
             };
 
-            progressService.Start(progressStart.Id, progressStart.Options.Title, cancelAction);
+            _progressService.Start(progressStart.Id, progressStart.Options.Title, cancelAction);
         }
 
         [AgentCallback("progress/report", deserializeToSingleObject: true)]
         public void Report(ProgressReportParams progressReport)
         {
-            progressService.ReportProgress(progressReport.Id, progressReport.Message, progressReport.Increment);
+            _progressService.ReportProgress(progressReport.Id, progressReport.Message, progressReport.Increment);
         }
 
         [AgentCallback("progress/end")]
         public void End(string id)
         {
-            progressService.End(id);
+            _progressService.End(id);
         }
     }
 }

@@ -50,8 +50,8 @@
     <Compile Include="Agent\AgentCallAttribute.cs" />
     <Compile Include="Agent\AgentCallbackAttribute.cs" />
     <Compile Include="Agent\EditTaskNotificationHandlers.cs" />
+    <Compile Include="Agent\IAgentApi.cs" />
     <Compile Include="Agent\IAgentProxy.cs" />
-    <Compile Include="Agent\IAgentService.cs" />
     <Compile Include="Agent\NotificationHandlers.cs" />
     <Compile Include="Agent\ProgressNotificationHandlers.cs" />
     <Compile Include="Agent\Protocol\AutocompleteEditItem.cs" />
@@ -122,6 +122,7 @@
     <Compile Include="DocumentSync\IDocumentSyncActions.cs" />
     <Compile Include="Ide\IInfobarNotifications.cs" />
     <Compile Include="Ide\Notification.cs" />
+    <Compile Include="Infrastructure\IAgentService.cs" />
     <Compile Include="Infrastructure\ConfigurationService.cs" />
     <Compile Include="Infrastructure\IConfigurationService.cs" />
     <Compile Include="Infrastructure\IDocumentService.cs" />

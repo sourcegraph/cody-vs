@@ -66,6 +66,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CodyPackage.cs" />
+    <Compile Include="Services\AgentService.cs" />
     <Compile Include="Services\DocumentService.cs" />
     <Compile Include="Services\EditCodeService.cs" />
     <Compile Include="Services\FileDialogService.cs" />
