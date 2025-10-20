@@ -59,7 +59,7 @@ namespace Cody.VisualStudio.Services
             }
         }
 
-        public async Task RestartAsync()
+        private async Task RestartAsync()
         {
             _logger.Info("Restarting agent...");
             
