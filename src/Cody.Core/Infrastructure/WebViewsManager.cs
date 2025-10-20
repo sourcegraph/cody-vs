@@ -190,6 +190,12 @@ namespace Cody.Core.Infrastructure
         public void Dispose()
         {
             _events?.Dispose();
+
+            if (_agentProxy != null)
+                _agentProxy.AgentDisconnected -= OnAgentDisconnected;
+
+            if (_notificationHandler != null)
+                _notificationHandler.OnRegisterWebViewRequest -= OnRegisterWebViewRequestHandler;
         }
     }
 
