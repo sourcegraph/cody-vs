@@ -83,6 +83,8 @@ namespace Cody.VisualStudio.Client
         {
             if (VsShellUtilities.ShutdownToken.IsCancellationRequested) return;
 
+            IsInitialized = false;
+
             if (e.Exception != null)
                 log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
             else
