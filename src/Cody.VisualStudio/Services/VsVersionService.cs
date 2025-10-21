@@ -32,8 +32,16 @@ namespace Cody.VisualStudio.Services
 
         private Version ParseVersion(string version)
         {
-            int spaceIndex = version.IndexOf(' ');
-            if (spaceIndex >= 0) version = version.Substring(0, spaceIndex).Trim();
+            if (version.StartsWith("Insiders ["))
+            {
+                version = version.Substring(10);
+                version = version.Remove(version.Length - 1);
+            }
+            else
+            {
+                int spaceIndex = version.IndexOf(' ');
+                if (spaceIndex >= 0) version = version.Substring(0, spaceIndex).Trim();
+            }
 
             return Version.Parse(version);
         }
