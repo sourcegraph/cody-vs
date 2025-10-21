@@ -16,7 +16,6 @@ namespace Cody.VisualStudio.Services
         private readonly Action _onAgentInitialized;
 
         private readonly ILog _logger;
-        private readonly bool _restartOnFailure;
 
 
         private IAgentApi _agent;
@@ -25,14 +24,12 @@ namespace Cody.VisualStudio.Services
             AgentClient agentClient, 
             Func<ClientInfo> getClientConfig, 
             Action  onAgentInitialized,
-            ILog logger,
-            bool restartOnFailure = true)
+            ILog logger)
         {
             _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
             _getClientConfig = getClientConfig ?? throw new ArgumentNullException(nameof(getClientConfig));
             _onAgentInitialized = onAgentInitialized;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _restartOnFailure = restartOnFailure;
 
             _agentClient.OnInitialized += OnAgentClientInitialized;
             _agentClient.AgentDisconnected += OnAgentDisconnected;
@@ -109,7 +106,7 @@ namespace Cody.VisualStudio.Services
             // Clear the current agent reference
             _agent = null;
 
-            if (_restartOnFailure && exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
+            if (exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
             {
                 _logger.Info("Agent disconnected unexpectedly. Restarting...");
                 

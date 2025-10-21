@@ -370,7 +370,6 @@ namespace Cody.VisualStudio
                         SecretNotificationHandlers
                     },
                     AgentDirectory = agentDir,
-                    RestartAgentOnFailure = true,
                     ConnectToRemoteAgent = Configuration.RemoteAgentPort.HasValue,
                     RemoteAgentPort = Configuration.RemoteAgentPort ?? 0,
                     AcceptNonTrustedCertificates = UserSettingsService.AcceptNonTrustedCert,

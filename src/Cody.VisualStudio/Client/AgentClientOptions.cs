@@ -12,7 +12,6 @@ namespace Cody.VisualStudio.Client
     {
         public bool Debug { get; set; }
 
-        public bool RestartAgentOnFailure { get; set; } = true;
 
         public bool ConnectToRemoteAgent { get; set; } = false;
 
