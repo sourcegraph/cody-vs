@@ -140,7 +140,9 @@ namespace Cody.Core.Infrastructure
         private async Task WaitForAgentInitialization()
         {
             var startTime = DateTime.Now;
-            while (!_agentProxy.IsInitialized || _agentService.Get() == null)
+            while (!_agentProxy.IsInitialized ||
+                   _agentService == null || _agentService.Get() == null
+                   )
             {
                 _logger.Debug("Waiting for Agent initialization ...");
                 await Task.Delay(TimeSpan.FromSeconds(1));
