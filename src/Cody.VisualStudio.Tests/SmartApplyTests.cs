@@ -84,20 +84,15 @@ namespace Cody.VisualStudio.Tests
             WriteLog("Chat message sent");
 
             WriteLog("Waiting for chat response to complete...");
-            // TODO: Wait for response completion indicator here
             
-            WriteLog("Capturing chat response content...");
-            try
+            WriteLog("Checking for Apply buttons...");
+            var applyButtons = await Page.Locator("span", new() { HasText = "Apply" }).CountAsync();
+            WriteLog($"Number of 'Apply' button spans found: {applyButtons}");
+            
+            if (applyButtons == 0)
             {
-                var chatMessages = await Page.Locator("[data-testid='chat']").InnerTextAsync();
-                WriteLog($"Chat content: {chatMessages}");
-                
-                var applyButtons = await Page.Locator("span", new() { HasText = "Apply" }).CountAsync();
-                WriteLog($"Number of 'Apply' button spans found: {applyButtons}");
-            }
-            catch (Exception ex)
-            {
-                WriteLog($"Failed to capture chat response: {ex.Message}");
+                WriteLog("No Apply buttons found - LLM response may not contain code suggestions");
+                throw new Exception("No Apply buttons found in chat response. The LLM may not have provided code suggestions for this prompt.");
             }
             
             WriteLog("Looking for Apply button...");
