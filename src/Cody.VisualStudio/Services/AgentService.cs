@@ -101,27 +101,36 @@ namespace Cody.VisualStudio.Services
 
         private void OnAgentDisconnected(object sender, int exitCode)
         {
-            _logger.Info($"Agent disconnected with exit code: {exitCode}");
-            
-            // Clear the current agent reference
-            _agent = null;
-
-            if (exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
+            try
             {
-                _logger.Info("Agent disconnected unexpectedly. Restarting...");
-                
-                _ = Task.Run(async () =>
+                _logger.Info($"Agent disconnected with exit code: {exitCode}");
+
+                // Clear the current agent reference
+                _agent = null;
+
+
+                if (exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
                 {
-                    try
+                    _logger.Info("Agent disconnected unexpectedly. Restarting...");
+
+                    _ = Task.Run(async () =>
                     {
-                        await RestartAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error("Failed to restart agent after disconnection.", ex);
-                    }
-                });
+                        try
+                        {
+                            await RestartAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error("Failed to restart agent after disconnection.", ex);
+                        }
+                    });
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.Error("Agent restarting process failed.", ex);
+            }
+
         }
 
         public IAgentApi Get()
