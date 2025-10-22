@@ -89,9 +89,9 @@ namespace Cody.VisualStudio.Tests
             WriteLog("Looking for Apply button...");
             var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
 
-            WriteLog("Waiting for Apply button to be available...");
-            await apply.WaitForAsync(new() { Timeout = 60000 });
-            WriteLog("Apply button found");
+            WriteLog("Waiting for Apply button to exist in DOM...");
+            await apply.WaitForAsync(new() { Timeout = 60000, State = WaitForSelectorState.Attached });
+            WriteLog("Apply button found in DOM");
 
             WriteLog("Checking if Apply button has hidden class...");
             // checking if Chat window is too narrow to show "Apply" text
