@@ -381,13 +381,11 @@ namespace Cody.VisualStudio
 
                 WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
                 // Create AgentService to manage initialization and restart workflow
-                AgentService = new Services.AgentService(
+                AgentService = new AgentService(
                     (AgentClient)AgentClient,
                     () => ConfigurationService.GetClientInfo(),
                     OnAgentServiceInitialized,
                     Logger);
-
-                WebViewsManager = new WebViewsManager(AgentClient, WebviewNotificationHandlers, Logger);
             }
             catch (Exception ex)
             {
