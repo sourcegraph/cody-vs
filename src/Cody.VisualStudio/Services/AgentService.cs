@@ -108,7 +108,6 @@ namespace Cody.VisualStudio.Services
                 // Clear the current agent reference
                 _agent = null;
 
-
                 if (exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
                 {
                     _logger.Info("Agent disconnected unexpectedly. Restarting...");
@@ -130,7 +129,6 @@ namespace Cody.VisualStudio.Services
             {
                 _logger.Error("Agent restarting process failed.", ex);
             }
-
         }
 
         public IAgentApi Get()
