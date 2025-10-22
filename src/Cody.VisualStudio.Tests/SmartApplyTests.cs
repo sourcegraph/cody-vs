@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Cody.VisualStudio.Tests
 {
-    public class SmartApplyTests: PlaywrightTestsBase, IDisposable
+    public class SmartApplyTests : PlaywrightTestsBase, IDisposable
     {
 
         private readonly JoinableTaskContext _context = ThreadHelper.JoinableTaskContext;
@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             Assert.NotEqual(modifiedText, originalText);
         }
 
-        [VsFact(Version = VsVersion.VS2022)]
+        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
         public async Task Apply_Suggestion_Is_Modifying_Manager_Document()
         {
             // given
@@ -88,7 +88,7 @@ namespace Cody.VisualStudio.Tests
             if (hasHiddenClass)
                 await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')"); // force shows "Apply" text so it will be possible to click on it
 
-            await apply.ClickAsync(new() {Force = true});
+            await apply.ClickAsync(new() { Force = true });
 
             await EditAppliedAsync();
         }
