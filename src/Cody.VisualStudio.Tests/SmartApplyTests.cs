@@ -86,6 +86,20 @@ namespace Cody.VisualStudio.Tests
             WriteLog("Waiting for chat response to complete...");
             // TODO: Wait for response completion indicator here
             
+            WriteLog("Capturing chat response content...");
+            try
+            {
+                var chatMessages = await Page.Locator("[data-testid='chat']").InnerTextAsync();
+                WriteLog($"Chat content: {chatMessages}");
+                
+                var applyButtons = await Page.Locator("span", new() { HasText = "Apply" }).CountAsync();
+                WriteLog($"Number of 'Apply' button spans found: {applyButtons}");
+            }
+            catch (Exception ex)
+            {
+                WriteLog($"Failed to capture chat response: {ex.Message}");
+            }
+            
             WriteLog("Looking for Apply button...");
             var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
 
