@@ -79,16 +79,34 @@ namespace Cody.VisualStudio.Tests
 
         private async Task ApplyLastSuggestionFor(string chatText)
         {
+            WriteLog($"Sending chat message: {chatText}");
             await EnterChatTextAndSend(chatText);
+            WriteLog("Chat message sent");
 
+            WriteLog("Waiting for chat response to complete...");
+            // TODO: Wait for response completion indicator here
+            
+            WriteLog("Looking for Apply button...");
             var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
 
+            WriteLog("Waiting for Apply button to be available...");
+            await apply.WaitForAsync(new() { Timeout = 60000 });
+            WriteLog("Apply button found");
+
+            WriteLog("Checking if Apply button has hidden class...");
             // checking if Chat window is too narrow to show "Apply" text
             var hasHiddenClass = await apply.EvaluateAsync<bool>(@"element => element.classList.contains('tw-hidden')");
+            WriteLog($"Apply button hidden class: {hasHiddenClass}");
+            
             if (hasHiddenClass)
+            {
+                WriteLog("Removing hidden class from Apply button");
                 await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')"); // force shows "Apply" text so it will be possible to click on it
+            }
 
-            await apply.ClickAsync(new() { Force = true });
+            WriteLog("Clicking Apply button...");
+            await apply.ClickAsync(new() { Force = true});
+            WriteLog("Apply button clicked");
 
             await EditAppliedAsync();
         }
