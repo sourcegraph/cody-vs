@@ -17,7 +17,7 @@ Follow these steps to publish a new preview to the [Private feed](https://source
    - The new version of the extension will be published to the [Private feed](https://sourcegraph.github.io/cody-vs/feed.xml).
    - A pre-release will be created on GitHub.
 
-4. **Visual Studio auto-updating with the latest Preview version**: Use preview gallery feed:
+5. **Visual Studio auto-updating with the latest Preview version**: Use preview gallery feed:
     - Tools -> Options -> Extensions
     - In the `Additional Extension Galleries` select `Add` and use https://sourcegraph.github.io/cody-vs/feed.xml as `URL`
 
