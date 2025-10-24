@@ -24,6 +24,11 @@ runs:
       with:
         path: ${{ github.workspace }}/PrivateGalleryCreator
         key: ${{ runner.os }}-PrivateGalleryCreator-1.0.64
+        
+    - name: Setup .NET 6.0
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: '6.0.x'
   
     - name: Generate gallery feed
       shell: pwsh
