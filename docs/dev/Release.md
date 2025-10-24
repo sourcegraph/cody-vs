@@ -17,6 +17,10 @@ Follow these steps to publish a new preview to the [Private feed](https://source
    - The new version of the extension will be published to the [Private feed](https://sourcegraph.github.io/cody-vs/feed.xml).
    - A pre-release will be created on GitHub.
 
+4. **Visual Studio auto-updating with the latest Preview version**: Use preview gallery feed:
+    - Tools -> Options -> Extensions
+    - In the `Additional Extension Galleries` select `Add` and use https://sourcegraph.github.io/cody-vs/feed.xml as `URL`
+
 ## Stable release
 
 NOTE: All releases are currently published automatically via GitHub Actions as Preview version.
@@ -41,7 +45,7 @@ To publish a **patch** release:
 
 1. Ensure all the changes for the patch are already committed to the latest release branch.
 2. **Start publication**: Go to https://github.com/sourcegraph/cody-vs/actions/workflows/publish.yml and run workflow manually using following parameters: 
-    - Use workflow from: release banch
+    - Use workflow from: release branch
     - Publish type: Release
 
 
