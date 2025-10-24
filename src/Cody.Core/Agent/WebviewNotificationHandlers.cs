@@ -2,17 +2,15 @@ using Cody.Core.Agent.Protocol;
 using Cody.Core.Logging;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Cody.Core.Infrastructure;
 
 namespace Cody.Core.Agent
 {
     public class WebviewNotificationHandlers
     {
         private readonly ILog _logger;
-        public IAgentService agentClient;
+        public IAgentService _agentService;
         private WebviewMessageHandler _messageFilter;
 
         public WebviewNotificationHandlers(ILog logger)
@@ -26,21 +24,33 @@ namespace Cody.Core.Agent
         public event EventHandler OnOptionsPageShowRequest;
         public event EventHandler<string> PostWebMessageAsJson;
 
-        public void SetAgentClient(IAgentService client)
+        public void SetAgentClient(IAgentService agentService)
         {
-            agentClient = client;
+            _agentService = agentService;
         }
 
         // Send a message to the host from webview.
         public async Task SendWebviewMessage(string handle, string message)
         {
-            bool handled = _messageFilter.HandleMessage(message);
-            if (!handled)
-                await agentClient.ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+            try
+            {
+                bool handled = _messageFilter.HandleMessage(message);
+                if (_agentService.Get() == null)
                 {
-                    Id = handle,
-                    MessageStringEncoded = message
-                });
+                    _logger.Error("There is no agent listening.");
+                }
+
+                if (!handled && _agentService.Get() != null)
+                    await _agentService.Get().ReceiveMessageStringEncoded(new ReceiveMessageStringEncodedParams
+                    {
+                        Id = handle,
+                        MessageStringEncoded = message
+                    });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Sending message to the agent failed.", ex);
+            }
         }
 
 

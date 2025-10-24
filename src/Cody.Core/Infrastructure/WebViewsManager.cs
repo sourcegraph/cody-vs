@@ -42,11 +42,12 @@ namespace Cody.Core.Infrastructure
         private readonly ILog _logger;
 
         private readonly List<IWebChatHost> _chatHosts;
-        private readonly List<WebViewEvent> _processedWebViewsRequests;
+        private ConcurrentQueue<WebViewEvent> _processedWebViewsRequests;
 
         private readonly TimeSpan _agentInitializationTimeout = TimeSpan.FromMinutes(1);
 
         private readonly BlockingCollection<WebViewEvent> _events; //TODO: when custom editors will be introduced, make it richer, like BlockingCollection<WebViewsEvents>, where WebViewsEvents will be a class
+
 
         public WebViewsManager(IAgentProxy agentProxy, WebviewNotificationHandlers notificationHandler, ILog logger)
         {
@@ -56,8 +57,9 @@ namespace Cody.Core.Infrastructure
 
             _chatHosts = new List<IWebChatHost>();
             _events = new BlockingCollection<WebViewEvent>();
-            _processedWebViewsRequests = new List<WebViewEvent>();
+            _processedWebViewsRequests = new ConcurrentQueue<WebViewEvent>();
 
+            _agentProxy.AgentDisconnected += OnAgentDisconnected;
             _notificationHandler.OnRegisterWebViewRequest += OnRegisterWebViewRequestHandler;
 
             Task.Run(ProcessEvents);
@@ -79,11 +81,11 @@ namespace Cody.Core.Infrastructure
 
                     _logger.Debug($"Processing event '{e.Type}' ...");
 
-                    _processedWebViewsRequests.Add(e);
+                    _processedWebViewsRequests.Enqueue(e);
                     _logger.Debug($"{e.Type}:{e.ViewId} added to processed collection.");
 
-                    var isRegisterWebViewRequestProcessed = _processedWebViewsRequests.Exists(w => w.Type == WebViewsEventTypes.RegisterWebViewRequest);
-                    var isWebChatHostInitialized = _processedWebViewsRequests.Exists(w => w.Type == WebViewsEventTypes.WebChatHostInitialized);
+                    var isRegisterWebViewRequestProcessed = _processedWebViewsRequests.Any(w => w.Type == WebViewsEventTypes.RegisterWebViewRequest);
+                    var isWebChatHostInitialized = _processedWebViewsRequests.Any(w => w.Type == WebViewsEventTypes.WebChatHostInitialized);
                     if (isRegisterWebViewRequestProcessed && isWebChatHostInitialized)
                     {
                         // check if there is IWebChatHost available
@@ -99,7 +101,7 @@ namespace Cody.Core.Infrastructure
                                 try
                                 {
                                     await WaitForAgentInitialization();
-                                    await _agentService.ResolveWebviewView(new ResolveWebviewViewParams
+                                    await _agentService.Get().ResolveWebviewView(new ResolveWebviewViewParams
                                     {
                                         // cody.chat for sidebar view, or cody.editorPanel for editor panel
                                         // TODO support custom editors
@@ -129,10 +131,25 @@ namespace Cody.Core.Infrastructure
             }
         }
 
+        private void OnAgentDisconnected(object sender, int e)
+        {
+            _logger.Debug("Cleaning ...");
+
+            var newQueue = new ConcurrentQueue<WebViewEvent>(
+                _processedWebViewsRequests.Where(r => r.Type != WebViewsEventTypes.RegisterWebViewRequest)
+            );
+
+            _processedWebViewsRequests = newQueue;
+
+            _logger.Debug("Cleared old agent service reference.");
+        }
+
         private async Task WaitForAgentInitialization()
         {
             var startTime = DateTime.Now;
-            while (!_agentProxy.IsInitialized || _agentService == null)
+            while (!_agentProxy.IsInitialized ||
+                   _agentService == null || _agentService.Get() == null
+                   )
             {
                 _logger.Debug("Waiting for Agent initialization ...");
                 await Task.Delay(TimeSpan.FromSeconds(1));
@@ -182,6 +199,12 @@ namespace Cody.Core.Infrastructure
         public void Dispose()
         {
             _events?.Dispose();
+
+            if (_agentProxy != null)
+                _agentProxy.AgentDisconnected -= OnAgentDisconnected;
+
+            if (_notificationHandler != null)
+                _notificationHandler.OnRegisterWebViewRequest -= OnRegisterWebViewRequestHandler;
         }
     }
 

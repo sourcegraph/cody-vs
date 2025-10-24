@@ -9,7 +9,8 @@ namespace Cody.Core.Agent
         bool IsConnected { get; }
         bool IsInitialized { get; }
         void Start();
-        Task<IAgentService> Initialize(ClientInfo clientInfo);
+        Task<IAgentApi> Initialize(ClientInfo clientInfo);
         event EventHandler<ServerInfo> OnInitialized;
+        event EventHandler<int> AgentDisconnected;
     }
 }
