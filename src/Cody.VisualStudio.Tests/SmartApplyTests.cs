@@ -79,43 +79,17 @@ namespace Cody.VisualStudio.Tests
 
         private async Task ApplyLastSuggestionFor(string chatText)
         {
-            WriteLog($"Sending chat message: {chatText}");
             await EnterChatTextAndSend(chatText);
-            WriteLog("Chat message sent");
 
-            WriteLog("Waiting for chat response to complete...");
-            
-            WriteLog("Checking for Apply buttons...");
-            var applyButtons = await Page.Locator("span", new() { HasText = "Apply" }).CountAsync();
-            WriteLog($"Number of 'Apply' button spans found: {applyButtons}");
-            
-            if (applyButtons == 0)
-            {
-                WriteLog("No Apply buttons found - LLM response may not contain code suggestions");
-                throw new Exception("No Apply buttons found in chat response. The LLM may not have provided code suggestions for this prompt.");
-            }
-            
-            WriteLog("Looking for Apply button...");
             var apply = Page.Locator("span", new() { HasText = "Apply" }).Last;
 
-            WriteLog("Waiting for Apply button to exist in DOM...");
             await apply.WaitForAsync(new() { Timeout = 60000, State = WaitForSelectorState.Attached });
-            WriteLog("Apply button found in DOM");
 
-            WriteLog("Checking if Apply button has hidden class...");
-            // checking if Chat window is too narrow to show "Apply" text
             var hasHiddenClass = await apply.EvaluateAsync<bool>(@"element => element.classList.contains('tw-hidden')");
-            WriteLog($"Apply button hidden class: {hasHiddenClass}");
-            
             if (hasHiddenClass)
-            {
-                WriteLog("Removing hidden class from Apply button");
-                await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')"); // force shows "Apply" text so it will be possible to click on it
-            }
+                await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')");
 
-            WriteLog("Clicking Apply button...");
             await apply.ClickAsync(new() { Force = true});
-            WriteLog("Apply button clicked");
 
             await EditAppliedAsync();
         }
