@@ -82,8 +82,6 @@ namespace Cody.VisualStudio.Tests
             Assert.NotEqual(modifiedText, originalText);
         }
 
-
-
         private async Task ApplyLastSuggestionFor(string chatText)
         {
             var contextChipLocator = Page.Locator("[aria-label='Chat message'] span[data-lexical-decorator='true']");
