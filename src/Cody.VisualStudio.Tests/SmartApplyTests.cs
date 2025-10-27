@@ -93,7 +93,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog($"Step 4: Complete - text length: {originalText.Length}");
 
             WriteLog("Step 5: Applying suggestion");
-            await ApplyLastSuggestionFor("Suggest improvements in Print() method");
+            await ApplyLastSuggestionFor("Fix the typo in the variable name");
             WriteLog("Step 5: Complete");
 
             WriteLog("Step 6: Getting modified text");
