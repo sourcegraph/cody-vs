@@ -109,24 +109,17 @@ namespace Cody.VisualStudio.Tests
         {
             WriteLog($"ApplyLastSuggestionFor: START - prompt='{chatText}'");
             
-            WriteLog("ApplyLastSuggestionFor: Waiting for file context to be added...");
-            await Task.Delay(1000);
+            WriteLog("ApplyLastSuggestionFor: Waiting for file context chip to appear...");
+            var contextChipLocator = Page.Locator("[aria-label='Chat message'] span[data-lexical-decorator='true']");
+            await contextChipLocator.First.WaitForAsync(new() { Timeout = 5000 });
             
-            WriteLog("ApplyLastSuggestionFor: Checking for file context chips in chat input");
-            var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
-            if (chatBox != null)
+            var contextChipCount = await contextChipLocator.CountAsync();
+            WriteLog($"ApplyLastSuggestionFor: Found {contextChipCount} context chip(s)");
+            
+            for (int i = 0; i < contextChipCount; i++)
             {
-                var contextChips = await chatBox.QuerySelectorAllAsync("span[data-lexical-decorator='true']");
-                WriteLog($"ApplyLastSuggestionFor: Found {contextChips.Count} context chip(s)");
-                foreach (var chip in contextChips)
-                {
-                    var chipText = await chip.TextContentAsync();
-                    WriteLog($"ApplyLastSuggestionFor: Context chip: '{chipText}'");
-                }
-            }
-            else
-            {
-                WriteLog("ApplyLastSuggestionFor: WARNING - Chat message area not found!");
+                var chipText = await contextChipLocator.Nth(i).TextContentAsync();
+                WriteLog($"ApplyLastSuggestionFor: Context chip {i}: '{chipText}'");
             }
             
             WriteLog("ApplyLastSuggestionFor: Entering chat text and sending");
