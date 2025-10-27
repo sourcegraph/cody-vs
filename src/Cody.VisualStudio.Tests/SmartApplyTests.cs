@@ -51,11 +51,11 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Apply_Suggestion_Is_Modifying_Manager_Document()
+        public async Task Apply_Suggestion_Is_Modifying_Point_Document()
         {
             await NewChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
-            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
+            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Point.cs"));
 
             var originalText = await GetActiveDocumentText();
 
@@ -67,15 +67,15 @@ namespace Cody.VisualStudio.Tests
         }
 
         [VsFact(Version = VsVersion.VS2022)]
-        public async Task Apply_Suggestion_Is_Modifying_Point_Document()
+        public async Task Apply_Suggestion_Is_Modifying_Manager_Document()
         {
             await NewChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
-            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Point.cs"));
+            await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
 
             var originalText = await GetActiveDocumentText();
 
-            await ApplyLastSuggestionFor("Suggest improvements");
+            await ApplyLastSuggestionFor("Suggest improvements in Print() method");
 
             var modifiedText = await GetActiveDocumentText();
 
