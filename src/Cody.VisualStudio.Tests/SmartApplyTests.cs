@@ -86,6 +86,8 @@ namespace Cody.VisualStudio.Tests
             
             WriteLog("Step 3: Opening Manager.cs");
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Manager.cs"));
+            WriteLog("Step 3: Document opened, waiting for context to populate...");
+            await Task.Delay(2000);
             WriteLog("Step 3: Complete");
 
             WriteLog("Step 4: Getting original text");
