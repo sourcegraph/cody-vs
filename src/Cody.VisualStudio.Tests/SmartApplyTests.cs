@@ -93,7 +93,7 @@ namespace Cody.VisualStudio.Tests
             WriteLog($"Step 4: Complete - text length: {originalText.Length}");
 
             WriteLog("Step 5: Applying suggestion");
-            await ApplyLastSuggestionFor("Fix the typo in the variable name");
+            await ApplyLastSuggestionFor("Suggest improvements");
             WriteLog("Step 5: Complete");
 
             WriteLog("Step 6: Getting modified text");
@@ -108,6 +108,15 @@ namespace Cody.VisualStudio.Tests
         private async Task ApplyLastSuggestionFor(string chatText)
         {
             WriteLog($"ApplyLastSuggestionFor: START - prompt='{chatText}'");
+            
+            WriteLog("ApplyLastSuggestionFor: Checking for file context chips in chat input");
+            var contextChips = await Page.Locator("[data-testid='context-item-chip']").AllAsync();
+            WriteLog($"ApplyLastSuggestionFor: Found {contextChips.Count} context chip(s)");
+            foreach (var chip in contextChips)
+            {
+                var chipText = await chip.InnerTextAsync();
+                WriteLog($"ApplyLastSuggestionFor: Context chip: '{chipText}'");
+            }
             
             WriteLog("ApplyLastSuggestionFor: Entering chat text and sending");
             await EnterChatTextAndSend(chatText);
