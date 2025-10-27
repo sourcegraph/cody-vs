@@ -109,13 +109,24 @@ namespace Cody.VisualStudio.Tests
         {
             WriteLog($"ApplyLastSuggestionFor: START - prompt='{chatText}'");
             
+            WriteLog("ApplyLastSuggestionFor: Waiting for file context to be added...");
+            await Task.Delay(1000);
+            
             WriteLog("ApplyLastSuggestionFor: Checking for file context chips in chat input");
-            var contextChips = await Page.Locator("[data-testid='context-item-chip']").AllAsync();
-            WriteLog($"ApplyLastSuggestionFor: Found {contextChips.Count} context chip(s)");
-            foreach (var chip in contextChips)
+            var chatBox = await Page.QuerySelectorAsync("[aria-label='Chat message']");
+            if (chatBox != null)
             {
-                var chipText = await chip.InnerTextAsync();
-                WriteLog($"ApplyLastSuggestionFor: Context chip: '{chipText}'");
+                var contextChips = await chatBox.QuerySelectorAllAsync("span[data-lexical-decorator='true']");
+                WriteLog($"ApplyLastSuggestionFor: Found {contextChips.Count} context chip(s)");
+                foreach (var chip in contextChips)
+                {
+                    var chipText = await chip.TextContentAsync();
+                    WriteLog($"ApplyLastSuggestionFor: Context chip: '{chipText}'");
+                }
+            }
+            else
+            {
+                WriteLog("ApplyLastSuggestionFor: WARNING - Chat message area not found!");
             }
             
             WriteLog("ApplyLastSuggestionFor: Entering chat text and sending");
