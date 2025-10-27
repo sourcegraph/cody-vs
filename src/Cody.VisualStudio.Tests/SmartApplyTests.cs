@@ -80,7 +80,7 @@ namespace Cody.VisualStudio.Tests
         private async Task ApplyLastSuggestionFor(string chatText)
         {
             WriteLog("Checking chat input area before sending...");
-            var entryArea = GetChatEntryArea();
+            var entryArea = Page.Locator("[data-lexical-editor=true]");
             var currentText = await entryArea.InnerTextAsync();
             WriteLog($"Chat input content before typing: '{currentText}'");
             
