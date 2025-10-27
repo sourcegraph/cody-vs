@@ -40,11 +40,14 @@ namespace Cody.VisualStudio.Tests
         [VsFact(Version = VsVersion.VS2022)]
         public async Task Apply_Suggestion_Is_Modifying_Dummy_Document()
         {
-            WriteLog("DUMMY TEST - warming up");
+            // TODO: This is a workaround. Without this test, the first SmartApply test fails
+            // because file context chips don't appear in the chat input, causing the LLM to
+            // respond without code suggestions. Running this dummy test first somehow fixes it.
+            // The root cause needs investigation - likely a timing or initialization issue
+            // in how file context is added to chat on first document open.
             await NewChat();
             await OpenSolution(SolutionsPaths.GetConsoleApp1File("ConsoleApp1.sln"));
             await OpenDocument(SolutionsPaths.GetConsoleApp1File(@"ConsoleApp1\Point.cs"));
-            WriteLog("DUMMY TEST - complete");
         }
 
         [VsFact(Version = VsVersion.VS2022)]
