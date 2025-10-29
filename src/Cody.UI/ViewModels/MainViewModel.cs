@@ -44,19 +44,20 @@ namespace Cody.UI.ViewModels
 
         private void OnSetHtmlHandler(object sender, SetHtmlEvent e)
         {
-            Html = e.Html;
+            Html = e;
         }
 
-        private string _html;
+        private SetHtmlEvent _html;
 
-        public string Html
+        public SetHtmlEvent Html
         {
             get { return _html; }
             set
             {
                 if (SetProperty(ref _html, value))
                 {
-                    _logger.Debug($"{_html}");
+                    _logger.Debug($"handle: '{_html.Handle}'");
+                    _logger.Debug($"handle: '{_html.Html}'");
                 }
             }
         }

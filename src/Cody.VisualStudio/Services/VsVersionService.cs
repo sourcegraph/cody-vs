@@ -1,6 +1,5 @@
 using Cody.Core.Ide;
 using Cody.Core.Logging;
-using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.CompilerServices;
@@ -11,6 +10,8 @@ namespace Cody.VisualStudio.Services
     public class VsVersionService : IVsVersionService
     {
         private readonly ILog _logger;
+
+        private const string InsidersPrefix = "Insiders [";
 
         public VsVersionService(ILog logger)
         {
@@ -32,8 +33,16 @@ namespace Cody.VisualStudio.Services
 
         private Version ParseVersion(string version)
         {
-            int spaceIndex = version.IndexOf(' ');
-            if (spaceIndex >= 0) version = version.Substring(0, spaceIndex).Trim();
+            if (version.StartsWith(InsidersPrefix))
+            {
+                version = version.Substring(InsidersPrefix.Length);
+                version = version.Replace("]", string.Empty);
+            }
+            else
+            {
+                int spaceIndex = version.IndexOf(' ');
+                if (spaceIndex >= 0) version = version.Substring(0, spaceIndex).Trim();
+            }
 
             return Version.Parse(version);
         }

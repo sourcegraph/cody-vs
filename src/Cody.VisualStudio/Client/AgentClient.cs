@@ -21,9 +21,10 @@ namespace Cody.VisualStudio.Client
         private ILog agentLog;
         private IAgentConnector connector;
         private JsonRpc jsonRpc;
-        private IAgentService _proxy;
+        private IAgentApi _proxy;
 
         public event EventHandler<ServerInfo> OnInitialized;
+        public event EventHandler<int> AgentDisconnected;
 
         public AgentClient(AgentClientOptions options, ILog log, ILog agentLog)
         {
@@ -65,7 +66,7 @@ namespace Cody.VisualStudio.Client
             jsonRpc.StartListening();
         }
 
-        public async Task<IAgentService> Initialize(ClientInfo clientInfo)
+        public async Task<IAgentApi> Initialize(ClientInfo clientInfo)
         {
             CreateAgentService();
 
@@ -82,6 +83,8 @@ namespace Cody.VisualStudio.Client
         {
             if (VsShellUtilities.ShutdownToken.IsCancellationRequested) return;
 
+            IsInitialized = false;
+
             if (e.Exception != null)
                 log.Error($"Agent disconnected due to {e.Description} (reason: {e.Reason})", e.Exception);
             else
@@ -90,8 +93,8 @@ namespace Cody.VisualStudio.Client
 
         private void CreateAgentService()
         {
-            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentService>() };
-            _proxy = jsonRpc.Attach<IAgentService>(proxyOptions);
+            var proxyOptions = new JsonRpcProxyOptions { MethodNameTransform = NameTransformer.CreateTransformer<IAgentApi>() };
+            _proxy = jsonRpc.Attach<IAgentApi>(proxyOptions);
 
             IsConnected = true;
             log.Info("A connection with the agent has been established.");
@@ -127,12 +130,7 @@ namespace Cody.VisualStudio.Client
             //to many calls to sentry
             //else log.Error($"The agent connection unexpectedly ended with code {exitCode}.");
 
-            if (options.RestartAgentOnFailure && exitCode != 0 && !VsShellUtilities.ShutdownToken.IsCancellationRequested)
-            {
-                log.Info("Restarting the agent.");
-
-                Start();
-            }
+            AgentDisconnected?.Invoke(this, exitCode);
 
             Debug.Assert(false, $"OnAgentDisconnected exitCode: {exitCode}");
         }

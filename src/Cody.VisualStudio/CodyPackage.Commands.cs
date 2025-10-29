@@ -83,10 +83,11 @@ namespace Cody.VisualStudio
                         StatusbarService?.StartProgressAnimation();
                     }
 
-                    if (AgentClient != null)
+                    var agentApi = AgentService.Get();
+                    if (agentApi != null)
                     {
                         Logger.Info($"Invoking command: {command}");
-                        await AgentService.CommandExecute(new ExecuteCommandParams
+                        await agentApi.CommandExecute(new ExecuteCommandParams
                         {
                             Command = command.CommandName
                         });
@@ -134,8 +135,8 @@ namespace Cody.VisualStudio
         public async void ShowEditCodeWindow(object sender, EventArgs eventArgs)
         {
 
-            var taskId = await AgentService.EditTaskStart();
-            if (taskId != null) await AgentService.EditTaskAccept(taskId);
+            var taskId = await AgentService.Get().EditTaskStart();
+            if (taskId != null) await AgentService.Get().EditTaskAccept(taskId);
         }
 
         public class CodyCommand

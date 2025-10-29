@@ -6,7 +6,8 @@ public class Manager2
 
     public void Print()
     {
-        Console.WriteLine("Hello, World!");
+        var mesage = "Hello, World!";
+        Console.WriteLine(mesage);
 
 
         Console.WriteLine("Bye, World!");

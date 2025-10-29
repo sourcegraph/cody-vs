@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Cody.Core.Agent;
 
 namespace Cody.UI.Controls
 {
@@ -155,7 +156,7 @@ namespace Cody.UI.Controls
             }
         }
 
-        public void SetHtml(string html)
+        public void SetHtml(SetHtmlEvent htmlEvent)
         {
             // NOTE: Serving the returned html doesn't work in Visual Studio,
             // as it doesn't allow access to the local storage _webview?.NavigateToString(html);
