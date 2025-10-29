@@ -57,7 +57,7 @@ namespace Cody.VisualStudio.Tests
             Assert.NotEqual(modifiedText, originalText);
         }
 
-        [VsFact(Version = VsVersion.VS2022, Skip = "Unstable")]
+        [VsFact(Version = VsVersion.VS2022)]
         public async Task Apply_Suggestion_Is_Modifying_Manager_Document()
         {
             // given
