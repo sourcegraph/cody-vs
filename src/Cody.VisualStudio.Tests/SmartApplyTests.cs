@@ -97,7 +97,7 @@ namespace Cody.VisualStudio.Tests
             if (hasHiddenClass)
                 await apply.EvaluateAsync("element => element.classList.remove('tw-hidden')");
 
-            await apply.ClickAsync(new() { Force = true});
+            await apply.ClickAsync(new() { Force = true });
 
             await EditAppliedAsync();
         }

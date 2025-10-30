@@ -84,7 +84,7 @@ namespace Cody.VisualStudio.Services
             stackPanel = new StackPanel()
             {
                 Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 0, 10, 0),
+                Margin = new Thickness(5, 0, 10, 0),
             };
 
             codyIcon = new Image()
@@ -108,9 +108,18 @@ namespace Cody.VisualStudio.Services
             DockPanel.SetDock(stackPanel, Dock.Right);
             stackPanel.MouseUp += (sender, args) => CodyStatusIconClicked?.Invoke(codyIcon, EventArgs.Empty);
 
+            var mainWindow = Application.Current.MainWindow;
+
+            if (mainWindow.IsLoaded) InjectControlIntoStatusbar();
+            else mainWindow.Loaded += (sender, args) => InjectControlIntoStatusbar();
+
+        }
+
+        private void InjectControlIntoStatusbar()
+        {
             var resizeGripControl = Utilities.UIHelper.FindChild<Control>(Application.Current.MainWindow, "ResizeGripControl");
             var dockPanel = resizeGripControl.Parent as DockPanel;
-            dockPanel.Children.Insert(2, stackPanel);
+            dockPanel.Children.Insert(1, stackPanel);
         }
 
         private void SetTextBlockForegroundColor()
