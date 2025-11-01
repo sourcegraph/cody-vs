@@ -54,7 +54,7 @@ jobs:
         run: ./src/build.ps1 -configuration ${{ env.Configuration }}
 
       - name: Upload Cody.VisualStudio.vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Cody.VisualStudio.vsix
           path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
@@ -71,7 +71,7 @@ jobs:
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
 
       - name: Upload screenshots for UI tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: UI Tests Screenshots
