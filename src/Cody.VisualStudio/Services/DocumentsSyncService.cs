@@ -248,46 +248,53 @@ namespace Cody.VisualStudio.Services
 
         int IVsRunningDocTableEvents.OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow, IVsWindowFrame pFrame)
         {
-            trace.TraceEvent("OnBeforeDocumentWindowShow");
-            if (lastShowDocCookie != docCookie)
+            try
             {
-                var path = rdt.GetDocumentInfo(docCookie).Moniker;
-                if (path == null) return VSConstants.S_OK;
-
-                if (!isSubscribed.Contains(docCookie))
+                trace.TraceEvent("OnBeforeDocumentWindowShow");
+                if (lastShowDocCookie != docCookie)
                 {
-                    trace.TraceEvent("OnSubscribeDocument", path);
+                    var path = rdt.GetDocumentInfo(docCookie).Moniker;
+                    if (path == null) return VSConstants.S_OK;
 
-                    var content = rdt.GetRunningDocumentContents(docCookie);
-                    if (content == null) return VSConstants.S_OK;
-
-                    var textView = GetVsTextView(pFrame);
-                    if (textView != null)
+                    if (!isSubscribed.Contains(docCookie))
                     {
-                        var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
-                        if (wpfTextView != null)
+                        trace.TraceEvent("OnSubscribeDocument", path);
+
+                        var content = rdt.GetRunningDocumentContents(docCookie);
+                        if (content == null) return VSConstants.S_OK;
+
+                        var textView = GetVsTextView(pFrame);
+                        if (textView != null)
                         {
-                            Subscribe(wpfTextView);
-
-                            if (!openNotificationSend.Contains(docCookie))
+                            var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
+                            if (wpfTextView != null)
                             {
+                                Subscribe(wpfTextView);
 
-                                var docRange = GetDocumentSelection(wpfTextView);
-                                var visibleRange = GetVisibleRange(wpfTextView);
+                                if (!openNotificationSend.Contains(docCookie))
+                                {
 
-                                documentActions.OnOpened(path, content, visibleRange, docRange);
-                                openNotificationSend.Add(docCookie);
+                                    var docRange = GetDocumentSelection(wpfTextView);
+                                    var visibleRange = GetVisibleRange(wpfTextView);
+
+                                    documentActions.OnOpened(path, content, visibleRange, docRange);
+                                    openNotificationSend.Add(docCookie);
+                                }
+
+                                isSubscribed.Add(docCookie);
                             }
-
-                            isSubscribed.Add(docCookie);
                         }
                     }
+
+                    trace.TraceEvent("OnDocumentFocus", path);
+                    documentActions.OnFocus(path);
+
+                    lastShowDocCookie = docCookie;
                 }
-
-                trace.TraceEvent("OnDocumentFocus", path);
-                documentActions.OnFocus(path);
-
-                lastShowDocCookie = docCookie;
+            }
+            catch (Exception ex)
+            {
+                log.Error("OnBeforeDocumentWindowShow failed", ex);
             }
 
             return VSConstants.S_OK;
@@ -295,20 +302,35 @@ namespace Cody.VisualStudio.Services
 
         private void Subscribe(IWpfTextView textView)
         {
-            textView.TextBuffer.Properties.AddProperty(typeof(IWpfTextView), textView);
-            textView.Selection.SelectionChanged += OnSelectionChanged;
-            textView.TextBuffer.ChangedLowPriority += OnTextBufferChanged;
-            textView.Closed += UnsubscribeOnClosed;
+            try
+            {
+
+                textView.TextBuffer.Properties.AddProperty(typeof(IWpfTextView), textView);
+                textView.Selection.SelectionChanged += OnSelectionChanged;
+                textView.TextBuffer.ChangedLowPriority += OnTextBufferChanged;
+                textView.Closed += UnsubscribeOnClosed;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Subscribe failed", ex);
+            }
         }
 
         private void UnsubscribeOnClosed(object sender, EventArgs e)
         {
-            var textView = (IWpfTextView)sender;
+            try
+            {
+                var textView = (IWpfTextView)sender;
 
-            textView.TextBuffer.Properties.RemoveProperty(typeof(IWpfTextView));
-            textView.Selection.SelectionChanged -= OnSelectionChanged;
-            textView.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
-            textView.Closed -= UnsubscribeOnClosed;
+                textView.TextBuffer.Properties.RemoveProperty(typeof(IWpfTextView));
+                textView.Selection.SelectionChanged -= OnSelectionChanged;
+                textView.TextBuffer.ChangedLowPriority -= OnTextBufferChanged;
+                textView.Closed -= UnsubscribeOnClosed;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Unsubscribe failed", ex);
+            }
         }
 
         int IVsRunningDocTableEvents.OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame) => VSConstants.S_OK;
@@ -422,7 +444,7 @@ namespace Cody.VisualStudio.Services
             {
                 trace.TraceEvent("OnRename");
                 documentActions.OnRename(pszMkDocumentOld, pszMkDocumentNew);
-    }
+            }
             return VSConstants.S_OK;
         }
     }
