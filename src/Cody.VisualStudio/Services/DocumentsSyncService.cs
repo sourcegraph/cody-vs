@@ -1,5 +1,6 @@
 using Cody.Core.DocumentSync;
 using Cody.Core.Logging;
+using Cody.Core.Settings;
 using Cody.Core.Trace;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
@@ -12,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Cody.Core.Settings;
+using System.Threading;
 
 namespace Cody.VisualStudio.Services
 {
@@ -269,19 +270,7 @@ namespace Cody.VisualStudio.Services
                             var wpfTextView = editorAdaptersFactoryService.GetWpfTextView(textView);
                             if (wpfTextView != null)
                             {
-                                Subscribe(wpfTextView);
-
-                                if (!openNotificationSend.Contains(docCookie))
-                                {
-
-                                    var docRange = GetDocumentSelection(wpfTextView);
-                                    var visibleRange = GetVisibleRange(wpfTextView);
-
-                                    documentActions.OnOpened(path, content, visibleRange, docRange);
-                                    openNotificationSend.Add(docCookie);
-                                }
-
-                                isSubscribed.Add(docCookie);
+                                Subscribe(wpfTextView, path, docCookie, content);
                             }
                         }
                     }
@@ -300,7 +289,7 @@ namespace Cody.VisualStudio.Services
             return VSConstants.S_OK;
         }
 
-        private void Subscribe(IWpfTextView textView)
+        private void Subscribe(IWpfTextView textView, string path, uint docCookie, string content)
         {
             try
             {
@@ -309,6 +298,19 @@ namespace Cody.VisualStudio.Services
                 textView.Selection.SelectionChanged += OnSelectionChanged;
                 textView.TextBuffer.ChangedLowPriority += OnTextBufferChanged;
                 textView.Closed += UnsubscribeOnClosed;
+
+                if (!openNotificationSend.Contains(docCookie))
+                {
+
+                    var docRange = GetDocumentSelection(textView);
+                    var visibleRange = GetVisibleRange(textView);
+
+                    documentActions.OnOpened(path, content, visibleRange, docRange);
+                    openNotificationSend.Add(docCookie);
+                }
+
+                isSubscribed.Add(docCookie);
+
             }
             catch (Exception ex)
             {
