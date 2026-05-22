@@ -159,7 +159,7 @@ jobs:
 
       - name: Publish to Visual Studio Marketplace
         if: ${{ github.event.inputs.publish == 'Release' }}
-        uses: cezarypiatek/VsixPublisherAction@1.1
+        uses: cezarypiatek/VsixPublisherAction@1.2
         with:
           extension-file: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
           publish-manifest-file: src\Cody.VisualStudio\publishManifest.json
