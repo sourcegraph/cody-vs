@@ -153,7 +153,7 @@ jobs:
 
       - name: Deploy feed to GitHub Pages
         if: ${{ github.event.inputs.publish == 'Preview' }}
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         with:
           artifact_name: vsix-gallery-feed
 
