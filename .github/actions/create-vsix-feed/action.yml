@@ -28,7 +28,7 @@ runs:
     - name: Setup .NET 6.0
       uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '6.0.428'
   
     - name: Generate gallery feed
       shell: pwsh
