@@ -64,7 +64,7 @@ jobs:
         run: ./src/build.ps1 -configuration ${{ env.Configuration }}
         
       - name: Upload Cody.VisualStudio.vsix artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Cody.VisualStudio.vsix
           path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
@@ -82,7 +82,7 @@ jobs:
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
         
       - name: Upload screenshots for UI tests
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: UI Tests Screenshots
