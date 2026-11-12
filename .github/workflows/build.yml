@@ -22,13 +22,13 @@ jobs:
       Configuration: Debug
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Add msbuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2.0.0
 
       - name: Cache nuget
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ github.sha }}
@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache agent
         id: cache-agent
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: src/Cody.VisualStudio/Agent
           key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version', 'agent/buildAgent.ps1', 'agent/runBuildAgent.ps1') }}
@@ -54,7 +54,7 @@ jobs:
         run: ./src/build.ps1 -configuration ${{ env.Configuration }}
 
       - name: Upload Cody.VisualStudio.vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: Cody.VisualStudio.vsix
           path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
@@ -71,7 +71,7 @@ jobs:
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
 
       - name: Upload screenshots for UI tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: UI Tests Screenshots
@@ -79,7 +79,7 @@ jobs:
           retention-days: 20
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        uses: EnricoMi/publish-unit-test-result-action/windows@da5b7be67623cd59bbbd1a0ce4f022050a55605f # v2.26.0
         if: always()
         with:
           files: TestResults/**/*.trx

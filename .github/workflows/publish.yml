@@ -34,7 +34,7 @@ jobs:
       Configuration: Release
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-tags: true
 
@@ -45,10 +45,10 @@ jobs:
           publish-type: ${{ github.event.inputs.publish }}
 
       - name: Add msbuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2.0.0
         
       - name: Cache nuget
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ github.workspace }}/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ github.sha }}
@@ -56,7 +56,7 @@ jobs:
         
       - name: Cache agent (${{ steps.version.outputs.agent-version }})
         id: cache-agent
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: src/Cody.VisualStudio/Agent
           key: ${{ runner.os }}-agent-${{ hashFiles('agent/agent.version', 'agent/buildAgent.ps1', 'agent/runBuildAgent.ps1') }}  
@@ -67,13 +67,13 @@ jobs:
         run: ./agent/runBuildAgent.ps1
         
       - name: Set version on AssemblyInfo.cs files (${{ steps.version.outputs.next-version }})
-        uses: dannevesdantas/set-version-assemblyinfo@v.1.0.0
+        uses: dannevesdantas/set-version-assemblyinfo@c7d09f193e84e1546d95b07afd3d0a6544978341 # v.1.0.0
         with:
           version: ${{ steps.version.outputs.next-version }}
           path: src/
           
       - name: Set version for .vsixmanifest file (${{ steps.version.outputs.next-version }})
-        uses: cezarypiatek/VsixVersionAction@1.2
+        uses: cezarypiatek/VsixVersionAction@d7a9f5c017ab76799bc4bf210c986a4078e3bdfa # 1.2
         with:
           version: ${{ steps.version.outputs.next-version }}
           vsix-manifest-file: src\Cody.VisualStudio\source.extension.vsixmanifest
@@ -83,7 +83,7 @@ jobs:
         run: ./src/build.ps1 -configuration ${{ env.Configuration }}
         
       - name: Upload Cody.VisualStudio.vsix artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: Cody.VisualStudio.vsix
           path: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
@@ -101,7 +101,7 @@ jobs:
         run: dotnet test src/*Tests/bin/${{ env.Configuration }}/*.Tests.dll --logger:trx --verbosity detailed
         
       - name: Upload screenshots for UI tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: UI Tests Screenshots
@@ -109,14 +109,14 @@ jobs:
           retention-days: 10
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        uses: EnricoMi/publish-unit-test-result-action/windows@da5b7be67623cd59bbbd1a0ce4f022050a55605f # v2.26.0
         if: always()
         with:
           files: TestResults/**/*.trx
           
       #Publish
       - name: Create git tag (${{ steps.version.outputs.next-version-tag }})
-        uses: actions/github-script@v6
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
         with:
           script: |
             github.rest.git.createRef({
@@ -127,7 +127,7 @@ jobs:
             })
           
       - name: Create GitHub release
-        uses: ncipollo/release-action@v1.14.0
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
           tag: ${{ steps.version.outputs.next-version-tag }}
           name: Cody for Visual Studio ${{ steps.version.outputs.next-version }}
@@ -146,20 +146,20 @@ jobs:
           
       - name: Upload feed files as artifact
         if: ${{ github.event.inputs.publish == 'Preview' }}
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           name: vsix-gallery-feed
           path: feed/
 
       - name: Deploy feed to GitHub Pages
         if: ${{ github.event.inputs.publish == 'Preview' }}
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
         with:
           artifact_name: vsix-gallery-feed
 
       - name: Publish to Visual Studio Marketplace
         if: ${{ github.event.inputs.publish == 'Release' }}
-        uses: cezarypiatek/VsixPublisherAction@1.1
+        uses: cezarypiatek/VsixPublisherAction@d28bc8109d6eaa67fa28e611d5b4557e90683bdd # 1.1
         with:
           extension-file: src/Cody.VisualStudio/bin/${{ env.Configuration }}/Cody.VisualStudio.vsix
           publish-manifest-file: src\Cody.VisualStudio\publishManifest.json
